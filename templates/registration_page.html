@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Host Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .hostid-display {
+            background-color: #f9f9f9;
+            padding: 10px 15px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .info-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Host Registration</h1>
+        <p>Please register your host ID by providing your email address below.</p>
+        
+        <form action="/register" method="POST">
+            <div class="form-group">
+                <label for="hostid">Host ID:</label>
+                <div class="hostid-display" id="hostid-display"></div>
+                <input type="hidden" id="hostid" name="hostid">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" required placeholder="your@email.com">
+                <p class="info-text">Your email will be used to identify all your registered devices.</p>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn">Register</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Get hostid from URL query parameter
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hostid = urlParams.get('hostid');
+            const email = urlParams.get('email');
+            
+            if (hostid) {
+                document.getElementById('hostid-display').textContent = hostid;
+                document.getElementById('hostid').value = hostid;
+            } else {
+                document.getElementById('hostid-display').textContent = 'No Host ID provided';
+            }
+
+            if (email) {
+                document.getElementById('email').value = email;
+            }
+        });
+    </script>
+</body>
+</html>

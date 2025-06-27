@@ -1,0 +1,121 @@
+<!-- hello world example -->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Grid.js Tabs Example</title>
+        <!-- Include Grid.js CSS -->
+        <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+        <style>
+            .tab {
+                display: none;
+            }
+            .tab.active {
+                display: block;
+            }
+            .tabs {
+                display: flex;
+                cursor: pointer;
+            }
+            .tabs div {
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-bottom: none;
+            }
+            .tabs div.active {
+                background-color: #eee;
+            }
+            .tab-content {
+                display: flex;
+                gap: 20px;
+            }
+            .table-container {
+                flex: 1;
+                overflow-x: auto; /* Enable horizontal scrolling */
+            }
+            .gridjs-container {
+                overflow-x: auto; /* Make the Grid.js table scrollable horizontally */
+                width: 100%; /* Ensure the table takes up full width within the container */
+            }
+            .header {
+                display: flex;
+                justify-content: space-between;
+                font-size: 18px;
+                font-weight: bold;
+                padding: 10px;
+                border-bottom: 2px solid black;
+            }
+        </style>
+    </head>
+    <body>
+
+        <h2> Misassignment of molecule</h2>
+
+        <p> The tables below shows the misassignment of molecules in the dataset. Each Tab holds the information for each CH<sub>n</sub> group in two tables </p>
+        <p> There are two tables showing the experimental assignment and the assignment derived from the predicted shifts and molecule  </p>
+        <p> Careful examination of the tables will hopefully lead to the user being able to correct the error in the original data</p>
+        <p style="color: red;">Click on a tab to see the table!</p>
+        <div class="tabs">
+            <div class="tab-button active" data-tab="{{tab_headings[0]}}">{{tab_headings[0]}}</div>
+            {% for i in range(1, tab_headings|length) %}
+            <div class="tab-button" data-tab="{{tab_headings[i]}}">{{tab_headings[i]}}</div>
+            {% endfor %}
+        </div>
+
+
+        {% for i in range(tab_headings|length) %}
+        <div id="{{ tab_headings[i] }}" class="tab">
+            <h2>{{ tab_headings[i] }}</h2>
+
+            <div class="header">
+                <span>Experimental</span>
+                <span>Calculated</span>
+            </div>
+
+            <div class="tab-content">
+                <div id="table{{ i * 2 + 1 }}" class="table-container"></div>
+                <div id="table{{ i * 2 + 2 }}" class="table-container"></div>
+            </div>
+        </div>
+        {% endfor %}
+    
+        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+        <script>
+            {% autoescape false %}
+            var headings = {{colHeadings}};
+
+            var df_data = {{df_data}};
+            {% endautoescape %}
+
+            const createGrid = (elementId, headings, data) => {
+                new gridjs.Grid({
+                    columns: headings,  // Added extra columns to test horizontal scroll
+                    data: data,
+                    pagination: true,
+                    search: true,
+                    sort: true,
+                }).render(document.getElementById(elementId));
+            };
+
+            for ( var i=0; i<df_data.length; i++ ) {
+                var j = i + 1;
+                var table_id = 'table' + j;
+                console.log('table_id:', table_id);
+                createGrid(table_id, headings, df_data[i]);
+            }
+
+            // Tab functionality
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+
+                    button.classList.add('active');
+                    document.getElementById(button.getAttribute('data-tab')).classList.add('active');
+                });
+            });            
+            
+        </script>
+    </body>
+</html>

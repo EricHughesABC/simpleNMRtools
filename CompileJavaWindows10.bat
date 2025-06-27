@@ -1,0 +1,1 @@
+jre\javawindows\bin\javac -cp cdk-2.7.1.jar;predictorc.jar;. MolFileParser.java

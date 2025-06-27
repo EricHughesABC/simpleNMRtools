@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .tooltip {
+            position: absolute;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 8px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+            display: inline-block;
+            max-width: 600px; /* Set max-width for the tooltip */
+        }
+
+        /* Style for the SVG border */
+        svg {
+            position: relative; /* Set position relative to make it a positioning context */
+            border: 1px solid black; /* 1px solid black border */
+            border-radius: 50px; /* Adjust the value to change the roundness of the corners */
+        }
+
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    
+        .container {
+            display: flex; /* Use flexbox */
+            justify-content: center; /* Center the content horizontally */
+            margin: 0 auto; /* Set the left and right margins to auto to center the container */
+        }
+
+        .group {
+            border: 1px solid black;
+            border-radius: 10px; /* Adjust the value to change the roundness of the corners */
+            display: block;
+            margin-right: 10px; /* Add some space between the groups */
+            padding: 10px; /* Add padding inside the border */
+            padding: 10px; /* Add padding inside the border */
+        }
+
+        .group:last-child {
+            margin-right: 0; /* Remove margin from the last group */
+        }
+
+        .color-container {
+            position: relative;
+            display: inline-block;
+            
+        }
+
+        .color-box {
+            width: 100px;
+            height: 50px;
+            border-radius: 7px;
+        }
+
+        .striped-rectangle {
+            width: 100px;
+            height: 50px;
+            background: repeating-linear-gradient(90deg, #ccc, #ccc 10px, #fff 10px, #fff 20px);
+        }
+
+        .color-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: black; /* Adjust text color as needed */
+        }
+
+        .orange { background-color: #FFA500; }
+        .green { background-color: #98FB98; }
+        .yellow { background-color: yellow; }
+        .cyan { background-color: #00FFFF; }
+        .grey { background-color: #808080; }
+        .blue { background-color: #ADD8E6; }
+        .red { background-color: #FF0000; }
+
+        .buttontooltip {
+            visibility: hidden;
+            width: 300px; /* Adjust width as needed */
+            background-color: #555;
+            color: #fff;
+            text-align: left;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the button */
+            left: 50%;
+            margin-left: -60px; /* Center the tooltip */
+            opacity: 0; /* Hide by default */
+            transition: opacity 0.3s; /* Smooth transition */
+        }
+
+        .action-button {
+            position: relative; /* Needed for absolute positioning of tooltip */
+        }
+
+        .action-button:hover .buttontooltip {
+            visibility: visible;
+            opacity: 1; /* Show the tooltip on hover */
+        }
+
+       /* Normal button styles */
+       button.normal {
+            background-color: #ADD8E6;
+            color: black;
+            border: 2px solid #ADD8E6; 
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        /* Sunken (clicked) button styles */
+        button.sunken {
+            background-color: #dae3e6;
+            box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.2);
+            transform: translateY(2px);
+        }
+    </style>
+
+    <title>{{title}}</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+    <br>
+
+    <div class="container">
+        <div class="group">
+            <button id="zoomIn" class="color-container color-box action-button white">
+                Zoom In
+                <span class="buttontooltip">Zoom background image in</span>
+            </button>
+            <button  id="zoomOut" class="color-container color-box action-button white">
+                Zoom Out
+                <span class="buttontooltip">Zoom background image out</span>
+            </button>      
+        </div>
+        <div class="group">
+            <button id="rotateClockwise" class="color-container color-box action-button white">
+               Rotate +10<sup>o</sup>
+                <span class="buttontooltip">Rotate background image clockwise</span>
+            </button>
+            <button id="rotateCounterclockwise" class="color-container color-box action-button white">
+               Rotate -10<sup>o</sup>
+                <span class="buttontooltip">Rotate background image anti-clockwise</span>
+            </button>
+
+        </div>
+        <div class="group">
+            <button id="reset" class="color-container color-box action-button white">
+                INFO
+                <span class="buttontooltip" id="info_results">Minimization Results</span>
+            </button>
+        </div>
+      </div>  
+      <br>
+
+     <!-- SVG container with background molecule image -->
+    {% autoescape false %}
+    {{svg_container}} 
+    {% endautoescape %}
+
+    <!-- Tooltip for displaying node information -->
+    <div id="tooltip" class="tooltip">Tooltip content</div>
+    <br>
+  
+    <div class="container">
+        <div class="group">
+            <button style="border: 2px solid orange" class="color-container color-box action-button orange" >
+                -C-<sub></sub>
+            </button>
+            <button style="border: 2px solid #98FB98" class="color-container color-box action-button green" >
+                -CH<sub></sub>
+            </button>
+            <button style="border: 2px solid yellow" class="color-container color-box action-button yellow" >
+                -CH<sub>2</sub>
+            </button>
+            <button style="border: 2px solid cyan" class="color-container color-box action-button cyan" >
+                -CH<sub>3</sub>
+            </button>
+        </div>
+        <div class="group">
+            <!-- <button id="sunkenButton" class="normal color-container color-box action-button">Click Me</button> -->
+            <button style="border: 2px solid grey" class="color-container color-box action-button grey" >
+                HMBC
+            </button>
+            <button id="sunkenButton" class="normal color-container color-box action-button blue" >
+                COSY
+                <span  class="buttontooltip">Press to hide cosy links</span>
+            </button>
+        </div>
+        <div class="group">
+            <button class="color-container color-box action-button white"  onclick="updateMovedAtoms()">
+                Update
+                <span class="buttontooltip">Apply the changes updating the ppm values and atom numbers</span>
+            </button>
+            <button class="color-container color-box action-button white" onclick="exportToMnova()">
+                Export
+                <span class="buttontooltip">Export information as JSON for use in assignment in MNOVA</span>
+            </button>      
+        </div>
+    </div>   
+
+    <script>
+
+    d3.select("svg g").classed("square-group", true);
+
+    // Create the SVG container
+    const svg = d3.select("svg");
+    // const width = +svg.attr("width");
+    // const height = +svg.attr("height");
+
+    const svgElement = document.querySelector('svg'); // Select your SVG element
+    var { width, height } = svgElement.getBoundingClientRect();
+
+    var width = width-200;
+    var height = height-200;
+
+    {% autoescape false %}
+    // smiles string
+    const smilesString = "{{smilesString}}";
+    // molfile
+    const molfile = `{{molFile}}`;
+    // working directory
+    const workingDirectory = `{{workingDirectory}}`;
+    // working filename
+    const workingFilename = `{{workingFilename}}`;
+    // data from
+    const dataFrom = `{{dataFrom}}`;
+    // oldjsondata
+    const oldjsondata = {{oldjsondata}};
+    // title
+    const title = `{{title}}`;
+    {% endautoescape %}
+
+    // Get the corresponding DOM element
+    var svgNode = svg.node();
+    // Get the dimensions of the SVG element
+    var svgWidth = svgNode.clientWidth;
+    var svgHeight = svgNode.clientHeight;
+
+    // Define scale functions for x and y coordinates
+    const xScale = d3.scaleLinear().domain([0, 1]).range([0, 1200-200]);
+    const yScale = d3.scaleLinear().domain([0, 1]).range([0, 600-200]);
+
+    // define colour blind friendly colours with 50% transparency
+    const orange = 'rgba(255, 165, 0, 1)';
+    const blue = 'rgba(173, 216, 230, 1)';
+    const green = 'rgba(152, 251, 152, 1)';
+    const yellow = 'rgba(255, 255, 0, 1)';
+    const purple = 'rgba(128, 0, 128, 1)';
+    const cyan = 'rgba(0, 255, 255, 1)';
+    const grey = 'rgba(128, 128, 128, 1)';
+
+    const black = 'rgba(0, 0, 0, 1)';
+    const white = 'rgba(255, 255, 255, 1)';
+
+    // assign colours to parts of the molecule
+    const CH3 = cyan;
+    const CH2 = yellow;
+    const CH = green;
+    const C = orange;
+
+    const cosyEdgeColor = blue;
+    const cosyEdgeHoverOpacity = 0.0;
+    const hmbcEdgeColor = grey;
+
+    const nodeHoverColor = "lightgrey";
+    const nodeHoverOpacity = 0.4;
+    const textHoverOpacity = 0;
+
+    // define node dimensions
+    const nodeRadius = 22;
+    const nodeRadiusSmall = 15;
+    const nodeRadiusLarge = 26;
+
+    // define edge widths
+    const cosyEdgeWidth = 8;
+    const hmbcEdgeWidth = 8;
+    const noesyEdgeWidth = 8;
+
+    // define font size
+    const fontSizeStr = "12px";
+    const fontSizeInt = 12;
+
+    const textOffsetInt = 8;
+
+    // Define color scale for nodes based on numProtons
+    const colorScale = d3.scaleOrdinal()
+      .domain([0, 1, 2, 3])
+      .range([C, CH, CH2, CH3]); // Blue, Orange, Green, Red
+
+    // Define the graph data
+    {% autoescape false %}
+    // catoms
+    var catoms = {{catoms}};
+    // nodes
+    var nodes = {{graph_nodes}};
+    // nodes_orig
+    var nodes_orig = {{orig_nodes}};
+    // nodes_now
+    var nodes_now = {{graph_nodes}};
+    // links
+    var links = {{graph_edges}};
+    // molgraph
+    var molgraph = {{molgraph}};
+    // shortest_paths
+    var shortest_paths = {{shortest_paths}};
+    // best_results
+    var best_results = {{best_results}};
+
+    var translate_x = {{translateX}};   
+    var translate_y = {{translateY}};
+
+    var svg_bckgrnd_image_str = `{{svg_container}}`;
+    {% endautoescape %}
+
+    // Modify INFO tooltip to display the best results from the optimization with only 2 decimal places
+    d3.select("#info_results").html(`Correlation Penalty: ${best_results.best_weight} MAE: ${best_results.best_mae.toFixed(2)} LAE: ${best_results.best_lae.toFixed(2)}`);
+
+
+    // Set the visible property of the catoms array to false
+    // loop through the nodes
+    catoms.forEach(node => {
+        node.visible = false;
+    });
+
+    // Set the visible property of the catoms array to false
+    // loop through the nodes
+    nodes.forEach(node => {
+        // find the id of the node in the catoms array set  visible property to the catom object to true
+        const catom = catoms.find(catom => catom.id === node.id);
+        if (catom) {
+            catom.visible = true;
+            catom.ppm =  node.ppm;
+            catom.iupacLabel = node.iupacLabel;
+            catom.jCouplingVals = node.jCouplingVals;
+            catom.jCouplingClass = node.jCouplingClass;
+            catom.H1_ppm = node.H1_ppm;
+        }
+    })
+
+    var catoms_orig = JSON.parse(JSON.stringify(catoms));
+
+    // Set initial positions of nodes and links
+    nodes.forEach(node => {
+        node.x = xScale(node.x)+{{translateX}};
+        node.y = yScale(node.y)+{{translateY}};
+    });
+
+    nodes_orig.forEach(node => {
+        node.x = xScale(node.x)+{{translateX}};
+        node.y = yScale(node.y)+{{translateY}};
+    });
+
+    catoms.forEach(node => {
+        node.x = xScale(node.x)+{{translateX}};
+        node.y = yScale(node.y)+{{translateY}};
+    });
+
+    catoms_orig.forEach(node => {
+        node.x = xScale(node.x)+{{translateX}};
+        node.y = yScale(node.y)+{{translateY}};
+    });
+
+    nodes = JSON.parse(JSON.stringify(catoms.filter(node => node.visible)));
+    
+    // // Define scale functions for x and y coordinates
+    // const xScale = d3.scaleLinear().domain([0, 1]).range([0, width-100*2]);
+    // const yScale = d3.scaleLinear().domain([0, 1]).range([0, height-100*2]);
+    // Set initial positions of nodes and links
+
+    const squareGroup = svg.select(".square-group");
+    const linksGroup = svg.append("g").attr("class", "links-group");
+
+    // Filter links that have the attribute cosy as true
+    // const cosyLinks = links.filter(link => link.cosy);
+    const cosyLinks = links.filter(eachLink => eachLink.cosy);
+    const hmbcLinksData = links.filter(eachLink => eachLink.hmbc);
+
+
+    const hmbclinks_svg = linksGroup.selectAll(".links-group")
+                        .data(hmbcLinksData)
+                        .enter().append("line")
+                        .attr("class", "link")
+                        .attr("class", "hmbc-link")
+                        .attr("stroke", hmbcEdgeColor)
+                        .attr("x1", d => nodes.find(node => node.id === d.source).x)
+                        .attr("y1", d => nodes.find(node => node.id === d.source).y)
+                        .attr("x2", d => nodes.find(node => node.id === d.target).x)
+                        .attr("y2", d => nodes.find(node => node.id === d.target).y)
+                        .attr("source", d => d.source)
+                        .attr("target", d => d.target)
+                        .attr("opacity", 0)
+                        .attr("stroke-width", hmbcEdgeWidth); // Set the stroke width to 8 pixels
+
+    // Create the COSY links to start
+    // Create a group for links
+    const link = linksGroup.selectAll(".links-group")
+        .data(cosyLinks)
+        .enter().append("line")
+        .attr("class", "link")
+        .attr("class", "cosy-link")
+        .attr("stroke", cosyEdgeColor)
+        .attr("source", d => d.source)
+        .attr("target", d => d.target)
+        .attr("x1", d => nodes.find(node => node.id === d.source).x)
+        .attr("y1", d => nodes.find(node => node.id === d.source).y)
+        .attr("x2", d => nodes.find(node => node.id === d.target).x)
+        .attr("y2", d => nodes.find(node => node.id === d.target).y)
+        .attr("stroke-width", cosyEdgeWidth); // Set the stroke width to 8 pixels
+
+    const nodesGroup = svg.append("g").attr("class", "node");
+
+    // Create the nodes
+    const allnodes = nodesGroup.selectAll(".node")
+      .data(nodes)
+      .enter().append("g")
+      .attr("class", "node")
+      .attr("transform", d => `translate(${d.x},${d.y})`)
+      .attr("atomNumber", d => d.atomNumber)
+      .attr("id", d => d.id)
+      .attr("ppm", d => d.ppm)
+      .attr("ppm_calculated", d => d.ppm_calculated)
+      .attr("numProtons", d => d.numProtons)
+      .attr("x", d => d.x)
+      .attr("y", d => d.y)
+      .on("mouseover", (event, d) => handleMouseOver(event, d)) // Call function when mouseover
+      .on("mouseout", (event, d) => handleMouseOut(event, d))  // Call function when mouseout
+      .call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended));
+
+
+    // Add circles to represent nodes
+    allnodes.append("circle")
+      .attr("r", nodeRadius)
+      .attr("fill", d => colorScale(d.numProtons)) // Set fill color based on numProtons
+
+    // Append atomNumber text
+    allnodes.append("text")
+        .attr("class", "node-text-atomNumber")
+        // .text(d => `${d.id}, ${d.atomNumber}`) // Display the id
+        .text(d => `${d.atomNumber}`) // Display the id
+        .attr("dy", -textOffsetInt) // Center the text vertically
+        .attr("font-size", fontSizeStr) // Set font size to 16 pixels
+        .attr("text-anchor", "middle"); // Center the text horizontally
+
+    // Append ppm text
+    allnodes.append("text")
+        .attr("class", "node-text-ppm")
+        .text(d => d.ppm.toFixed(2)) // Display the id
+        .attr("dy", +textOffsetInt) // Center the text vertically
+        .attr("font-size", fontSizeStr) // Set font size to 16 pixels
+        .attr("text-anchor", "middle"); // Center the text horizontally
+
+    // Tooltip for node hover
+    const tooltip = d3.select("#tooltip");
+
+    tooltip.style("opacity", 0);
+
+    let hmbcLinks = []; // Track hmbc links separately
+    var circlenodes = document.querySelectorAll('.node circle');
+    var textnodes = document.querySelectorAll('.node text');
+
+    // split textnodes into atomNumber and ppm
+    var nodetextppm = [];
+    var nodetextatomNumber = [];
+    for(var i=0; i<textnodes.length; i+=2) {
+        nodetextatomNumber.push(textnodes[i]);
+        nodetextppm.push(textnodes[i+1]);
+    }
+
+    var dragstartedFlag = false;
+
+    // Drag handlers
+    function dragstarted(event, d) {
+        // change the opacity of the cosy links to 0
+        link.style("opacity", 0);
+        // Remove hmbc links
+        // hmbcLinks.forEach(eachHMBClink => eachHMBClink.remove());
+        // hmbcLinks = []; // Clear the hmbc links array
+        d3.select(this).raise().classed("active", true);
+        dragstartedFlag = true;
+    }
+
+    function dragged(event, d) {
+        d.x = event.x;
+        d.y = event.y;
+        link.filter(l => l.source === d.id).attr("x1", d.x).attr("y1", d.y);
+        link.filter(l => l.target === d.id).attr("x2", d.x).attr("y2", d.y);
+        hmbclinks_svg.filter(l => l.source === d.id).attr("x1", d.x).attr("y1", d.y);
+        hmbclinks_svg.filter(l => l.target === d.id).attr("x2", d.x).attr("y2", d.y);
+
+        d3.select(this).attr("transform", `translate(${d.x},${d.y})`);
+    }
+
+    function dragended(event, d) {
+      d3.select(this).classed("active", false);
+      dragstartedFlag = false;
+      handleMouseOver(event, d); // Call handleMouseOut function to reset the view
+    }
+
+    // Function to find nearest neighbors and non-nearest neighbours of a node with a specific attribute
+    function findNearestNeighbors(nodeId, attribute) {
+        const neighbors = [];
+        const nonNeighbors = [];
+
+        // Iterate through the links
+        links.forEach(link => {
+            if (link[attribute] && (link.source === nodeId || link.target === nodeId)) {
+                neighbors.push(link.source === nodeId ? link.target : link.source);
+            }
+        });
+
+        // Iterate through all nodes to find non-neighbors
+        nodes.forEach(node => {
+            if (node.id !== nodeId && !neighbors.includes(node.id)) {
+                nonNeighbors.push(node.id);
+            }
+        });
+
+        return { neighbors, nonNeighbors };
+    }
+
+    // Function to display tooltip
+    function displayTooltip(event, d){
+        // generate the html sub string for d.H1 ppm which is an array
+
+        var circlenodes = document.querySelectorAll('.node circle');
+
+        // When numProtons is 0
+        if (d.numProtons == 0) {
+            if (d.ppm_calculated.length == 0) {
+                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} ppm`;
+            }
+            else {
+                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} (${d.ppm_calculated.toFixed(2)}) ppm`;
+            }
+        } 
+        else if (d.H1_ppm.length == 1) {
+            // Expect d.H1 to be an array of length 1
+            if (d.ppm_calculated.length == 0) {
+                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} ppm, <sup>1</sup>H = ${d.H1_ppm[0].toFixed(2)} ppm`;
+            }
+            else {
+                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} (${d.ppm_calculated.toFixed(2)}) ppm, <sup>1</sup>H = ${d.H1_ppm[0].toFixed(2)} ppm`;
+            }
+                // var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} ppm, <sup>1</sup>H = ${d.H1_ppm[0].toFixed(2)} ppm`;
+            // if jCouplingVals is not empty, add the J coupling values
+            if (d.jCouplingClass.length > 0) {
+                if (d.jCouplingClass === "m" || d.jCouplingClass === "s") {
+                    htmlstr = htmlstr + `<br>J's : ${d.jCouplingClass}`;
+                } 
+                else {
+                // htmlstr = htmlstr + `<br>J's : ${d.jCouplingClass[0]} : ${d.jCouplingVals[0]} Hz`;
+                    htmlstr = htmlstr + `<br>J's : ${d.jCouplingClass} : ${d.jCouplingVals} Hz`;
+                }
+            }
+        } 
+        else {
+            // Expect d.H1 to be an array of length 2
+            if (d.ppm_calculated.length == 0) {
+                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} ppm, <sup>1</sup>H = ${d.H1_ppm[0].toFixed(2)} & ${d.H1_ppm[1].toFixed(2)} ppm`;
+            }
+            else {
+                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} (${d.ppm_calculated.toFixed(2)}) ppm, <sup>1</sup>H = ${d.H1_ppm[0].toFixed(2)} & ${d.H1_ppm[1].toFixed(2)} ppm`;
+            }
+            // var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} ppm, <sup>1</sup>H = ${d.H1_ppm[0].toFixed(2)} & ${d.H1_ppm[1].toFixed(2)} ppm`;
+            // add the J coupling values if not empty
+            // print("d.jCouplingClass.length, d.jCouplingVals.length", d.jCouplingClass.length, d.jCouplingVals.length);
+            if(d.jCouplingClass.length > 0) {
+                // htmlstr = htmlstr + `<br>J's : ${d.jCouplingClass[0]} : ${d.jCouplingVals[0]} Hz, ${d.jCouplingClass[1]} : ${d.jCouplingVals[1]} Hz`;
+                if (d.jCouplingClass === "m" || d.jCouplingClass === "s") {
+                    htmlstr = htmlstr + `<br>J's : ${d.jCouplingClass}`;
+                }
+                else {
+                    htmlstr = htmlstr + `<br>J's : ${d.jCouplingClass} : ${d.jCouplingVals} Hz`;
+                }
+            }
+        }
+
+        tooltip.transition()
+            .duration(200)
+            .style("opacity", 9.75);
+        tooltip.html(htmlstr)    
+            .style("left", (-99999) + "px")
+            .style("top", (-99999) + "px")
+            .style("display", "inline-block");
+
+        var tooltipDiv = d3.select('#tooltip');
+
+        // Get the corresponding DOM element
+        var tooltipNode = tooltipDiv.node();
+
+        var pageWidth = document.documentElement.clientWidth;
+
+        // Get the dimensions of the div element
+        var tooltipWidth = tooltipNode.clientWidth;
+        var tooltipHeight = tooltipNode.clientHeight;
+        var tooltipX = (pageWidth - tooltipWidth) / 5;
+
+        tooltip.html(htmlstr) 
+            .style("left", (tooltipX) + "px")
+            .style("top", (125) + "px")
+            .style("display", "inline-block");
+
+        // Increase the radius of the hovered over node using d.id
+        circlenodes.forEach(function(circleNode) {
+            if (circleNode.__data__.id == d.id) {
+                circleNode.setAttribute("r", nodeRadiusLarge/scaleLevel);
+            }
+        });
+    }
+
+    // Function to highlight HMBC neighbors
+    function highlightHMBCneighbors(event, d) {
+        var circlenodes = document.querySelectorAll('.node circle');
+        // select all the nodes circles
+        // var circlenodes = document.querySelectorAll('.node circle');
+
+        // Define the attribute to find nearest neighbors
+        const attribute = "hmbc";
+        const attribute2 = "noesy";
+        
+        // Call the function to find nearest neighbors
+        const hmbcNearestNodes = findNearestNeighbors(d.id, attribute);
+        const noesyNearestNodes = findNearestNeighbors(d.id, attribute2);
+
+        const nearestNeighborIDs = hmbcNearestNodes.neighbors;
+        const nearestNeighborIDs2 = noesyNearestNodes.neighbors;
+    
+        // change the opacity of the nodes to 0.5
+        hmbcNearestNodes.nonNeighbors.forEach(nonNeighborId => {
+            circlenodes.forEach(function(circleNode) {
+                if (circleNode.__data__.id == nonNeighborId) {
+                    circleNode.style.opacity = nodeHoverOpacity;
+                    circleNode.setAttribute("r", nodeRadiusSmall/scaleLevel);
+                }
+            });
+        });
+        // set the font colour to grey for all the text nodes
+        hmbcNearestNodes.nonNeighbors.forEach(i => {
+            textnodes.forEach(function(textNode) {
+                if (textNode.__data__.id == i) {
+                    textNode.style.fill = nodeHoverColor;
+                    textNode.style.opacity = textHoverOpacity;
+                }
+            });
+        });
+
+        // increase the size of the circles for the nearest neighbors
+        nearestNeighborIDs.forEach(i => {
+            circlenodes.forEach(function(circleNode) {
+                if (circleNode.__data__.id == i) {
+                    circleNode.setAttribute("r",  nodeRadiusLarge/scaleLevel);
+                }
+            });
+        });
+
+        // change the opacity of the cosy links to 0
+        link.style("opacity", 0);
+
+        // Add hmbc links to nearest neighbors
+        hmbclinks_svg.filter(l => l.source === d.id).attr("opacity", 1);
+        hmbclinks_svg.filter(l => l.target === d.id).attr("opacity", 1);
+    }
+
+    // Function to handle mouseover event
+    function handleMouseOver(event, d) {
+
+        if (dragstartedFlag) {
+            return;
+        }   
+        // Display tooltip
+        if (event) {
+            displayTooltip(event, d);
+            highlightHMBCneighbors(event,d);
+        }
+    }
+
+    // Function to handle mouseout event
+    function handleMouseOut(event, d) {
+
+        var circlenodes = document.querySelectorAll('.node circle');
+
+        if (dragstartedFlag) {
+            return;
+        }   
+        // change the opacity of the text nodes to 1
+        // reset the font colour of the text in the nodes to black
+        textnodes.forEach( t => {
+            t.style.opacity = 1;
+            t.style.fill = 'black';
+        });
+
+        // set the opacity of all the nodes to 1
+        circlenodes.forEach( c => {
+            c.style.opacity = 1;
+        });
+
+        // reset the fill color of all the circles to their original color
+        // loop through the nodes to get the id and numProtons
+        nodes.forEach(d => {
+            circlenodes.forEach( function(circleNode) {
+                if (circleNode.__data__.id == d.id) {
+                    circleNode.style.fill = colorScale(d.numProtons);
+                    circleNode.setAttribute("r", nodeRadius/scaleLevel);
+                }
+            });
+        });
+
+        // Hide the tooltip
+        tooltip.transition()
+                .duration(100)
+                .style("opacity", 0);
+        // Revert the radius
+        d3.select(event.target)
+            .transition()
+            .duration(100)
+            .attr("r", nodeRadius/scaleLevel);
+
+        // Remove hmbc links
+        hmbcLinks.forEach(link => link.remove());
+        hmbcLinks = []; // Clear the hmbc links array
+
+        // change the opacity of the cosy links to 1
+        link.style("opacity", 1);
+
+        // hmbclinks_svg.style("opacity", 0);
+        hmbclinks_svg.filter(l => l.source === d.id).attr("opacity", 0);
+        hmbclinks_svg.filter(l => l.target === d.id).attr("opacity", 0);
+    }
+
+    function generateHTMLnumProtonsString(index) {
+        switch (index) {
+            case 0:
+            return "-C-";
+            case 1:
+            return "-CH";
+            case 2:
+            return "-CH<sub>2</sub>";
+            case 3:
+            return "-CH<sub>3</sub>";
+            default:
+            return "<p>Invalid index</p>";
+        }
+    }
+
+    function updateMovedAtoms() {
+        // Update the moved atoms
+
+        if( !updateMovedAtoms3()){
+            return
+        };
+
+        nodes = JSON.parse(JSON.stringify(catoms.filter(node => node.visible)));
+
+        // Select all circle elements with the class 'node' in the nodesGroup
+        var circlenodes = nodesGroup.selectAll('.node circle');
+
+        // Add circles to represent nodes
+        // svg.selectAll(".node circle")
+
+        // update node colour
+        nodesGroup.selectAll(".node circle")
+            .data(nodes)
+            .style("fill", d => colorScale(d.numProtons))
+            .raise(); // Display the id
+
+        // update atomNumber
+        nodesGroup.selectAll(".node text.node-text-atomNumber")
+            .data(nodes)
+            // .text(d => `${d.id},${d.atomNumber}`)
+            .text(d => `${d.atomNumber}`)
+            .raise(); // Display the id
+
+        // update the ppm text
+        nodesGroup.selectAll(".node text.node-text-ppm")
+            .data(nodes)
+            .text(d => d.ppm.toFixed(2))
+            .raise(); // Display the ppm
+
+        // move the nodes
+        nodesGroup.selectAll(".node")
+            .data(nodes)
+            .attr("class", "node")
+            .transition()
+            .duration(1000)
+            .attr("transform", d => `translate(${d.x},${d.y})`);
+
+        // update the cosy links
+        svg.selectAll(".link")
+            .data(cosyLinks)
+            .attr("x1", d => nodes.find(node => node.id === d.source).x)
+            .attr("y1", d => nodes.find(node => node.id === d.source).y)
+            .attr("x2", d => nodes.find(node => node.id === d.target).x)
+            .attr("y2", d => nodes.find(node => node.id === d.target).y);
+
+        // update the hmbc links
+        svg.selectAll(".link")
+            .data(hmbcLinksData)
+            .attr("x1", d => nodes.find(node => node.id === d.source).x)
+            .attr("y1", d => nodes.find(node => node.id === d.source).y)
+            .attr("x2", d => nodes.find(node => node.id === d.target).x)
+            .attr("y2", d => nodes.find(node => node.id === d.target).y);
+    }
+
+    function updateMovedAtoms3() {
+
+        console.log("updateMovedAtoms3");
+        // Find the moved nodes and store them in the moved_nodes array
+        const moved_nodes = [];
+        const removed = [];
+        nodes.forEach((node1, index) => {
+            const node2 =  catoms_orig[index];
+            if (node1.x !== node2.x || node1.y !== node2.y) {
+                moved_nodes.push(JSON.parse(JSON.stringify(node1)));
+                removed.push(false)
+            }
+        });
+
+        if(moved_nodes.length == 0){
+            return false;
+        }
+
+
+        // Find the closest nodes to the moved nodes
+        // Store the indices of the moved nodes and the closest nodes in the closest array
+        // keep also the distance between the moved node and the closest node
+        const closest_nodes = [];
+        const closest_catoms = [];
+        moved_nodes.forEach((node1, idx) => {
+            // Calculate Euclidean distance between the moved node and all other nodes
+            const distances_nodes = catoms_orig.map(node2 => 
+                Math.pow(node1.x - node2.x, 2) + Math.pow(node1.y - node2.y, 2)
+            );
+            
+            // Find the closest node
+            const minValue1 = Math.min(...distances_nodes);  // Gets the minimum value, which is 3
+            const closest_node_idx = distances_nodes.indexOf(minValue1);  // Gets the index, which is 3 (index = 3)
+
+            // Append the index of the moved node and the closest node to the result array
+            closest_nodes.push([node1.atomNumber, catoms_orig[closest_node_idx].atomNumber, minValue1]);
+        });
+
+        console.log(`closest_nodes.length ${closest_nodes.length}`);
+        console.log(`moved_nodes.length ${moved_nodes.length}`);
+        console.log(`removed.length ${removed.length}`);
+
+
+        updateNodesEEH3( closest_nodes, moved_nodes, removed);
+            // check if all items in removed are true then return false
+
+        if(removed.every(Boolean)){
+            return false;
+        }
+
+        for(var i=0; i<removed.length; i++) {
+            if (removed[i] == true) {
+                continue;
+            }
+            var atomNumber1 = closest_nodes[i][0];
+            var atomNumber2 = closest_nodes[i][1];
+
+            // find node1 in the catoms array
+            var node1 = moved_nodes.find(node => node.atomNumber === atomNumber1);
+            var node2 = catoms.find(catom => catom.atomNumber === atomNumber2);
+
+            // move over information from node1 to node2
+            node2["ppm"] = node1["ppm"];
+            node2["H1_ppm"] = node1["H1_ppm"];
+            node2["jCouplingVals"] = node1["jCouplingVals"];
+            node2["jCouplingClass"] = node1["jCouplingClass"];
+            node2["id"] = node1["id"];
+        }
+
+        // uddate the visible flags in the catoms array
+        for(var i=0; i<removed.length; i++) {
+            if (removed[i] == true) {
+                continue;
+            }
+            var atomNumber1 = closest_nodes[i][0];
+            // var atomNumber2 = closest_nodes[i][1];
+            // find node with atomNumber1 in the catoms array
+            var node1 = catoms.find(catom => catom.atomNumber === atomNumber1);
+            node1.visible = false;
+        }
+
+        for(var i=0; i<removed.length; i++) {
+            if (removed[i] == true) {
+                continue;
+            }
+            // var atomNumber1 = closest_nodes[i][0];
+            var atomNumber2 = closest_nodes[i][1];
+            // find node with atomNumber1 in the catoms array
+            var node1 = catoms.find(catom => catom.atomNumber === atomNumber2);
+            node1.visible = true;
+        }
+        return true;
+    }
+
+    function updateNodesEEH3(closest_nodes, moved_nodes, removed) {
+
+        // first check if the moved node will be going to a position that has the same number of protons
+        // if it is not, then remove the moved node from the moved_nodes array
+        // by setting the removed flag to true
+
+        console.log("updateNodesEEH3");
+
+        for(var j=0; j<closest_nodes.length; j++) {
+            var atomNumber1 = closest_nodes[j][0];
+            var atomNumber2 = closest_nodes[j][1];
+            var minValue = closest_nodes[j][2];
+
+            // find node1 in the catoms array
+            var node1 = catoms.find(catom => catom.atomNumber === atomNumber1);
+            var node2 = catoms.find(catom => catom.atomNumber === atomNumber2);
+
+            if (node1.numProtons != node2.numProtons) {
+                removed[j] = true;
+            }
+            if (node1.atomNumber == node2.atomNumber) {
+                removed[j] = true;
+            }
+        }
+        for(var j=0; j<closest_nodes.length; j++) {
+
+            if (removed[j] == true) {
+                continue;
+            }
+            var atomNumber1 = closest_nodes[j][0];
+            var atomNumber2 = closest_nodes[j][1];
+            var minValue = closest_nodes[j][2];
+
+            // find node1 in the catoms array
+            var node1 = catoms.find(catom => catom.atomNumber === atomNumber1);
+            var node2 = catoms.find(catom => catom.atomNumber === atomNumber2);
+
+            // destination in the moved_nodes array
+            dest_found = moved_nodes.find(moved_node => moved_node.atomNumber === atomNumber2) == undefined ? false : true;
+            dest_idx = moved_nodes.findIndex(moved_node => moved_node.atomNumber === atomNumber2);
+
+            if (!dest_found) {
+                // check if the destination node is visible
+                // if it is then that means the node is being moved to a position that is free and that is allowed
+                if (node2.visible) {
+                    removed[j] = true;
+                }
+                else {
+                    removed[j] = false;
+                }
+            }
+            else {
+                // check that if the destination node has been removed or not
+                if (removed[dest_idx] == true) {
+                    removed[j] = true;
+                }
+                else {
+                    removed[j] = false;
+                }
+            }
+        }
+    }
+
+    function exportToMnova() {
+
+        console.log("exportToMnova");
+        var workingDirectory = "{{workingDirectory}}";
+        var workingFilename = "{{workingFilename}}";
+
+        // create the json filename
+        var jsonFilename = workingFilename + '_assignments_from_simplemnova.json';
+
+        // add the working directory to the jsonFilename Does not work
+        // var jsonFilename = workingDirectory + '/' + jsonFilename;
+
+        var nodes_export = JSON.parse(JSON.stringify(nodes));
+
+        nodes_export.forEach(node => {
+            // node.x = xScale.invert(node.x-100);
+            // node.y = yScale.invert(node.y-100);
+            node.x = xScale.invert(node.x - {{translateX}});
+            node.y = yScale.invert(node.y - {{translateY}});
+        });
+
+        catoms_orig.forEach(node => {
+            // node.x = xScale.invert(node.x-100);
+            // node.y = yScale.invert(node.y-100);
+            node.x = xScale.invert(node.x - {{translateX}});
+            node.y = yScale.invert(node.y - {{translateY}});
+        });
+
+        catoms.forEach(node => {
+            // node.x = xScale.invert(node.x-100);
+            // node.y = yScale.invert(node.y-100);
+            node.x = xScale.invert(node.x - {{translateX}});
+            node.y = yScale.invert(node.y - {{translateY}});
+        });
+
+        var nodes_data ={};
+        nodes_data['nodes_orig'] = catoms_orig;
+        nodes_data['nodes_now'] = nodes_export;
+        nodes_data['links'] = links;
+
+        // add smilesString and molfile to the nodes_data
+        nodes_data['smilesString'] = smilesString;
+        nodes_data['molfile'] = molfile;
+
+        nodes_data['dataFrom'] = dataFrom;
+        nodes_data['oldjsondata'] = oldjsondata;
+
+        nodes_data['molgraph'] = molgraph;
+        nodes_data['shortest_paths'] = shortest_paths;
+        //  get the contents of the svg element convert to string
+        nodes_data['svg'] = svg_bckgrnd_image_str;
+
+        nodes_data['translateX'] = translate_x;
+        nodes_data['translateY'] = translate_y;
+
+        nodes_data['catoms'] = catoms;
+        nodes_data['best_results'] = best_results;
+        nodes_data['workingDirectory'] = workingDirectory;
+        nodes_data['workingFilename'] = workingFilename;
+        nodes_data['title'] = title;
+
+
+        // save the json string to a file
+        var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(nodes_data, null, 2));
+        var a = document.createElement('a');
+        a.href = 'data:' + data;
+        a.download = jsonFilename;
+        a.innerHTML = 'download JSON';
+        a.click();
+
+        // Scale nodes back again
+        catoms_orig.forEach(node => {
+            node.x = xScale(node.x) + translate_x;
+            node.y = yScale(node.y) + translate_y;
+        });
+
+        catoms.forEach(node => {
+            node.x = xScale(node.x) + translate_x;
+            node.y = yScale(node.y) + translate_y;
+        });
+    }
+
+
+    function publish() {
+        console.log('Publishing');
+    }
+
+    function savehtmpage(){
+        console.log('Saving HTML page');
+    }
+
+    const button = document.getElementById('sunkenButton');
+
+    // Toggle between 'sunken' and 'normal' styles when clicked
+    let linksVisible = true;
+    button.addEventListener('click', function() {
+        button.classList.toggle('sunken');
+
+        if (linksVisible) {
+            d3.selectAll(".cosy-link").style("display", "none");
+            // this.textContent = "Show Links";
+        } else {
+            d3.selectAll(".cosy-link").style("display", "inline");
+            // this.textContent = "Hide Links";
+        }
+        linksVisible = !linksVisible;
+    });
+
+    let scaleLevel = 1;
+    let rotationAngle = 0;
+    let relrotationAngle = 0;
+    const scaleFactor = 1.1; // Scaling factor for each zoom step
+
+    const viewBoxCenterX = 1200 / 2;
+    const viewBoxCenterY = 600 / 2;
+    // const offsetX = 100;
+    // const offsetY = 100;
+    const offsetX = {{translateX}};
+    const offsetY = {{translateY}};
+
+    function applyZoom() {
+        // Combined transformation for squareGroup, nodesGroup, and linksGroup
+        const transformString = `translate(${viewBoxCenterX},${viewBoxCenterY}) rotate(${rotationAngle}) scale(${scaleLevel}) translate(${-viewBoxCenterX + offsetX},${-viewBoxCenterY + offsetY})`;
+        
+        // Apply the combined transformation to each group
+        squareGroup.attr("transform", transformString);
+        nodesGroup.attr("transform", transformString);
+        linksGroup.attr("transform", transformString);
+
+        applyRotation();
+        console.log("");
+
+        d3.selectAll(".node").each(function() {
+            // Select the current node
+            const anode = d3.select(this);
+
+            console.log(`anode: ${anode.attr("atomNum")} ${anode.attr("transform")}`);
+        });
+    }
+
+    function applyRotation() {
+        // Apply rotation transformation to the square group around the viewBox center, with initial offset
+        squareGroup.attr("transform", `translate(${viewBoxCenterX},${viewBoxCenterY}) rotate(${rotationAngle}) scale(${scaleLevel}) translate(${-viewBoxCenterX + offsetX},${-viewBoxCenterY + offsetY})`);
+        nodesGroup.attr("transform", `translate(${viewBoxCenterX},${viewBoxCenterY}) rotate(${rotationAngle}) scale(${scaleLevel}) translate(${-viewBoxCenterX },${-viewBoxCenterY})`);
+        linksGroup.attr("transform", `translate(${viewBoxCenterX},${viewBoxCenterY}) rotate(${rotationAngle}) scale(${scaleLevel}) translate(${-viewBoxCenterX },${-viewBoxCenterY})`);
+        
+        // Keep text elements horizontal by applying a counter-rotation, adjust font size, and offset positions
+        nodesGroup.selectAll(".node-text-atomNumber")
+            .attr("transform", `rotate(${-rotationAngle})`)
+            .attr("font-size", `${fontSizeInt / scaleLevel}px`)        // Adjust font size
+            .attr("dy", `${-textOffsetInt / scaleLevel}px`);              // Adjust vertical offset for atom number text
+
+        nodesGroup.selectAll(".node-text-ppm")
+            .attr("transform", `rotate(${-rotationAngle})`)
+            .attr("font-size", `${fontSizeInt / scaleLevel}px`)        // Adjust font size
+            .attr("dy", `${textOffsetInt / scaleLevel}px`);               // Adjust vertical offset for ppm text
+
+        // Keep circle radius constant by adjusting inversely with the scale level
+        nodesGroup.selectAll("circle")
+            .attr("r", nodeRadius / scaleLevel); // Adjust radius to counter zoom
+
+        // Keep link stroke width constant by adjusting inversely with the scale level
+        linksGroup.selectAll("line")
+            .attr("stroke-width", `${hmbcEdgeWidth / scaleLevel}px`); // Adjust stroke width to counter zoom
+
+    }
+
+        // Zoom and rotation event listeners
+    d3.select("#zoomIn").on("click", () => {
+      scaleLevel *= scaleFactor;
+      applyZoom();
+    });
+
+    d3.select("#zoomOut").on("click", () => {
+      scaleLevel /= scaleFactor;
+      applyZoom();
+    });
+
+    d3.select("#rotateClockwise").on("click", () => {
+      rotationAngle = (rotationAngle + 10) % 360;
+      relrotationAngle = 10;
+      applyRotation();
+    });
+
+    d3.select("#rotateCounterclockwise").on("click", () => {
+      rotationAngle = (rotationAngle - 10 + 360) % 360;
+      relrotationAngle = -10;
+      applyRotation();
+    });
+  </script>
+</body>
+</html>

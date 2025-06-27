@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Host Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .hostid-display {
+            background-color: #f9f9f9;
+            padding: 10px 15px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+        .license-container {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .checkbox-container input[type="checkbox"] {
+            margin-right: 10px;
+            margin-top: 3px;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .info-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .data-consent {
+            background-color: #f0f7ff;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .data-consent h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Host Registration</h1>
+        <p>Please register your host ID by providing your email address below.</p>
+        
+        <form action="/register" method="POST" id="registration-form">
+            
+            <div class="form-group">
+                <label for="hostid">Host ID:</label>
+                <div class="hostid-display" id="hostid-display"></div>
+                <input type="hidden" id="hostid" name="hostid">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" required placeholder="your@email.com">
+                <p class="info-text">Your email will be used to identify all your registered devices.</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="license-agreement">License Agreement:</label>
+                <div class="license-container">
+                    <p><strong>simpleNMR Software License Agreement</strong></p>
+                    <p>Please read this license agreement carefully before registering and using the simpleNMR software.</p>
+                    <p>1. <strong>Grant of License:</strong> This software is licensed, not sold. Upon registration, you are granted a non-exclusive, non-transferable license to use the software on your registered device(s).</p>
+                    <p>2. <strong>Restrictions:</strong> You may not reverse engineer, decompile, or disassemble the software. You may not distribute, rent, lease, or sublicense the software.</p>
+                    <p>3. <strong>Updates:</strong> The software may automatically download and install updates from time to time. These updates are designed to improve or enhance the software and may include bug fixes, new features, or revised versions.</p>
+                    <p>4. <strong>Data Collection:</strong> The software may collect certain information about your usage to improve functionality and user experience. This information is collected anonymously and in accordance with our Privacy Policy.</p>
+                    <p>5. <strong>Termination:</strong> This license is effective until terminated. Your rights under this license will terminate automatically if you fail to comply with any of its terms.</p>
+                    <p>6. <strong>Disclaimer of Warranty:</strong> The software is provided "as is" without warranty of any kind. The entire risk as to the quality and performance of the software is with you.</p>
+                    <p>7. <strong>Limitation of Liability:</strong> In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.</p>
+                </div>
+            </div>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="license-checkbox" name="agree-license" required>
+                <label for="license-checkbox">I have read and agree to the License Agreement</label>
+            </div>
+            
+            <div class="data-consent">
+                <h3>Data Collection for Machine Learning Research</h3>
+                <p>We are building a database of NMR results to develop a machine learning model that can identify molecular structures from NMR data without prior knowledge of the molecule.</p>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="ml-consent" name="ml-consent">
+                    <label for="ml-consent">I consent to my NMR data being stored and used for machine learning research purposes. This is completely optional and will not affect your ability to use the software.</label>
+                </div>
+                <p class="info-text">Your contribution will help advance research in molecular structure prediction using AI.</p>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn" id="submit-btn" disabled>Register</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Get hostid from URL query parameter
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hostid = urlParams.get('hostid');
+            const email = urlParams.get('email');
+            
+            if (hostid) {
+                document.getElementById('hostid-display').textContent = hostid;
+                document.getElementById('hostid').value = hostid;
+            } else {
+                document.getElementById('hostid-display').textContent = 'No Host ID provided';
+            }
+
+            if (email) {
+                document.getElementById('email').value = email;
+            }
+            
+            // Handle checkbox for enabling/disabling submit button
+            const licenseCheckbox = document.getElementById('license-checkbox');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            licenseCheckbox.addEventListener('change', function() {
+                submitBtn.disabled = !this.checked;
+            });
+            
+            // Form validation (client-side)
+            const form = document.getElementById('registration-form');
+            form.addEventListener('submit', function(event) {
+                if (!licenseCheckbox.checked) {
+                    event.preventDefault();
+                    alert('You must agree to the License Agreement to register.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
