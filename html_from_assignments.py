@@ -11,6 +11,7 @@ from scipy import stats
 import networkx as nx
 from networkx.readwrite import json_graph
 from rdkit import Chem
+
 # from rdkit.Chem import AllChem
 from rdkit.Chem import Draw
 
@@ -23,8 +24,6 @@ from globals import svgDimensions
 from globals import CARBONSEPARATION
 from globals import PROTONSEPARATION
 from globals import NMREXPERIMENTS
-
-
 
 
 def find_nearest(true_values: list, value: float):
@@ -56,7 +55,6 @@ def tidyup_ppm_values(
         )
 
     return df
-
 
 
 def return_nonempty_mnova_datasets(data: dict) -> dict:
@@ -166,7 +164,7 @@ def get_1d_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
 
         df = pd.DataFrame(df_data, columns=["ppm", "Intensity", "Type"])
 
-        print( f"\nget_1d_dataframe_from_json {technique}:\n\n {df}\n")
+        print(f"\nget_1d_dataframe_from_json {technique}:\n\n {df}\n")
 
     else:
         # find peaks from  from multiplets key
@@ -213,7 +211,6 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
             elif v["type"].lower() == "1d":
                 df = get_1d_dataframe_from_json(data, k)
                 _dataframes[k] = df
-
 
         elif k in [
             "allAtomsInfo",
@@ -788,6 +785,7 @@ class NMRgraph:
     def build_html_page(self, G2: nx.Graph, dataframes: dict) -> str:
         pass
 
+
 def calc_minimum_ppm_separation(ppm_pks, ppmSeparation):
 
     if len(ppm_pks) < 2:
@@ -817,6 +815,7 @@ def calc_minimum_ppm_separation(ppm_pks, ppmSeparation):
     else:
         return ppmSeparation
 
+
 class NMRProblem:
     def __init__(self, dataframes: dict):
         self.dataframes = dataframes
@@ -831,14 +830,13 @@ class NMRProblem:
         # self.protonSeparation = calc_minimum_ppm_separation(hsqc_H1_pks, PROTONSEPARATION)
 
         self.carbonSeparation = CARBONSEPARATION
-        self.protonSeparation =  PROTONSEPARATION
+        self.protonSeparation = PROTONSEPARATION
 
         print("*********************************************")
 
         print("self.carbonSeparation", self.carbonSeparation)
         print("self.protonSeparation", self.protonSeparation)
         print("*********************************************")
-
 
     @classmethod
     def from_mnova_json_file(cls, fn: Path):
@@ -990,29 +988,58 @@ class NMRProblem:
 
         # drop duplicates from h1 based on ppm
         h1_ppm_unique_list = h1.drop_duplicates(subset=["ppm"])["ppm"].to_list()
-        h1_f1_ppm_unique_list = h1.drop_duplicates(subset=["f1_ppm"])["f1_ppm"].to_list() # used for hsqc, ddept and hsqc_clipcosy  c13
-        c13_ppm_unique_list = nmrAssignments.drop_duplicates(subset=["f1_ppm"])["f1_ppm"].to_list()
+        h1_f1_ppm_unique_list = h1.drop_duplicates(subset=["f1_ppm"])[
+            "f1_ppm"
+        ].to_list()  # used for hsqc, ddept and hsqc_clipcosy  c13
+        c13_ppm_unique_list = nmrAssignments.drop_duplicates(subset=["f1_ppm"])[
+            "f1_ppm"
+        ].to_list()
 
         # tid up the ppm values in the dataframes
-        hsqc = tidyup_ppm_values(hsqc, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation)
-        hsqc = tidyup_ppm_values(hsqc, h1_f1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation)
+        hsqc = tidyup_ppm_values(
+            hsqc, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
+        )
+        hsqc = tidyup_ppm_values(
+            hsqc, h1_f1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation
+        )
 
-        h1_1d = tidyup_ppm_values(h1_1d, h1_ppm_unique_list, "ppm", ppm_tolerance=self.protonSeparation)
+        h1_1d = tidyup_ppm_values(
+            h1_1d, h1_ppm_unique_list, "ppm", ppm_tolerance=self.protonSeparation
+        )
 
-        cosy = tidyup_ppm_values(cosy, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation)
-        cosy = tidyup_ppm_values(cosy, h1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.protonSeparation)
+        cosy = tidyup_ppm_values(
+            cosy, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
+        )
+        cosy = tidyup_ppm_values(
+            cosy, h1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.protonSeparation
+        )
 
-        hmbc = tidyup_ppm_values(hmbc, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation)
-        hmbc = tidyup_ppm_values(hmbc, c13_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation)
+        hmbc = tidyup_ppm_values(
+            hmbc, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
+        )
+        hmbc = tidyup_ppm_values(
+            hmbc, c13_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation
+        )
 
         hmbc.drop(hmbc[hmbc.f1_ppm_prob == 0].index, inplace=True)
         hmbc.drop(hmbc[hmbc.f2_ppm_prob == 0].index, inplace=True)
 
-        clipcosy = tidyup_ppm_values(clipcosy, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation)
-        clipcosy = tidyup_ppm_values(clipcosy, h1_f1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation)
+        clipcosy = tidyup_ppm_values(
+            clipcosy, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
+        )
+        clipcosy = tidyup_ppm_values(
+            clipcosy,
+            h1_f1_ppm_unique_list,
+            "f1_ppm",
+            ppm_tolerance=self.carbonSeparation,
+        )
 
-        ddept = tidyup_ppm_values(ddept, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation)
-        ddept = tidyup_ppm_values(ddept, h1_f1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation)
+        ddept = tidyup_ppm_values(
+            ddept, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
+        )
+        ddept = tidyup_ppm_values(
+            ddept, h1_f1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation
+        )
 
         # add jCouplingVals and jCouplingClass to h1 from h1_1D
         h1 = add_jCouplingVals_jCouplingClass_to_h1(h1, h1_1d)

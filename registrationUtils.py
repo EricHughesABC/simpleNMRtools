@@ -1,5 +1,6 @@
 registered_hosts = ["host1", "host2", "host3", "Z49BR-HKPP041Y-42DHS-ANANTMPB"]
 
+
 def is_registered(hostName):
     """
     Check if the host is registered in the system.
@@ -25,6 +26,3 @@ def register_host(hostid, email):
     # append the host ID to the registered hosts list
     registered_hosts.append(hostid)
     return True
-    
-
-

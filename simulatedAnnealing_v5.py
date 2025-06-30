@@ -12,6 +12,7 @@ import pandas as pd
 import networkx as nx
 from rdkit import Chem
 from pathlib import Path
+
 # import matplotlib.pyplot as plt
 from rdkit.Chem import Draw
 from rdkit.Chem.rdchem import Mol
@@ -226,7 +227,6 @@ def simulated_annealing(
             best_mapping, best_weight = current_mapping, current_weight
 
         weights.append((iteration, best_weight, current_weight, temperature))
-            
 
         # Cooling
         temperature *= cooling_rate
@@ -428,8 +428,8 @@ class SimulatedAnnealing2:
                 graph_df.at[int(cnode["id"]), key] = value1
 
         # reset the nan values to empty strings for the columns iupaclabel, jCouplingClass, jCouplingVals, x, y H1_ppm, ppm ppm_calculated
-        # df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) 
-        
+        # df.method({col: value}, inplace=True)' or df[col] = df[col].method(value)
+
         # graph_df["iupacLabel"].fillna("", inplace=True)
         graph_df["iupacLabel"] = graph_df["iupacLabel"].fillna("")
         # graph_df["jCouplingClass"].fillna("", inplace=True)
@@ -604,8 +604,6 @@ class SimulatedAnnealing2:
             self.carbon_graph, self.predicted_mapping, self.shortest_paths
         )
 
-
-
         self.initial_mapping = self.initialize_mapping(
             self.carbon_graph,
             self.carbon_grouped_nodes,
@@ -618,8 +616,6 @@ class SimulatedAnnealing2:
 
         self.results = {}
 
-
-        
         for i in range(num_times):
 
             self.initial_mapping = self.initialize_mapping(
@@ -692,7 +688,6 @@ class SimulatedAnnealing2:
             self.carbon_graph, self.carbon_grouped_nodes, self.randomize_mapping
         )
 
-
         self.shortest_paths = dict(nx.all_pairs_shortest_path_length(self.mol_graph))
 
         self.nProtons_to_nodes = self.map_protons_to_nodes(self.graph_df)
@@ -704,7 +699,6 @@ class SimulatedAnnealing2:
         self.predicted_weight = compute_total_weight(
             self.carbon_graph, self.predicted_mapping, self.shortest_paths
         )
-
 
     def process_results(self, catoms_df, jsonGraphData):
 
@@ -823,12 +817,10 @@ class SimulatedAnnealing2:
         jsonGraphData["moved_nodes"] = optimized_nodes_eeh
         jsonGraphData["links"] = optimized_links
 
-
-
         return jsonGraphData, best_results
 
     def process_results_SA_skipped(self):
-            
+
         best_results = {}
 
         # set the best weights to the predicted weight
@@ -852,9 +844,7 @@ class SimulatedAnnealing2:
             ppm_calculated_orig = df.loc[node_orig, "ppm_calculated"]
             atomNumber_orig = df.loc[node_orig, "atomNumber"]
 
-            if isinstance(ppm_calculated_orig, float) and isinstance(
-                ppm_moved, float
-            ):
+            if isinstance(ppm_calculated_orig, float) and isinstance(ppm_moved, float):
                 ppm_rss += (ppm_calculated_orig - ppm_moved) ** 2
                 diff = abs(ppm_calculated_orig - ppm_moved)
                 mae += diff
@@ -868,7 +858,6 @@ class SimulatedAnnealing2:
         best_results["best_lae_atomNumber"] = lae_atomNumber
 
         return best_results
-
 
 
 # if __name__ == "__main__":

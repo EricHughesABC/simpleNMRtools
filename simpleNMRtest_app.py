@@ -737,7 +737,7 @@ def simpleMNOVA_display_molecule():
         if rtn_msg != "ok":
             return rtn_msg, rtn_num
 
-        rtn_msg, rtn_num = solution.attempt_assignment_CH3_CH2_CH1()
+        rtn_msg, rtn_num = solution.attempt_assignment_CH3_CH2_CH1_to_C13_table()
 
         if rtn_msg != "ok":
             return rtn_msg, rtn_num

@@ -155,6 +155,8 @@ class expectedMolecule:
         self.molprops_df["CH3CH1"] = False
         self.molprops_df["CH3CH1"] = self.molprops_df["CH3"] | self.molprops_df["CH1"]
 
+        self.molprops_df["picked"] = False
+
         # decide where to calculate C13 NMR chemical shifts from
         # if mnova_c13predictions is not None then use mnova_c13predictions
         # else use nmrshift2D to calculate C13 NMR chemical shifts
@@ -215,7 +217,7 @@ class expectedMolecule:
                 self.molprops_df["atom_idx"] = self.molprops_df.index
                 self.molprops_df["atomNumber"] = carbonAtomsInfo["atomNumber"].values
                 self.nmrshiftdb_failed = True
-                self.nmrshiftdb_failed_code =401
+                self.nmrshiftdb_failed_code = 401
 
         # check if there are rings in the molecule
         self.molprops_df["ring_idx"] = -1
@@ -773,7 +775,6 @@ class expectedMolecule:
 
             if atom.GetSymbol() == "C":
                 new_xy3[idx] = (point.x / molWidth, point.y / molHeight)
-
 
         return sss, new_xy3, new_xy3_all
 

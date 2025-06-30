@@ -1,4 +1,4 @@
-def extract_hostname(json_data:dict) -> str:
+def extract_hostname(json_data: dict) -> str:
     """
     Extracts the host name from the given JSON data.
 
@@ -10,7 +10,7 @@ def extract_hostname(json_data:dict) -> str:
     """
     try:
         # Assuming the host ID is located at json_data['hostId']
-        print("json_data['hostname']:", json_data['hostname'])
-        return json_data['hostname']["data"]["0"]
+        print("json_data['hostname']:", json_data["hostname"])
+        return json_data["hostname"]["data"]["0"]
     except KeyError:
         return ""
