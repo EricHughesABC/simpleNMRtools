@@ -1,6 +1,7 @@
 function simplePREDICT_eeh(){
 
 
+    var spectra_keys = ["HSQC", "HMBC", "COSY", "NOESY", "H1_1D", "C13_1D", "DEPT135", "PureShift", "DDEPT_CH3_ONLY", "SKIP", "HSQC_CLIPCOSY"];
 
     function stringInArray(needle, haystack){
         for( var i=0; i<haystack.length; i++){
@@ -529,11 +530,56 @@ function simplePREDICT_eeh(){
         }
         else {
             chosen_spectra_ids[key] = value;
+        }   
+    }
+
+
+    // loop through the chosen spectra split the string and createa a dictionary of the last two items with the last item as the key
+    var chosen_spectra_ids2 = {};
+    var spectra_inrements = {};
+    // set spectra_Increments keys to experiment types and values to -1
+    for( var i=0; i<spectra_keys.length; i++){
+        spectra_inrements[spectra_keys[i]] = -1;
+    }
+    var skip_increment = 0
+    for( var i=0; i<chosen_spectra["checked_spectra"].length; i++){
+        var split_str = chosen_spectra["checked_spectra"][i].split(" ");
+        var key = split_str[split_str.length-1];
+        var value = split_str[split_str.length-2];
+        print("key ", key, " value ", value);
+        // if the key is in the spectra_increments then increment the value by 1
+        if( spectra_inrements[key] !== undefined ){
+            spectra_inrements[key] += 1;
+            key = key + "_" + spectra_inrements[key];
+            print("\tkey ", key, " value ", value);
+            chosen_spectra_ids2[key] = value;
         }
-        
+        else{
+            // Big error if key is not in spectra_increments
+            // warn user and end script
+            MessageBox.warning("Error: Spectrum type " + key + " unknown. Please check the spectra in the document.");
+            return;
+        }
     }
 
     print("chosen_spectra_ids\n", chosen_spectra_ids);
+    print("chosen_spectra_ids2\n", chosen_spectra_ids2);
+
+    // check if HSQC is present in the chosen_spectra_ids2
+    // loop through the keys and in chosen_spectr_ids2, split the key by "_" and check if the first part is "HSQC"
+    var foundHSQC = false;
+    for( var key in chosen_spectra_ids2){
+        var split_key = key.split("_");
+        if( split_key[0] == "HSQC" ){
+            foundHSQC = true;
+            break;
+        }
+    }
+    //  warn the user and end the script if HSQC is not found
+    if( !foundHSQC ){
+        MessageBox.warning("No HSQC found in the chosen spectra. Please choose a HSQC spectrum.");
+        return;
+    }
 
 
     // check if HSQC is present in the chosen spectra ids
@@ -601,12 +647,6 @@ function simplePREDICT_eeh(){
         MessageBox.warning("Number of peaks and integrals do not match in HSQC data. Therefore using peaks only. Program works best with integrals");
     }
 
-    // spectra["carbonCalcPositionsMethod"] = {};
-    // spectra["carbonCalcPositionsMethod"]["datatype"] = "carbonCalcPositionsMethod";
-    // spectra["carbonCalcPositionsMethod"]["count"] = 1;
-    // spectra["carbonCalcPositionsMethod"]["data"] = {};
-    // spectra["carbonCalcPositionsMethod"]["data"]["0"] = chosen_spectra["calcSimpleNMR"]
-
     spectra["MNOVAcalcMethod"] = {};
     spectra["MNOVAcalcMethod"]["datatype"] = "MNOVAcalcMethod";
     spectra["MNOVAcalcMethod"]["count"] = 1;
@@ -635,12 +675,6 @@ function simplePREDICT_eeh(){
 
     var dialogParams = {};
     dialogParams["simulatedAnnealing"] = chosen_spectra["simulatedAnnealing"];
-    // dialogParams["randomizeStart"] = chosen_spectra["randomizeStart"];
-    // dialogParams["startingTemperature"] = chosen_spectra["startingTemperature"];
-    // dialogParams["endingTemperature"] = chosen_spectra["endingTemperature"];
-    // dialogParams["coolingRate"] = chosen_spectra["coolingRate"];
-    // dialogParams["numberOfSteps"] = chosen_spectra["numberOfSteps"];
-    // dialogParams["ppmGroupSeparation"] = chosen_spectra["ppmGroupSeparation"];
 
     dialogParams["calcSimpleNMR"] = chosen_spectra["calcSimpleNMR"];
     dialogParams["calcSimpleMNOVA"] = chosen_spectra["calcSimpleMNOVA"];
@@ -651,8 +685,6 @@ function simplePREDICT_eeh(){
         sout = new TextStream(fout, 'UTF-8');
         sout.writeln(JSON.stringify(dialogParams));
     }
-
-
 
     spectra["workingDirectory"] = {};
     spectra["workingDirectory"]["datatype"] = "workingDirectory";
@@ -681,47 +713,6 @@ function simplePREDICT_eeh(){
     spectra["ml_consent"]["data"] = {};
     spectra["ml_consent"]["data"]["0"] = chosen_spectra["ml_consent"];
 
-    // //add the simulated annealing randomize flag to the spectra object
-    // spectra["randomizeStart"] = {};
-    // spectra["randomizeStart"]["datatype"] = "randomizeStart";
-    // spectra["randomizeStart"]["count"] = 1;
-    // spectra["randomizeStart"]["data"] = {};
-    // spectra["randomizeStart"]["data"]["0"] = chosen_spectra["randomizeStart"];
-
-    // // add the simulated anealing startingTemperature to the spectra object
-    // spectra["startingTemperature"] = {};
-    // spectra["startingTemperature"]["datatype"] = "startingTemperature";
-    // spectra["startingTemperature"]["count"] = 1;
-    // spectra["startingTemperature"]["data"] = {};
-    // spectra["startingTemperature"]["data"]["0"] = chosen_spectra["startingTemperature"];
-
-    // // add the simulated annealing endingTemperature to the spectra object
-    // spectra["endingTemperature"] = {};
-    // spectra["endingTemperature"]["datatype"] = "endingTemperature";
-    // spectra["endingTemperature"]["count"] = 1;
-    // spectra["endingTemperature"]["data"] = {};
-    // spectra["endingTemperature"]["data"]["0"] = chosen_spectra["endingTemperature"];
-
-    // // add the simulated annealing coolingRate to the spectra object
-    // spectra["coolingRate"] = {};
-    // spectra["coolingRate"]["datatype"] = "coolingRate";
-    // spectra["coolingRate"]["count"] = 1;
-    // spectra["coolingRate"]["data"] = {};
-    // spectra["coolingRate"]["data"]["0"] = chosen_spectra["coolingRate"];
-
-    // // add the simulated annealing numberOfSteps to the spectra object
-    // spectra["numberOfSteps"] = {};
-    // spectra["numberOfSteps"]["datatype"] = "numberOfSteps";
-    // spectra["numberOfSteps"]["count"] = 1;
-    // spectra["numberOfSteps"]["data"] = {};
-    // spectra["numberOfSteps"]["data"]["0"] = chosen_spectra["numberOfSteps"];
-
-    // // add the simulated annealing ppmGroupSeparation to the spectra object
-    // spectra["ppmGroupSeparation"] = {};
-    // spectra["ppmGroupSeparation"]["datatype"] = "ppmGroupSeparation";
-    // spectra["ppmGroupSeparation"]["count"] = 1;
-    // spectra["ppmGroupSeparation"]["data"] = {};
-    // spectra["ppmGroupSeparation"]["data"]["0"] = chosen_spectra["ppmGroupSeparation"];
 
     spectra["spectraWithPeaks"] = {};
     spectra["spectraWithPeaks"]["datatype"] = "spectraWithPeaks";

@@ -1,18 +1,10 @@
-import copy
-import sys
-import json
-import webbrowser
-import jinja2
+
 import numpy as np
 import pandas as pd
 from scipy import stats
 from scipy.optimize import linear_sum_assignment
 import networkx as nx
-from networkx.readwrite import json_graph
-from rdkit import Chem
-from rdkit.Chem import AllChem
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
-import pathlib
 from typing import Tuple, Union, List, Dict, Any
 
 from flask import render_template
@@ -23,16 +15,7 @@ from rdkit.Chem import Draw
 # from excelheaders import excel_orig_df_columns, excel_df_columns
 # from html_from_assignments import tidyup_ppm_values
 from html_from_assignments import NMRProblem
-
-# import buildNMRdataframes
-# import javaUtils
 import expectedmolecule
-
-# from globals import svgDimensions
-
-# from globals import CARBONSEPARATION
-# from globals import PROTONSEPARATION
-
 
 def warning_dialog(return_message, title_message, qstarted=True):
     print(return_message)
