@@ -1,7 +1,17 @@
 function simplePREDICT_eeh(){
 
 
-    var spectra_keys = ["HSQC", "HMBC", "COSY", "NOESY", "H1_1D", "C13_1D", "DEPT135", "PureShift", "DDEPT_CH3_ONLY", "SKIP", "HSQC_CLIPCOSY"];
+    var spectra_keys = ["HSQC", 
+                        "HMBC", 
+                        "COSY", 
+                        "NOESY", 
+                        "H1_1D", 
+                        "C13_1D", 
+                        "DEPT135", 
+                        "PureShift", 
+                        "DDEPT_CH3_ONLY", 
+                        "SKIP", 
+                        "HSQC_CLIPCOSY"];
 
     function stringInArray(needle, haystack){
         for( var i=0; i<haystack.length; i++){
@@ -142,10 +152,6 @@ function simplePREDICT_eeh(){
         MessageBox.warning("Error parsing JSON response: " + e + "\n" + rtn.response + "\nrtn.exitCode" + rtn.exitCode + "\nrtn.allErrorOutput" + rtn.allErrorOutput);
         return;
     }
-
-
-
-    // return;
 
 
   
@@ -514,28 +520,28 @@ function simplePREDICT_eeh(){
         spectra["chosenSpectra"]["data"][i] = chosen_spectra["checked_spectra"][i];
     }
 
+    // // loop through the chosen spectra split the string and createa a dictionary of the last two items with the last item as the key
+    // var chosen_spectra_ids = {};
+    // var skip_increment = 0
+    // for( var i=0; i<chosen_spectra["checked_spectra"].length; i++){
+    //     var split_str = chosen_spectra["checked_spectra"][i].split(" ");
+    //     var key = split_str[split_str.length-1];
+    //     var value = split_str[split_str.length-2];
+    //     print("key ", key, " value ", value);
+    //     if(key == "SKIP") {
+    //         key = "SKIP" + "_" + skip_increment;
+    //         print("\tkey ", key, " value ", value);
+    //         skip_increment++;
+    //         chosen_spectra_ids[key] = value;
+    //     }
+    //     else {
+    //         chosen_spectra_ids[key] = value;
+    //     }   
+    // }
+
+
     // loop through the chosen spectra split the string and createa a dictionary of the last two items with the last item as the key
     var chosen_spectra_ids = {};
-    var skip_increment = 0
-    for( var i=0; i<chosen_spectra["checked_spectra"].length; i++){
-        var split_str = chosen_spectra["checked_spectra"][i].split(" ");
-        var key = split_str[split_str.length-1];
-        var value = split_str[split_str.length-2];
-        print("key ", key, " value ", value);
-        if(key == "SKIP") {
-            key = "SKIP" + "_" + skip_increment;
-            print("\tkey ", key, " value ", value);
-            skip_increment++;
-            chosen_spectra_ids[key] = value;
-        }
-        else {
-            chosen_spectra_ids[key] = value;
-        }   
-    }
-
-
-    // loop through the chosen spectra split the string and createa a dictionary of the last two items with the last item as the key
-    var chosen_spectra_ids2 = {};
     var spectra_inrements = {};
     // set spectra_Increments keys to experiment types and values to -1
     for( var i=0; i<spectra_keys.length; i++){
@@ -552,7 +558,7 @@ function simplePREDICT_eeh(){
             spectra_inrements[key] += 1;
             key = key + "_" + spectra_inrements[key];
             print("\tkey ", key, " value ", value);
-            chosen_spectra_ids2[key] = value;
+            chosen_spectra_ids[key] = value;
         }
         else{
             // Big error if key is not in spectra_increments
@@ -562,13 +568,10 @@ function simplePREDICT_eeh(){
         }
     }
 
-    print("chosen_spectra_ids\n", chosen_spectra_ids);
-    print("chosen_spectra_ids2\n", chosen_spectra_ids2);
-
     // check if HSQC is present in the chosen_spectra_ids2
     // loop through the keys and in chosen_spectr_ids2, split the key by "_" and check if the first part is "HSQC"
     var foundHSQC = false;
-    for( var key in chosen_spectra_ids2){
+    for( var key in chosen_spectra_ids){
         var split_key = key.split("_");
         if( split_key[0] == "HSQC" ){
             foundHSQC = true;
@@ -582,11 +585,11 @@ function simplePREDICT_eeh(){
     }
 
 
-    // check if HSQC is present in the chosen spectra ids
-    if( chosen_spectra_ids["HSQC"] === undefined ){
-        MessageBox.warning("No HSQC found");
-        return;
-    }
+    // // check if HSQC is present in the chosen spectra ids
+    // if( chosen_spectra_ids["HSQC"] === undefined ){
+    //     MessageBox.warning("No HSQC found");
+    //     return;
+    // }
 
     // loop through the chosen spectra and replace the key with the value in chosen_spectra_ids
     for( var key in chosen_spectra_ids){
@@ -594,16 +597,30 @@ function simplePREDICT_eeh(){
         spectra[key]["filename"] = chosen_spectra_ids[key];
     }
 
-    // make sure the type is "2D" for the spectra HSQC, HMBC, COSY, NOESY, HSQC_CLIPCOSY, DDEPT_CH3_ONLY
+    // // make sure the type is "2D" for the spectra HSQC, HMBC, COSY, NOESY, HSQC_CLIPCOSY, DDEPT_CH3_ONLY
+    // for( var key in chosen_spectra_ids){
+    //     if( key == "HSQC" || key == "HMBC" || key == "COSY" || key == "NOESY" || key == "HSQC_CLIPCOSY" || key == "DDEPT_CH3_ONLY"){
+    //         spectra[key]["type"] = "2D";
+    //     }
+    // }
+
     for( var key in chosen_spectra_ids){
-        if( key == "HSQC" || key == "HMBC" || key == "COSY" || key == "NOESY" || key == "HSQC_CLIPCOSY" || key == "DDEPT_CH3_ONLY"){
+        // split the key by "_" and check
+        var split_key = key.split("_");
+        if( split_key[0] == "HSQC" || split_key[0] == "HMBC" || split_key[0] == "COSY" || split_key[0] == "NOESY" || split_key[0] == "HSQC_CLIPCOSY" || split_key[0] == "DDEPT_CH3_ONLY"){
             spectra[key]["type"] = "2D";
         }
     }
 
+
     // loop through the chosen spectra and remove the key from the spectra object
     for( var key in chosen_spectra_ids){
         delete spectra[chosen_spectra_ids[key]];
+    }
+
+    // print the chosen spectra ids
+    for( var key in chosen_spectra_ids){
+        print("chosen_spectra_ids ", key);
     }
 
     // with the hsqc data replace the intensity from the peaks with the integrals intensity values.
@@ -612,7 +629,7 @@ function simplePREDICT_eeh(){
     // if there is a match then replace the intensity value of the peak with the integral value
     
     // var hsqc = spectra[chosen_spectra_ids["HSQC"]];
-    var hsqc = spectra["HSQC"];
+    
     // assign H1_1D to a variable if it exists
     if( spectra["H1_1D"] !== undefined ){
         var h1_1d = spectra["H1_1D"];
@@ -620,31 +637,43 @@ function simplePREDICT_eeh(){
     else{
         var h1_1d = undefined;
     }
-    var pks = hsqc["peaks"]["data"];
-    var pks_count = hsqc["peaks"]["count"];
-    var integrals = hsqc["integrals"]["data"];
-    var integrals_count = hsqc["integrals"]["count"];
 
-    if (pks_count == integrals_count){
-        for ( var i=0; i<pks_count; i++){
-            var pk = pks[i];
-            for( var j=0; j<integrals_count; j++){
-                var integral = integrals[j];
+    for( var key in spectra){
+        var split_key = key.split("_");
 
-                if( (pk["delta1"] >= integral["rangeMax1"]) && 
-                    (pk["delta1"] <= integral["rangeMin1"]) && 
-                    (pk["delta2"] >= integral["rangeMin2"]) && 
-                    (pk["delta2"] <= integral["rangeMax2"])){
+        // check if the first par of the key is HSQC and the second part is numeric
+        // if it is not then continue to the next key
+        if( split_key[0] != "HSQC" || split_key.length != 2 ){
+            continue;
+        }
+        
+        var hsqc = spectra[key];
+        var pks = hsqc["peaks"]["data"];
+        var pks_count = hsqc["peaks"]["count"];
+        var integrals = hsqc["integrals"]["data"];
+        var integrals_count = hsqc["integrals"]["count"];
 
-                    pk["intensity"] = integral["intensity"];
-                    break;
+        if (pks_count == integrals_count){
+            for ( var i=0; i<pks_count; i++){
+                var pk = pks[i];
+                for( var j=0; j<integrals_count; j++){
+                    var integral = integrals[j];
+
+                    if( (pk["delta1"] >= integral["rangeMax1"]) && 
+                        (pk["delta1"] <= integral["rangeMin1"]) && 
+                        (pk["delta2"] >= integral["rangeMin2"]) && 
+                        (pk["delta2"] <= integral["rangeMax2"])){
+
+                        pk["intensity"] = integral["intensity"];
+                        break;
+                    }
                 }
             }
         }
-    }
-    
-    else if( pks_count != integrals_count){
-        MessageBox.warning("Number of peaks and integrals do not match in HSQC data. Therefore using peaks only. Program works best with integrals");
+        
+        else if( pks_count != integrals_count){
+            MessageBox.warning("Number of peaks and integrals do not match in HSQC data. Therefore using peaks only. Program works best with integrals");
+        }
     }
 
     spectra["MNOVAcalcMethod"] = {};

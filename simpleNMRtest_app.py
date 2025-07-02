@@ -698,11 +698,31 @@ def simpleMNOVA_display_molecule():
 
     problemdata_json = NMRProblem.from_mnova_dict(json_data)
 
+    print("problemdata_json\n", problemdata_json.dataframes.keys())
+
 
     # decide whether we are doing prediction or assignments
     if problemdata_json.is_prediction():
 
         solution = nmrsolution.NMRsolution(problemdata_json)
+
+        print(dir(solution))
+
+        # # print out some useful information on the different dataframes
+        # print("solution.c13_df ", solution.c13_df.shape[0])
+        # print("solution.c13_df.CH0 ", solution.c13_df.CH1.shape[0])
+        # print("solution.c13_df.CH2 ", solution.c13_df.CH2.shape[0])
+        # print("solution.c13_df.CH3 ", solution.c13_df.CH3.shape[0])
+        # print("solution.c13_df.CH1 ", solution.c13_df.CH1.shape[0])
+        # print("solution.c13_df.CH3CH1 ", solution.c13_df.CH3CH1.shape[0])
+        # print()
+
+        print("solution.hsqc_df.shape ", solution.hsqc_df.shape[0])
+        print(solution.hsqc_df.columns )
+        # print("solution.hsqc_df.CH2 ", solution.hsqc_df.CH2.shape[0])
+        # print("solution.hsqc_df.CH3 ", solution.hsqc_df.CH3.shape[0])
+        # print("solution.hsqc_df.CH1 ", solution.hsqc_df.CH1.shape[0])
+        # print("solution.hsqc_df.CH3CH1 ", solution.hsqc_df.CH3CH1.shape[0])
 
         if solution.nmrsolution_failed:
             return solution.nmrsolution_error_message, solution.nmrsolution_error_code
@@ -726,11 +746,46 @@ def simpleMNOVA_display_molecule():
 
         rtn_msg, rtn_num = solution.assign_CH3_CH2_CH1_overall()
 
+        print("solution.hsqc.shape ", solution.hsqc.shape[0])
+        print(solution.hsqc.columns )
+
+        print("solution.hsqc.CH2 ", solution.hsqc[solution.hsqc.CH2].shape[0])
+        print("solution.hsqc.CH3 ", solution.hsqc[solution.hsqc.CH3].shape[0])
+        print("solution.hsqc.CH1 ", solution.hsqc[solution.hsqc.CH1].shape[0])
+        print("solution.hsqc.CH3CH1 ", solution.hsqc[solution.hsqc.CH3CH1].shape[0])
+
+        # print the mol_props_df
+
+        df = solution.expected_molecule.molprops_df
+        print("molprops_df.shape ", df.shape[0])
+
+        print("CH2 count: ", df[df["CH2"]].shape[0])
+        print("CH3 count: ", df[df["CH3"]].shape[0])
+        print("CH1 count: ", df[df["CH1"]].shape[0])
+        print("CH3CH1 count: ", df[df["CH3CH1"]].shape[0])
+
+        # print information on the c13 dataframe
+        print("solution.c13.shape ", solution.c13.shape[0])
+        print(solution.c13.columns )    
+        print("solution.c13.CH2 ", solution.c13[solution.c13.CH2].shape[0])
+        print("solution.c13.CH3 ", solution.c13[solution.c13.CH3].shape[0])
+        print("solution.c13.CH1 ", solution.c13[solution.c13.CH1].shape[0])
+        print("solution.c13.CH3CH1 ", solution.c13[solution.c13.CH3CH1].shape[0])
+
+        print("\nrtn_msg\n", rtn_msg)
+
         if rtn_msg != "ok":
             return rtn_msg, rtn_num
 
         solution.transfer_hsqc_info_to_c13()
         solution.transfer_hsqc_info_to_h1()
+
+        print("solution.c13.shape ", solution.c13.shape[0])
+        print(solution.c13.columns )    
+        print("solution.c13.CH2 ", solution.c13[solution.c13.CH2].shape[0])
+        print("solution.c13.CH3 ", solution.c13[solution.c13.CH3].shape[0])
+        print("solution.c13.CH1 ", solution.c13[solution.c13.CH1].shape[0])
+        print("solution.c13.CH3CH1 ", solution.c13[solution.c13.CH3CH1].shape[0])
 
         rtn_msg, rtn_num = solution.initialise_prior_to_carbon_assignment()
 
@@ -1021,4 +1076,4 @@ if __name__ == "__main__":
     # reload(sys)
     # sys.setdefaultencoding("utf-8")
     create_database()  # Create tables if they don't exist
-    app.run()
+    app.run(debug=True)

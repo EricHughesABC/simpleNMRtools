@@ -110,6 +110,30 @@ def read_in_mesrenova_json(fn: Path) -> dict:
     return data
 
 
+def read_in_mesrenova_json_multiple(fn: Path) -> dict:
+    """Read in the JSON file exported from MestReNova."""
+
+    print("\nread_in_mesrenova_json(fn: Path) -> dict:\n")
+
+    # check the type of fn is a pathlib.Path
+    if isinstance(fn, Path):
+        with open(fn, "r") as file:
+            data_orig = json.load(file)
+    elif isinstance(fn, dict):
+        data_orig = fn
+
+    data = return_nonempty_mnova_datasets(data_orig)
+
+    # # create a dictionary of filename to experiment type ie  HSQC: filename, HMBC: filename, etc
+    # chosen_spectra = { v.split(" ")[-1]: v.split(" ")[-2] for _,v in  data["chosenSpectra"]["data"].items()}
+    # # replace the nmrdata key names with the experiment type ie HSQC, HMBC, etc
+    # for k, v in chosen_spectra.items():
+    #     data[k] = data[v]
+    #     del data[v]
+
+    return data
+
+
 def get_2D_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
     """
     Returns a pandas dataframe from the json_data dictionary for the specified technique.
@@ -202,9 +226,19 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
     """
     Returns a dictionary of pandas dataframes for each technique in the data dictionary.
     """
+    print("\ncreate_dataframes_from_mresnova_json(data: dict) -> dict:\n")
     _dataframes = {}
     for k, v in data.items():
-        if k in NMREXPERIMENTS:
+        print(f"Processing key: {k}")
+        # split the key by "_" and check if the first part is in NMREXPERIMENTS
+        k1 = k.split("_")
+        if len(k1) == 2:
+            k1 = k1[0]
+        elif len(k1) == 3:
+            k1 = k1[0] + "_" + k1[1]
+        else:
+            k1 = k1[0]
+        if k1 in NMREXPERIMENTS:
             if v["type"].lower() == "2d":
                 df = get_2D_dataframe_from_json(data, k)
                 _dataframes[k] = df
@@ -212,15 +246,15 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
                 df = get_1d_dataframe_from_json(data, k)
                 _dataframes[k] = df
 
-        elif k in [
+        elif k1 in [
             "allAtomsInfo",
             "nmrAssignments",
             "carbonAtomsInfo",
             "c13predictions",
         ]:
-            _dataframes[k] = pd.DataFrame.from_dict(data[k]["data"], orient="index")
+            _dataframes[k1] = pd.DataFrame.from_dict(data[k1]["data"], orient="index")
 
-        elif k in [
+        elif k1 in [
             "smiles",
             "molfile",
             "carbonCalcPositionsMethod",
@@ -235,22 +269,22 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
             "numberOfSteps",
             "ppmGroupSeparation",
         ]:
-            _dataframes[k] = pd.DataFrame(v["data"], index=[0])
-            _dataframes[k].columns = [k]
+            _dataframes[k1] = pd.DataFrame(v["data"], index=[0])
+            _dataframes[k1].columns = [k1]
 
-        elif k in ["spectraWithPeaks", "chosenSpectra"]:
-            _dataframes[k] = pd.DataFrame.from_dict(v["data"], orient="index")
-            _dataframes[k].columns = [k]
+        elif k1 in ["spectraWithPeaks", "chosenSpectra"]:
+            _dataframes[k1] = pd.DataFrame.from_dict(v["data"], orient="index")
+            _dataframes[k1].columns = [k1]
 
-            if k == "chosenSpectra":
+            if k1 == "chosenSpectra":
                 expts = [s.split()[-1] for s in v["data"].values()]
                 filenames = [s.split()[-2] for s in v["data"].values()]
-                _dataframes[k]["filename"] = filenames
-                _dataframes[k]["expt"] = expts
+                _dataframes[k1]["filename"] = filenames
+                _dataframes[k1]["expt"] = expts
 
-                _dataframes[k]["NMRdimensions"] = "unknown"
-                for idx, row in _dataframes[k].iterrows():
-                    kwds = row[k].split()
+                _dataframes[k1]["NMRdimensions"] = "unknown"
+                for idx, row in _dataframes[k1].iterrows():
+                    kwds = row[k1].split()
                     if len(kwds) == 5:
                         nmr_nuclei = kwds[0]
                     else:
@@ -263,12 +297,14 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
                     else:
                         expt_type = "unknown"
 
-                    _dataframes[k].loc[idx, "NMRdimensions"] = expt_type
+                    _dataframes[k1].loc[idx, "NMRdimensions"] = expt_type
             else:
                 filenames = [s.split()[-1] for s in v["data"].values()]
-                _dataframes[k]["filename"] = filenames
+                _dataframes[k1]["filename"] = filenames
         else:
-            print(f"Skipping {k}")
+            print(f"Skipping {k1}")
+
+    print("_dataframes keys: ", _dataframes.keys())
 
     return _dataframes
 
@@ -758,32 +794,32 @@ def create_htmlpage_from_graph(
     webbrowser.open(html_fn.absolute().as_uri())
 
 
-class NMRgraph:
-    def __init__(self, dataframes: dict):
-        self.dataframes = dataframes
-        self.G2 = nx.Graph()
-        pass
+# class NMRgraph:
+#     def __init__(self, dataframes: dict):
+#         self.dataframes = dataframes
+#         self.G2 = nx.Graph()
+#         pass
 
-    def buildGraph(self, G2: nx.Graph, dataframes: dict):
-        pass
+#     def buildGraph(self, G2: nx.Graph, dataframes: dict):
+#         pass
 
-    def add_nodes(self, G2: nx.Graph, dataframes: dict):
-        pass
+#     def add_nodes(self, G2: nx.Graph, dataframes: dict):
+#         pass
 
-    def add_cosy_edges(self, G2: nx.Graph, dataframes: dict):
-        pass
+#     def add_cosy_edges(self, G2: nx.Graph, dataframes: dict):
+#         pass
 
-    def add_clipcosy_edges(self, G2: nx.Graph, dataframes: dict):
-        pass
+#     def add_clipcosy_edges(self, G2: nx.Graph, dataframes: dict):
+#         pass
 
-    def add_hmbc_edges(self, G2: nx.Graph, dataframes: dict):
-        pass
+#     def add_hmbc_edges(self, G2: nx.Graph, dataframes: dict):
+#         pass
 
-    def add_noesy_edges(self, G2: nx.Graph, dataframes: dict):
-        pass
+#     def add_noesy_edges(self, G2: nx.Graph, dataframes: dict):
+#         pass
 
-    def build_html_page(self, G2: nx.Graph, dataframes: dict) -> str:
-        pass
+#     def build_html_page(self, G2: nx.Graph, dataframes: dict) -> str:
+#         pass
 
 
 def calc_minimum_ppm_separation(ppm_pks, ppmSeparation):
@@ -815,14 +851,86 @@ def calc_minimum_ppm_separation(ppm_pks, ppmSeparation):
     else:
         return ppmSeparation
 
+def combine_multiple_nmrExpt_dataframes(dataframes):
+    """
+    Combine multiple NMR experiment dataframes into a single dataframe.
+    This is useful when there are multiple 1D or 2D spectra for the same experiment.
+    """
+
+    # group the expt dataframes by their experiment type
+    nmrExptsDataframes = {}
+    nmrExptsToDelete = []
+    for k, v in dataframes.items():
+        # split the key by "_" once from the right
+        print(f"Processing key: {k}")
+        k1 = k.rsplit("_", 1)[0]
+        if k1 in NMREXPERIMENTS:
+            print( f"{k} shape: {v.shape}"  )
+            if k1 not in nmrExptsDataframes:
+                nmrExptsDataframes[k1] = []
+            nmrExptsDataframes[k1].append(v)
+            nmrExptsToDelete.append(k)
+
+    # print the number of dataframes in each group
+    print("\nNumber of dataframes in each NMR experiment group:")
+    for k, v in nmrExptsDataframes.items():
+        print(f"{k}: {len(v)} dataframes")
+    
+    # combine the dataframes in each group
+    for k, v in nmrExptsDataframes.items(): 
+        if len(v) > 1:
+            # combine the dataframes in v
+            combined_df = pd.concat(v, ignore_index=True)
+            # remove duplicate rows based on ppm or f1_ppm and f2_ppm columns
+            if "ppm" in combined_df.columns:
+                combined_df = combined_df.drop_duplicates(subset=["ppm"])
+            elif "f1_ppm" in combined_df.columns and "f2_ppm" in combined_df.columns:
+                combined_df = combined_df.drop_duplicates(subset=["f1_ppm", "f2_ppm"])
+            # sort the dataframe by ppm in descending order
+            if "ppm" in combined_df.columns:
+                combined_df = combined_df.sort_values(by=["ppm"], ascending=False).reset_index(drop=True)
+            elif "f1_ppm" in combined_df.columns:
+                combined_df = combined_df.sort_values(by=["f1_ppm"], ascending=False).reset_index(drop=True)
+            else:
+                print(f"No ppm column found in {k}, skipping sorting")
+            # set the index to start at 1
+            combined_df.index += 1
+            dataframes[k] = combined_df
+        elif len(v) == 1:
+            dataframes[k] = v[0]
+        else:
+            print(f"No data for {k}")
+    # print out the keys of the combined dataframes and the number of rows in each dataframe
+    print("\nCombined NMR experiment dataframes:")
+    for k, v in dataframes.items():
+        print(f"{k}: {v.shape[0]} rows")
+
+    # remove dataframes that were found in nmrExptsToDelete
+    for k in nmrExptsToDelete:
+        if k in dataframes:
+            del dataframes[k]
+            print(f"Removed {k} from dataframes")
+
+    print("\nFinal dataframes keys:")
+    for k in dataframes.keys():
+        print(f"{k}: {dataframes[k].shape[0]} rows")
+
+    return dataframes
+
 
 class NMRProblem:
     def __init__(self, dataframes: dict):
         self.dataframes = dataframes
+        print("\nNMRProblem.__init__(self, dataframes: dict):\n")
+        print("*********************************************")
+        print("self.dataframes.keys():", self.dataframes.keys() )
         # data is a dictionary of pandas dataframes
         self.add_missing_spectra()
         self.dataframes = standardize_column_headings(self.dataframes)
+        self.dataframes = combine_multiple_nmrExpt_dataframes(self.dataframes)
+        print("self.dataframes.keys():", self.dataframes.keys() )
         self.dataframes = add_missing_columns_to_nmrExpt_dataframes(self.dataframes)
+        print("self.dataframes.keys():", self.dataframes.keys() )
 
         hsqc_H1_pks = self.dataframes["HSQC"].f2_ppm.values
         c13_pks = self.dataframes["C13_1D"].ppm.values
@@ -851,6 +959,20 @@ class NMRProblem:
         data = read_in_mesrenova_json(cls.json_data)
         dataframes = create_dataframes_from_mresnova_json(data)
         return cls(dataframes)
+    
+    # @classmethod
+    # def from_mnova_json_file_multiple(cls, fn: Path):
+    #     """
+    #     Create an NMRProblem object from a json file.
+    #     """
+    #     with open(fn, "r") as f:
+    #         cls.json_data = json.load(f)
+
+    #     # convert the json data into a dictionary of pandas dataframes
+
+    #     data = read_in_mesrenova_json_multiple(cls.json_data)
+    #     dataframes = create_dataframes_from_mresnova_json(data)
+    #     return cls(dataframes)
 
     @classmethod
     def from_mnova_dict(cls, json_data: dict):
@@ -863,6 +985,18 @@ class NMRProblem:
         data = read_in_mesrenova_json(cls.json_data)
         dataframes = create_dataframes_from_mresnova_json(data)
         return cls(dataframes)
+    
+        # @classmethod
+    # def from_mnova_dict_multiple(cls, json_data: dict):
+    #     """
+    #     Create an NMRProblem object from a json file.
+    #     """
+    #     print("\nfrom_mnova_dict(cls,json_data: dict):\n")
+    #     cls.json_data = json_data
+    #     # convert the json data into a dictionary of pandas dataframes
+    #     data = read_in_mesrenova_json_multiple(cls.json_data)
+    #     dataframes = create_dataframes_from_mresnova(data)
+    #     return cls(dataframes)
 
     @classmethod
     def from_excel_file(cls, fn: Path):
@@ -904,9 +1038,19 @@ class NMRProblem:
         """
         Add missing spectra to the dataframes dictionary
         """
+        exceptions_names = [
+            "molfile",
+            "carbonAtomsInfo",
+            "nmrAssignments",
+        ]
+
         for k in excel_orig_df_columns.keys():
-            if k not in self.dataframes:
-                self.dataframes[k] = pd.DataFrame(columns=excel_orig_df_columns[k])
+            if k in exceptions_names:
+                if k not in self.dataframes:
+                    self.dataframes[k] = pd.DataFrame(columns=excel_orig_df_columns[k])
+            else:
+                if k + "_0" not in self.dataframes:
+                    self.dataframes[k+"_0"] = pd.DataFrame(columns=excel_orig_df_columns[k])
 
     def get_molfile_string(self):
         molfile_string = self.dataframes["molfile"].loc[0, "molfile"]
