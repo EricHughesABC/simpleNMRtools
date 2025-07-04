@@ -478,7 +478,7 @@ class NMRsolution:
                 self.nmrsolution_error_code = 401
                 return
 
-            if len(self.dept_df) != mol.num_carbon_atoms_with_protons:
+            if (len(self.dept_df) != mol.num_carbon_atoms_with_protons) and (len(self.dept_df) != mol.num_sym_carbon_atoms_with_protons):
                 self.nmrsolution_failed = True
                 self.nmrsolution_error_message = "<p> Please check the number of carbon peaks in the DEPT data as the number does not equal to the number of protonated carbons in the given molecule</p>"
                 self.nmrsolution_error_code = 401
@@ -830,8 +830,6 @@ class NMRsolution:
 
         h1_df = h1_df[(h1_df["signaltype"] == "Compound") | (h1_df["signaltype"] == 0)]
 
-        # h1_df["numProtons"] = 1.0
-        # h1_df["integral"] = 1.0
         h1_df["numProtons"] = -1
         h1_df["integral"] = -1
         h1_df["jCouplingVals"] = ""
@@ -874,8 +872,6 @@ class NMRsolution:
         # label all rows in c13_df as CH0 where numProtons is -1
         self.c13_df.loc[self.c13_df.numProtons == -1, "CH0"] = True
         self.c13_df.loc[self.c13_df.numProtons == -1, "numProtons"] = 0
-
-        # print("c13\n", self.c13_df)
 
         self.c13
 
@@ -1439,9 +1435,6 @@ class NMRsolution:
         h1 = self.h1
         hsqc = self.hsqc
 
-        print("transfer_hsqc_info_to_h1")
-        print("hsqc\n", hsqc)
-
         for col in ["CH3CH1", "CH3", "CH2", "CH1"]:
             if col not in h1.columns:
                 h1[col] = False
@@ -1521,8 +1514,6 @@ class NMRsolution:
 
         CH3_mol_df = expected_molecule.molprops_df[expected_molecule.molprops_df.CH3]
 
-        print(f"CH3_mol_df.shape[0]: {CH3_mol_df.shape[0]}")
-
         CH3CH1_mol_df = expected_molecule.molprops_df[
             expected_molecule.molprops_df.CH3CH1
         ]
@@ -1551,11 +1542,6 @@ class NMRsolution:
         print(f"CH3CH1_hsqc_df.shape[0]: {CH3CH1_hsqc_df.shape[0]}")
         print(f"CH3CH1_mol_df.shape[0]: {CH3CH1_mol_df.shape[0]}")
         print(f"CH3CH1_sym_mol_df.shape[0]: {CH3CH1_sym_mol_df.shape[0]}")
-
-        # print(f"CH3CH1_hsqc_df.shape[0]: {CH3CH1_hsqc_df.shape[0]}")
-        # print(f"CH3CH1_mol_df.shape[0]: {CH3CH1_mol_df.shape[0]}")
-        # print(f"CH3CH1_sym_mol_df.shape[0]: {CH3CH1_sym_mol_df.shape[0]}")
-        # print(CH3CH1_sym_mol_df[["ppm", "numProtons", "CH3", "CH1"]])
 
         if num_CH3CH1_hsqc == 0:
             #  skip if no CH3CH1 groups in HSQC
@@ -1600,6 +1586,7 @@ class NMRsolution:
         #  check if we think we have symmetry in the expected molecule
         if CH3CH1_sym_mol_df.shape[0] < CH3CH1_mol_df.shape[0] and CH3CH1_hsqc_df.shape[0] < CH3CH1_sym_mol_df.shape[0]:
 
+            print("not all HSQC peaks picked yet")
             # loop through the CH3CH1_hsqc_df and try to match with CH3CH1_mol_df 
             CH3CH1_sym_mol_df = CH3CH1_sym_mol_df[~CH3CH1_sym_mol_df.picked]
             for idx, row in CH3CH1_hsqc_df.iterrows():
@@ -1618,25 +1605,25 @@ class NMRsolution:
 
                     CH3CH1_sym_mol_df.loc[closest_match.index, "picked"] = True
                     CH3CH1_sym_mol_df = CH3CH1_sym_mol_df[~CH3CH1_sym_mol_df.picked]
-            pass
-        elif CH3CH1_hsqc_df.shape[0] < CH3CH1_mol_df.shape[0]:
+            
+        # elif CH3CH1_hsqc_df.shape[0] < CH3CH1_mol_df.shape[0]:
 
-            # loop through the CH3CH1_hsqc_df and try to match with CH3CH1_mol_df 
-            CH3CH1_mol_df = CH3CH1_mol_df[~CH3CH1_mol_df.picked]
-            for idx, row in CH3CH1_hsqc_df.iterrows():
-                # find the closest match in the CH3CH1_mol_df
-                closest_match = CH3CH1_mol_df.iloc[
-                    (CH3CH1_mol_df["ppm"] - row.f1_ppm).abs().argsort()[:1]
-                ]
-                if not closest_match.empty:
-                    # update the hsqc dataframe with the closest match
-                    hsqc.loc[row.name, "numProtons"] = closest_match.totalNumHs.values[0]
-                    hsqc.loc[row.name, "CH3"] = closest_match.CH3.values[0]
-                    hsqc.loc[row.name, "CH1"] = closest_match.CH1.values[0]
-                    # mark the closest match as picked in the CH3CH1_mol_df
+        #     # loop through the CH3CH1_hsqc_df and try to match with CH3CH1_mol_df 
+        #     CH3CH1_mol_df = CH3CH1_mol_df[~CH3CH1_mol_df.picked]
+        #     for idx, row in CH3CH1_hsqc_df.iterrows():
+        #         # find the closest match in the CH3CH1_mol_df
+        #         closest_match = CH3CH1_mol_df.iloc[
+        #             (CH3CH1_mol_df["ppm"] - row.f1_ppm).abs().argsort()[:1]
+        #         ]
+        #         if not closest_match.empty:
+        #             # update the hsqc dataframe with the closest match
+        #             hsqc.loc[row.name, "numProtons"] = closest_match.totalNumHs.values[0]
+        #             hsqc.loc[row.name, "CH3"] = closest_match.CH3.values[0]
+        #             hsqc.loc[row.name, "CH1"] = closest_match.CH1.values[0]
+        #             # mark the closest match as picked in the CH3CH1_mol_df
 
-                    CH3CH1_mol_df.loc[closest_match.index, "picked"] = True
-                    CH3CH1_mol_df = CH3CH1_mol_df[~CH3CH1_mol_df.picked]
+        #             CH3CH1_mol_df.loc[closest_match.index, "picked"] = True
+        #             CH3CH1_mol_df = CH3CH1_mol_df[~CH3CH1_mol_df.picked]
 
   
 
@@ -1781,6 +1768,24 @@ class NMRsolution:
 
             # elif num_CH3CH1_hsqc < CH3CH1_mol_df.shape[0]:
             #     # attempt to match up CH3 and CH1 based on ppm values
+            elif CH3CH1_hsqc_df.shape[0] < CH3CH1_mol_df.shape[0]:
+
+                # loop through the CH3CH1_hsqc_df and try to match with CH3CH1_mol_df 
+                CH3CH1_mol_df = CH3CH1_mol_df[~CH3CH1_mol_df.picked]
+                for idx, row in CH3CH1_hsqc_df.iterrows():
+                    # find the closest match in the CH3CH1_mol_df
+                    closest_match = CH3CH1_mol_df.iloc[
+                        (CH3CH1_mol_df["ppm"] - row.f1_ppm).abs().argsort()[:1]
+                    ]
+                    if not closest_match.empty:
+                        # update the hsqc dataframe with the closest match
+                        hsqc.loc[row.name, "numProtons"] = closest_match.totalNumHs.values[0]
+                        hsqc.loc[row.name, "CH3"] = closest_match.CH3.values[0]
+                        hsqc.loc[row.name, "CH1"] = closest_match.CH1.values[0]
+                        # mark the closest match as picked in the CH3CH1_mol_df
+
+                        CH3CH1_mol_df.loc[closest_match.index, "picked"] = True
+                        CH3CH1_mol_df = CH3CH1_mol_df[~CH3CH1_mol_df.picked]
             else:
                 print("No solution found")
                 self.nmrsolution_failed = True
@@ -2525,15 +2530,11 @@ def copy_over_values_c13_all_to_hetero2D(df, c13_all):
     df["f2_x"] = None
     df["f2_y"] = None
 
-    # print the column type of dataframe df
-    # print("\ndf.dtypes")
-    # print(df.dtypes)
 
     for idx, row in c13_all.iterrows():
         c13_ppm = row["ppm"]
         f1_idx = df[df["f1_ppm"] == c13_ppm].index
         for ii in f1_idx:
-            print(ii, type(ii))
             df.loc[ii, "f1_atom_idx"] = row["atom_idx"]
             df.at[ii, "f1_sym_atom_idx"] = row["sym_atom_idx"]
             df.at[ii, "f1_atomNumber"] = row["atomNumber"]
@@ -2542,19 +2543,12 @@ def copy_over_values_c13_all_to_hetero2D(df, c13_all):
 
         f2p_idx = (df[df["f2p_ppm"] == c13_ppm]).index.tolist()
         for ii in f2p_idx:
-            print(ii, type(ii))
             df.at[ii, "f2_atom_idx"] = row["atom_idx"]
             df.at[ii, "f2_sym_atom_idx"] = row["sym_atom_idx"]
             df.at[ii, "f2_atomNumber"] = row["atomNumber"]
             df.at[ii, "f2_x"] = row["x"]
             df.at[ii, "f2_y"] = row["y"]
-        # print(f"f2p_idx: {f2p_idx}, type: {type(f2p_idx[0])}")
-        # df.at[f2p_idx, "f2_atom_idx"] = row["atom_idx"]
-        # df.at[f2p_idx, "f2_sym_atom_idx"] = row["sym_atom_idx"]
-        # df.at[f2p_idx, "f2_atomNumber"] = row["atomNumber"]
-        # df.at[f2p_idx, "f2_sym_atomNumber"] = row["sym_atomNumber"]
-        # df.at[f2p_idx, "f2_x"] = row["x"]
-        # df.at[f2p_idx, "f2_y"] = row["y"]
+
 
     return df
 
@@ -2590,13 +2584,6 @@ def copy_over_values_c13_all_to_homo2D(df, c13_all):
             df.at[ii, "f1_x"] = row["x"]
             df.at[ii, "f1_y"] = row["y"]
 
-        # df.at[f1_idx, "f1_atom_idx"] = row["atom_idx"]
-        # df.at[f1_idx, "f1_sym_atom_idx"] = row["sym_atom_idx"]
-        # df.at[f1_idx, "f1_atomNumber"] = row["atomNumber"]
-        # df.at[f1_idx, "f1_sym_atomNumber"] = row["sym_atomNumber"]
-        # df.at[f1_idx, "f1_x"] = row["x"]
-        # df.at[f1_idx, "f1_y"] = row["y"]
-
         f2p_idx = df[df["f2p_ppm"] == c13_ppm].index
         for ii in f2p_idx:
             df.at[ii, "f2_atom_idx"] = row["atom_idx"]
@@ -2605,13 +2592,6 @@ def copy_over_values_c13_all_to_homo2D(df, c13_all):
             df.at[ii, "f2_sym_atomNumber"] = row["sym_atomNumber"]
             df.at[ii, "f2_x"] = row["x"]
             df.at[ii, "f2_y"] = row["y"]
-
-        # df.at[f2p_idx, "f2_atom_idx"] = row["atom_idx"]
-        # df.at[f2p_idx, "f2_sym_atom_idx"] = row["sym_atom_idx"]
-        # df.at[f2p_idx, "f2_atomNumber"] = row["atomNumber"]
-        # df.at[f2p_idx, "f2_sym_atomNumber"] = row["sym_atomNumber"]
-        # df.at[f2p_idx, "f2_x"] = row["x"]
-        # df.at[f2p_idx, "f2_y"] = row["y"]
 
     return df
 
