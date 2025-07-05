@@ -10,6 +10,9 @@ __pycache__/
 *.db
 *.sqlite3
 
+# docs / build
+docs/build
+
 # Distribution / packaging
 .Python
 build/
