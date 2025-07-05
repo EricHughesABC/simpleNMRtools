@@ -1,0 +1,1 @@
+pandoc --extract-media . -o simpleIntegrate2D.rst simpleIntegrate2D.docx

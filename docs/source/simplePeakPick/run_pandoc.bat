@@ -1,0 +1,1 @@
+pandoc --extract-media . -o simplePeakPick.rst simplePeakPick.docx

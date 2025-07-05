@@ -1,0 +1,1 @@
+pandoc --extract-media . -o simpleREPORT.rst simpleREPORT.docx

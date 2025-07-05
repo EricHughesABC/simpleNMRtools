@@ -1,0 +1,1 @@
+pandoc --extract-media . -o simpleHTMLGUI.rst simpleHTMLGUI.docx

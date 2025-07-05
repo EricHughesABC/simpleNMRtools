@@ -1,0 +1,1 @@
+pandoc --extract-media . -o mnovaInstallation.rst mnovaInstallation.docx

@@ -1,0 +1,1 @@
+pandoc --extract-media . -o snapToCarbonHSQC.rst snapToCarbonHSQC.docx

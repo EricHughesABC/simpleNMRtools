@@ -1,0 +1,1 @@
+pandoc --extract-media . -o simpleASSIGN.rst simpleASSIGN.docx
