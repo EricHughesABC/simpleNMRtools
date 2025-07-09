@@ -119,7 +119,7 @@ which are optional.
    to use a multiplicity edited version of the HSQC experiment to
    facilitate identification of CH\ :sub:`2` groups. Beyond that, the
    method uses correlations between the CH(n) fragments to refine and
-   confirm their positioning on the molecular structure. So both HMBC
+   confirm their positioning on the molecular structure. So, both HMBC
    and some form of COSY experiment are very useful, but note that
    neither is an absolute requirement. It may be, for example, that some
    structures show hardly any useful COSY correlations, so it makes no
@@ -131,7 +131,7 @@ which are optional.
    experiment will have better peak dispersion, so would probably be
    favoured, but it may be that in cases where there is near accidental
    degeneracy in the carbon spectrum, but not in the proton, the classic
-   :sup:`1`\ H-:sup:`1`\ H COSY gives better results. So the user can
+   :sup:`1`\ H-:sup:`1`\ H COSY gives better results. So, the user can
    select whichever experiment seems more appropriate. Finally among the
    2D data sets, if the molecule contains a significant number of methyl
    groups that are overlapped with other signals so that it is not
@@ -167,7 +167,7 @@ The simplePREDICT Dialog
 After clicking on the simplePREDICT icon, the simplePREDICT dialog
 window will appear.
 
-.. image:: media/image1.png
+.. image:: media\\image1.png
    :alt: highlighted simplePREDICT icon
    :width: 6.26806in
    :height: 0.85833in
@@ -181,15 +181,15 @@ main parts to the dialog.
 
 2. Which carbon chemical shift prediction source to use
 
-3. Optimization of results using simulated annealing on COSY and HMBC
-   correlations
+3. Optimization of the results using simulated annealing on COSY and
+   HMBC correlations
 
-.. image:: media/image2.png
-   :alt: simplePREDICT main dialog
+.. image:: media\\image2.png
+   :alt: A screenshot of a computer AI-generated content may be incorrect.
    :width: 6.26806in
-   :height: 5.42361in
+   :height: 4.54722in
 
-Figure 2 simplePREDICT dialog showing three distinct parts
+Figure 2 simplePREDICT dialog
 
 1. NMR data sets to use in the prediction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -212,16 +212,13 @@ Note that an HSQC dataset **must** be present in the list.
 2. Carbon Prediction software to use.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In this part of the dialog the user has three options on how the
+In this part of the dialog the user has two options on how the
 simplePREDICT tool calculates the carbon ppm values.
 
 The first option is to use the prediction tool from MNOVA if the user
 has a license.
 
-The second option can be used if the user has manually assigned the data
-already using the manual or semi-automatic tools from MNOVA.
-
-The third option uses the NMRSHIFTDB hose code to predict the chemical
+The second option uses the NMRSHIFTDB hose code to predict the chemical
 shifts. This code is free to use, but the predictions are generally less
 accurate than those from the Mnova software.
 

@@ -1,4 +1,6 @@
 
+
+
 // Function to check if one string is a substring of another
 function isSubstring(sub, str) {
     return str.indexOf(sub) !== -1;
@@ -7,6 +9,18 @@ function isSubstring(sub, str) {
 function simpleUtils() {
 
     var doc = Application.mainWindow.activeDocument;
+
+    simpleUtils.spectra_keys = ["HSQC", 
+                        "HMBC", 
+                        "COSY", 
+                        "NOESY", 
+                        "H1_1D", 
+                        "C13_1D", 
+                        "DEPT135", 
+                        "PureShift", 
+                        "DDEPT_CH3_ONLY", 
+                        "SKIP", 
+                        "HSQC_CLIPCOSY"];
 
 }
 

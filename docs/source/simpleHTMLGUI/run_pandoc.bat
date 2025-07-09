@@ -1,1 +1,1 @@
-pandoc --extract-media . -o simpleHTMLGUI.rst simpleHTMLGUI.docx
+pandoc simpleHTMLGUI.docx -o simpleHTMLGUI.rst  --extract-media=. --resource-path=. 

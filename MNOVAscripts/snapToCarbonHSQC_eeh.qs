@@ -9,7 +9,7 @@ function snapToCarbonHSQC_eeh()
     print("spectra_lst", spectra_lst);
 
     // find the carbon spectrum
-    var simpleutils = new simpleUtils();
+    // var simpleutils = new simpleUtils();
     // var spectra = simpleutils.identifySpectra(doc);
     var c13spec = simpleutils.findC13spectrum(spectra_lst);
 

@@ -52,8 +52,8 @@ distinct carbon atoms.
    predictions are not correct and a better arrangement of the carbon
    atoms is valid.
 
-COSY and HMBC Correlations
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+ COSY and HMBC Correlations
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The COSY and HMBC correlations are represented as edges in a graph
 network between the carbon nodes.
@@ -61,7 +61,7 @@ network between the carbon nodes.
 -  The COSY correlations are shown by default, they are the sky-blue
    lines. They can be toggled off by clicking the COSY button
 
-.. image:: media/image2.png
+.. image:: media\\image2.png
    :alt: COSY correlations are in blue
    :width: 6.26806in
    :height: 2.92986in
@@ -72,9 +72,13 @@ Figure 2 COSY correlations are shown in blue.
    user hovers over a carbon node with the cursor the HMBC correlations
    for that carbon node will be displayed.
 
+-  Clicking on the HMBC button will display all the HMBC correlations
+   over the molecule. HMBC correlations greater than 3 bonds are shown
+   in red, otherwise they are shown in grey.
+
 ..
 
-   .. image:: media/image3.png
+   .. image:: media\\image3.png
       :alt: HMBC correlations displayed upon hover
       :width: 4.57277in
       :height: 3.61216in
