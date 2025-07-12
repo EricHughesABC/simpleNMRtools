@@ -47,7 +47,7 @@ var valid1DH1PulseSequenceStrings = ["zg30",
                                      ];
 
 var valid1DC13PulseSequenceStrings = ["zgdc30", "s2pul", "zgpg30",
-                                      "zgzrse"
+                                      "zgzrse", "zg0dc.fr"
 ];
 
 var validPURESHIFT1DH1PulseSequenceStrings = ["ja_PSYCHE_pr_03b", 

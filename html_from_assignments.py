@@ -236,6 +236,8 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
             k1 = k1[0]
         elif len(k1) == 3:
             k1 = k1[0] + "_" + k1[1]
+        elif len(k1) == 4:
+            k1 = k1[0] + "_" + k1[1] + "_" + k1[2]
         else:
             k1 = k1[0]
         if k1 in NMREXPERIMENTS:
