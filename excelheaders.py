@@ -1,5 +1,6 @@
 excel_df_columns = {
-    "nmrAssignment": [
+
+    "nmrAssignments": [
         "atom_idx",
         "atomNumber",
         "numProtons",
@@ -135,7 +136,8 @@ excel_df_columns = {
 }
 
 excel_orig_df_columns = {
-    "nmrAssignment": [
+
+        "nmrAssignments": [
         "atom_idx",
         "atomNumber",
         "numProtons",

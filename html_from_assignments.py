@@ -227,6 +227,7 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
     Returns a dictionary of pandas dataframes for each technique in the data dictionary.
     """
     print("\ncreate_dataframes_from_mresnova_json(data: dict) -> dict:\n")
+    print("***** EEH ****")
     _dataframes = {}
     for k, v in data.items():
         print(f"Processing key: {k}")
@@ -240,6 +241,8 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
             k1 = k1[0] + "_" + k1[1] + "_" + k1[2]
         else:
             k1 = k1[0]
+
+        print(f"k1: {k1}")
         if k1 in NMREXPERIMENTS:
             if v["type"].lower() == "2d":
                 df = get_2D_dataframe_from_json(data, k)
@@ -247,6 +250,8 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
             elif v["type"].lower() == "1d":
                 df = get_1d_dataframe_from_json(data, k)
                 _dataframes[k] = df
+
+        
 
         elif k1 in [
             "allAtomsInfo",
@@ -796,32 +801,7 @@ def create_htmlpage_from_graph(
     webbrowser.open(html_fn.absolute().as_uri())
 
 
-# class NMRgraph:
-#     def __init__(self, dataframes: dict):
-#         self.dataframes = dataframes
-#         self.G2 = nx.Graph()
-#         pass
 
-#     def buildGraph(self, G2: nx.Graph, dataframes: dict):
-#         pass
-
-#     def add_nodes(self, G2: nx.Graph, dataframes: dict):
-#         pass
-
-#     def add_cosy_edges(self, G2: nx.Graph, dataframes: dict):
-#         pass
-
-#     def add_clipcosy_edges(self, G2: nx.Graph, dataframes: dict):
-#         pass
-
-#     def add_hmbc_edges(self, G2: nx.Graph, dataframes: dict):
-#         pass
-
-#     def add_noesy_edges(self, G2: nx.Graph, dataframes: dict):
-#         pass
-
-#     def build_html_page(self, G2: nx.Graph, dataframes: dict) -> str:
-#         pass
 
 
 def calc_minimum_ppm_separation(ppm_pks, ppmSeparation):
@@ -859,6 +839,10 @@ def combine_multiple_nmrExpt_dataframes(dataframes):
     This is useful when there are multiple 1D or 2D spectra for the same experiment.
     """
 
+    print("\ncombine_multiple_nmrExpt_dataframes(dataframes: dict) -> dict:\n")
+
+    print("dataframes keys: ", dataframes.keys())
+
     # group the expt dataframes by their experiment type
     nmrExptsDataframes = {}
     nmrExptsToDelete = []
@@ -873,10 +857,10 @@ def combine_multiple_nmrExpt_dataframes(dataframes):
             nmrExptsDataframes[k1].append(v)
             nmrExptsToDelete.append(k)
 
-    # print the number of dataframes in each group
-    print("\nNumber of dataframes in each NMR experiment group:")
-    for k, v in nmrExptsDataframes.items():
-        print(f"{k}: {len(v)} dataframes")
+    # # print the number of dataframes in each group
+    # print("\nNumber of dataframes in each NMR experiment group:")
+    # for k, v in nmrExptsDataframes.items():
+    #     print(f"{k}: {len(v)} dataframes")
     
     # combine the dataframes in each group
     for k, v in nmrExptsDataframes.items(): 
@@ -928,7 +912,9 @@ class NMRProblem:
         print("self.dataframes.keys():", self.dataframes.keys() )
         # data is a dictionary of pandas dataframes
         self.add_missing_spectra()
+        print("915 self.dataframes.keys():\n", self.dataframes.keys() )
         self.dataframes = standardize_column_headings(self.dataframes)
+        print("917 self.dataframes.keys():\n", self.dataframes.keys() )
         self.dataframes = combine_multiple_nmrExpt_dataframes(self.dataframes)
         print("self.dataframes.keys():", self.dataframes.keys() )
         self.dataframes = add_missing_columns_to_nmrExpt_dataframes(self.dataframes)
@@ -948,6 +934,9 @@ class NMRProblem:
         print("self.protonSeparation", self.protonSeparation)
         print("*********************************************")
 
+        self.exact_ppm_values = self.exact_ppm_values_only()
+        print("self.exact_ppm_values:", self.exact_ppm_values)
+
     @classmethod
     def from_mnova_json_file(cls, fn: Path):
         """
@@ -960,6 +949,7 @@ class NMRProblem:
 
         data = read_in_mesrenova_json(cls.json_data)
         dataframes = create_dataframes_from_mresnova_json(data)
+        print("dataframes keys: ", dataframes.keys())
         return cls(dataframes)
     
     # @classmethod
@@ -986,6 +976,8 @@ class NMRProblem:
         # convert the json data into a dictionary of pandas dataframes
         data = read_in_mesrenova_json(cls.json_data)
         dataframes = create_dataframes_from_mresnova_json(data)
+        print("\nfrom_mnova_dict\n")
+        print("dataframes keys: ", dataframes.keys())
         return cls(dataframes)
     
         # @classmethod
@@ -1008,6 +1000,52 @@ class NMRProblem:
         """
         dataframes = pd.read_excel(fn, sheet_name=None)
         return cls(dataframes)
+    
+
+    def exact_ppm_values_only(self):
+
+        expts_with_peaks = self.dataframes["chosenSpectra"][~self.dataframes["chosenSpectra"]["expt"].str.contains("SKIP")].expt.values
+
+        if 'C13_1D' in expts_with_peaks and 'HSQC' in expts_with_peaks:
+            f1_ppm = set(self.dataframes["C13_1D"]["ppm"].values)
+            f2_ppm = set(self.dataframes["HSQC"]["f2_ppm"].values)
+
+            f2_ppm_expts = set()
+            f1_ppm_expts = set()
+
+            for expt in expts_with_peaks:
+                if expt in ["HSQC", "HSQC_CLIPCOSY", "HMBC", "DDEPT_CH3_ONLY"]:
+                    # add f2_ppm values to f2_ppm_expts set
+                    f2_ppm_set = set(self.dataframes[expt]["f2_ppm"].values)
+                    f2_ppm_expts.update(f2_ppm_set)
+                    
+                    f1_ppm_set = set(self.dataframes[expt]["f1_ppm"].values)
+                    f1_ppm_expts.update(f1_ppm_set)
+
+                elif expt in ["COSY"]:
+                    f2_ppm_set = set(self.dataframes[expt]["f2_ppm"].values)
+                    f2_ppm_expts.update(f2_ppm_set)
+                    f2_ppm_set = set(self.dataframes[expt]["f1_ppm"].values)
+                    f2_ppm_expts.update(f2_ppm_set)
+                    
+
+
+            print("f1_ppm_expts:", f1_ppm_expts)
+            print("f2_ppm_expts:", f2_ppm_expts)
+
+            print("extra f1_ppm:", f1_ppm - f1_ppm_expts)
+            print("extra f2_ppm:", f2_ppm - f2_ppm_expts)
+
+            #  check if f1_ppm - f1_ppm_expts is empty
+            if f1_ppm - f1_ppm_expts and f2_ppm - f2_ppm_expts:
+                print("There are extra ppm values in f1_ppm and f2_ppm that are not in the expts_with_peaks.")
+                return False
+            else:
+                print("All ppm values in f1_ppm and f2_ppm are accounted for in the expts_with_peaks.")
+                return True
+        else:
+            return False
+    
 
     def is_prediction(self):
         """
@@ -1044,6 +1082,8 @@ class NMRProblem:
             "molfile",
             "carbonAtomsInfo",
             "nmrAssignments",
+            "c13predictions",
+            "molecule",
         ]
 
         for k in excel_orig_df_columns.keys():
@@ -1141,51 +1181,54 @@ class NMRProblem:
             "f1_ppm"
         ].to_list()
 
-        # tid up the ppm values in the dataframes
-        hsqc = tidyup_ppm_values(
-            hsqc, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
-        )
-        hsqc = tidyup_ppm_values(
-            hsqc, h1_f1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation
-        )
+        if not self.exact_ppm_values:
+            # tidy up the ppm values in the dataframes
+            hsqc = tidyup_ppm_values(
+                hsqc, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
+            )
+            hsqc = tidyup_ppm_values(
+                hsqc, h1_f1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation
+            )
 
-        h1_1d = tidyup_ppm_values(
-            h1_1d, h1_ppm_unique_list, "ppm", ppm_tolerance=self.protonSeparation
-        )
+            h1_1d = tidyup_ppm_values(
+                h1_1d, h1_ppm_unique_list, "ppm", ppm_tolerance=self.protonSeparation
+            )
 
-        cosy = tidyup_ppm_values(
-            cosy, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
-        )
-        cosy = tidyup_ppm_values(
-            cosy, h1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.protonSeparation
-        )
+            cosy = tidyup_ppm_values(
+                cosy, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
+            )
+            cosy = tidyup_ppm_values(
+                cosy, h1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.protonSeparation
+            )
 
-        hmbc = tidyup_ppm_values(
-            hmbc, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
-        )
-        hmbc = tidyup_ppm_values(
-            hmbc, c13_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation
-        )
+            hmbc = tidyup_ppm_values(
+                hmbc, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
+            )
+            hmbc = tidyup_ppm_values(
+                hmbc, c13_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation
+            )
 
-        hmbc.drop(hmbc[hmbc.f1_ppm_prob == 0].index, inplace=True)
-        hmbc.drop(hmbc[hmbc.f2_ppm_prob == 0].index, inplace=True)
+            hmbc.drop(hmbc[hmbc.f1_ppm_prob == 0].index, inplace=True)
+            hmbc.drop(hmbc[hmbc.f2_ppm_prob == 0].index, inplace=True)
 
-        clipcosy = tidyup_ppm_values(
-            clipcosy, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
-        )
-        clipcosy = tidyup_ppm_values(
-            clipcosy,
-            h1_f1_ppm_unique_list,
-            "f1_ppm",
-            ppm_tolerance=self.carbonSeparation,
-        )
+            clipcosy = tidyup_ppm_values(
+                clipcosy, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
+            )
+            clipcosy = tidyup_ppm_values(
+                clipcosy,
+                h1_f1_ppm_unique_list,
+                "f1_ppm",
+                ppm_tolerance=self.carbonSeparation,
+            )
 
-        ddept = tidyup_ppm_values(
-            ddept, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
-        )
-        ddept = tidyup_ppm_values(
-            ddept, h1_f1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation
-        )
+            ddept = tidyup_ppm_values(
+                ddept, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
+            )
+            ddept = tidyup_ppm_values(
+                ddept, h1_f1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation
+            )
+        else:
+            print("Exact ppm values only, no tidy up required")
 
         # add jCouplingVals and jCouplingClass to h1 from h1_1D
         h1 = add_jCouplingVals_jCouplingClass_to_h1(h1, h1_1d)

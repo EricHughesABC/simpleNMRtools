@@ -24,6 +24,8 @@ def warning_dialog(return_message, title_message, qstarted=True):
 class NMRsolution:
     def __init__(self, problemdata_json: NMRProblem):
 
+        self.exact_ppm_values = problemdata_json.exact_ppm_values
+
         self.qtstarted = False
 
         self.nmrsolution_failed = False
@@ -957,12 +959,15 @@ class NMRsolution:
             return self.c13_df, False
 
         # replace values for f2_ppm in hmbc starting from f2_ppm hsqc
-        self.hmbc_df = self.tidyup_ppm_values(
-            self.hmbc_df,
-            sorted(self.hsqc.f2_ppm.unique().tolist(), reverse=True),
-            "f2_ppm",
-            ppm_tolerance=self.problemdata_json.protonSeparation,
-        )
+        if not self.exact_ppm_values:
+            self.hmbc_df = self.tidyup_ppm_values(
+                self.hmbc_df,
+                sorted(self.hsqc.f2_ppm.unique().tolist(), reverse=True),
+                "f2_ppm",
+                ppm_tolerance=self.problemdata_json.protonSeparation,
+            )
+        else:
+            print("Exact ppm values only, no tidy up required")
 
         # if any hmbc f2_ppm_probs == 0 then drop the row
         self.hmbc_df.drop(
@@ -1028,20 +1033,24 @@ class NMRsolution:
         mean_unique_hmbc_vals = [np.mean(h) for h in unique_hmbc]
 
         # tidyup f1_ppm values in hmbc that are not in f1_ppm HSQC
-        hmbc_1 = self.tidyup_ppm_values(
-            self.hmbc_df.loc[iii],
-            mean_unique_hmbc_vals,
-            "f1_ppm",
-            ppm_tolerance=self.problemdata_json.carbonSeparation,
-        )
+        if not self.exact_ppm_values:
 
-        # tidyup f1_ppm values in hmbc that are in f1_ppm HSQC
-        hmbc_2 = self.tidyup_ppm_values(
-            self.hmbc_df.drop(iii),
-            self.hsqc.f1_ppm.unique(),
-            "f1_ppm",
-            ppm_tolerance=self.problemdata_json.carbonSeparation,
-        )
+            hmbc_1 = self.tidyup_ppm_values(
+                self.hmbc_df.loc[iii],
+                mean_unique_hmbc_vals,
+                "f1_ppm",
+                ppm_tolerance=self.problemdata_json.carbonSeparation,
+            )
+
+            # tidyup f1_ppm values in hmbc that are in f1_ppm HSQC
+            hmbc_2 = self.tidyup_ppm_values(
+                self.hmbc_df.drop(iii),
+                self.hsqc.f1_ppm.unique(),
+                "f1_ppm",
+                ppm_tolerance=self.problemdata_json.carbonSeparation,
+            )
+        else:
+            print("Exact ppm values only, no tidy up required")
 
         # rejoin two parts of HMBC data
         self.hmbc_df = pd.concat([hmbc_1, hmbc_2])
@@ -2092,54 +2101,62 @@ class NMRsolution:
         # tidy up chemical shift values by replacing cosy, hsqc and hmbc picked peaks with values from c13ppm and h1ppm dataframes
 
         # HMBC
-        self.hmbc = self.tidyup_ppm_values(
-            self.hmbc,
-            self.c13.ppm.tolist(),
-            "f1_ppm",
-            ppm_tolerance=self.problemdata_json.carbonSeparation,
-        )
-        self.hmbc = self.tidyup_ppm_values(
-            self.hmbc,
-            self.h1.ppm.tolist(),
-            "f2_ppm",
-            ppm_tolerance=self.problemdata_json.protonSeparation,
-        )
+        if not self.exact_ppm_values:
+            self.hmbc = self.tidyup_ppm_values(
+                self.hmbc,
+                self.c13.ppm.tolist(),
+                "f1_ppm",
+                ppm_tolerance=self.problemdata_json.carbonSeparation,
+            )
+            self.hmbc = self.tidyup_ppm_values(
+                self.hmbc,
+                self.h1.ppm.tolist(),
+                "f2_ppm",
+                ppm_tolerance=self.problemdata_json.protonSeparation,
+            )
 
-        self.hmbc.drop(self.hmbc[self.hmbc.f1_ppm_prob == 0].index, inplace=True)
-        self.hmbc.drop(self.hmbc[self.hmbc.f2_ppm_prob == 0].index, inplace=True)
+            self.hmbc.drop(self.hmbc[self.hmbc.f1_ppm_prob == 0].index, inplace=True)
+            self.hmbc.drop(self.hmbc[self.hmbc.f2_ppm_prob == 0].index, inplace=True)
+
+        else:
+            print("Exact ppm values only, no tidy up required")
 
         # HSQC
-        self.hsqc = self.tidyup_ppm_values(
-            self.hsqc,
-            self.c13.ppm.tolist(),
-            "f1_ppm",
-            self.problemdata_json.carbonSeparation,
-        )
-        self.hsqc = self.tidyup_ppm_values(
-            self.hsqc,
-            self.h1.ppm.tolist(),
-            "f2_ppm",
-            self.problemdata_json.protonSeparation,
-        )
+        if not self.exact_ppm_values:
+            self.hsqc = self.tidyup_ppm_values(
+                self.hsqc,
+                self.c13.ppm.tolist(),
+                "f1_ppm",
+                self.problemdata_json.carbonSeparation,
+            )
+            self.hsqc = self.tidyup_ppm_values(
+                self.hsqc,
+                self.h1.ppm.tolist(),
+                "f2_ppm",
+                self.problemdata_json.protonSeparation,
+            )
 
-        # tidy up cosy H1 shifts
-        self.cosy = self.tidyup_ppm_values(
-            self.cosy,
-            self.h1.ppm.tolist(),
-            "f1_ppm",
-            self.problemdata_json.protonSeparation,
-        )
-        self.cosy = self.tidyup_ppm_values(
-            self.cosy,
-            self.h1.ppm.tolist(),
-            "f2_ppm",
-            self.problemdata_json.protonSeparation,
-        )
+            # tidy up cosy H1 shifts
+            self.cosy = self.tidyup_ppm_values(
+                self.cosy,
+                self.h1.ppm.tolist(),
+                "f1_ppm",
+                self.problemdata_json.protonSeparation,
+            )
+            self.cosy = self.tidyup_ppm_values(
+                self.cosy,
+                self.h1.ppm.tolist(),
+                "f2_ppm",
+                self.problemdata_json.protonSeparation,
+            )
 
-        # check if any probability equals zero and remove the row
-        # because it is likely that proton is not connected directly to carbon
-        self.cosy.drop(self.cosy[self.cosy.f1_ppm_prob == 0].index, inplace=True)
-        self.cosy.drop(self.cosy[self.cosy.f2_ppm_prob == 0].index, inplace=True)
+            # check if any probability equals zero and remove the row
+            # because it is likely that proton is not connected directly to carbon
+            self.cosy.drop(self.cosy[self.cosy.f1_ppm_prob == 0].index, inplace=True)
+            self.cosy.drop(self.cosy[self.cosy.f2_ppm_prob == 0].index, inplace=True)
+        
+        else:
+            print("Exact ppm values only, no tidy up required")
 
         # add index columns to h1
         self.h1["label"] = ["H" + str(i) for i in self.h1.index]
@@ -2204,28 +2221,38 @@ class NMRsolution:
         self.hsqcH1labelC13index = dict(zip(self.hsqc.f2H_i, self.hsqc.f1_i))
         self.hsqcH1labelC13ppm = dict(zip(self.hsqc.f2H_i, self.hsqc.f1_ppm))
 
-        # add index columns to hsqc_clipcosy
-        self.hsqc_clipcosy = self.tidyup_hsqc_clipcosy(
-            self.hsqc_clipcosy_df, self.c13, self.h1
-        )
+        if not self.exact_ppm_values:
+            # add index columns to hsqc_clipcosy
+            self.hsqc_clipcosy = self.tidyup_hsqc_clipcosy(
+                self.hsqc_clipcosy_df, self.c13, self.h1
+            )
+        else:
+            print("Exact ppm values only, no tidy up required")
+            self.hsqc_clipcosy = self.hsqc_clipcosy_df.copy()
+
         self.hsqc_clipcosy = self.process_hsqc_clipcosy(self.hsqc_clipcosy, self.hsqc)
         # loguru.logger.debug(f"hsqc_clipcosy\n{self.hsqc_clipcosy}")
         # loguru.logger.debug(f"hsqc\n{self.hsqc}")
 
         # process ddept_ch3_only
         self.ddept_ch3_only = self.ddept_ch3_only_df.copy()
-        self.ddept_ch3_only = self.tidyup_ppm_values(
-            self.ddept_ch3_only,
-            self.c13["ppm"],
-            "f1_ppm",
-            ppm_tolerance=self.problemdata_json.carbonSeparation,
-        )
-        self.ddept_ch3_only = self.tidyup_ppm_values(
-            self.ddept_ch3_only,
-            self.h1["ppm"],
-            "f2_ppm",
-            ppm_tolerance=self.problemdata_json.protonSeparation,
-        )
+
+        if not self.exact_ppm_values:
+            self.ddept_ch3_only = self.tidyup_ppm_values(
+                self.ddept_ch3_only,
+                self.c13["ppm"],
+                "f1_ppm",
+                ppm_tolerance=self.problemdata_json.carbonSeparation,
+            )
+            self.ddept_ch3_only = self.tidyup_ppm_values(
+                self.ddept_ch3_only,
+                self.h1["ppm"],
+                "f2_ppm",
+                ppm_tolerance=self.problemdata_json.protonSeparation,
+            )
+        else:
+            print("Exact ppm values only, no tidy up required")
+
         self.ddept_ch3_only = self.process_ddept_ch3_only(
             self.ddept_ch3_only, self.hsqc
         )
@@ -2437,19 +2464,23 @@ class NMRsolution:
         # Filter the dataframe for intensity < 0
         hsqc_clipcosy = hsqc_clipcosy_df[hsqc_clipcosy_df.intensity < 0].copy()
 
-        # Tidy up ppm values
-        hsqc_clipcosy = self.tidyup_ppm_values(
-            hsqc_clipcosy,
-            c13["ppm"],
-            "f1_ppm",
-            ppm_tolerance=self.problemdata_json.carbonSeparation,
-        )
-        hsqc_clipcosy = self.tidyup_ppm_values(
-            hsqc_clipcosy,
-            h1["ppm"],
-            "f2_ppm",
-            ppm_tolerance=self.problemdata_json.protonSeparation,
-        )
+
+        if not self.exact_ppm_values:
+            # Tidy up ppm values
+            hsqc_clipcosy = self.tidyup_ppm_values(
+                hsqc_clipcosy,
+                c13["ppm"],
+                "f1_ppm",
+                ppm_tolerance=self.problemdata_json.carbonSeparation,
+            )
+            hsqc_clipcosy = self.tidyup_ppm_values(
+                hsqc_clipcosy,
+                h1["ppm"],
+                "f2_ppm",
+                ppm_tolerance=self.problemdata_json.protonSeparation,
+            )
+        else:
+            print("Exact ppm values only, no tidy up required")
 
         return hsqc_clipcosy
 
