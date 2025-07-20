@@ -2192,6 +2192,8 @@ class NMRsolution:
         self.C13ppmC13index = dict(zip(self.c13.ppm, self.c13.index))
         self.C13indexC13ppm = dict(zip(self.h1.index, self.c13.ppm))
 
+        print("self.C13indexC13ppm", self.C13indexC13ppm)
+
         # open and read excel file into datframe and then process it
         # with open(self.yamlFiles[0], 'r') as fp:
         #    info = yaml.safe_load(fp)
@@ -2199,6 +2201,7 @@ class NMRsolution:
 
         # add index columns to hsqc
         for i in self.hsqc.index:
+            print(i)
             self.hsqc.loc[i, "f2_i"] = self.H1ppmH1index[self.hsqc.loc[i, "f2_ppm"]]
             self.hsqc.loc[i, "f2H_i"] = self.H1ppmH1label[self.hsqc.loc[i, "f2_ppm"]]
             self.hsqc.loc[i, "f1_i"] = self.C13ppmC13index[self.hsqc.loc[i, "f1_ppm"]]

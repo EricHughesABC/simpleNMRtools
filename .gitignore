@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# zip files
+*.zip
+
 # database files
 *.db
 *.sqlite3
@@ -83,6 +86,7 @@ docs/_build/
 target/
 
 # Jupyter Notebook
+.ipynb
 .ipynb_checkpoints
 
 # IPython

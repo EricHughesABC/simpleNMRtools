@@ -61,7 +61,7 @@ function test_molecule()
     print(mol.paramNames());
     print("Molecule name: " + mol.name);
     print("Molecule ID: " + mol.id);
-    print("Molecule atom count: " + mol.atomCount);
+    print("Molecule heavy atom count: " + mol.atomCount);
 
     var molHasSymmetry = false;
     // create a dictionary to hold symmetric atoms
@@ -310,7 +310,7 @@ function test_molecule()
     var message = "<h2>Test Molecule Results</h2>";
     message += "<p>Molecule name: <strong>" + mol.name + "</strong></p>";
     message += "<p>Molecule ID: <strong>" + mol.id + "</strong></p>";
-    message += "<p>Molecule atom count: <strong>" + mol.atomCount + "</strong></p>";
+    message += "<p>Molecule heavy atom count: <strong>" + mol.atomCount + "</strong></p>";
     message += "<p>Total number of carbon atoms: <strong>" + carbonAtomCount + "</strong></p>";
 
     message += "<p>Molecule has symmetry: <strong>" + molHasSymmetry + "</strong></p>";

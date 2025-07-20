@@ -324,6 +324,12 @@ function simplePREDICT_eeh(){
                 spectra[spectitle]["solvent"] = spec.getParam("Solvent");
                 // add temperature
                 spectra[spectitle]["temperature"] = spec.getParam("Temperature");
+
+                // double check the type, if type is 1D and the nucleus has a comma in it then it is a 2D spectrum then set type to "2D"
+                if( spectra[spectitle]["type"] == "1D" && spectra[spectitle]["nucleus"].indexOf(",") != -1 ){
+                    spectra[spectitle]["type"] = "2D";
+                }
+                
         
                 // process multiplets
         

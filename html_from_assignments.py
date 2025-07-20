@@ -849,13 +849,18 @@ def combine_multiple_nmrExpt_dataframes(dataframes):
     for k, v in dataframes.items():
         # split the key by "_" once from the right
         print(f"Processing key: {k}")
-        k1 = k.rsplit("_", 1)[0]
+        nameSplit = k.rsplit("_", 1)
+        k_number = ""
+        k1 = nameSplit[0]
+        if len(nameSplit) == 2:
+            k_number = nameSplit[1]
         if k1 in NMREXPERIMENTS:
             print( f"{k} shape: {v.shape}"  )
             if k1 not in nmrExptsDataframes:
                 nmrExptsDataframes[k1] = []
             nmrExptsDataframes[k1].append(v)
-            nmrExptsToDelete.append(k)
+            if k_number.isdigit():
+                nmrExptsToDelete.append(k)
 
     # # print the number of dataframes in each group
     # print("\nNumber of dataframes in each NMR experiment group:")
@@ -912,13 +917,25 @@ class NMRProblem:
         print("self.dataframes.keys():", self.dataframes.keys() )
         # data is a dictionary of pandas dataframes
         self.add_missing_spectra()
+        print("\nadd_missing_spectra()")
         print("915 self.dataframes.keys():\n", self.dataframes.keys() )
         self.dataframes = standardize_column_headings(self.dataframes)
+        print("\nstandardize_column_headings(self.dataframes)")
         print("917 self.dataframes.keys():\n", self.dataframes.keys() )
+
+        # print(self.dataframes["C13_1D_0"].head())
+
         self.dataframes = combine_multiple_nmrExpt_dataframes(self.dataframes)
-        print("self.dataframes.keys():", self.dataframes.keys() )
+        print("\ncombine_multiple_nmrExpt_dataframes(self.dataframes)")
+        print("\n923 self.dataframes.keys():", self.dataframes.keys() )
+
+        # print(self.dataframes["C13_1D"].head())
+
         self.dataframes = add_missing_columns_to_nmrExpt_dataframes(self.dataframes)
-        print("self.dataframes.keys():", self.dataframes.keys() )
+        print("\nadd_missing_columns_to_nmrExpt_dataframes(self.dataframes)")
+        print("\n927 self.dataframes.keys():", self.dataframes.keys() )
+
+        print(self.dataframes["C13_1D"].head())
 
         hsqc_H1_pks = self.dataframes["HSQC"].f2_ppm.values
         c13_pks = self.dataframes["C13_1D"].ppm.values
@@ -1016,17 +1033,30 @@ class NMRProblem:
             for expt in expts_with_peaks:
                 if expt in ["HSQC", "HSQC_CLIPCOSY", "HMBC", "DDEPT_CH3_ONLY"]:
                     # add f2_ppm values to f2_ppm_expts set
+                    print(f"1036 Processing expt: {expt}")
+                    print(self.dataframes[expt].columns)
                     f2_ppm_set = set(self.dataframes[expt]["f2_ppm"].values)
                     f2_ppm_expts.update(f2_ppm_set)
                     
                     f1_ppm_set = set(self.dataframes[expt]["f1_ppm"].values)
                     f1_ppm_expts.update(f1_ppm_set)
 
+                    print("\n****************************\n\n")
+                    print(f"{expt} f1_ppm: {len(f1_ppm_set - f1_ppm)}, {f1_ppm_set - f1_ppm}, f2_ppm: {len(f2_ppm_set - f2_ppm)}, {f2_ppm_set - f2_ppm}")
+                    print("\n****************************\n\n")
+
+
                 elif expt in ["COSY"]:
                     f2_ppm_set = set(self.dataframes[expt]["f2_ppm"].values)
                     f2_ppm_expts.update(f2_ppm_set)
-                    f2_ppm_set = set(self.dataframes[expt]["f1_ppm"].values)
-                    f2_ppm_expts.update(f2_ppm_set)
+                    f1_ppm_set = set(self.dataframes[expt]["f1_ppm"].values)
+                    f2_ppm_expts.update(f1_ppm_set)
+
+                    
+                    print("\n****************************\n\n")
+                    print(f"{expt} f1_ppm: {len(f1_ppm_set - f1_ppm)}, {f1_ppm_set - f1_ppm}, f2_ppm: {len(f2_ppm_set - f2_ppm)}, {f2_ppm_set - f2_ppm}")
+                    print("\n****************************\n\n")
+
                     
 
 
@@ -1037,7 +1067,7 @@ class NMRProblem:
             print("extra f2_ppm:", f2_ppm - f2_ppm_expts)
 
             #  check if f1_ppm - f1_ppm_expts is empty
-            if f1_ppm - f1_ppm_expts and f2_ppm - f2_ppm_expts:
+            if len(f1_ppm - f1_ppm_expts) > 0 or len(f2_ppm - f2_ppm_expts) > 0:
                 print("There are extra ppm values in f1_ppm and f2_ppm that are not in the expts_with_peaks.")
                 return False
             else:
