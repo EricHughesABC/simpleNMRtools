@@ -431,8 +431,7 @@ function simplePREDICT_eeh(){
 
     // var brukerExpts = new brukerExperiments();
 
-    // search through the spectra using type and subtype and pulsesequence to see which 
-    // experiments are present in the document
+    // search through the spectra using type and subtype and pulsesequence to see which experiments are present in the document
 
     var spectra_with_peaks = [];
 
@@ -527,11 +526,27 @@ function simplePREDICT_eeh(){
         spectra["chosenSpectra"]["data"][i] = chosen_spectra["checked_spectra"][i];
     }
 
+    // // loop through the chosen spectra split the string and createa a dictionary of the last two items with the last item as the key
+    // var chosen_spectra_ids = {};
+    // var skip_increment = 0
+    // for( var i=0; i<chosen_spectra["checked_spectra"].length; i++){
+    //     var split_str = chosen_spectra["checked_spectra"][i].split(" ");
+    //     var key = split_str[split_str.length-1];
+    //     var value = split_str[split_str.length-2];
+    //     print("key ", key, " value ", value);
+    //     if(key == "SKIP") {
+    //         key = "SKIP" + "_" + skip_increment;
+    //         print("\tkey ", key, " value ", value);
+    //         skip_increment++;
+    //         chosen_spectra_ids[key] = value;
+    //     }
+    //     else {
+    //         chosen_spectra_ids[key] = value;
+    //     }   
+    // }
 
 
-
-    // loop through the chosen spectra split the string and createa a dictionary of the last two items 
-    // with the last item as the key
+    // loop through the chosen spectra split the string and createa a dictionary of the last two items with the last item as the key
     var chosen_spectra_ids = {};
     var spectra_inrements = {};
     // set spectra_Increments keys to experiment types and values to -1
@@ -576,13 +591,24 @@ function simplePREDICT_eeh(){
     }
 
 
+    // // check if HSQC is present in the chosen spectra ids
+    // if( chosen_spectra_ids["HSQC"] === undefined ){
+    //     MessageBox.warning("No HSQC found");
+    //     return;
+    // }
+
     // loop through the chosen spectra and replace the key with the value in chosen_spectra_ids
     for( var key in chosen_spectra_ids){
         spectra[key] = spectra[chosen_spectra_ids[key]];
         spectra[key]["filename"] = chosen_spectra_ids[key];
     }
 
-
+    // // make sure the type is "2D" for the spectra HSQC, HMBC, COSY, NOESY, HSQC_CLIPCOSY, DDEPT_CH3_ONLY
+    // for( var key in chosen_spectra_ids){
+    //     if( key == "HSQC" || key == "HMBC" || key == "COSY" || key == "NOESY" || key == "HSQC_CLIPCOSY" || key == "DDEPT_CH3_ONLY"){
+    //         spectra[key]["type"] = "2D";
+    //     }
+    // }
 
     for( var key in chosen_spectra_ids){
         // split the key by "_" and check

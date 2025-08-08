@@ -50,6 +50,16 @@ DOCS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs/build/
 
 # to test this using curl type the following in the terminal
 # curl -X POST http://localhost:5000/simpleMNOVA -H "Content-Type: application/json" -d @/Users/vsmw51/Downloads/4Eric/EVB_330b_predicted/EVB_330b_predicted_assignments_mresnova.json
+#
+# move to the directory where the JSON file is located
+# mac os
+# curl -X POST "https://simplenmr.pythonanywhere.com/simpleMNOVA" -H "Content-Type: application/json" -d "@E72507_04164043_propyl_benzoate_assignments_mresnova.json" > test.html && open test.html
+# 
+# windows
+# curl -X POST "https://simplenmr.pythonanywhere.com/simpleMNOVA" -H "Content-Type: application/json" -d "@E72507_04164043_propyl_benzoate_assignments_mresnova.json" > test.html && start test.html
+#
+# cross platform if python installed
+# curl -X POST "https://simplenmr.pythonanywhere.com/simpleMNOVA" -H "Content-Type: application/json" -d "@E72507_04164043_propyl_benzoate_assignments_mresnova.json" > test.html && python -m webbrowser test.html
 
 # Helper to convert numpy types to native types
 def convert_numpy(obj):
@@ -490,7 +500,12 @@ def simpleMNOVAfinalHTML():
         })
 
 
-    machine_learning_opt_in = json_data["oldjsondata"]["ml_consent"]["data"]["0"]
+    try:
+        machine_learning_opt_in = json_data["oldjsondata"]["ml_consent"]["data"]["0"]
+    except KeyError:
+        # If the key doesn't exist, set machine_learning_opt_in to False
+        machine_learning_opt_in = False
+
     updated_count = update_ml_consent_for_all_user_devices(hostname,  machine_learning_opt_in)
 
     if machine_learning_opt_in:
@@ -692,7 +707,11 @@ def simpleMNOVA_display_molecule():
     record_usage(hostname)
 
     # check if the user has agreed to the machine learning consent
-    machine_learning_opt_in = json_data["ml_consent"]["data"]["0"]
+    try:
+        machine_learning_opt_in = json_data["ml_consent"]["data"]["0"]
+    except KeyError:
+        # If the key doesn't exist, set machine_learning_opt_in to False
+        machine_learning_opt_in = False
 
     updated_count = update_ml_consent_for_all_user_devices(hostname,  machine_learning_opt_in)
 
@@ -708,21 +727,11 @@ def simpleMNOVA_display_molecule():
 
         print(dir(solution))
 
-        # # print out some useful information on the different dataframes
-        # print("solution.c13_df ", solution.c13_df.shape[0])
-        # print("solution.c13_df.CH0 ", solution.c13_df.CH1.shape[0])
-        # print("solution.c13_df.CH2 ", solution.c13_df.CH2.shape[0])
-        # print("solution.c13_df.CH3 ", solution.c13_df.CH3.shape[0])
-        # print("solution.c13_df.CH1 ", solution.c13_df.CH1.shape[0])
-        # print("solution.c13_df.CH3CH1 ", solution.c13_df.CH3CH1.shape[0])
-        # print()
+
 
         print("solution.hsqc_df.shape ", solution.hsqc_df.shape[0])
         print(solution.hsqc_df.columns )
-        # print("solution.hsqc_df.CH2 ", solution.hsqc_df.CH2.shape[0])
-        # print("solution.hsqc_df.CH3 ", solution.hsqc_df.CH3.shape[0])
-        # print("solution.hsqc_df.CH1 ", solution.hsqc_df.CH1.shape[0])
-        # print("solution.hsqc_df.CH3CH1 ", solution.hsqc_df.CH3CH1.shape[0])
+
 
         if solution.nmrsolution_failed:
             return solution.nmrsolution_error_message, solution.nmrsolution_error_code

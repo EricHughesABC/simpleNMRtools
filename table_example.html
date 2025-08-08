@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Tables Example</title>
+    <style>
+        /* CSS for the second table */
+        .css-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 40px;
+        }
+        
+        .css-table th {
+            background-color: #333;
+            color: white;
+            padding: 12px;
+            border-top: 2px solid #333;
+            border-bottom: 2px solid #333;
+            border-left: none;
+            border-right: none;
+        }
+        
+        .css-table td {
+            padding: 12px;
+            border-left: none;
+            border-right: none;
+            border-top: none;
+            border-bottom: none;
+        }
+        
+        .css-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .css-table tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+        
+        .css-table tr:last-child td {
+            border-bottom: 2px solid #333;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Table 1: Using Inline Formatting</h2>
+    <table style="border-collapse: collapse; width: 100%;">
+        <tr style="background-color: #333; color: white; border-top: 2px solid #333; border-bottom: 2px solid #333;">
+            <th style="padding: 12px; border: none;">Name</th>
+            <th style="padding: 12px; border: none;">Age</th>
+            <th style="padding: 12px; border: none;">City</th>
+            <th style="padding: 12px; border: none;">Occupation</th>
+        </tr>
+        <tr style="background-color: #ffffff;">
+            <td style="padding: 12px; border: none;">John Smith</td>
+            <td style="padding: 12px; border: none;">28</td>
+            <td style="padding: 12px; border: none;">New York</td>
+            <td style="padding: 12px; border: none;">Developer</td>
+        </tr>
+        <tr style="background-color: #f2f2f2; border-bottom: 2px solid #333;">
+            <td style="padding: 12px; border: none;">Sarah Johnson</td>
+            <td style="padding: 12px; border: none;">32</td>
+            <td style="padding: 12px; border: none;">Los Angeles</td>
+            <td style="padding: 12px; border: none;">Designer</td>
+        </tr>
+    </table>
+
+    <h2>Table 2: Using CSS Styling</h2>
+    <table class="css-table">
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Category</th>
+        </tr>
+        <tr>
+            <td>Laptop</td>
+            <td>$899</td>
+            <td>15</td>
+            <td>Electronics</td>
+        </tr>
+        <tr>
+            <td>Coffee Mug</td>
+            <td>$12</td>
+            <td>50</td>
+            <td>Home & Kitchen</td>
+        </tr>
+    </table>
+</body>
+</html>

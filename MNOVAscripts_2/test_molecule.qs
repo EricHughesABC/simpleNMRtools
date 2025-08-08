@@ -307,7 +307,52 @@ function test_molecule()
     }
 
     //  output message as html in a message box
-    var message = "<h2>Test Molecule Results</h2>";
+    var css_str = ['<style>',
+        '/* CSS for the second table */',
+        '.css-table {',
+        '    border-collapse: collapse;',
+        '    width: 100%;',
+        '    margin-top: 40px;',
+        '}',
+        '.css-table th {',
+        '    background-color: #333;',
+        '    color: white;',
+        '    padding: 12px;',
+        '    border-top: 2px solid #333;',
+        '    border-bottom: 2px solid #333;',
+        '    border-left: none;',
+        '    border-right: none;',
+        '}',
+
+        '.css-table td {',
+        '    padding: 12px;',
+        '    border-left: none;',
+        '    border-right: none;',
+        '    border-top: none;',
+        '    border-bottom: none;',
+        '}',
+        '.css-table tr:nth-child(even) {',
+        '    background-color: #f2f2f2;',
+        '}',
+        '.css-table tr:nth-child(odd) {',
+        '    background-color: #ffffff;',
+        '}',
+        '.css-table tr:last-child td {',
+        '    border-bottom: 2px solid #333;',
+        '}',
+        'body {',
+        '    font-family: Arial, sans-serif;',
+        '    margin: 20px;',
+        '}',
+        'h2 {',
+        '    color: #333;',
+        '    margin-bottom: 10px;',
+        '}',
+    '</style>'].join('\n');
+
+    // var message = '    <style>/* CSS for the second table */.css-table {border-collapse: collapse;width: 100%;margin-top: 40px;}.css-table th {background-color: #333;color: white;padding: 12px;border-top: 2px solid #333;border-bottom: 2px solid #333;border-left: none;border-right: none;}.css-table td {padding: 12px;border-left: none;border-right: none;border-top: none;border-bottom: none;}.css-table tr:nth-child(even) {background-color: #f2f2f2;}.css-table tr:nth-child(odd) {background-color: #ffffff;}.css-table tr:last-child td {border-bottom: 2px solid #333;}body {font-family: Arial, sans-serif;margin: 20px;}h2 {color: #333;margin-bottom: 10px;}</style>';
+    var message = css_str;
+    message += "<h2>Test Molecule Results</h2>";
     message += "<p>Molecule name: <strong>" + mol.name + "</strong></p>";
     message += "<p>Molecule ID: <strong>" + mol.id + "</strong></p>";
     message += "<p>Molecule heavy atom count: <strong>" + mol.atomCount + "</strong></p>";
@@ -369,8 +414,11 @@ function test_molecule()
     }
     // add total number of positive and negative integrals in HSQC spectra
     message += "<p>Total number of positive integrals in HSQC spectra: <strong>" + totalPositiveIntegrals + "</strong></p>";
-    message += "<p>Total number of negative integrals in HSQC spectra: <strong>" + totalNegativeIntegrals + "</strong></p>";    
+    message += "<p>Total number of negative integrals in HSQC spectra: <strong>" + totalNegativeIntegrals + "</strong></p>";  
     
+    message +=     '<table style="border-collapse: collapse; width: 100%;"><tr style="background-color: #333; color: white; border-top: 2px solid #333; border-bottom: 2px solid #333;"><th style="padding: 12px; border: none;">Name</th><th style="padding: 12px; border: none;">Age</th><th style="padding: 12px; border: none;">City</th><th style="padding: 12px; border: none;">Occupation</th></tr><tr style="background-color: #ffffff;"><td style="padding: 12px; border: none;">John Smith</td><td style="padding: 12px; border: none;">28</td><td style="padding: 12px; border: none;">New York</td><td style="padding: 12px; border: none;">Developer</td></tr><tr style="background-color: #f2f2f2; border-bottom: 2px solid #333;"><td style="padding: 12px; border: none;">Sarah Johnson</td><td style="padding: 12px; border: none;">32</td><td style="padding: 12px; border: none;">Los Angeles</td><td style="padding: 12px; border: none;">Designer</td></tr></table>';
+    
+    message += '    <table class="css-table"><tr><th>Product</th><th>Price</th><th>Stock</th><th>Category</th></tr><tr><td>Laptop</td><td>$899</td><td>15</td><td>Electronics</td></tr><tr><td>Coffee Mug</td><td>$12</td><td>50</td><td>Home & Kitchen</td></tr></table>'
     MessageBox.information(message, "Test Molecule Results");
     
 }
