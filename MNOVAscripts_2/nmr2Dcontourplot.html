@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Spectrum Contour Plot</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        #plot {
+            width: 100%;
+            height: 700px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .control-group {
+            display: inline-block;
+            margin: 0 15px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        label {
+            display: block;
+            color: #2c3e50;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        input, select {
+            padding: 5px 10px;
+            border: 2px solid #ecf0f1;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 120px;
+            margin: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>2D Spectrum Contour Plot</h1>
+        <p class="subtitle">Interactive visualization of spectral data with customizable contour levels</p>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="minValue">-</div>
+                <div class="stat-label">Min Value</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="maxValue">-</div>
+                <div class="stat-label">Max Value</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="dimensions">-</div>
+                <div class="stat-label">Dimensions</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="contourLevels">Contour Levels:</label>
+                <input type="number" id="contourLevels" value="20" min="5" max="50">
+            </div>
+            <div class="control-group">
+                <label for="colorScale">Color Scale:</label>
+                <select id="colorScale">
+                    <option value="Viridis">Viridis</option>
+                    <option value="Plasma">Plasma</option>
+                    <option value="RdBu">RdBu</option>
+                    <option value="Spectral">Spectral</option>
+                    <option value="Jet">Jet</option>
+                    <option value="Hot">Hot</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="showLines">Show Contour Lines:</label>
+                <input type="checkbox" id="showLines" checked>
+            </div>
+        </div>
+        
+        <div id="plot"></div>
+    </div>
+
+    <script>
+        // Load data from file
+        async function loadData() {
+            try {
+                const dataText = await window.fs.readFile('paste.txt', { encoding: 'utf8' });
+                return JSON.parse(dataText);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                // Fallback: use a subset of the data for demonstration
+                return [
+                    [-0.04056, -0.00159, 0.02979, 0.06550, 0.08277],
+                    [-0.04743, -0.01229, 0.00752, 0.04624, 0.07035],
+                    [-0.04444, -0.01704, -0.01475, 0.02123, 0.05320],
+                    [-0.03228, -0.01312, -0.02911, -0.00023, 0.03762],
+                    [-0.01424, -0.00042, -0.03025, -0.01091, 0.02808]
+                ];
+            }
+        }
+
+        let spectralData;
+
+        // Initialize the plot
+        async function init() {
+            spectralData = await loadData();
+            updateStats();
+            createContourPlot();
+        }
+
+        function updateStats() {
+            const flatData = spectralData.flat();
+            const minVal = Math.min(...flatData);
+            const maxVal = Math.max(...flatData);
+            
+            document.getElementById('minValue').textContent = minVal.toFixed(3);
+            document.getElementById('maxValue').textContent = maxVal.toFixed(3);
+            document.getElementById('dimensions').textContent = `${spectralData.length} × ${spectralData[0].length}`;
+        }
+
+        function createContourPlot() {
+            const contourLevels = parseInt(document.getElementById('contourLevels').value);
+            const colorScale = document.getElementById('colorScale').value;
+            const showLines = document.getElementById('showLines').checked;
+
+            const trace = {
+                z: spectralData,
+                type: 'contour',
+                colorscale: colorScale,
+                contours: {
+                    size: (Math.max(...spectralData.flat()) - Math.min(...spectralData.flat())) / contourLevels,
+                    showlines: showLines,
+                    coloring: 'heatmap'
+                },
+                colorbar: {
+                    title: 'Intensity',
+                    titleside: 'right'
+                },
+                hovertemplate: 'Row: %{y}<br>Col: %{x}<br>Value: %{z:.4f}<extra></extra>'
+            };
+
+            const layout = {
+                title: {
+                    text: '2D Spectrum Contour Plot',
+                    font: { size: 20, color: '#2c3e50' }
+                },
+                xaxis: {
+                    title: 'Column Index',
+                    showgrid: true,
+                    gridcolor: 'rgba(255,255,255,0.5)',
+                    zeroline: false
+                },
+                yaxis: {
+                    title: 'Row Index',
+                    showgrid: true,
+                    gridcolor: 'rgba(255,255,255,0.5)',
+                    zeroline: false
+                },
+                plot_bgcolor: 'rgba(240,240,240,0.8)',
+                paper_bgcolor: 'transparent',
+                font: { color: '#2c3e50' },
+                margin: { t: 60, b: 60, l: 60, r: 60 }
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+                displaylogo: false
+            };
+
+            Plotly.newPlot('plot', [trace], layout, config);
+        }
+
+        // Event listeners
+        document.getElementById('contourLevels').addEventListener('input', createContourPlot);
+        document.getElementById('colorScale').addEventListener('change', createContourPlot);
+        document.getElementById('showLines').addEventListener('change', createContourPlot);
+
+        // Initialize when page loads
+        window.addEventListener('load', init);

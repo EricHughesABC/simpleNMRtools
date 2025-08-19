@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBSCAN Clustering Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input[type="range"] {
+            width: 150px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info {
+            margin-top: 20px;
+            text-align: center;
+            color: #666;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 DBSCAN Clustering Visualization</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="eps">Epsilon (ε): <span id="epsValue">0.5</span></label>
+                <input type="range" id="eps" min="0.1" max="2.0" step="0.1" value="0.5">
+            </div>
+            
+            <div class="control-group">
+                <label for="minPts">Min Points: <span id="minPtsValue">3</span></label>
+                <input type="range" id="minPts" min="2" max="10" step="1" value="3">
+            </div>
+            
+            <button onclick="generateNewData()">Generate New Data</button>
+            <button onclick="runClustering()">Run Clustering</button>
+        </div>
+        
+        <canvas id="canvas" width="800" height="600"></canvas>
+        
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-item">
+                <div class="stat-number" id="clusterCount">0</div>
+                <div>Clusters</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="noiseCount">0</div>
+                <div>Noise Points</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalPoints">0</div>
+                <div>Total Points</div>
+            </div>
+        </div>
+        
+        <div class="info">
+            <p><strong>Instructions:</strong> The data is automatically scaled using StandardScaler (like scikit-learn). Adjust epsilon (neighborhood distance) and minimum points, then click "Run Clustering"!</p>
+            <p><em>Note: Epsilon values are now in scaled units (typically 0.1-2.0 work well for standardized data)</em></p>
+        </div>
+    </div>
+
+    <script>
+        // DBSCAN Implementation (ES5 Compatible)
+        function DBSCAN(eps, minPts) {
+            this.eps = eps || 0.5;
+            this.minPts = minPts || 5;
+        }
+
+        DBSCAN.prototype.distance = function(point1, point2) {
+            var sum = 0;
+            for (var i = 0; i < point1.length; i++) {
+                sum += Math.pow(point1[i] - point2[i], 2);
+            }
+            return Math.sqrt(sum);
+        };
+
+        DBSCAN.prototype.regionQuery = function(dataset, pointIndex) {
+            var neighbors = [];
+            var point = dataset[pointIndex];
+            
+            for (var i = 0; i < dataset.length; i++) {
+                if (this.distance(point, dataset[i]) <= this.eps) {
+                    neighbors.push(i);
+                }
+            }
+            return neighbors;
+        };
+
+        DBSCAN.prototype.fit = function(dataset) {
+            var n = dataset.length;
+            var labels = [];
+            var clusterId = 0;
+            var i, j;
+
+            for (i = 0; i < n; i++) {
+                labels[i] = -1;
+            }
+
+            for (i = 0; i < n; i++) {
+                if (labels[i] !== -1) continue;
+
+                var neighbors = this.regionQuery(dataset, i);
+
+                if (neighbors.length < this.minPts) {
+                    labels[i] = -2;
+                    continue;
+                }
+
+                clusterId++;
+                labels[i] = clusterId;
+
+                var seedSet = neighbors.slice();
+                j = 0;
+
+                while (j < seedSet.length) {
+                    var currentPoint = seedSet[j];
+
+                    if (labels[currentPoint] === -2) {
+                        labels[currentPoint] = clusterId;
+                    }
+
+                    if (labels[currentPoint] !== -1) {
+                        j++;
+                        continue;
+                    }
+
+                    labels[currentPoint] = clusterId;
+
+                    var currentNeighbors = this.regionQuery(dataset, currentPoint);
+
+                    if (currentNeighbors.length >= this.minPts) {
+                        for (var k = 0; k < currentNeighbors.length; k++) {
+                            var neighbor = currentNeighbors[k];
+                            var found = false;
+                            
+                            for (var m = 0; m < seedSet.length; m++) {
+                                if (seedSet[m] === neighbor) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!found) {
+                                seedSet.push(neighbor);
+                            }
+                        }
+                    }
+
+                    j++;
+                }
+            }
+
+            return labels;
+        };
+
+        DBSCAN.prototype.fitPredict = function(dataset) {
+            var labels = this.fit(dataset);
+            var clusters = {};
+            var noise = [];
+            var i;
+
+            for (i = 0; i < labels.length; i++) {
+                var label = labels[i];
+                
+                if (label === -2) {
+                    noise.push({ point: dataset[i], index: i });
+                } else {
+                    if (!clusters[label]) {
+                        clusters[label] = [];
+                    }
+                    clusters[label].push({ point: dataset[i], index: i });
+                }
+            }
+
+            return { clusters: clusters, noise: noise, labels: labels };
+        };
+
+        // Visualization Code
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        var currentData = [];
+        var scaledData = [];
+        var colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'];
+
+        // Standard scaler function
+        function standardScale(data) {
+            if (data.length === 0) return data;
+            
+            var scaled = [];
+            var means = [];
+            var stds = [];
+            
+            // Calculate means for each dimension
+            for (var dim = 0; dim < data[0].length; dim++) {
+                var sum = 0;
+                for (var i = 0; i < data.length; i++) {
+                    sum += data[i][dim];
+                }
+                means[dim] = sum / data.length;
+            }
+            
+            // Calculate standard deviations
+            for (var dim = 0; dim < data[0].length; dim++) {
+                var sumSquaredDiffs = 0;
+                for (var i = 0; i < data.length; i++) {
+                    sumSquaredDiffs += Math.pow(data[i][dim] - means[dim], 2);
+                }
+                stds[dim] = Math.sqrt(sumSquaredDiffs / data.length);
+                // Avoid division by zero
+                if (stds[dim] === 0) stds[dim] = 1;
+            }
+            
+            // Scale the data
+            for (var i = 0; i < data.length; i++) {
+                var scaledPoint = [];
+                for (var dim = 0; dim < data[i].length; dim++) {
+                    scaledPoint[dim] = (data[i][dim] - means[dim]) / stds[dim];
+                }
+                scaled.push(scaledPoint);
+            }
+            
+            return scaled;
+        }
+
+        // Calculate cluster centers (centroids)
+        function calculateClusterCenters(data, result) {
+            var centers = {};
+            var clusterKeys = Object.keys(result.clusters);
+            
+            for (var i = 0; i < clusterKeys.length; i++) {
+                var clusterId = clusterKeys[i];
+                var cluster = result.clusters[clusterId];
+                var center = [0, 0];
+                
+                // Sum all points in the cluster
+                for (var j = 0; j < cluster.length; j++) {
+                    var point = data[cluster[j].index];
+                    center[0] += point[0];
+                    center[1] += point[1];
+                }
+                
+                // Calculate mean (centroid)
+                center[0] /= cluster.length;
+                center[1] /= cluster.length;
+                
+                centers[clusterId] = center;
+            }
+            
+            return centers;
+        }
+
+        function generateNewData() {
+            currentData = [];
+            
+            // Generate multiple clusters with varying densities and scales
+            var clusters = [
+                { center: [2, 2], count: 25, spread: 0.5 },      // Tight cluster
+                { center: [8, 8], count: 20, spread: 0.8 },      // Medium cluster
+                { center: [2, 8], count: 30, spread: 0.6 },      // Another cluster
+                { center: [15, 5], count: 15, spread: 1.2 },     // Loose cluster
+                { center: [12, 12], count: 25, spread: 0.4 }     // Very tight cluster
+            ];
+
+            // Generate clustered points
+            for (var i = 0; i < clusters.length; i++) {
+                var cluster = clusters[i];
+                for (var j = 0; j < cluster.count; j++) {
+                    var x = cluster.center[0] + (Math.random() - 0.5) * cluster.spread * 2;
+                    var y = cluster.center[1] + (Math.random() - 0.5) * cluster.spread * 2;
+                    currentData.push([x, y]);
+                }
+            }
+
+            // Add some noise points across different scales
+            for (var k = 0; k < 15; k++) {
+                currentData.push([Math.random() * 20, Math.random() * 20]);
+            }
+
+            // Scale the data for DBSCAN
+            scaledData = standardScale(currentData);
+
+            drawPoints(currentData, null);
+        }
+
+        function drawPoints(data, result) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Scale data to canvas coordinates for visualization
+            var minX = Math.min.apply(Math, data.map(function(p) { return p[0]; }));
+            var maxX = Math.max.apply(Math, data.map(function(p) { return p[0]; }));
+            var minY = Math.min.apply(Math, data.map(function(p) { return p[1]; }));
+            var maxY = Math.max.apply(Math, data.map(function(p) { return p[1]; }));
+            
+            var padding = 50;
+            var scaleX = (canvas.width - 2 * padding) / (maxX - minX);
+            var scaleY = (canvas.height - 2 * padding) / (maxY - minY);
+            
+            function toCanvas(point) {
+                return [
+                    (point[0] - minX) * scaleX + padding,
+                    (point[1] - minY) * scaleY + padding
+                ];
+            }
+            
+            if (!result) {
+                // Draw original points in gray
+                ctx.fillStyle = '#999';
+                for (var i = 0; i < data.length; i++) {
+                    var canvasPoint = toCanvas(data[i]);
+                    ctx.beginPath();
+                    ctx.arc(canvasPoint[0], canvasPoint[1], 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            } else {
+                // Calculate cluster centers
+                var clusterCenters = calculateClusterCenters(data, result);
+                var clusterKeys = Object.keys(result.clusters);
+                
+                // Draw clusters
+                for (var i = 0; i < clusterKeys.length; i++) {
+                    var clusterId = clusterKeys[i];
+                    var cluster = result.clusters[clusterId];
+                    ctx.fillStyle = colors[i % colors.length];
+                    
+                    for (var j = 0; j < cluster.length; j++) {
+                        var point = cluster[j].point;
+                        var originalPoint = data[cluster[j].index];
+                        var canvasPoint = toCanvas(originalPoint);
+                        ctx.beginPath();
+                        ctx.arc(canvasPoint[0], canvasPoint[1], 6, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+                }
+                
+                // Draw cluster centers as larger circles with black outline
+                for (var i = 0; i < clusterKeys.length; i++) {
+                    var clusterId = clusterKeys[i];
+                    var center = clusterCenters[clusterId];
+                    var centerCanvas = toCanvas(center);
+                    
+                    // Draw center point
+                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(centerCanvas[0], centerCanvas[1], 12, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Draw a white center dot
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.arc(centerCanvas[0], centerCanvas[1], 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+                
+                // Draw noise points in black
+                ctx.fillStyle = '#333';
+                for (var k = 0; k < result.noise.length; k++) {
+                    var originalPoint = data[result.noise[k].index];
+                    var canvasPoint = toCanvas(originalPoint);
+                    ctx.beginPath();
+                    ctx.arc(canvasPoint[0], canvasPoint[1], 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+
+                // Update statistics
+                updateStats(result);
+            }
+        }
+
+        function updateStats(result) {
+            var clusterCount = Object.keys(result.clusters).length;
+            var noiseCount = result.noise.length;
+            var totalPoints = currentData.length;
+
+            document.getElementById('clusterCount').textContent = clusterCount;
+            document.getElementById('noiseCount').textContent = noiseCount;
+            document.getElementById('totalPoints').textContent = totalPoints;
+            document.getElementById('stats').style.display = 'flex';
+        }
+
+        function runClustering() {
+            if (currentData.length === 0) {
+                generateNewData();
+                return;
+            }
+
+            var eps = parseFloat(document.getElementById('eps').value);
+            var minPts = parseInt(document.getElementById('minPts').value);
+            
+            // Use scaled data for clustering
+            var dbscan = new DBSCAN(eps, minPts);
+            var result = dbscan.fitPredict(scaledData);
+            
+            // Draw using original data coordinates but with clustering results
+            drawPoints(currentData, result);
+        }
+
+        // Event listeners for sliders
+        document.getElementById('eps').addEventListener('input', function() {
+            document.getElementById('epsValue').textContent = this.value;
+        });
+
+        document.getElementById('minPts').addEventListener('input', function() {
+            document.getElementById('minPtsValue').textContent = this.value;
+        });
+
+        // Initialize with sample data
+        generateNewData();
+    </script>
+</body>
+</html>

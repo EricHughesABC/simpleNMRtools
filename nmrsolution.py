@@ -1324,6 +1324,7 @@ class NMRsolution:
                    and message is a string describing the result.
         """
 
+        print("self.hsqc_df:\n", self.hsqc_df)
         if not self.hsqc_df.empty:
             # copy rows where signaltype is Compound or 0
             self.hsqc = self.hsqc_df[
@@ -2001,6 +2002,8 @@ class NMRsolution:
 
         # check what experiments are present
         self.check_what_experiments_are_present()
+
+        print("self.HSQC_data_present:", self.HSQC_data_present)
 
         # check if hsqc is present
         if not self.HSQC_data_present:
