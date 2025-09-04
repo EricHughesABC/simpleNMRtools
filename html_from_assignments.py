@@ -61,9 +61,12 @@ def return_nonempty_mnova_datasets(data: dict) -> dict:
     # remove datasets where multiplet counts is zero and peaks counts is zero and integrals counts is zero
 
     print("\nreturn_nonempty_mnova_datasets(data: dict) -> dict:\n")
-
+    print("data.keys()\n", data.keys(), "\n")
     dicts_to_keep = {}
     for k, v in data.items():
+        print(f"Processing key: {k}")
+        print(f"\tdata[{k}].keys()\n", v.keys(), "\n")
+        print(f"v.items():\n", v.items(), "\n")
         if v["datatype"] == "nmrspectrum":
             if (
                 (v["multiplets"]["count"] > 0)
@@ -97,6 +100,8 @@ def read_in_mesrenova_json(fn: Path) -> dict:
             data_orig = json.load(file)
     elif isinstance(fn, dict):
         data_orig = fn
+
+    print("data_orig keys: ", data_orig.keys())
 
     data = return_nonempty_mnova_datasets(data_orig)
 
@@ -1081,9 +1086,13 @@ class NMRProblem:
         """
         Check if the data is a prediction
         """
+
+        print("self.dataframes[\"MNOVAcalcMethod\"].loc[0, \"MNOVAcalcMethod\"]\n", self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"])
+
         if self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"] in [
             "MNOVA Predict",
             "NMRSHIFTDB2 Predict",
+            "JEOL Predict"
         ]:
             return True
         else:
@@ -1102,6 +1111,21 @@ class NMRProblem:
             return True
         else:
             print("Prediction from MNOVA")
+            return False
+        
+    def JEOL_prediction_used(self):
+        """
+        Check if the data is a prediction from JEOL
+        """
+
+        if (
+            self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"]
+            == "JEOL Predict"
+        ):
+            print("Prediction from JEOL")
+            return True
+        else:
+            print("Prediction from MNOVA or NMRSHIFTDB2")
             return False
 
     def add_missing_spectra(self):

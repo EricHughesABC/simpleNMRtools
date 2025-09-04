@@ -676,6 +676,7 @@ def simpleMNOVA_display_molecule():
     # Get JSON data from the request body (for curl POST requests)
     try:
         json_data = request.get_json()
+        print("json_data.keys()\n", json_data.keys())
         if json_data is None:
             print("No JSON data received")
             return "No JSON data received", 400

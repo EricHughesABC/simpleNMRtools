@@ -60,6 +60,8 @@ class NMRsolution:
         self.pureshift_df = problemdata_json.dataframes["H1_pureshift"]
         self.c13_df = problemdata_json.dataframes["C13_1D"]
 
+        print("self.c13_df\n", self.c13_df)
+
         # if hsqc_df is empty then return
         if self.hsqc_df.empty:
             self.nmrsolution_failed = True
@@ -78,6 +80,7 @@ class NMRsolution:
             self.carbonAtomsInfo,
             self.c13predictions,
             self.problemdata_json.prediction_from_nmrshiftdb2(),
+            self.problemdata_json.JEOL_prediction_used()
         )
 
         self.solution_error_message = self.expected_molecule.nmrshiftdb_failed_message
@@ -115,7 +118,7 @@ class NMRsolution:
         molgraph = nx.Graph()
 
         # if rubteralone remove - 1 from the atom numbers
-        if json_data["MNOVAcalcMethod"]["data"]["0"] == "NMRSHIFTDB2 Predict":
+        if (json_data["MNOVAcalcMethod"]["data"]["0"] == "NMRSHIFTDB2 Predict") or (json_data["MNOVAcalcMethod"]["data"]["0"] == "JEOL Predict"):
             nodes_offset = 0
         else:
             nodes_offset = 1
@@ -693,6 +696,7 @@ class NMRsolution:
         carbonAtomsInfo: pd.DataFrame,
         df: pd.DataFrame,
         prediction_from_nmrshiftdb: bool,
+        JEOL_predict: bool
     ) -> expectedmolecule.expectedMolecule:
 
         """
@@ -717,6 +721,7 @@ class NMRsolution:
             carbonAtomsInfo=carbonAtomsInfo,
             mnova_c13predictions=df,
             predict_from_nmrshiftdb=prediction_from_nmrshiftdb,
+            JEOL_predict=JEOL_predict
         )
 
         return mol

@@ -54,6 +54,7 @@ class expectedMolecule:
         is_smiles=True,
         mnova_c13predictions=None,
         predict_from_nmrshiftdb=False,
+        JEOL_predict=False
     ):
         self.nmrshiftdb_failed = False
         self.nmrshiftdb_failed_message = ""
@@ -127,7 +128,12 @@ class expectedMolecule:
         )
 
         #  add 1 to atom_idx
-        self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"] + 1
+
+        # self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"] + 1
+        if JEOL_predict:    
+            self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"]
+        else:
+            self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"] + 1
 
         self.molprops_df["numProtons"] = self.molprops_df["totalNumHs"].astype(int)
         self.molprops_df = self.molprops_df.set_index(["idx"])
