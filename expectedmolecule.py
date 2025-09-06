@@ -129,11 +129,15 @@ class expectedMolecule:
 
         #  add 1 to atom_idx
 
+        print("BEFORE ::: self.molprops_df\n", self.molprops_df)
+
         # self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"] + 1
         if JEOL_predict:    
             self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"]
         else:
             self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"] + 1
+
+        print("AFTER ::: self.molprops_df\n", self.molprops_df)
 
         self.molprops_df["numProtons"] = self.molprops_df["totalNumHs"].astype(int)
         self.molprops_df = self.molprops_df.set_index(["idx"])
@@ -163,6 +167,9 @@ class expectedMolecule:
 
         self.molprops_df["picked"] = False
 
+        print("\nmolprops_df\n")
+        print(self.molprops_df)
+
         # decide where to calculate C13 NMR chemical shifts from
         # if mnova_c13predictions is not None then use mnova_c13predictions
         # else use nmrshift2D to calculate C13 NMR chemical shifts
@@ -172,6 +179,10 @@ class expectedMolecule:
             print("=====================================================")
             print("Using mnova_c13predictions to calculate C13 NMR chemical shifts")
             print("=====================================================")
+
+            print("\nmnova_c13predictions\n")
+            print(mnova_c13predictions)
+            print("\n")
 
             # self.c13ppm = {}
             # self.c13ppm['mean'] = mnova_c13predictions["ppm"].values
@@ -188,6 +199,8 @@ class expectedMolecule:
             self.molprops_df["numProtons"] = self.molprops_df["numProtons_x"]
             # reset the index to atom index
             self.molprops_df.set_index("idx", inplace=True)
+
+            print("AFTER MERGE ::: self.molprops_df\n", self.molprops_df)
 
         else:
             print("Using nmrshift2D to calculate C13 NMR chemical shifts")

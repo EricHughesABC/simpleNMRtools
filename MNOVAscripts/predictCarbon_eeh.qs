@@ -55,7 +55,7 @@ function predictCarbon_eeh() {
     var atomNumberToNumProtons = {};
     for ( i = 1; i <= mol.atomCount; i++) {    
         var atom = new Atom(mol.atom(i));
-        atomNumberToIndex[atom.number] = i;
+        atomNumberToIndex[atom.number] = i-1; // zero based index changed EEH 2025-sep-06
         atomIndexToNumber[i] = atom.number;
         atomNumberToNumProtons[atom.number] = atom.nH;
     }

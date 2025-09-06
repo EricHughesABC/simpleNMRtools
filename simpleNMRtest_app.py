@@ -726,9 +726,6 @@ def simpleMNOVA_display_molecule():
 
         solution = nmrsolution.NMRsolution(problemdata_json)
 
-        print(dir(solution))
-
-
 
         print("solution.hsqc_df.shape ", solution.hsqc_df.shape[0])
         print(solution.hsqc_df.columns )

@@ -118,7 +118,9 @@ class NMRsolution:
         molgraph = nx.Graph()
 
         # if rubteralone remove - 1 from the atom numbers
-        if (json_data["MNOVAcalcMethod"]["data"]["0"] == "NMRSHIFTDB2 Predict") or (json_data["MNOVAcalcMethod"]["data"]["0"] == "JEOL Predict"):
+        if (json_data["MNOVAcalcMethod"]["data"]["0"] == "NMRSHIFTDB2 Predict"):
+            nodes_offset = 0
+        elif (json_data["MNOVAcalcMethod"]["data"]["0"] == "JEOL Predict"):
             nodes_offset = 0
         else:
             nodes_offset = 1

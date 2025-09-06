@@ -45,6 +45,7 @@ def compute_total_weight(
     Returns:
         float: Sum of the path lengths of COSY and HMBC edges mapped onto the molecule graph.
     """
+
     total_weight = 0
     for u, v, d in graph.edges(data=True):
         if d["cosy"] or d["hmbc"]:
@@ -80,17 +81,9 @@ def modify_mapping(grouped_nodes, current_mapping, nProtons_to_nodes):
     """
     new_mapping = current_mapping.copy()
 
-    # nProtons_to_nodes = {}
-    # for idx, row in df.iterrows():
-    #     if row["symbol"] != "C":
-    #         continue
-    #     nProtons = row["numProtons"]
-    #     nProtons_to_nodes[idx] = nProtons
-
     # Step 1: Choose a random key (node in graph1)
     random_node = random.choice(list(nProtons_to_nodes.keys()))
     nprotons_key = int(nProtons_to_nodes[random_node])
-    # print("nprotons_key", nprotons_key)
 
     # Step 2: Randomly select a value from its possible mappings
     possible_values = grouped_nodes[nprotons_key]
@@ -125,6 +118,8 @@ def compute_total_weight(
     Returns:
         float: Sum of the path lengths of COSY and HMBC edges mapped onto the molecule graph.
     """
+
+
     total_weight = 0
     for u, v, d in graph.edges(data=True):
         if d["cosy"] or d["hmbc"]:
@@ -208,7 +203,6 @@ def simulated_annealing(
         neighbor_weight = compute_total_weight(G2, neighbor_mapping, shortest_paths)
 
         # Update mapping and weights based on acceptance criteria
-        # if neighbor_weight < current_weight or random.random() < math.exp((current_weight - neighbor_weight) / temperature):
         if neighbor_weight < current_weight:
             stats["improvements"] += 1
             current_mapping = neighbor_mapping
@@ -233,7 +227,6 @@ def simulated_annealing(
 
         # Early stopping condition
         if temperature < final_temp:
-            # print(f"Temperature reached below 1e-3 at iteration {iteration}")
             break
 
     return best_mapping, best_weight, stats, weights
@@ -265,7 +258,6 @@ class NMRgraphs:
 
 class SimulatedAnnealing2:
     def __init__(self, json_data):
-        print("__init__")
 
         self.json_data = json_data
         self.nmr_nodes = json_data["nodes_now"]
@@ -283,10 +275,15 @@ class SimulatedAnnealing2:
             == "NMRSHIFTDB2 Predict"
         ):
             self.nodes_offset = 0
+
+        elif(
+            json_data["oldjsondata"]["MNOVAcalcMethod"]["data"]["0"]
+            == "JEOL Predict"
+        ): 
+            self.nodes_offset = 0
         else:
             self.nodes_offset = 1
 
-        print("nodes_offset", self.nodes_offset)
 
         for link in self.nmr_links:
             link["source"] = int(link["source"]) - self.nodes_offset
@@ -321,8 +318,6 @@ class SimulatedAnnealing2:
         for idx, (x, y) in self.xy3.items():
             self.graph_df.loc[idx, "x"] = x
             self.graph_df.loc[idx, "y"] = y
-
-        # self.nmr_graph = self.create_nmr_network_graph(self.carbon_df, self.nmr_links)
 
         self.nmr_graph = NMRgraphs(self.graph_df, self.all_links).graph
         self.carbon_graph = NMRgraphs(self.carbon_df, self.nmr_links).graph
@@ -395,29 +390,9 @@ class SimulatedAnnealing2:
             json_data["oldjsondata"]["c13predictions"]["data"], orient="index"
         )
 
-        print("graph_df", graph_df.columns, graph_df.shape, graph_df.empty)
-
-        print(
-            "c13predictions_df",
-            c13predictions_df.columns,
-            c13predictions_df.shape,
-            c13predictions_df.empty,
-        )
-
-        # #  copy ppm values from c13predictions_df to graph_df as ppm_calculated using the id as the index
-        # for idx, row in c13predictions_df.iterrows():
-        #     id = int(row["atom_idx"])
-        #     # find "id" in graph_df and copy the ppm value to the ppm_calculated column
-        #     graph_df_idx = graph_df[graph_df["id"] == id].index
-        #     if not graph_df_idx.empty:
-        #         graph_df.at[graph_df_idx, "ppm_calculated"] = row["ppm"]
-
         # change index to integer
         graph_df.index = graph_df.index.astype(int)
 
-        # for cnode in nmr_nodes:
-        #     for key, value in cnode.items():
-        #         graph_df.loc[int(cnode["id"]), key] = value
 
         for cnode in nmr_nodes:
             for key, value in cnode.items():
@@ -427,27 +402,16 @@ class SimulatedAnnealing2:
                     value1 = value
                 graph_df.at[int(cnode["id"]), key] = value1
 
-        # reset the nan values to empty strings for the columns iupaclabel, jCouplingClass, jCouplingVals, x, y H1_ppm, ppm ppm_calculated
-        # df.method({col: value}, inplace=True)' or df[col] = df[col].method(value)
 
-        # graph_df["iupacLabel"].fillna("", inplace=True)
         graph_df["iupacLabel"] = graph_df["iupacLabel"].fillna("")
-        # graph_df["jCouplingClass"].fillna("", inplace=True)
         graph_df["jCouplingClass"] = graph_df["jCouplingClass"].fillna("")
-        # graph_df["jCouplingVals"].fillna("", inplace=True)
         graph_df["jCouplingVals"] = graph_df["jCouplingVals"].fillna("")
-        # graph_df["x"].fillna("", inplace=True)
         graph_df["x"] = graph_df["x"].fillna("")
-        # graph_df["y"].fillna("", inplace=True)
         graph_df["y"] = graph_df["y"].fillna("")
-        # graph_df["H1_ppm"].fillna("", inplace=True)
         graph_df["H1_ppm"] = graph_df["H1_ppm"].fillna("")
-        # graph_df["ppm"].fillna("", inplace=True)
         graph_df["ppm"] = graph_df["ppm"].fillna("")
-        # graph_df["ppm_calculated"].fillna("", inplace=True)
         graph_df["ppm_calculated"] = graph_df["ppm_calculated"].fillna("")
         if "visible" in graph_df.columns:
-            # graph_df["visible"].fillna(True, inplace=True)
             graph_df["visible"] = graph_df["visible"].fillna(True)
         else:
             graph_df["visible"] = True
@@ -553,17 +517,6 @@ class SimulatedAnnealing2:
                     random_mapping[node] = nodes2[i]
         return random_mapping
 
-    # def initialize_mapping(self, carbon_graph, carbon_grouped_nodes, randomize_mapping=True):
-    #     random__mapping = {node: node  for node in carbon_graph.nodes()}
-    #     if randomize_mapping:
-    #         for nprotons in range(4):
-    #             nodes1 = carbon_grouped_nodes.get(nprotons, []).copy()
-    #             nodes2 = carbon_grouped_nodes.get(nprotons, []).copy()
-    #             random.shuffle(nodes2)
-    #             # print(nprotons, ":", nodes1, nodes2)
-    #             for i, node in enumerate(nodes1):
-    #                 random__mapping[node] = nodes2[i]
-    #     return random__mapping
 
     def map_protons_to_nodes(self, df: pd.DataFrame) -> Dict[int, int]:
         """
@@ -597,8 +550,6 @@ class SimulatedAnnealing2:
         self.predicted_mapping = self.initialize_mapping(
             self.carbon_graph, self.carbon_grouped_nodes, randomize_mapping=False
         )
-        print("predicted_mapping", self.predicted_mapping)
-        print("predicted weight", self.predicted_weight)
 
         self.predicted_weight = compute_total_weight(
             self.carbon_graph, self.predicted_mapping, self.shortest_paths
@@ -612,7 +563,6 @@ class SimulatedAnnealing2:
         self.initial_weight = compute_total_weight(
             self.carbon_graph, self.initial_mapping, self.shortest_paths
         )
-        print("initial_mapping", self.initial_mapping)
 
         self.results = {}
 
@@ -680,8 +630,6 @@ class SimulatedAnnealing2:
         self.min_temp = min_temp
         self.cooling_rate = cooling_rate
         self.randomize_mapping = randomize_mapping
-
-        print("cooling_rate", self.cooling_rate)
 
         # initialize the mapping
         self.mapping = self.initialize_mapping(
@@ -795,8 +743,6 @@ class SimulatedAnnealing2:
 
         for i, row in catoms_df.iterrows():
             id = row["id"] - self.nodes_offset
-            # id_best = best_mapping[id]
-            # catoms_df.loc[i, "id"] = id_best
 
         optimized_links = copy.deepcopy(self.nmr_links)
 
@@ -851,7 +797,6 @@ class SimulatedAnnealing2:
                 if diff > lae:
                     lae = diff
                     lae_atomNumber = atomNumber_orig
-                    print(f"atomNumber_orig {atomNumber_orig}, lae {lae}")
 
         best_results["best_mae"] = mae / num_carbons
         best_results["best_lae"] = lae
@@ -860,332 +805,5 @@ class SimulatedAnnealing2:
         return best_results
 
 
-# if __name__ == "__main__":
 
-#     from matplotlib import pyplot as plt
 
-#     # Abscisic_acid
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Abscisic_acid/Abscisic_acid_assignments_from_simplemnova.json")
-#     #  alpha-ionon
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/alpha-ionon/alpha-ionon_assignments_from_simplemnova.json")
-#     # Ascochitine
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Ascochitine/Ascochitine_assignments_from_simplemnova.json")
-#     # Bactobolin
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Bactobolin/Bactobolin_assignments_from_simplemnova.json")
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Bakuchiol/Bakuchiol_assignments_from_simplemnova.json")
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Bicuculline/Bicuculline_assignments_from_simplemnova.json")
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/2-bromophenol/2-bromophenol_assignments_from_simplemnova.json") # works
-#     # camphor_AMK
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/camphor_AMK/camphor_AMK_assignments_from_simplemnova.json")
-#     # Camptothecin
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Camptothecin/Camptothecin_assignments_from_simplemnova.json")
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Canadine/Canadine_assignments_from_simplemnova.json")
-#     # capsaicin
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/capsaicin/capsaicin_assignments_from_simplemnova.json")
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Carene/Carene_assignments_from_simplemnova.json")
-#     # cis-3_7
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/cis-3_7/cis-3_7_assignments_from_simplemnova.json")
-#     #  Colchicine
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Colchicine/Colchicine_assignments_from_simplemnova.json")
-#     # Cordycepin
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Cordycepin/Cordycepin_assignments_from_simplemnova.json")
-#     # Dihydroisorescinnamine
-#     # fn = Path(
-#     #     r"/Users/vsmw51/Downloads/4Eric/Dihydroisorescinnamine/Dihydroisorescinnamine_assignments_from_simplemnova.json"
-#     # )
-#     # # ethylIndanone
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/ethylIndanone/ethylIndanone_assignments_from_simplemnova.json")
-#     # Eserine
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Eserine/Eserine_assignments_from_simplemnova.json")
-#     # Eugenol
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Eugenol/Eugenol_assignments_from_simplemnova.json")
-#     # EVB_330b_predicted
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/EVB_330b_predicted/EVB_330b_predicted_assignments_from_simplemnova.json")
-
-#     # fasiglifam
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/fasiglifam/fasiglifam_assignments_from_simplemnova.json")
-
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Dihydroisorescinnamine/Dihydroisorescinnamine_assignments_from_simplemnova.json")
-
-#     # Gelcohol
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Gelcohol/Gelcohol_assignments_from_simplemnova.json")
-#     # Genipin
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Genipin/Genipin_assignments_from_simplemnova.json")
-#     # Guaiol
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Guaiol/Guaiol_assignments_from_simplemnova.json")
-
-#     # Harmalol
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Harmalol/Harmalol_assignments_from_simplemnova.json")
-#     # Himbacine
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Himbacine/Himbacine_assignments_from_simplemnova.json") # does not work
-#     # Hispanolone
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Hispanolone/Hispanolone_assignments_from_simplemnova.json") # simpleNMR does not work
-
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/ibuprofen/ibuprofen_assignments_from_simplemnova.json") # works
-#     # lonchocarpic_acid
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/lonchocarpic_acid/lonchocarpic_acid_assignments_from_simplemnova.json") # half works but I think simpleNMR assignments are wrong
-#     fn = Path(r"Y:\downloads\Eric\student_projects\2025\simpleNMR_examples\Ibuprofen\Ibuprofen_assignments_from_simplemnova.json") # works
-
-#     # Lovastatin  remarks :: simpleNMR assignments maybe wrong
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Lovastatin/Lovastatin_assignments_from_simplemnova.json") #
-
-#     # maslinic_acid remarks :: works, but multiple solutions
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/maslinic_acid/maslinic_acid_assignments_from_simplemnova.json")
-#     # mebeverine remarks :: works
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/mebeverine/mebeverine_assignments_from_simplemnova.json")
-#     # Medicarpin remarks :: works
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Medicarpin/Medicarpin_assignments_from_simplemnova.json")
-
-#     # Parthenin remarks :: works, best weight 0, 2 solutions
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Parthenin/Parthenin_assignments_from_simplemnova.json")
-#     # Picrotin remarks :: works, best weight 3, 2 solutions
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Picrotin/Picrotin_assignments_from_simplemnova.json")
-#     # Pleurotine remarks :: works
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Pleurotine/Pleurotine_assignments_from_simplemnova.json")
-#     # p-menthanediol
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/p-menthanediol/p-menthanediol_assignments_from_simplemnova.json")
-#     # Problem90 remarks :: works
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Problem90/Problem90_assignments_from_simplemnova.json")
-#     # pseudoceranoid_J remarks :: works
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/pseudoceranoid_J/pseudoceranoid_J_assignments_from_simplemnova.json")
-#     # pubescine remarks :: works, best weight 1, 1 solution
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/pubescine/pubescine_assignments_from_simplemnova.json")
-#     # Pyrethrosin remarks :: works, best weight 11, 2 solutions
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Pyrethrosin/Pyrethrosin_assignments_from_simplemnova.json")
-
-#     # Quadrone remarks :: works, best weight 0, 2 solutions
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Quadrone/Quadrone_assignments_from_simplemnova.json")
-#     # quinine remarks :: works :: 1 solution
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/quinine/quinine_assignments_from_simplemnova.json")
-
-#     # REF5 remarks :: works
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/REF5/REF5_assignments_from_simplemnova.json")
-#     # Rotenone remarks :: works but I think the simpleNMR assignments are wrong
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Rotenone/Rotenone_assignments_from_simplemnova.json")
-#     # rubteralone remarks :: works
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/rubteralone/rubteralone_assignments_from_simplemnova.json")
-#     # rutin remarks :: seems to work
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/rutin/rutin_assignments_from_simplemnova.json")
-
-#     # Salicylsalicylic_acid
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/Salicylsalicylic_acid/Salicylsalicylic_acid_assignments_from_simplemnova.json")
-#     # santonin remarks :: works
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/santonin/santonin_assignments_from_simplemnova.json")
-#     # stigmasterol remarks :: works
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/stigmaSterol_C6D6/stigmaSterol_C6D6_assignments_from_simplemnova.json") # works
-
-#     # vinpocetine remarks :: works
-#     # fn = Path(r"/Users/vsmw51/Downloads/4Eric/vinpocetine/vinpocetine_assignments_from_simplemnova.json")
-
-#     simAnneal = SimulatedAnnealing2.from_json_file(fn)
-#     simAnneal.setup_run(randomize_mapping=True)
-#     simAnneal.run_optimization(100)
-
-#     filename = fn.parts[-2]
-
-#     best_weight = simAnneal.bestest_weight
-
-#     unique_mappings = set()
-#     unique_mapping_dict = {}
-#     print(
-#         "number of different solutions with best_weight",
-#         len(simAnneal.results[best_weight]["best_mapping"]),
-#     )
-#     for mapping in simAnneal.results[best_weight]["best_mapping"]:
-#         v1 = list(mapping.values())
-#         v1_str = "".join([str(x) for x in v1])
-#         #  add the string to the set
-#         unique_mappings.add(v1_str)
-#         unique_mapping_dict[v1_str] = mapping
-
-#     print("number of unique solutions with best_weight", len(unique_mappings))
-
-#     # print the unique mappings
-#     for k, v in unique_mapping_dict.items():
-#         print(k, v)
-
-#     xy3 = simAnneal.xy3
-#     predicted_xy3 = {
-#         node: xy3[simAnneal.predicted_mapping[node]]
-#         for node in simAnneal.carbon_graph.nodes()
-#     }  # positions for all nodes in G2 based on predicted mapping
-#     best_xy3 = {
-#         node: xy3[simAnneal.bestest_mapping[node]]
-#         for node in simAnneal.carbon_graph.nodes()
-#     }  # positions for all nodes in G2 based on best mapping
-#     init_xy3 = {
-#         node: xy3[simAnneal.initial_mapping[node]]
-#         for node in simAnneal.carbon_graph.nodes()
-#     }  # positions for all nodes in G2 based on best mapping
-
-#     figs_axes = []
-#     unique_mapping_dict["initial"] = simAnneal.predicted_mapping
-
-#     num_mappings = len(unique_mapping_dict)
-#     print(simAnneal.graph_df.columns)
-#     i = 1
-#     unique_mapping_results_dict = {}
-#     for k1, v1 in unique_mapping_dict.items():
-
-#         print(k1, v1)
-#         best_xy3 = {
-#             node: xy3[v1[node]] for node in simAnneal.carbon_graph.nodes()
-#         }  # positions for all nodes in G2 based on best mapping
-
-#         print("best_xy3", best_xy3)
-
-#         best_labels = {}
-#         df = simAnneal.graph_df
-#         num_carbons = len(simAnneal.carbon_graph.nodes())
-#         best_mapping = v1
-#         ppm_rss = 0.0
-#         mae = 0.0
-#         lae = 0.0
-#         for node_orig, node_moved in best_mapping.items():
-#             atomNumber_moved = df.loc[node_moved, "atomNumber"]
-#             atomNumber_orig = df.loc[node_orig, "atomNumber"]
-#             id_orig = df.loc[node_orig, "id"]
-#             id_moved = df.loc[node_moved, "id"]
-#             ppm_orig = df.loc[node_orig, "ppm"]
-#             ppm_moved = df.loc[node_moved, "ppm"]
-#             ppm_calculated_orig = df.loc[node_orig, "ppm_calculated"]
-#             ppm_calculated_moved = df.loc[node_moved, "ppm_calculated"]
-
-#             if isinstance(ppm_calculated_orig, float) and isinstance(ppm_moved, float):
-#                 ppm_rss += (ppm_calculated_orig - ppm_moved) ** 2
-#                 diff = abs(ppm_calculated_orig - ppm_moved)
-#                 mae += diff
-#                 if diff > lae:
-#                     lae = diff
-
-#             if node_orig == node_moved:
-
-#                 if isinstance(ppm_orig, float):
-#                     best_labels[id_orig] = f"{id_moved}\n{ppm_orig:.1f}"
-#                 else:
-#                     best_labels[id_orig] = f"{id_moved}"
-
-#             else:
-#                 if isinstance(ppm_orig, float):
-#                     best_labels[id_orig] = f"{id_moved}, {id_orig}\n{ppm_orig:.1f}"
-#                 else:
-#                     best_labels[id_orig] = f"{id_moved}, {id_orig}"
-
-#         ppm_rss = np.sqrt(ppm_rss / num_carbons)
-#         mae = mae / num_carbons
-
-#         unique_mapping_results_dict[k] = [v, mae, lae]
-
-#         figs_axes.append(plt.subplots(figsize=(6, 6)))
-#         ax00 = figs_axes[-1][1]
-#         nx.draw_networkx_nodes(
-#             simAnneal.mol_graph,
-#             pos=xy3,
-#             node_size=800,
-#             node_color=simAnneal.graph_df.color.values,
-#             ax=ax00,
-#         )
-#         nx.draw_networkx_edges(
-#             simAnneal.mol_graph, pos=xy3, width=10, edge_color="lightgray", ax=ax00
-#         )
-#         nx.draw_networkx_labels(
-#             simAnneal.carbon_graph,
-#             pos=best_xy3,
-#             labels=best_labels,
-#             font_size=6,
-#             ax=ax00,
-#         )
-
-#         nx.draw_networkx_edges(
-#             simAnneal.cosy_subgraph, pos=best_xy3, ax=ax00, edge_color="r", width=5
-#         )
-#         nx.draw_networkx_edges(
-#             simAnneal.hmbc_subgraph,
-#             pos=best_xy3,
-#             ax=ax00,
-#             edge_color="b",
-#             style="dashed",
-#         )
-
-#         # ax1.set_title("Predicted Mapping")
-#         if i == num_mappings:
-#             # ax00.set_title(f"Predicted :: {filename} {k1} Mapping Weight: {simAnneal.predicted_weight}, ppm rss: {ppm_rss:.1f}", )
-#             ax00.set_title(
-#                 f"Predicted :: {filename} {k1} Mapping Weight: {simAnneal.predicted_weight}, mae: {mae:.1f} lae: {lae:.1f}",
-#             )
-#         else:
-#             # ax00.set_title(f"{filename} Best Weight: {simAnneal.bestest_weight}, ppm rss: {ppm_rss:.1f}, mae: {mae:.1f} lae: {lae:.1f}", )
-#             ax00.set_title(
-#                 f"{filename} Best Weight: {simAnneal.bestest_weight}, mae: {mae:.1f} lae: {lae:.1f}",
-#             )
-#         ax00.set_ylim(1, 0)
-#         i += 1
-
-#     print("results :: best weight")
-#     found_weights = [str(k) for k in np.sort(list(simAnneal.results.keys()))]
-#     num_times = [
-#         simAnneal.results[k]["num_times"]
-#         for k in np.sort(list(simAnneal.results.keys()))
-#     ]
-
-#     fig, ax1a = plt.subplots(figsize=(10, 6))
-#     ax1a.bar(found_weights, num_times)
-#     ax1a.set_title(f"{filename} Number of times a weight was found")
-#     ax1a.set_xlabel("Weight")
-#     ax1a.set_ylabel("Number of times found")
-
-#     # decide which is the best solution based on lowest MAE and LAE
-#     best_mae = float("inf")
-#     best_lae = float("inf")
-
-#     for k, v in unique_mapping_results_dict.items():
-#         mae, lae = v[1:]
-#         if (mae <= best_mae) and (lae <= best_lae):
-#             best_mae = mae
-#             best_lae = lae
-#             best_mapping = v[0]
-#             best_key = k
-
-#     print("best mapping\n", best_mapping)
-#     print("best MAE", best_mae)
-#     print("best LAE", best_lae)
-#     print("best key", best_key)
-
-#     print("simAnneal.nodes", type(simAnneal.nmr_nodes))
-#     print("simAnneal.links", type(simAnneal.nmr_links))
-
-#     optimized_nodes = []
-#     optimized_links = []
-
-#     for node in simAnneal.nmr_nodes:
-
-#         id_orig = node["id"]
-#         id_best = best_mapping[id_orig]
-
-#         optimized_nodes.append(copy.deepcopy(node))
-
-#         if id_orig != id_best:
-#             #  find node in list with best_node
-#             for bnode in simAnneal.nmr_nodes:
-#                 if bnode["id"] == id_best:
-#                     # copy over certain items
-#                     optimized_nodes[-1]["id"] = bnode["id"]
-#                     optimized_nodes[-1]["ppm"] = bnode["ppm"]
-#                     break
-
-#     optimized_links = copy.deepcopy(simAnneal.nmr_links)
-
-#     for link in optimized_links:
-#         link["source"] = best_mapping[link["source"]]
-#         link["target"] = best_mapping[link["target"]]
-
-#     for node1, node2 in zip(optimized_nodes, simAnneal.nmr_nodes):
-#         print("id", node1["id"], node2["id"])
-#         print("atomNumber", node1["atomNumber"], node2["atomNumber"])
-#         print("ppm", node1["ppm"], node2["ppm"])
-
-#     for link1, link2 in zip(optimized_links, simAnneal.nmr_links):
-#         print("source", link1["source"], link2["source"])
-#         print("target", link1["target"], link2["target"])
-
-#     plt.show()

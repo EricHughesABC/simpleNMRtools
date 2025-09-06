@@ -1098,6 +1098,21 @@ class NMRProblem:
         else:
             return False
 
+    # def prediction_from_nmrshiftdb2(self):
+    #     """
+    #     Check if the data is a prediction from NMRSHIFTDB2
+    #     """
+
+    #     if (
+    #         self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"]
+    #         == "NMRSHIFTDB2 Predict"
+    #     ):
+    #         print("Prediction from NMRSHIFTDB2")
+    #         return True
+    #     else:
+    #         print("Prediction from MNOVA")
+    #         return False
+
     def prediction_from_nmrshiftdb2(self):
         """
         Check if the data is a prediction from NMRSHIFTDB2
@@ -1109,10 +1124,15 @@ class NMRProblem:
         ):
             print("Prediction from NMRSHIFTDB2")
             return True
+        elif (
+            self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"]
+            == "JEOL Predict"
+        ):
+            print("Prediction from NMRSHIFTDB2")
+            return True
         else:
             print("Prediction from MNOVA")
-            return False
-        
+            return False        
     def JEOL_prediction_used(self):
         """
         Check if the data is a prediction from JEOL
