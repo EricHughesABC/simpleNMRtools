@@ -124,6 +124,7 @@ class NMRsolution:
             nodes_offset = 0
         else:
             nodes_offset = 1
+            nodes_offset = 0  # EEH 2025-sep-06
 
         # Add nodes for each atom in the molecule
         for atom in self.expected_molecule.GetAtoms():
@@ -146,9 +147,7 @@ class NMRsolution:
         # set the 'ppm' attribute for each node in the molgraph to 10000 to begin with
         for node in molgraph.nodes():
             molgraph.nodes[node]["ppm"] = 10000
-            # molgraph.nodes[node]["numProtons"] = -1
 
-        # c13predictions = json_data["oldjsondata"]["c13predictions"]["data"]
 
         for node in molgraph.nodes():
 

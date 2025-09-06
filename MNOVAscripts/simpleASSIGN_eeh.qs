@@ -43,12 +43,6 @@ function simpleASSIGN_eeh() {
     // print("json_obj_string ", json_obj_string);
     rtn = web_utils.jsonRequest(entry_point, json_obj_string, "", "", false);
 
-    // print("entry_point ", entry_point);
-
-    // print(rtn.url);
-    // print(rtn.exitCode);
-    // print(rtn.allErrorOutput);
-    // print(rtn.allStrOutput);
     print("\nrtn.response\n");
     print(rtn.response);
 
@@ -179,10 +173,13 @@ function simpleASSIGN_eeh() {
 
         // add 1 to atom_idx if dataFrom == "nmrshiftdb2"
         print("jsondata[\"dataFrom\"] = ", jsondata["dataFrom"]);
-        if( jsondata["dataFrom"] == "nmrshiftdb2"){
-            print("Adding 1 to atom_idx");
-            atom_idx += 1;
-        }
+        // if( jsondata["dataFrom"] == "nmrshiftdb2"){
+        //     print("Adding 1 to atom_idx");
+        //     atom_idx += 1;
+        // }
+
+        // add 1 to atom_idx for all sources
+        atom_idx += 1;
         // var atom_idx = parseInt(atom["id"]); // atom index starts from 1
         print(atom_idx, atomNumber, c13_ppm);
 
@@ -378,45 +375,45 @@ function simpleASSIGN_eeh() {
     // Do some checking
     ////////////////////
 
-    var chosen_spectra = spectra["chosenSpectra"]["data"][0];
-    var hsqc = spectra["HSQC"];
-    var h1_1d = spectra["H1_1D"];
+    // var chosen_spectra = spectra["chosenSpectra"]["data"][0];
+    // var hsqc = spectra["HSQC"];
+    // var h1_1d = spectra["H1_1D"];
 
-    // check if there are any assignments if the user has chosen to use MNOVA manually assigned
-    if( spectra["nmrAssignments"]["count"] == 0 && chosen_spectra == "MNova Manually Assigned"){
-        print("No assignments found");
-        MessageBox.warning("No MNOVA assignment data found");  
-        return;
-    }
+    // // check if there are any assignments if the user has chosen to use MNOVA manually assigned
+    // if( spectra["nmrAssignments"]["count"] == 0 && chosen_spectra == "MNova Manually Assigned"){
+    //     print("No assignments found");
+    //     MessageBox.warning("No MNOVA assignment data found");  
+    //     return;
+    // }
 
-    // check if there are any C13 predictions if the user has chosen to use MNOVA Predict
-    if( spectra["c13predictions"]["count"] == 0 && chosen_spectra == "MNOVA Predict"){
-        print("No C13 predictions found");
-        MessageBox.warning("No C13 predictions found");  
-        return;
-    }
+    // // check if there are any C13 predictions if the user has chosen to use MNOVA Predict
+    // if( spectra["c13predictions"]["count"] == 0 && chosen_spectra == "MNOVA Predict"){
+    //     print("No C13 predictions found");
+    //     MessageBox.warning("No C13 predictions found");  
+    //     return;
+    // }
 
-    // check if there are no integrals and no peaks in the HSQC spectrum
-    if( hsqc["peaks"]["count"] == 0 && hsqc["integrals"]["count"] == 0){
-        print("No peaks or integrals found in HSQC spectrum");
-        MessageBox.warning("No peaks or integrals found in HSQC spectrum");  
-        return;
-    }
+    // // check if there are no integrals and no peaks in the HSQC spectrum
+    // if( hsqc["peaks"]["count"] == 0 && hsqc["integrals"]["count"] == 0){
+    //     print("No peaks or integrals found in HSQC spectrum");
+    //     MessageBox.warning("No peaks or integrals found in HSQC spectrum");  
+    //     return;
+    // }
 
-    // warn the user that there are no integrals in the HSQC spectrum
-    if(  hsqc["integrals"]["count"] == 0){
-        print("No peaks or integrals found in HSQC spectrum");
-        MessageBox.warning("No integrals found in HSQC spectrum, using peaks only. Program works best with integrals");  
-    }
+    // // warn the user that there are no integrals in the HSQC spectrum
+    // if(  hsqc["integrals"]["count"] == 0){
+    //     print("No peaks or integrals found in HSQC spectrum");
+    //     MessageBox.warning("No integrals found in HSQC spectrum, using peaks only. Program works best with integrals");  
+    // }
 
-    // check if the number of peaks in hsqc is == number of multiplets in h1_1d
-    if( h1_1d !== undefined ){
-        if( hsqc["peaks"]["count"] != h1_1d["multiplets"]["count"]){
-            print("Number of peaks in HSQC not equal to number of multiplets in H1_1D");
-            MessageBox.warning("Number of peaks in HSQC not equal to number of multiplets in H1_1D. Do not use H1_1D");  
-            return;
-        }
-    }
+    // // check if the number of peaks in hsqc is == number of multiplets in h1_1d
+    // if( h1_1d !== undefined ){
+    //     if( hsqc["peaks"]["count"] != h1_1d["multiplets"]["count"]){
+    //         print("Number of peaks in HSQC not equal to number of multiplets in H1_1D");
+    //         MessageBox.warning("Number of peaks in HSQC not equal to number of multiplets in H1_1D. Do not use H1_1D");  
+    //         return;
+    //     }
+    // }
 
     //////////////////////////////////////
     // choose which server we are using

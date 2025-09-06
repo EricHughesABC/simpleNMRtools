@@ -56,7 +56,7 @@ function predictCarbon_eeh() {
     for ( i = 1; i <= mol.atomCount; i++) {    
         var atom = new Atom(mol.atom(i));
         atomNumberToIndex[atom.number] = i-1; // zero based index changed EEH 2025-sep-06
-        atomIndexToNumber[i] = atom.number;
+        atomIndexToNumber[i-1] = atom.number; // zero based index changed EEH 2025-sep-06
         atomNumberToNumProtons[atom.number] = atom.nH;
     }
 
@@ -78,7 +78,6 @@ function predictCarbon_eeh() {
 
     // dump the c13predictions to a json string
     var c13predictionsStr = JSON.stringify(c13predictions, null, 4);
-    print(c13predictionsStr);
 
     return c13predictions
 

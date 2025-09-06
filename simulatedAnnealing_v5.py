@@ -282,7 +282,8 @@ class SimulatedAnnealing2:
         ): 
             self.nodes_offset = 0
         else:
-            self.nodes_offset = 1
+            # self.nodes_offset = 1
+            self.nodes_offset = 0  # EEH 2025-sep-06
 
 
         for link in self.nmr_links:

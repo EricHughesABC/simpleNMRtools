@@ -135,7 +135,8 @@ class expectedMolecule:
         if JEOL_predict:    
             self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"]
         else:
-            self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"] + 1
+            # self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"] + 1
+            self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"] + 0  # EEH 2025-sep-06
 
         print("AFTER ::: self.molprops_df\n", self.molprops_df)
 
