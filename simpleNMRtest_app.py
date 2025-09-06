@@ -373,7 +373,7 @@ def make_shell_context():
 def download_file():
     # Define the path to the downloads directory using pathlib
     downloads_dir = Path(app.root_path) / 'downloads'
-    filename = 'MNOVAScripts.zip'
+    filename = 'MNOVAscripts.zip'
     file_path = downloads_dir / filename
 
     # Debug print
