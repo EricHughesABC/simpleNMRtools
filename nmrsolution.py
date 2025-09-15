@@ -12,8 +12,6 @@ from flask import render_template
 
 from rdkit.Chem import Draw
 
-# from excelheaders import excel_orig_df_columns, excel_df_columns
-# from html_from_assignments import tidyup_ppm_values
 from html_from_assignments import NMRProblem
 import expectedmolecule
 
@@ -57,6 +55,7 @@ class NMRsolution:
         self.ddept_ch3_only_df = problemdata_json.dataframes["DDEPT_CH3_ONLY"]
         self.hsqc_clipcosy_df = problemdata_json.dataframes["HSQC_CLIPCOSY"]
         self.h1_df = problemdata_json.dataframes["H1_1D"]
+        print("problemdata_json.dataframes.keys()", problemdata_json.dataframes.keys())
         self.pureshift_df = problemdata_json.dataframes["H1_pureshift"]
         self.c13_df = problemdata_json.dataframes["C13_1D"]
 

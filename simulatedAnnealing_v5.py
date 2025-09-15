@@ -18,15 +18,18 @@ from rdkit.Chem import Draw
 from rdkit.Chem.rdchem import Mol
 from typing import Dict, List, Optional, Tuple
 
-# node color map
-color_map = {
-    0: "#FFA500",
-    1: "#98FB98",
-    2: "yellow",
-    3: "#00FFFF",
-    -1: "lightblue",  # For non-carbon atoms
-    -2: "lightgrey",
-}
+# # node color map
+# color_map = {
+#     0: "#FFA500",
+#     1: "#98FB98",
+#     2: "yellow",
+#     3: "#00FFFF",
+#     -1: "lightblue",  # For non-carbon atoms
+#     -2: "lightgrey",
+# }
+
+from globals import SVG_DIMENSIONS as svgDimensions
+from globals import NODE_COLOR_MAP as color_map
 
 
 def compute_total_weight(
@@ -427,13 +430,21 @@ class SimulatedAnnealing2:
 
         return graph_df
 
+    # def calc_xy3_coords(
+    #     self,
+    #     mol: Mol,
+    #     molWidth: int = 1000,
+    #     molHeight: int = 400,
+    #     svgWidth: int = 1200,
+    #     svgHeight: int = 600,
+    # ) -> Tuple[str, Dict[int, Tuple[float, float]]]:
     def calc_xy3_coords(
         self,
         mol: Mol,
-        molWidth: int = 1000,
-        molHeight: int = 400,
-        svgWidth: int = 1200,
-        svgHeight: int = 600,
+        molWidth: int = svgDimensions.mol_width,
+        molHeight: int = svgDimensions.mol_height,
+        svgWidth: int = svgDimensions.svg_width,
+        svgHeight: int = svgDimensions.svg_height
     ) -> Tuple[str, Dict[int, Tuple[float, float]]]:
         """
         Create an SVG string representation of a molecule and extract atom coordinates.
@@ -519,18 +530,18 @@ class SimulatedAnnealing2:
         return random_mapping
 
 
-    def map_protons_to_nodes(self, df: pd.DataFrame) -> Dict[int, int]:
+    def map_protons_to_nodes(self, graph_df: pd.DataFrame) -> Dict[int, int]:
         """
         Map the number of protons to their corresponding nodes in the dataframe.
 
         Args:
-            df (pd.DataFrame): DataFrame containing molecular information with columns 'symbol' and 'numProtons'.
+            graph_df (pd.DataFrame): DataFrame containing molecular information with columns 'symbol' and 'numProtons'.
 
         Returns:
             Dict[int, int]: A dictionary mapping node indices to the number of protons.
         """
         nProtons_to_nodes = {}
-        for idx, row in df.iterrows():
+        for idx, row in graph_df.iterrows():
             if row["symbol"] != "C":
                 continue
             nProtons = row["numProtons"]

@@ -21,7 +21,7 @@ import javaUtils
 
 from functools import lru_cache
 
-from globals import svgDimensions
+from globals import SVG_DIMENSIONS as svgDimensions
 
 XYDIM = 800
 
@@ -83,11 +83,18 @@ class expectedMolecule:
 
         # self.mol.Compute2DCoords()
 
+        # self.svg_str, self.xy3, self.xy3_allatoms = self.create_svg_string(
+        #     molWidth=svgDimensions.MOLWIDTH,
+        #     molHeight=svgDimensions.MOLHEIGHT,
+        #     svgWidth=svgDimensions.SVGWIDTH,
+        #     svgHeight=svgDimensions.SVGHEIGHT,
+        # )
+
         self.svg_str, self.xy3, self.xy3_allatoms = self.create_svg_string(
-            molWidth=svgDimensions.MOLWIDTH,
-            molHeight=svgDimensions.MOLHEIGHT,
-            svgWidth=svgDimensions.SVGWIDTH,
-            svgHeight=svgDimensions.SVGHEIGHT,
+            molWidth=svgDimensions.mol_width,
+            molHeight=svgDimensions.mol_height,
+            svgWidth=svgDimensions.svg_width,
+            svgHeight=svgDimensions.svg_height,
         )
         # print("self.svg_str\n", self.svg_str)
 

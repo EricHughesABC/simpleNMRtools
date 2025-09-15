@@ -36,7 +36,7 @@ from html_from_assignments import NMRProblem
 import jsonUtils
 
 import nmrsolution
-from globals import svgDimensions
+from globals import SVG_DIMENSIONS as svgDimensions
 
 from simulatedAnnealing_v5 import SimulatedAnnealing2
 
@@ -897,10 +897,10 @@ def simpleMNOVA_display_molecule():
         # calculate the shortest paths between all pairs of nodes in the molgraph
         shortest_paths = dict(nx.all_pairs_dijkstra_path_length(solution.molgraph))
 
-        svgWidth = svgDimensions.SVGWIDTH
-        svgHeight = svgDimensions.SVGHEIGHT
-        molWidth = svgDimensions.MOLWIDTH
-        molHeight = svgDimensions.MOLHEIGHT
+        svgWidth = svgDimensions.svg_width
+        svgHeight = svgDimensions.svg_height
+        molWidth = svgDimensions.mol_width
+        molHeight = svgDimensions.mol_height
 
         catoms_df = solution.expected_molecule.molprops_df[
             [

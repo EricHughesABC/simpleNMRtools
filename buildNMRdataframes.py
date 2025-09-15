@@ -5,7 +5,9 @@ from scipy import stats
 
 from networkx.readwrite import json_graph
 
-from excelheaders import excel_orig_df_columns, excel_df_columns
+from excelheaders import EXCEL_DF_COLUMNS as excel_df_columns
+from excelheaders import EXCEL_ORIG_DF_COLUMNS as excel_orig_df_columns
+
 from html_from_assignments import create_cosy_combinations
 from html_from_assignments import create_clipcosy_combinations
 from html_from_assignments import remove_duplicate_cosy_combinations
@@ -19,7 +21,7 @@ from html_from_assignments import create_network_graph
 
 import expectedmolecule
 
-from globals import svgDimensions
+from globals import SVG_DIMENSIONS as svgDimensions
 
 from globals import CARBONSEPARATION
 from globals import PROTONSEPARATION

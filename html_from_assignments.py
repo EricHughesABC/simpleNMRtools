@@ -17,9 +17,9 @@ from rdkit.Chem import Draw
 
 import jinja2
 
-from excelheaders import excel_orig_df_columns
+from excelheaders import EXCEL_ORIG_DF_COLUMNS as excel_orig_df_columns
 
-from globals import svgDimensions
+from globals import SVG_DIMENSIONS as svgDimensions
 
 from globals import CARBONSEPARATION
 from globals import PROTONSEPARATION
