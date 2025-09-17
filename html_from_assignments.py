@@ -1098,20 +1098,6 @@ class NMRProblem:
         else:
             return False
 
-    # def prediction_from_nmrshiftdb2(self):
-    #     """
-    #     Check if the data is a prediction from NMRSHIFTDB2
-    #     """
-
-    #     if (
-    #         self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"]
-    #         == "NMRSHIFTDB2 Predict"
-    #     ):
-    #         print("Prediction from NMRSHIFTDB2")
-    #         return True
-    #     else:
-    #         print("Prediction from MNOVA")
-    #         return False
 
     def prediction_from_nmrshiftdb2(self):
         """
@@ -1128,7 +1114,7 @@ class NMRProblem:
             self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"]
             == "JEOL Predict"
         ):
-            print("Prediction from NMRSHIFTDB2")
+            print("Prediction from JEOL")
             return True
         else:
             print("Prediction from MNOVA")
@@ -1337,7 +1323,7 @@ class NMRProblem:
 
         self.G2 = G2
 
-        jsonGraphData = json_graph.node_link_data(G2)
+        jsonGraphData = json_graph.node_link_data(G2, edges="links")  # added edges='links' for compatibility
 
         self.jinjadata = {
             "svg_container": svg_str,

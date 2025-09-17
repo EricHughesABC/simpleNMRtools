@@ -1352,9 +1352,9 @@ class NMRsolution:
             self.hsqc["f1_i"] = -1
             self.hsqc["f2_i"] = -1
             self.hsqc["f2p_i"] = -1
-            self.hsqc["f1C_i"] = -1
-            self.hsqc["f2H_i"] = -1
-            self.hsqc["f2Cp_i"] = -1
+            self.hsqc["f1C_i"] = "-1"
+            self.hsqc["f2H_i"] = "-1"
+            self.hsqc["f2Cp_i"] = "-1"
             self.hsqc["f2p_ppm"] = -1
 
             self.hsqc["CH2"] = False
@@ -2324,12 +2324,12 @@ class NMRsolution:
 
         # fill in hmbc dataframe
         for i in self.hmbc.index:
-            self.hmbc.loc[i, "f2p_ppm"] = self.hsqcH1ppmC13ppm.get(
+            self.hmbc.loc[i, "f2p_ppm"] = float(self.hsqcH1ppmC13ppm.get(
                 self.hmbc.loc[i, "f2_ppm"]
-            )
-            self.hmbc.loc[i, "f2p_i"] = self.hsqcH1ppmC13index.get(
+            ))
+            self.hmbc.loc[i, "f2p_i"] = int(self.hsqcH1ppmC13index.get(
                 self.hmbc.loc[i, "f2_ppm"]
-            )
+            ))
 
             self.hmbc.loc[i, "f2_i"] = self.H1ppmH1index.get(self.hmbc.loc[i, "f2_ppm"])
             self.hmbc.loc[i, "f1_i"] = self.C13ppmC13index.get(

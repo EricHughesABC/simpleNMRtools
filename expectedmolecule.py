@@ -182,7 +182,8 @@ class expectedMolecule:
         # if mnova_c13predictions is not None then use mnova_c13predictions
         # else use nmrshift2D to calculate C13 NMR chemical shifts
 
-        if (mnova_c13predictions is not None) and (predict_from_nmrshiftdb == False):
+        # if (mnova_c13predictions is not None) and (predict_from_nmrshiftdb == False):
+        if (mnova_c13predictions is not None) and JEOL_predict:
 
             print("=====================================================")
             print("Using mnova_c13predictions to calculate C13 NMR chemical shifts")

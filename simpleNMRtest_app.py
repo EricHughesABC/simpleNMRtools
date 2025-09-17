@@ -224,7 +224,7 @@ def create_database():
     with app.app_context():
         db.create_all()
 
-create_database()
+# create_database() # removed as it is called in __main__
 
 def register_device(email, hostid, license_agreed, ml_consent):
     """Register a new device or update an existing one with consent status"""
@@ -884,7 +884,7 @@ def simpleMNOVA_display_molecule():
             G2, solution.hmbc, solution.h1, solution.c13
         )
 
-        jsonGraphData = json_graph.node_link_data(G2)
+        jsonGraphData = json_graph.node_link_data(G2, edges="links") #added edges="links" for future compatibility
         jsonGraphData["moved_nodes"] = jsonGraphData["nodes"]
 
         # create a network graph of the expected molecule
@@ -892,7 +892,7 @@ def simpleMNOVA_display_molecule():
         solution.initiate_molgraph( json_data, G2)
 
         #  convert the molgraph to a json object
-        jsonGraphData_mol = json_graph.node_link_data(solution.molgraph)
+        jsonGraphData_mol = json_graph.node_link_data(solution.molgraph, edges="links") #added edges="links" for future compatibility
 
         # calculate the shortest paths between all pairs of nodes in the molgraph
         shortest_paths = dict(nx.all_pairs_dijkstra_path_length(solution.molgraph))
