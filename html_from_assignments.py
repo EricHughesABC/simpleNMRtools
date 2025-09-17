@@ -1323,7 +1323,8 @@ class NMRProblem:
 
         self.G2 = G2
 
-        jsonGraphData = json_graph.node_link_data(G2, edges="links")  # added edges='links' for compatibility
+        # jsonGraphData = json_graph.node_link_data(G2, edges="links")  # added edges='links' for compatibility
+        jsonGraphData = json_graph.node_link_data(G2)  # reverted back to original as pythonanywhere lower version
 
         self.jinjadata = {
             "svg_container": svg_str,

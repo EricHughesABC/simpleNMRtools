@@ -884,7 +884,8 @@ def simpleMNOVA_display_molecule():
             G2, solution.hmbc, solution.h1, solution.c13
         )
 
-        jsonGraphData = json_graph.node_link_data(G2, edges="links") #added edges="links" for future compatibility
+        # jsonGraphData = json_graph.node_link_data(G2, edges="links") #added edges="links" for future compatibility
+        jsonGraphData = json_graph.node_link_data(G2) # reverted back to original as edges="links" was causing problems
         jsonGraphData["moved_nodes"] = jsonGraphData["nodes"]
 
         # create a network graph of the expected molecule
@@ -892,7 +893,7 @@ def simpleMNOVA_display_molecule():
         solution.initiate_molgraph( json_data, G2)
 
         #  convert the molgraph to a json object
-        jsonGraphData_mol = json_graph.node_link_data(solution.molgraph, edges="links") #added edges="links" for future compatibility
+        jsonGraphData_mol = json_graph.node_link_data(solution.molgraph) # reverted back to original as edges="links" was causing problems
 
         # calculate the shortest paths between all pairs of nodes in the molgraph
         shortest_paths = dict(nx.all_pairs_dijkstra_path_length(solution.molgraph))
