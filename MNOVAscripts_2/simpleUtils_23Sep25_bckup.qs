@@ -12,14 +12,6 @@ function isSubstring(sub, str) {
     return str.indexOf(sub) !== -1;
 }
 
-
-
-
-
-
-
-
-
 spectra_keys = ["HSQC", 
                     "HMBC", 
                     "COSY", 
@@ -31,30 +23,28 @@ spectra_keys = ["HSQC",
                     "DDEPT_CH3_ONLY", 
                     "SKIP", 
                     "HSQC_CLIPCOSY"];
-                    
 function simpleUtils() {
 
     var doc = Application.mainWindow.activeDocument;
 
+    // simpleUtils.spectra_keys = ["HSQC", 
+    //                     "HMBC", 
+    //                     "COSY", 
+    //                     "NOESY", 
+    //                     "H1_1D", 
+    //                     "C13_1D", 
+    //                     "DEPT135", 
+    //                     "PureShift", 
+    //                     "DDEPT_CH3_ONLY", 
+    //                     "SKIP", 
+    //                     "HSQC_CLIPCOSY"];
+
 }
 
-/**
- * Checks if an object is empty (has no own properties).
- *
- * @param {Object} obj - The object to check.
- * @returns {boolean} True if the object is empty, false otherwise.
- */
 simpleUtils.prototype.isObjectEmpty = function(obj) {
     return Object.keys(obj).length === 0;
 }
 
-/**
- * Gets the active molecule from the document window and molecule plugin.
- *
- * @param {Object} aDocWin - The document window object.
- * @param {Object} aMolPlugin - The molecule plugin object.
- * @returns {Object|undefined} The active molecule object or undefined if not found.
- */
 simpleUtils.prototype.getActiveMolecule = function (aDocWin, aMolPlugin) {
     var molec = aMolPlugin.activeMolecule();
 
@@ -68,12 +58,6 @@ simpleUtils.prototype.getActiveMolecule = function (aDocWin, aMolPlugin) {
     return undefined;
 }	
 
-/**
- * Splits a file path into directory, filename, name, and extension.
- *
- * @param {string} path - The full file path.
- * @returns {Object} An object containing directoryPath, filename, name, and extension.
- */
 simpleUtils.prototype.splitPathAndFilename = function (path) {
     var separatorIndex = path.lastIndexOf('/');
     var directoryPath = path.substring(0, separatorIndex);
@@ -91,12 +75,14 @@ simpleUtils.prototype.splitPathAndFilename = function (path) {
     };
 }
 
-/**
- * Writes a JavaScript object as JSON to a file.
- *
- * @param {Object} data - The data to write.
- * @param {string} filename - The filename to write to.
- */
+        // var json_spectra_string = JSON.stringify(mnova_to_iupac, null, 4);
+        // var fout1 = new File(jsonfilename);
+        // if (fout1.open(File.WriteOnly)) {
+        //     sout1 = new TextStream(fout1, 'UTF-8');
+        //     sout1.writeln(json_spectra_string);
+        // }
+        // fout1.close();   
+
 simpleUtils.prototype.writeAsJsonToFile = function (data, filename) {
 
     print("writing to file ", filename);
@@ -113,12 +99,6 @@ simpleUtils.prototype.writeAsJsonToFile = function (data, filename) {
     fout1.close();
 }
 
-/**
- * Reads JSON data from a file and parses it.
- *
- * @param {string} filename - The filename to read from.
- * @returns {Object|undefined} The parsed JSON object, or undefined if reading fails.
- */
 simpleUtils.prototype.readJsonFromFile = function (filename) {
     var fin = new File(filename);
     var rtn = undefined;
@@ -135,20 +115,15 @@ simpleUtils.prototype.readJsonFromFile = function (filename) {
     return rtn;
 }
 
-/**
- * Identifies all valid spectra in a document.
- *
- * @param {Object} doc - The document object.
- * @returns {Array} Array of valid NMRSpectrum objects.
- */
 simpleUtils.prototype.identifySpectra = function(doc) {
-    var spectra = [];
-    for (var i = 0, pageCount = doc.pageCount(); i < pageCount; i++) {
-        var page = doc.page(i);
-        for (var j = 0, itemCount = page.itemCount(); j < itemCount; j++) {
-            var spec = new NMRSpectrum(page.item(j));
 
-            if (spec.isValid()) {
+    var spectra = [];
+    for (i = 0, pageCount = doc.pageCount(); i < pageCount; i++) {
+        page = doc.page(i);
+        for (j = 0, itemCount = page.itemCount(); j < itemCount; j++) {
+            spec = new NMRSpectrum(page.item(j));
+      
+            if( spec.isValid() ){
                 spectra.push(spec);
             }
         }
@@ -156,13 +131,13 @@ simpleUtils.prototype.identifySpectra = function(doc) {
     return spectra;
 }
 
-/**
- * Finds the first 1D 13C spectrum in a list of spectra.
- *
- * @param {Array} spectra_lst - List of spectra objects.
- * @returns {Object|undefined} The 13C spectrum object, or undefined if not found.
- */
 simpleUtils.prototype.findC13spectrum = function( spectra_lst ) {
+    // find the first 1D 13C spectrum in the list of spectra
+    // parameters
+    //    spectra_lst:  list of spectra
+    // returns
+    //    c13spectrum: the spectrum object
+
     var c13spectrum = undefined;
     for (var i=0; i<spectra_lst.length; i++){
         if (spectra_lst[i].subtype == "predicted, 13C"){
@@ -179,13 +154,13 @@ simpleUtils.prototype.findC13spectrum = function( spectra_lst ) {
     return c13spectrum;
 }
 
-/**
- * Finds the first 1D PureShift spectrum in a list of spectra.
- *
- * @param {Array} spectra_lst - List of spectra objects.
- * @returns {Object|undefined} The PureShift spectrum object, or undefined if not found.
- */
 simpleUtils.prototype.findPureShiftSpectrum = function( spectra_lst ) {
+    // find the first 1D PureShift spectrum in the list of spectra
+    // parameters
+    //    spectra_lst:  list of spectra
+    // returns
+    //    psSpectrum: the spectrum object
+
     var psSpectrum = undefined;
     for (var i=0; i<spectra_lst.length; i++){
         var pulseSequence = spectra_lst[i].getParam("Pulse Sequence");
@@ -200,13 +175,13 @@ simpleUtils.prototype.findPureShiftSpectrum = function( spectra_lst ) {
     return psSpectrum;
 }   
 
-/**
- * Checks if a spectrum has peaks.
- *
- * @param {Object} spectrum - The spectrum object.
- * @returns {boolean} True if the spectrum has peaks, false otherwise.
- */
+
 simpleUtils.prototype.hasPeaks = function(spectrum) {
+    // check if the spectrum has peaks
+    // parameters
+    //    spectrum:  spectrum object
+    // returns
+    //    boolean: true if the spectrum has peaks, false otherwise
     if(spectrum.peaks().count > 0){
         return true;
     }
@@ -215,13 +190,12 @@ simpleUtils.prototype.hasPeaks = function(spectrum) {
     }
 }
 
-/**
- * Checks if a spectrum is a COSY spectrum.
- *
- * @param {Object} spectrum - The spectrum object.
- * @returns {boolean} True if the spectrum is a COSY spectrum, false otherwise.
- */
 simpleUtils.prototype.isCOSY = function(spectrum) {
+    // check if the spectrum is a COSY spectrum
+    // parameters
+    //    spectrum:  spectrum object
+    // returns
+    //    boolean: true if the spectrum is a COSY spectrum, false otherwise
     var pulseSequence = spectrum.getParam("Pulse Sequence");
     // change string to lowercase
     pulseSequence = pulseSequence.toLowerCase();
@@ -233,13 +207,12 @@ simpleUtils.prototype.isCOSY = function(spectrum) {
     }
 }
 
-/**
- * Checks if a spectrum is a HSQC-CLIP-COSY spectrum.
- *
- * @param {Object} spectrum - The spectrum object.
- * @returns {boolean} True if the spectrum is a HSQC-CLIP-COSY spectrum, false otherwise.
- */
 simpleUtils.prototype.isHSQCCLIPCOSY = function(spectrum) {
+    // check if the spectrum is a HSQC-CLIP-COSY spectrum
+    // parameters
+    //    spectrum:  spectrum object
+    // returns
+    //    boolean: true if the spectrum is a HSQC-CLIP-COSY spectrum, false otherwise
     var pulseSequence = spectrum.getParam("Pulse Sequence");
     // change string to lowercase
     pulseSequence = pulseSequence.toLowerCase();
@@ -251,14 +224,15 @@ simpleUtils.prototype.isHSQCCLIPCOSY = function(spectrum) {
     }
 }
 
-/**
- * Checks if a spectrum is a 2D spectrum.
- *
- * @param {Object} spectrum - The spectrum object.
- * @returns {boolean} True if the spectrum is a 2D spectrum, false otherwise.
- */
+// check if the spectrum is a 2D spectrum
 simpleUtils.prototype.is2DSpectrum = function(spectrum) {
-
+    // check if the spectrum is a 2D spectrum
+    // parameters
+    //    spectrum:  spectrum object
+    // returns
+    //    boolean: true if the spectrum is a 2D spectrum, false otherwise
+    
+    print("spectrum type", spectrum.type);
     if(spectrum.dimCount == 2){
         return true;
     }
@@ -268,13 +242,13 @@ simpleUtils.prototype.is2DSpectrum = function(spectrum) {
     }
 }
 
-/**
- * Checks if a spectrum is a HSQC spectrum.
- *
- * @param {Object} spectrum - The spectrum object.
- * @returns {boolean} True if the spectrum is a HSQC spectrum, false otherwise.
- */
+// is HSQC spectrum
 simpleUtils.prototype.isHSQC = function(spectrum) {
+    // check if the spectrum is a HSQC spectrum
+    // parameters
+    //    spectrum:  spectrum object
+    // returns
+    //    boolean: true if the spectrum is a HSQC spectrum, false otherwise
     var pulseSequence = spectrum.getParam("Pulse Sequence");
     // change string to lowercase
     pulseSequence = pulseSequence.toLowerCase();
@@ -287,12 +261,8 @@ simpleUtils.prototype.isHSQC = function(spectrum) {
     }
 }
 
-/**
- * Finds the first HSQC spectrum in a list of spectra.
- *
- * @param {Array} spectra_lst - List of spectra objects.
- * @returns {Object|undefined} The HSQC spectrum object, or undefined if not found.
- */
+// find HSQC spectrum
+
 simpleUtils.prototype.findHSQC = function(spectra_lst) {
     var hsqcSpectrum = undefined;
     for (var i=0; i<spectra_lst.length; i++){

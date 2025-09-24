@@ -4,14 +4,14 @@
 // }
 
 var validHSQCPulseSequenceStrings =  ["hsqcedetgpsisp2.3.ptg",
-                                        "hsqcedetgpsisp2.3",
-                                        "gHSQCAD", 
-                                        "hsqcedetgpsp.3",
-                                        "gHSQC",
-                                        "inv4gp.wu",
-                                        "hsqcetgp",
-                                        "gns_noah3-BSScc.eeh",
-                                        "hsqcedetgpsisp2.4"];
+                                      "hsqcedetgpsisp2.3",
+                                      "gHSQCAD", 
+                                      "hsqcedetgpsp.3",
+                                      "gHSQC",
+                                      "inv4gp.wu",
+                                      "hsqcetgp",
+                                      "gns_noah3-BSScc.eeh",
+                                      "hsqcedetgpsisp2.4"];
 
 var validHMBCPulseSequenceStrings = ["ghmbc.wu", 
                                      "gHMBC", 
@@ -19,8 +19,9 @@ var validHMBCPulseSequenceStrings = ["ghmbc.wu",
                                      "hmbcetgpl3nd.ptg",
                                      "gHMBCAD",
                                      "hmbcgpndqf",
-                                    "gns_noah3-BSScc.eeh",
-                                    "shmbcctetgpl2nd"];
+                                     "gns_noah3-BSScc.eeh",
+                                     "shmbcctetgpl2nd",
+                                     "hmbcgplpndqf"];
 
 var validCOSYCPulseSequenceStrings = ["cosygpqf", 
                                       "cosygp", 
@@ -92,6 +93,9 @@ function identify_spectrum(){
         var spectrumFound = false;
         var exptIdentifiedName = "";
 
+        spectrum["experimentEEH"] = "UNIDENTIFIED";
+        spectrum["pulseSeqIdentified"] = false;
+
         if(ndims == 2){
             var pulseSeqIdentified = false;
             for( var ky in valid2DPulseSequences){
@@ -101,12 +105,12 @@ function identify_spectrum(){
                     spectrumFound = true;
                     exptIdentifiedName = ky;
                     spectrum["experimentEEH"] = ky;
+                    spectrum["pulseSeqIdentified"] = pulseSeqIdentified;
                     break;
                 }
             }
         }
         else if(ndims == 1){
-            var pulseSeqIdentified = false;
             for( var ky in valid1DPulseSequences){
                 if(comparePulseSequence(valid1DPulseSequences[ky], pulseSequence)){
                     if(ky == "H1_1D" && subtype == "1H"){
@@ -130,6 +134,7 @@ function identify_spectrum(){
                     spectrumFound = true;
                     exptIdentifiedName = ky;
                     spectrum["experimentEEH"] = ky;
+                    spectrum["pulseSeqIdentified"] = pulseSeqIdentified;
                     break;
                 }
             }

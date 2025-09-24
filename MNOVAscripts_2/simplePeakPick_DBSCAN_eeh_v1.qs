@@ -1,7 +1,7 @@
 /*globals WebUtilsQT NMRAssignments xy3_dialog Dir brukerExperiments String iupac_dialog server_address MnUi*/
 
 
-function simplePeakPickHSQC_eeh_v1() {
+function simplePeakPick_DBSCAN_eeh_v1() {
 
     function find2DPeaks(f2ppm_list, f1ppm_list, spec2D) {
 
@@ -33,45 +33,47 @@ function simplePeakPickHSQC_eeh_v1() {
                 possiblePeaksData.push([f2ppm_list[j], f1ppm_list[i]]);
             }
         }
+
+        print("Number of possible peaks ", possiblePeaksData.length);
+        print();
     
         var nmr2Dspectrum = spec2D;
         var sLimits = spec2D.getScaleLimits();
     
         var twoDppeaksfound = nmr2Dspectrum.peaks();
         var twoDintegalsfound = nmr2Dspectrum.integrals();
+        print("the number of peaks already  in the 2D spectrum ", twoDppeaksfound.count);
         print("The number of integrals found in the 2D spectrum ", twoDintegalsfound.count);
-    
-         // findout the range of the peak intensiities in order to determine the cutoff height
+        print();
+
+
+        
+         // findout the range of the peak intensities in order to determine the cutoff height
          // create a peaks region
         var peaksRegion = SpectrumRegion( sLimits.fromX, sLimits.toX, sLimits.fromY, sLimits.toY);
         var allPeaksFound = Peaks(nmr2Dspectrum, peaksRegion);
         var allIntegralsFound = Integral(nmr2Dspectrum, peaksRegion);
-
-        print("The number of integrals found ", allIntegralsFound.count);
-        print("The number of peaks found ", allPeaksFound.count);
-        print()
-        print("allIntegralsFound");
-        print(allIntegralsFound);
+    
+        // print("The numbr of integrals found ", allIntegralsFound.count);
+        print("The numbr of peaks found ", allPeaksFound.count);
         print();
 
-
+        // print out the peaks in json format using stringify
+        print("All peaks found in the region in json format \n", JSON.stringify(allPeaksFound));
+        print();
         print(Integral.calculationParams);
 
-        // add peaks to the 2D spectrum
-        nmr2Dspectrum.setPeaks(allPeaksFound);
 
 
-        simpleIntegrate();
-        nmr2Dspectrum.process();
+        //                 // add peaks to the 2D spectrum
+        // var newPeaks = new Peaks();
+        // for( var i = 0; i < allPeaksFound.count; i++ ) {
+        //     var pk = allPeaksFound.at(i);
+        //     newPeaks.append(pk);
+        // }
+        // nmr2Dspectrum.setPeaks(newPeaks);
+        // nmr2Dspectrum.process();
 
-        print("spectrum.count(1): " + nmr2Dspectrum.count(1));
-        print("spectrum.count(2): " + nmr2Dspectrum.count(2));
-        print("spectrum.count(3): " + nmr2Dspectrum.count(3));
-        var fullLimits = nmr2Dspectrum.getFullScaleLimits();
-        print("fullLimits.fromX " + fullLimits.fromX);
-        print("fullLimits.toX " + fullLimits.toX);
-        print("fullLimits.fromY " + fullLimits.fromY);
-        print("fullLimits.toY " + fullLimits.toY);
         
     
          // extract delta(1) and delta(2) values from the peaks
@@ -80,60 +82,97 @@ function simplePeakPickHSQC_eeh_v1() {
             var pk = allPeaksFound.at(i);
             allPeaksData.push([pk.delta(2), pk.delta(1)]);
         }
-        
 
-         // find the possible peaks enclosed in the SLimits
-        var possiblePeaksInRegion = [];
-        for( var i = 0; i < possiblePeaksData.length; i++ ) {
-            var pk = possiblePeaksData[i];
-            if( (pk[0] >= sLimits.fromX) && (pk[0] <= sLimits.toX) && (pk[1] >= sLimits.fromY )&& (pk[1] <= sLimits.toY) ) {
-                possiblePeaksInRegion.push(pk);
-            }
-        }
+            print("All peaks data \n", allPeaksData);
+            print();
 
-        var result = kMeans2D(allPeaksData, possiblePeaksInRegion);
+        var results = dbscan(allPeaksData, 0.02, 1, 'nmr'); // eps=0.02, minPts=2
 
-        
-    
-         // create a list of peaks found from the cluster results
-        for (var i = 0; i < result.clusters.length; i++) {
-            if( result.clusters[i].length > 0 ) {
-                // peak found
-                var pk = new Peak( possiblePeaksInRegion[i][1], possiblePeaksInRegion[i][0], nmr2Dspectrum);
-                twoDppeaksfound.append(pk);
-            }
-        }
+                                // add peaks to the 2D spectrum
 
-        // if the spectrum is a clipcosyhsqc only keep the peaks that have a negative intensity
-        if( simpleutils.isHSQCCLIPCOSY(nmr2Dspectrum) ) {
-            var newPeaks = new Peaks();
-            for( var i = 0; i < twoDppeaksfound.count; i++ ) {
-                var pk = twoDppeaksfound.at(i);
-                if( pk.intensity < 0.0 ) {
-                    newPeaks.append(pk);
-                }
-            }
-            twoDppeaksfound = newPeaks;
+        print();
+        print("Found Peaks");
+        print();
+
+        // var newPeaks = new Peaks();
+        var centroidKeys = Object.keys(results.centroids);
+        for (var i = 0; i < centroidKeys.length; i++) {
+            var clusterId = centroidKeys[i];
+            var centroid = results.centroids[clusterId];
+            print('Cluster ' + clusterId + ' centroid:', centroid);
+
+            // convert to float
+            centroid[0] = parseFloat(centroid[0]);
+            centroid[1] = parseFloat(centroid[1]);
+            var H1ppm = parseFloat(centroid[0]);
+            var C13ppm = parseFloat(centroid[1]);
+            print("Centroid ", i, ": ", H1ppm, C13ppm);
+            var pk = new Peak(C13ppm, H1ppm, nmr2Dspectrum);
+            twoDppeaksfound.append(pk);
         }
-        else if( simpleutils.isCOSY(nmr2Dspectrum) ) {
-            var newPeaks = new Peaks();
-            for( var i = 0; i < twoDppeaksfound.count; i++ ) {
-                var pk = twoDppeaksfound.at(i);
-                if( pk.delta(1) != pk.delta(2) ) {
-                    newPeaks.append(pk);
-                }
-            }
-            twoDppeaksfound = newPeaks;
-        }
-    
-        print("Number of peaks found: ", twoDppeaksfound.count);
-    
-        // add integrals to the peaks
-    
-    
-        // add peaks to the 2D spectrum
+        // for( var i = 0; i < results.centroids.count; i++ ) {
+        //     var centroid = results.centroids.at(i);
+        //     print("Centroid ", i, ": ", centroid[0], centroid[1]);
+        //     var pk = new Peak(centroid[1], centroid[0], nmr2Dspectrum);
+        //     newPeaks.append(pk);
+        // }
         nmr2Dspectrum.setPeaks(twoDppeaksfound);
         nmr2Dspectrum.process();
+
+        // return;
+        //  // find the possible peaks enclosed in the SLimits
+        // var possiblePeaksInRegion = [];
+        // for( var i = 0; i < possiblePeaksData.length; i++ ) {
+        //     var pk = possiblePeaksData[i];
+        //     if( (pk[0] >= sLimits.fromX) && (pk[0] <= sLimits.toX) && (pk[1] >= sLimits.fromY )&& (pk[1] <= sLimits.toY) ) {
+        //         possiblePeaksInRegion.push(pk);
+        //     }
+        // }
+
+        // print("Possible peaks in region \n", possiblePeaksInRegion);
+        // print();
+        // return;
+        //  var result = kMeans2D(allPeaksData, possiblePeaksInRegion);
+    
+        //  // create a list of peaks found from the cluster results
+        // for (var i = 0; i < result.clusters.length; i++) {
+        //     if( result.clusters[i].length > 0 ) {
+        //         // peak found
+        //         var pk = new Peak( possiblePeaksInRegion[i][1], possiblePeaksInRegion[i][0], nmr2Dspectrum);
+        //         twoDppeaksfound.append(pk);
+        //     }
+        // }
+    
+        // // if the spectrum is a clipcosyhsqc only keep the peaks that have a negative intensity
+        // if( simpleutils.isHSQCCLIPCOSY(nmr2Dspectrum) ) {
+        //     var newPeaks = new Peaks();
+        //     for( var i = 0; i < twoDppeaksfound.count; i++ ) {
+        //         var pk = twoDppeaksfound.at(i);
+        //         if( pk.intensity < 0.0 ) {
+        //             newPeaks.append(pk);
+        //         }
+        //     }
+        //     twoDppeaksfound = newPeaks;
+        // }
+        // else if( simpleutils.isCOSY(nmr2Dspectrum) ) {
+        //     var newPeaks = new Peaks();
+        //     for( var i = 0; i < twoDppeaksfound.count; i++ ) {
+        //         var pk = twoDppeaksfound.at(i);
+        //         if( pk.delta(1) != pk.delta(2) ) {
+        //             newPeaks.append(pk);
+        //         }
+        //     }
+        //     twoDppeaksfound = newPeaks;
+        // }
+    
+        // print("Number of peaks found: ", twoDppeaksfound.count);
+    
+        // // add integrals to the peaks
+    
+    
+        // // add peaks to the 2D spectrum
+        // nmr2Dspectrum.setPeaks(twoDppeaksfound);
+        // nmr2Dspectrum.process();
     
     }
 
@@ -231,18 +270,11 @@ function simplePeakPickHSQC_eeh_v1() {
     if (hsqc_idx != -1) {
         hsqcspec = spectra_lst[hsqc_idx];
     }
-    else{
-        return -1;
-    }
 
  
     var simpleutils = new simpleUtils();
     // var spectra = simpleutils.identifySpectra(doc);
     var c13spec = simpleutils.findC13spectrum(spectra_lst);
-    var pshift = simpleutils.findPureShiftSpectrum(spectra_lst);
-
-    var c13peaksList = [];
-    var protonPeaksList = [];
 
     if( c13spec == undefined){
         MessageBox.warning("No C13 1D spectrum found");
@@ -252,24 +284,25 @@ function simplePeakPickHSQC_eeh_v1() {
         MessageBox.warning("No peaks found in C13 1D spectrum");
         return;
     }
-
-
-    var c13peaks = c13spec.peaks();
-    for (var i = 0; i < c13peaks.count; i++) {
-        var pk = c13peaks.at(i);
-        c13peaksList.push(pk.delta(1));
+    else {
+        var c13peaksList = [];
+        var c13peaks = c13spec.peaks();
+        for (var i = 0; i < c13peaks.count; i++) {
+            var pk = c13peaks.at(i);
+            c13peaksList.push(pk.delta(1));
+        }
     }
     
 
     // MessageBox.information("Carbon Spectrum Found");
 
-    
+    var pshift = simpleutils.findPureShiftSpectrum(spectra_lst);
     if(pshift == undefined && hsqcspec == undefined){
         MessageBox.warning("No Proton peaks defined");
         return
     }
 
-    
+    var protonPeaksList = [];
     if(pshift != undefined && pshift.peaks().count > 0){
         if (pshift.peaks().count > 0 ) {
             // creat protons peaks list from the pshift spectrum
@@ -313,11 +346,13 @@ function simplePeakPickHSQC_eeh_v1() {
     // MessageBox.information("Find 2D Peaks Function finished");
 }
  
+ 
 
 
-//  if (this.MnUi && MnUi.simpleNMRtools) {
-// 	MnUi.simpleNMRtools.simpleNMRtools_simplePeakPick_eeh = simplePeakPick_eeh;
-// }
+
+ if (this.MnUi && MnUi.simpleNMRtools) {
+	MnUi.simpleNMRtools.simpleNMRtools_simplePeakPick_eeh = simplePeakPick_eeh;
+}
 
 
 

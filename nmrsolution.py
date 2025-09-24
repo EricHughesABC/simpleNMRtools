@@ -483,7 +483,14 @@ class NMRsolution:
                 self.nmrsolution_error_code = 401
                 return
 
-            if (len(self.dept_df) != mol.num_carbon_atoms_with_protons) and (len(self.dept_df) != mol.num_sym_carbon_atoms_with_protons):
+            # check if the number of dept rows equals the number of protonated carbons in molprops_df
+            print()
+            print("len(self.dept_df)", len(self.dept_df))
+            print("mol.num_carbon_atoms_with_protons", mol.num_carbon_atoms_with_protons)
+            print("mol.num_sym_carbon_atoms_with_protons", mol.num_sym_carbon_atoms_with_protons)
+            print()
+
+            if (len(self.dept_df) > mol.num_carbon_atoms_with_protons) or (len(self.dept_df) < mol.num_sym_carbon_atoms_with_protons):
                 self.nmrsolution_failed = True
                 self.nmrsolution_error_message = "<p> Please check the number of carbon peaks in the DEPT data as the number does not equal to the number of protonated carbons in the given molecule</p>"
                 self.nmrsolution_error_code = 401

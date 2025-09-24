@@ -1118,7 +1118,8 @@ class NMRProblem:
             return True
         else:
             print("Prediction from MNOVA")
-            return False        
+            return False  
+              
     def JEOL_prediction_used(self):
         """
         Check if the data is a prediction from JEOL
@@ -1130,8 +1131,14 @@ class NMRProblem:
         ):
             print("Prediction from JEOL")
             return True
+        elif (
+            self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"]
+            == "MNOVA Predict"
+        ):
+            print("Prediction from MNOVA")
+            return True
         else:
-            print("Prediction from MNOVA or NMRSHIFTDB2")
+            print("Prediction from NMRSHIFTDB2")
             return False
 
     def add_missing_spectra(self):

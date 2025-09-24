@@ -10,21 +10,6 @@ function simplePeakPick_eeh() {
         print("f2ppm_list ", f2ppm_list);
         print("f1ppm_list ", f1ppm_list);
      
-        // var f2peaks = f2spec.peaks();
-        // var f1peaks = f1spec.peaks();
-    
-        // // get the peak ppm values from the f2 peaks
-        // var f2ppm_list = [];
-        // for( var i = 0; i < f2peaks.length; i++ ) {
-        //     var pk = f2peaks.at(i);
-        //     f2ppm_list.push(pk.delta(1));
-        // }
-    
-        // var f1ppm_list = [];
-        // for( var i = 0; i < f1peaks.length; i++ ) {
-        //     var pk = f1peaks.at(i);
-        //     f1ppm_list.push(pk.delta(1));
-        // }
      
         // create an array of f1ppm and f2ppm coordinates
         var possiblePeaksData = [];
@@ -87,6 +72,7 @@ function simplePeakPick_eeh() {
             }
             twoDppeaksfound = newPeaks;
         }
+        // if the spectrum is a cosy only keep the peaks that are not on the diagonal
         else if( simpleutils.isCOSY(nmr2Dspectrum) ) {
             var newPeaks = new Peaks();
             for( var i = 0; i < twoDppeaksfound.count; i++ ) {
@@ -99,7 +85,25 @@ function simplePeakPick_eeh() {
         }
     
         print("Number of peaks found: ", twoDppeaksfound.count);
-    
+
+        // Create sorted index array (keeps original object intact)
+        var sortedIndices = [];
+        for(var i = 0; i < twoDppeaksfound.count; i++) {
+            sortedIndices.push(i);
+        }
+
+        // Sort indices by peak intensity
+        sortedIndices.sort(function(a, b) {
+            var pkA = twoDppeaksfound.at(a);
+            var pkB = twoDppeaksfound.at(b);
+            return pkB.intensity - pkA.intensity;
+        });
+
+        // Print using sorted indices
+        for(var i = 0; i < sortedIndices.length; i++) {
+            var pk = twoDppeaksfound.at(sortedIndices[i]);
+            print("Peak ", i+1, ": F2 (ppm) = ", pk.delta(2), ", F1 (ppm) = ", pk.delta(1), ", Intensity = ", pk.intensity);
+        }
         // add integrals to the peaks
     
     
@@ -280,9 +284,6 @@ function simplePeakPick_eeh() {
 }
  
  
-
-
-
  if (this.MnUi && MnUi.simpleNMRtools) {
 	MnUi.simpleNMRtools.simpleNMRtools_simplePeakPick_eeh = simplePeakPick_eeh;
 }

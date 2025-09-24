@@ -1,3 +1,5 @@
+
+
 // DBSCAN Clustering Implementation - ES5 Compatible
 function DBSCAN(eps, minPts) {
   this.eps = eps || 0.5;        // Maximum distance between two points to be neighbors
@@ -106,6 +108,57 @@ DBSCAN.prototype.fit = function(dataset) {
   return labels;
 };
 
+// Calculate centroids for each cluster
+DBSCAN.prototype.getCentroids = function(dataset, labels) {
+  var centroids = {};
+  var clusterSums = {};
+  var clusterCounts = {};
+  var i, j, label;
+
+  // Initialize sums and counts for each cluster
+  for (i = 0; i < labels.length; i++) {
+    label = labels[i];
+    
+    // Skip noise points (label -2)
+    if (label <= 0) continue;
+    
+    if (!clusterSums[label]) {
+      clusterSums[label] = [];
+      clusterCounts[label] = 0;
+      
+      // Initialize sum array with zeros for each dimension
+      for (j = 0; j < dataset[i].length; j++) {
+        clusterSums[label][j] = 0;
+      }
+    }
+  }
+
+  // Sum up all points in each cluster
+  for (i = 0; i < labels.length; i++) {
+    label = labels[i];
+    
+    // Skip noise points
+    if (label <= 0) continue;
+    
+    for (j = 0; j < dataset[i].length; j++) {
+      clusterSums[label][j] += dataset[i][j];
+    }
+    clusterCounts[label]++;
+  }
+
+  // Calculate centroids by dividing sums by counts
+  for (label in clusterSums) {
+    if (clusterSums.hasOwnProperty(label)) {
+      centroids[label] = [];
+      for (j = 0; j < clusterSums[label].length; j++) {
+        centroids[label][j] = clusterSums[label][j] / clusterCounts[label];
+      }
+    }
+  }
+
+  return centroids;
+};
+
 // Convenience method to get clusters as arrays of points
 DBSCAN.prototype.fitPredict = function(dataset) {
   var labels = this.fit(dataset);
@@ -129,58 +182,85 @@ DBSCAN.prototype.fitPredict = function(dataset) {
   return { clusters: clusters, noise: noise, labels: labels };
 };
 
-// // Standard scaler function
-// function standardScale(data) {
-//     if (data.length === 0) return data;
-    
-//     var scaled = [];
-//     var means = [];
-//     var stds = [];
-    
-//     // Calculate means for each dimension
-//     for (var dim = 0; dim < data[0].length; dim++) {
-//         var sum = 0;
-//         for (var i = 0; i < data.length; i++) {
-//             sum += data[i][dim];
-//         }
-//         means[dim] = sum / data.length;
-//     }
-    
-//     // Calculate standard deviations
-//     for (var dim = 0; dim < data[0].length; dim++) {
-//         var sumSquaredDiffs = 0;
-//         for (var i = 0; i < data.length; i++) {
-//             sumSquaredDiffs += Math.pow(data[i][dim] - means[dim], 2);
-//         }
-//         stds[dim] = Math.sqrt(sumSquaredDiffs / data.length);
-//         // Avoid division by zero
-//         if (stds[dim] === 0) stds[dim] = 1;
-//     }
-    
-//     // Scale the data
-//     for (var i = 0; i < data.length; i++) {
-//         var scaledPoint = [];
-//         for (var dim = 0; dim < data[i].length; dim++) {
-//             scaledPoint[dim] = (data[i][dim] - means[dim]) / stds[dim];
-//         }
-//         scaled.push(scaledPoint);
-//     }
-    
-//     return scaled;
-// }
+// Enhanced method that includes centroids in the result
+DBSCAN.prototype.fitPredictWithCentroids = function(dataset) {
+  var labels = this.fit(dataset);
+  var clusters = {};
+  var noise = [];
+  var centroids = this.getCentroids(dataset, labels);
+  var i;
 
+  for (i = 0; i < labels.length; i++) {
+    var label = labels[i];
+    
+    if (label === -2) {
+      noise.push({ point: dataset[i], index: i });
+    } else {
+      if (!clusters[label]) {
+        clusters[label] = [];
+      }
+      clusters[label].push({ point: dataset[i], index: i });
+    }
+  }
+
+  return { 
+    clusters: clusters, 
+    noise: noise, 
+    labels: labels, 
+    centroids: centroids 
+  };
+};
 
 // Example usage:
-var dbscan = new DBSCAN(1.0, 2); // eps=1.0, minPts=3
+function dbscan(data) {
+  // if no data set dat to data2
+  if (data === undefined) {
+    data = [
+      [8.0827, 129.55],
+      [8.0723, 129.55],
+      [7.5807, 132.78],
+      [7.5693, 132.78],
+      [7.5594, 132.78],
+      [7.4670, 128.38],
+      [7.4576, 128.38],
+      [7.4488, 128.38]
+    ];
+  }  
+  var dbscan1 = new DBSCAN(1.0, 1); // eps=1.0, minPts=2
 
-// Sample 2D dataset
-var data = [
-  [0, 0], [1, 1], [2, 0], [8, 7], [8, 8], [25, 80],
-  [0.5, 0.5], [1.5, 1.5], [9, 9], [10, 8], [7, 9]
-];
+  // // Sample 2D dataset
+  // var data = [
+  //   [0, 0], [1, 1], [2, 0], [8, 7], [8, 8], [25, 80],
+  //   [0.5, 0.5], [1.5, 1.5], [9, 9], [10, 8], [7, 9]
+  // ];
 
-var result = dbscan.fitPredict(data);
+  // // HSQC data
+  // var data2 = [
+  //   [8.0827, 129.55],
+  //   [8.0723, 129.55],
+  //   [7.5807, 132.78],
+  //   [7.5693, 132.78],
+  //   [7.5594, 132.78],
+  //   [7.4670, 128.38],
+  //   [7.4576, 128.38],
+  //   [7.4488, 128.38]
+  // ];
+  
+  // Using the new method with centroids
+  var result = dbscan1.fitPredictWithCentroids(data);
+  
+  print('Clusters:', result.clusters);
+  print('Noise points:', result.noise);
+  print('Labels:', result.labels);
+  print('Centroids:', result.centroids);
+  print('Number of clusters:', Object.keys(result.clusters).length);
+  print('Number of centroids:', Object.keys(result.centroids).length);
+  
+  // // Or use the standalone centroid calculation
+  // var labels = dbscan1.fit(data);
+  // var centroids = dbscan1.getCentroids(data, labels);
+  // print('Standalone centroids:', centroids);
 
-print('Clusters:', result.clusters);
-print('Noise points:', result.noise);
-print('Labels:', result.labels);
+  return result;
+}
+
