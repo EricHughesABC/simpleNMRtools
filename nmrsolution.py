@@ -59,6 +59,8 @@ class NMRsolution:
         self.pureshift_df = problemdata_json.dataframes["H1_pureshift"]
         self.c13_df = problemdata_json.dataframes["C13_1D"]
 
+        self.dept135_not_used_to_solve_problem = True
+
         print("self.c13_df\n", self.c13_df)
 
         # if hsqc_df is empty then return
@@ -549,6 +551,8 @@ class NMRsolution:
                     # set the intensity to -1 for all prob values greater than 0.0
                     self.hsqc_df.loc[self.hsqc_df["prob"] > 0.0, "intensity"] = -1.0
                     self.hsqc_df["prob"] = 0.0
+
+            self.dept135_not_used_to_solve_problem = False
 
     def find_and_group_CH2s(self, df1):
         """
@@ -1569,15 +1573,16 @@ class NMRsolution:
             #  skip if no CH3CH1 groups in HSQC
             return
         
-        if num_CH3CH1_hsqc > CH3CH1_mol_df.shape[0]:
-            #  if more CH3CH1 groups in HSQC than expected molecule then we have a problem
-            print(
-                "more CH3CH1 groups in HSQC than expected molecule, this is a problem"
-            )
-            self.nmrsolution_failed = True
-            self.nmrsolution_error_message = "CH3CH1 HSQC > CH3CH1 expected molecule"
-            self.nmrsolution_error_code = 401
-            return
+        if self.dept135_not_used_to_solve_problem:
+            if num_CH3CH1_hsqc > CH3CH1_mol_df.shape[0]:
+                #  if more CH3CH1 groups in HSQC than expected molecule then we have a problem
+                print(
+                    "more CH3CH1 groups in HSQC than expected molecule, this is a problem"
+                )
+                self.nmrsolution_failed = True
+                self.nmrsolution_error_message = "CH3CH1 HSQC > CH3CH1 expected molecule"
+                self.nmrsolution_error_code = 401
+                return
 
         #  check if CH3 groups already assigned and if so assign CH1 groups
         if (CH3_mol_df.shape[0] > 0) and hsqc.CH3.sum() > 0:
