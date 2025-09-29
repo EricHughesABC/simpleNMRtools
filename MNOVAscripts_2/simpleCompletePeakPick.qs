@@ -15,8 +15,6 @@ function simpleCompletePeakPick() {
 
     var nmr2Dspec = new NMRSpectrum(nmr.activeSpectrum());
 
-
-
     // if not 2D spectrum, exit with message
     if(!simpleutils.is2DSpectrum(nmr2Dspec)){
         return;
