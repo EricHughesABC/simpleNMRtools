@@ -20,8 +20,24 @@ def warning_dialog(return_message, title_message, qstarted=True):
 
 
 class NMRsolution:
-    def __init__(self, problemdata_json: NMRProblem):
+    """
+    Represents a solution for NMR experiment data analysis and assignment.
 
+    This class manages the processing, assignment, and validation of NMR experiment data,
+    including HSQC, HMBC, COSY, DEPT, and related spectra. It provides methods to initialize,
+    process, and assign group information (CH3, CH2, CH1, etc.) to experimental and predicted
+    dataframes, and to synchronize and validate assignments for downstream NMR structure elucidation.
+    """
+    def __init__(self, problemdata_json: NMRProblem):
+        """
+        Initializes the NMRsolution object with experimental and predicted NMR data.
+
+        Sets up internal dataframes and variables for NMR experiment analysis, checks for required experiments,
+        and prepares the solution for further assignment and validation steps.
+        
+        Args:
+            problemdata_json (NMRProblem): The NMR problem data containing experimental and predicted spectra.
+        """
         self.exact_ppm_values = problemdata_json.exact_ppm_values
 
         self.qtstarted = False
@@ -114,7 +130,21 @@ class NMRsolution:
         # print("self.hsqc_df after check_hsqc_assign_CH2_from_DEPT\n", self.hsqc_df)
         # print(self.hsqc_df)
 
-    def initiate_molgraph(self, json_data, G2):
+    def initiate_molgraph(
+        self, 
+        json_data: dict, 
+        G2: nx.Graph
+    ) -> None:
+        """
+        Initializes a molecular graph representation for the current molecule.
+
+        Constructs a NetworkX graph with nodes for each atom and edges for each bond,
+        assigning atom properties and chemical shift (ppm) values from provided data.
+        
+        Args:
+            json_data (dict): JSON data containing calculation method and related information.
+            G2 (networkx.Graph): Reference graph with atom properties and ppm values.
+        """
         # Create a new NetworkX graph
         molgraph = nx.Graph()
 
@@ -149,7 +179,6 @@ class NMRsolution:
         for node in molgraph.nodes():
             molgraph.nodes[node]["ppm"] = 10000
 
-
         for node in molgraph.nodes():
 
             G2_node = node + nodes_offset
@@ -176,6 +205,15 @@ class NMRsolution:
         self.molgraph = molgraph
 
     def assign_CH3_CH2_CH1_overall(self):
+        """
+        Assigns CH3, CH2, and CH1 group information to the HSQC dataframe using multiple strategies.
+
+        This function attempts to annotate all relevant groups in the HSQC data by applying assignment methods
+        in sequence, and returns a status message and code indicating success or failure.
+        
+        Returns:
+            tuple: ("ok", 200) if assignment is successful, or (error_message, 400) if assignment fails.
+        """
 
         self.assign_CH3_CH2_CH1_in_HSQC_using_Assignments()
 
@@ -205,6 +243,15 @@ class NMRsolution:
             return "ok", 200
 
     def initialise_prior_to_carbon_assignment(self):
+        """
+        Prepares and aligns carbon-13 (C13) and molecular property dataframes for assignment.
+
+        This function sorts and matches experimental and predicted C13 data, determines the appropriate
+        molecular property dataframe to use, and handles mismatches by generating an error table if necessary.
+
+        Returns:
+            tuple: ("ok", 200) if assignment is successful, or (rendered_html, 400) if an error occurs.
+        """
 
         self.c13 = self.c13.sort_values("ppm", ascending=False, ignore_index=True)
         c13 = self.c13
@@ -441,15 +488,6 @@ class NMRsolution:
         """
         mol = self.expected_molecule
 
-        print("check_hsqc_assign_CH2_from_DEPT135")
-        print("self.hsqc_df.shape[0]", self.hsqc_df.shape[0])
-        print("self.dept_df.shape[0]", self.dept_df.shape[0])
-        print("mol.num_carbon_atoms_with_protons", mol.num_carbon_atoms_with_protons)
-
-        print(
-            "self.hsqc_df.shape[0] == self.dept_df.shape[0]",
-            self.hsqc_df.shape[0] == self.dept_df.shape[0],
-        )
 
         # check if mol has CH2 in dataframe then does hsqc have some negative intensities
         if (
@@ -554,7 +592,7 @@ class NMRsolution:
 
             self.dept135_not_used_to_solve_problem = False
 
-    def find_and_group_CH2s(self, df1):
+    def find_and_group_CH2s(self, df1: pd.DataFrame) -> tuple[list[list[int]], list[list[float]]]:
         """
         Groups CH2 resonances in the provided DataFrame based on their chemical shift proximity.
 
@@ -637,8 +675,13 @@ class NMRsolution:
         return unique_idxs, unique_ch2s
 
     def create_svg_string(
-        self, mol, molWidth=1000, molHeight=600, svgWidth=1200, svgHeight=700
-    ):
+                self,
+                mol,
+                molWidth: int = 1000,
+                molHeight: int = 600,
+                svgWidth: int = 1200,
+                svgHeight: int = 700
+            ) -> tuple[str, dict[int, tuple[float, float]]]:
         """
         Generates an SVG string representation of a molecule and computes normalized coordinates for carbon atoms.
 
@@ -2507,7 +2550,23 @@ class NMRsolution:
 
         return hsqc_clipcosy
 
-    def process_hsqc_clipcosy(self, df, hsqc):
+    def process_hsqc_clipcosy(
+        self, 
+        df: pd.DataFrame, 
+        hsqc: pd.DataFrame
+    ) -> pd.DataFrame:
+        """
+        Adds index and group information to the HSQC-CLIP-COSY DataFrame using corresponding indices from the HSQC DataFrame.
+
+        This function populates the HSQC-CLIP-COSY DataFrame with index columns and group assignments by matching chemical shifts to the HSQC DataFrame.
+
+        Args:
+            df (pd.DataFrame): The HSQC-CLIP-COSY DataFrame to process.
+            hsqc (pd.DataFrame): The HSQC DataFrame used for index and group assignment.
+
+        Returns:
+            pd.DataFrame: The processed HSQC-CLIP-COSY DataFrame with added indices and group columns.
+        """
         if df.empty:
             return df
         ## adds indices to the hsqc_clipcosy dataframe using corresponding indices from hsqc dataframe
@@ -2544,16 +2603,41 @@ class NMRsolution:
 
         return df
 
-    def find_nearest(self, array, value):
+    def find_nearest(self, array: list[float], value: float) -> float:
+        """
+        Finds the value in the array that is closest to the specified target value.
+
+        This function returns the array element with the smallest absolute difference to the given value.
+
+        Args:
+            array (list[float]): The list or array of float values to search.
+            value (float): The target value to find the nearest neighbor for.
+
+        Returns:
+            float: The value from the array that is closest to the target value.
+        """
         array = np.asarray(array)
         idx = (np.abs(array - value)).argmin()
         return array[idx]
 
 
-def copy_over_values_c13_all_to_hetero2D(df, c13_all):
+def copy_over_values_c13_all_to_hetero2D(
+    df: pd.DataFrame, c13_all: pd.DataFrame
+) -> pd.DataFrame:
     """
-    Copy over values from c13_all to hmbc dataframe
+    Copies atom and symmetry information from the c13_all DataFrame to the heteronuclear 2D DataFrame.
+
+    This function adds columns for atom indices, symmetry indices, atom numbers, and coordinates to the input DataFrame,
+    and populates them by matching chemical shift values (ppm) with those in the c13_all DataFrame.
+
+    Args:
+        df (pd.DataFrame): The heteronuclear 2D DataFrame to update.
+        c13_all (pd.DataFrame): The C13 DataFrame containing atom and symmetry information.
+
+    Returns:
+        pd.DataFrame: The updated heteronuclear 2D DataFrame with copied atom and symmetry values.
     """
+
     if df.empty:
         columns = list(df.columns)
         columns.append("f1_atom_idx")
@@ -2650,7 +2734,23 @@ def copy_over_values_c13_all_to_homo2D(df, c13_all):
     return df
 
 
-def create_network_graph(c13, h1):
+def create_network_graph(
+    c13: pd.DataFrame, 
+    h1: pd.DataFrame
+) -> nx.Graph:
+    """
+    Creates a molecular network graph from C13 and H1 DataFrames.
+
+    This function generates a NetworkX graph where each node represents an atom from the C13 and H1 data,
+    with node attributes for chemical properties and coordinates. Proton ppm values are also added to the corresponding nodes.
+
+    Args:
+        c13 (pd.DataFrame): DataFrame containing C13 atom information.
+        h1 (pd.DataFrame): DataFrame containing H1 atom information.
+
+    Returns:
+        nx.Graph: A NetworkX graph with nodes for each atom in the input DataFrames.
+    """
 
     # create nodes of graph
     G2 = nx.Graph()
@@ -2708,7 +2808,20 @@ def create_network_graph(c13, h1):
     return G2
 
 
-def assign_jcouplings(df1, df2):
+def assign_jcouplings(df1: pd.DataFrame, df2: pd.DataFrame) -> pd.DataFrame:
+    """
+    Assigns J-coupling values and classes from one DataFrame to another based on matching indices.
+
+    This function sorts both input DataFrames by chemical shift, then copies J-coupling values and classes
+    from the second DataFrame to the first, provided the DataFrames are of equal length and contain the necessary columns.
+
+    Args:
+        df1 (pd.DataFrame): The DataFrame to which J-coupling values and classes will be assigned.
+        df2 (pd.DataFrame): The DataFrame providing J-coupling values and classes.
+
+    Returns:
+        pd.DataFrame: The updated DataFrame with assigned J-coupling values and classes.
+    """
     # check if h1_1d is the same length as h1 and proceed
     if len(df1) != len(df2):
         return df1
@@ -2740,7 +2853,23 @@ def assign_jcouplings(df1, df2):
     return df1
 
 
-def assign_jcouplings_to_c13(c13, hsqc):
+def assign_jcouplings_to_c13(
+    c13: pd.DataFrame, 
+    hsqc: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    Assigns J-coupling values and classes from the HSQC DataFrame to the C13 DataFrame based on atom indices.
+
+    This function initializes J-coupling columns in the C13 DataFrame and populates them by matching atom indices
+    with those in the HSQC DataFrame, copying over the corresponding J-coupling values and classes.
+
+    Args:
+        c13 (pd.DataFrame): The C13 DataFrame to update with J-coupling information.
+        hsqc (pd.DataFrame): The HSQC DataFrame containing J-coupling values and classes.
+
+    Returns:
+        pd.DataFrame: The updated C13 DataFrame with assigned J-coupling values and classes.
+    """
 
     c13["jCouplingVals"] = ""
     c13["jCouplingClass"] = ""
@@ -2758,6 +2887,19 @@ def assign_jcouplings_to_c13(c13, hsqc):
 
 
 def create_cosy_combinations(cosy: pd.DataFrame, h1: pd.DataFrame) -> dict:
+    """
+    Generates all possible COSY cross-peak combinations between pairs of protons.
+
+    This function creates a dictionary mapping each unique pair of proton chemical shifts (ppm)
+    to all possible atom and symmetry index combinations, including their coordinates, based on the input COSY and H1 DataFrames.
+
+    Args:
+        cosy (pd.DataFrame): The COSY DataFrame containing cross-peak information.
+        h1 (pd.DataFrame): The H1 DataFrame containing atom and coordinate information.
+
+    Returns:
+        dict: A dictionary where keys are (f1_ppm, f2_ppm) tuples and values are lists of possible atom/symmetry/coordinate combinations.
+    """
     cosy_combinations = {}
     for i, row in cosy.iterrows():
         # find the rows in h1 that have the same ppm vaslue as the f1_ppm value in the row
@@ -2788,6 +2930,18 @@ def create_cosy_combinations(cosy: pd.DataFrame, h1: pd.DataFrame) -> dict:
 
 
 def remove_duplicate_cosy_combinations(cosy_combinations: dict) -> dict:
+    """
+    Removes duplicate COSY cross-peak combinations that represent intersecting edges in groups of four.
+
+    This function filters out intersecting COSY edge combinations from the input dictionary, retaining only non-intersecting pairs
+    for each key. If a group contains four combinations, only non-intersecting pairs are kept; otherwise, all combinations are retained.
+
+    Args:
+        cosy_combinations (dict): A dictionary of COSY cross-peak combinations.
+
+    Returns:
+        dict: A filtered dictionary with duplicate or intersecting COSY combinations removed.
+    """
     # remove any cosy edges that cross in groups of 4
     keep = {}
 
@@ -2813,6 +2967,19 @@ def remove_duplicate_cosy_combinations(cosy_combinations: dict) -> dict:
 
 
 def create_clipcosy_combinations(cosy: pd.DataFrame, h1: pd.DataFrame) -> dict:
+    """
+    Generates all possible CLIP-COSY cross-peak combinations between pairs of protons.
+
+    This function creates a dictionary mapping each unique pair of proton chemical shifts (ppm)
+    to all possible atom and symmetry index combinations, including their coordinates, based on the input CLIP-COSY and H1 DataFrames.
+
+    Args:
+        cosy (pd.DataFrame): The CLIP-COSY DataFrame containing cross-peak information.
+        h1 (pd.DataFrame): The H1 DataFrame containing atom and coordinate information.
+
+    Returns:
+        dict: A dictionary where keys are (f1_ppm, f2_ppm) tuples and values are lists of possible atom/symmetry/coordinate combinations.
+    """
     cosy_combinations = {}
     for i, row in cosy.iterrows():
         # find the rows in h1 that have the same ppm vaslue as the f1_ppm value in the row
@@ -2842,6 +3009,19 @@ def create_clipcosy_combinations(cosy: pd.DataFrame, h1: pd.DataFrame) -> dict:
 
 
 def add_cosy_edges_to_graph(G2: nx.Graph, keep: dict) -> nx.Graph:
+    """
+    Adds COSY edges to the molecular network graph based on provided combinations.
+
+    This function iterates through the provided dictionary of COSY combinations and adds edges
+    between nodes in the graph, marking each edge with a 'cosy' attribute set to True.
+
+    Args:
+        G2 (nx.Graph): The molecular network graph to update.
+        keep (dict): A dictionary of COSY combinations to add as edges.
+
+    Returns:
+        nx.Graph: The updated graph with COSY edges added.
+    """
 
     # add cosy edges to graph
     for k, v in keep.items():
@@ -2860,6 +3040,19 @@ def add_cosy_edges_to_graph(G2: nx.Graph, keep: dict) -> nx.Graph:
 
 
 def add_clipcosy_edges_to_graph(G2: nx.Graph, keep: dict) -> nx.Graph:
+    """
+    Adds CLIP-COSY edges to the molecular network graph based on provided combinations.
+
+    This function iterates through the provided dictionary of CLIP-COSY combinations and adds edges
+    between nodes in the graph, marking each edge with a 'cosy' attribute set to True.
+
+    Args:
+        G2 (nx.Graph): The molecular network graph to update.
+        keep (dict): A dictionary of CLIP-COSY combinations to add as edges.
+
+    Returns:
+        nx.Graph: The updated graph with CLIP-COSY edges added.
+    """
 
     # add cosy edges to graph
     for k, v in keep.items():
@@ -2881,8 +3074,21 @@ def add_all_hmbc_edges_to_graph(
     G2, hmbc: pd.DataFrame, h1_all: pd.DataFrame, c13_sorted: pd.DataFrame
 ):
     """
-    Add edges to the graph G2 from the hmbc dataframe
+    Adds all HMBC edges to the molecular network graph using the provided HMBC, H1, and C13 data.
+
+    This function updates the graph by adding edges corresponding to HMBC correlations between protons and carbons,
+    utilizing the full set of H1 and sorted C13 dataframes.
+
+    Args:
+        G2 (nx.Graph): The molecular network graph to update.
+        hmbc (pd.DataFrame): The HMBC DataFrame containing cross-peak information.
+        h1_all (pd.DataFrame): The H1 DataFrame with all proton information.
+        c13_sorted (pd.DataFrame): The sorted C13 DataFrame.
+
+    Returns:
+        nx.Graph: The updated graph with HMBC edges added.
     """
+
     G2 = add_hmbc_edges_to_graph(G2, hmbc, h1_all, c13_sorted)
 
     return G2
@@ -2891,6 +3097,21 @@ def add_all_hmbc_edges_to_graph(
 def add_hmbc_edges_to_graph(
     G2: nx.Graph, hmbc: pd.DataFrame, h1: pd.DataFrame, c13: pd.DataFrame
 ) -> nx.Graph:
+    """
+    Adds HMBC edges to the molecular network graph using the provided HMBC, H1, and C13 data.
+
+    This function iterates through the HMBC DataFrame and adds edges to the graph between protons and carbons
+    based on matching chemical shifts, marking each edge with an 'hmbc' attribute set to True.
+
+    Args:
+        G2 (nx.Graph): The molecular network graph to update.
+        hmbc (pd.DataFrame): The HMBC DataFrame containing cross-peak information.
+        h1 (pd.DataFrame): The H1 DataFrame with proton information.
+        c13 (pd.DataFrame): The C13 DataFrame with carbon information.
+
+    Returns:
+        nx.Graph: The updated graph with HMBC edges added.
+    """
     # add HMBC edges to G2
     print("Adding HMBC edges 1")
     count = 0
@@ -2919,8 +3140,21 @@ def add_all_cosy_edges_to_graph(
     G2, cosy: pd.DataFrame, clipcosy: pd.DataFrame, h1_all: pd.DataFrame
 ):
     """
-    Add edges to the graph G2 from the cosy dataframe
+    Adds all COSY and CLIP-COSY edges to the molecular network graph using the provided data.
+
+    This function generates and filters COSY and CLIP-COSY cross-peak combinations, then adds the corresponding
+    edges to the graph, marking each with the appropriate attributes.
+
+    Args:
+        G2 (nx.Graph): The molecular network graph to update.
+        cosy (pd.DataFrame): The COSY DataFrame containing cross-peak information.
+        clipcosy (pd.DataFrame): The CLIP-COSY DataFrame containing cross-peak information.
+        h1_all (pd.DataFrame): The H1 DataFrame with all proton information.
+
+    Returns:
+        nx.Graph: The updated graph with COSY and CLIP-COSY edges added.
     """
+
     cosy_combinations = create_cosy_combinations(cosy, h1_all)
 
     clipcosy_combinations = create_clipcosy_combinations(clipcosy, h1_all)
