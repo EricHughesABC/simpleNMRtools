@@ -24,18 +24,50 @@ from globals import SVG_DIMENSIONS as svgDimensions
 from globals import CARBONSEPARATION
 from globals import PROTONSEPARATION
 from globals import NMREXPERIMENTS
+from globals import NMREXPERIMENTS_COLUMN_RENAME_MAP
 
 
-def find_nearest(true_values: list, value: float):
+def find_nearest(true_values: list[float], value: float) -> float:
+    """
+    Finds and returns the value in a list of floats that is closest to a given target value.
+
+    Args:
+        true_values (list[float]): A list of float values to search.
+        value (float): The target value to find the nearest neighbor for.
+
+    Returns:
+        float: The value from true_values that is closest to the target value.
+
+    Example:
+        >>> find_nearest([1.0, 2.5, 3.8], 3.0)
+        2.5
+    """
     arraynp = np.asarray(true_values)
     idx = (np.abs(arraynp - value)).argmin()
     return arraynp[idx]
 
 
 def tidyup_ppm_values(
+
     df: pd.DataFrame, true_values: list, column_name: str, ppm_tolerance=0.005
 ) -> pd.DataFrame:
-
+    """
+    Adjusts the values in a specified column of a DataFrame to their nearest true values and calculates the probability
+    of each adjustment based on a normal distribution.
+    This function:
+        - Creates a backup of the original column values with a "_orig" suffix.
+        - Replaces each value in the specified column with its nearest value from the provided list of true values.
+        - Calculates the probability (using a normal distribution) that the original value would be observed given the
+          adjusted value and a specified ppm tolerance, storing this in a new column with a "_prob" suffix.
+    Args:
+        df (pd.DataFrame): The input DataFrame containing the column to be adjusted.
+        true_values (list): A list of true values to which the column values will be snapped.
+        column_name (str): The name of the column in the DataFrame to adjust.
+        ppm_tolerance (float, optional): The standard deviation for the normal distribution used in probability
+            calculation. Defaults to 0.005.
+    Returns:
+        pd.DataFrame: The DataFrame with the adjusted column, original values, and probability column added.
+    """
     # make a copy of the column_name adding a suffix orig
     df[f"{column_name}_orig"] = df[column_name]
 
@@ -58,10 +90,23 @@ def tidyup_ppm_values(
 
 
 def return_nonempty_mnova_datasets(data: dict) -> dict:
+    """
+    Filters and returns a dictionary of datasets from the input `data` dictionary,
+    removing any datasets of type "nmrspectrum" where the counts of multiplets,
+    peaks, and integrals are all zero.
+    Args:
+        data (dict): A dictionary where each key maps to a dataset dictionary.
+            Each dataset dictionary should contain a "datatype" key (str) and,
+            if "datatype" is "nmrspectrum", should also contain "multiplets",
+            "peaks", and "integrals" keys, each with a "count" integer.
+    Returns:
+        dict: A filtered dictionary containing only datasets where, for
+            "nmrspectrum" types, at least one of "multiplets", "peaks", or
+            "integrals" has a count greater than zero. Datasets of other types
+            are retained unchanged.
+    """
     # remove datasets where multiplet counts is zero and peaks counts is zero and integrals counts is zero
 
-    print("\nreturn_nonempty_mnova_datasets(data: dict) -> dict:\n")
-    print("data.keys()\n", data.keys(), "\n")
     dicts_to_keep = {}
     for k, v in data.items():
         print(f"Processing key: {k}")
@@ -81,6 +126,19 @@ def return_nonempty_mnova_datasets(data: dict) -> dict:
 
 
 def add_technique(key: str, technique_keys: dict, technique_counts: dict, expt: str):
+    """
+    Adds a technique to the technique_keys dictionary, ensuring unique keys for duplicate experiment names.
+    If the given experiment name (`expt`) already exists among the values of `technique_keys`, 
+    increments its count in `technique_counts` and appends the count to the experiment name 
+    to create a unique key. Otherwise, adds the experiment name as is.
+    Args:
+        key (str): The key to add or update in the technique_keys dictionary.
+        technique_keys (dict): A dictionary mapping keys to experiment names (or unique experiment identifiers).
+        technique_counts (dict): A dictionary tracking the count of each experiment name.
+        expt (str): The experiment name to add.
+    Returns:
+        None
+    """
 
     if expt in technique_keys.values():
         technique_counts[expt] += 1
@@ -90,9 +148,26 @@ def add_technique(key: str, technique_keys: dict, technique_counts: dict, expt: 
 
 
 def read_in_mesrenova_json(fn: Path) -> dict:
-    """Read in the JSON file exported from MestReNova."""
-
-    print("\nread_in_mesrenova_json(fn: Path) -> dict:\n")
+    """
+    Reads a JSON file exported from MestReNova or accepts a dictionary directly, 
+    and returns the non-empty MestReNova datasets.
+    Parameters
+    ----------
+    fn : Path or dict
+        The path to the JSON file exported from MestReNova, or a dictionary containing the data.
+    Returns
+    -------
+    dict
+        A dictionary containing the non-empty MestReNova datasets.
+    Raises
+    ------
+    FileNotFoundError
+        If the provided file path does not exist.
+    json.JSONDecodeError
+        If the file is not a valid JSON.
+    TypeError
+        If the input is neither a Path nor a dict.
+    """
 
     # check the type of fn is a pathlib.Path
     if isinstance(fn, Path):
@@ -101,25 +176,30 @@ def read_in_mesrenova_json(fn: Path) -> dict:
     elif isinstance(fn, dict):
         data_orig = fn
 
-    print("data_orig keys: ", data_orig.keys())
-
     data = return_nonempty_mnova_datasets(data_orig)
-
-    # # create a dictionary of filename to experiment type ie  HSQC: filename, HMBC: filename, etc
-    # chosen_spectra = { v.split(" ")[-1]: v.split(" ")[-2] for _,v in  data["chosenSpectra"]["data"].items()}
-    # # replace the nmrdata key names with the experiment type ie HSQC, HMBC, etc
-    # for k, v in chosen_spectra.items():
-    #     data[k] = data[v]
-    #     del data[v]
 
     return data
 
 
 def read_in_mesrenova_json_multiple(fn: Path) -> dict:
-    """Read in the JSON file exported from MestReNova."""
-
-    print("\nread_in_mesrenova_json(fn: Path) -> dict:\n")
-
+    """
+    Reads and processes a MestReNova JSON file or dictionary containing NMR datasets.
+    Parameters
+    ----------
+    fn : Path or dict
+        The file path to a MestReNova JSON file (as a pathlib.Path object) or a dictionary
+        containing the JSON data.
+    Returns
+    -------
+    dict
+        A dictionary containing the non-empty MestReNova datasets extracted from the input.
+    Notes
+    -----
+    If a file path is provided, the function reads and parses the JSON file.
+    If a dictionary is provided, it is used directly.
+    The function relies on `return_nonempty_mnova_datasets` to filter and return relevant datasets.
+    """
+    
     # check the type of fn is a pathlib.Path
     if isinstance(fn, Path):
         with open(fn, "r") as file:
@@ -128,21 +208,38 @@ def read_in_mesrenova_json_multiple(fn: Path) -> dict:
         data_orig = fn
 
     data = return_nonempty_mnova_datasets(data_orig)
-
-    # # create a dictionary of filename to experiment type ie  HSQC: filename, HMBC: filename, etc
-    # chosen_spectra = { v.split(" ")[-1]: v.split(" ")[-2] for _,v in  data["chosenSpectra"]["data"].items()}
-    # # replace the nmrdata key names with the experiment type ie HSQC, HMBC, etc
-    # for k, v in chosen_spectra.items():
-    #     data[k] = data[v]
-    #     del data[v]
 
     return data
 
 
 def get_2D_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
     """
-    Returns a pandas dataframe from the json_data dictionary for the specified technique.
+    Extracts 2D NMR peak data from a nested JSON structure and returns it as a pandas DataFrame.
+    Parameters
+    ----------
+    json_data : dict
+        The JSON data containing NMR peak information, structured by technique and signal type.
+    technique : str
+        The key specifying which NMR technique's data to extract (e.g., 'HSQC', 'HMBC').
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame containing the extracted peak data with columns:
+        - 'f2 (ppm)': Chemical shift in the f2 dimension.
+        - 'f1 (ppm)': Chemical shift in the f1 dimension.
+        - 'Intensity': Peak intensity.
+        - 'Type': Peak type.
+        - 'Annotation': Peak annotation.
+    Notes
+    -----
+    - Only peaks present in the JSON data are included.
+    - The resulting DataFrame is sorted by 'f2 (ppm)' in descending order and indexed starting from 1.
+    Example
+    -------
+    >>> df = get_2D_dataframe_from_json(json_data, 'HSQC')
+    >>> print(df.head())
     """
+
     print("technique: ", technique)
     df_data = []
 
@@ -175,6 +272,19 @@ def get_2D_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
 
 
 def get_1d_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
+    """
+    Extracts 1D NMR data from a JSON dictionary and returns it as a pandas DataFrame.
+    The function processes either 'multiplets' or 'peaks' data for the specified NMR technique.
+    If 'multiplets' are present, it extracts chemical shift, integral, number of hydrogens, 
+    category, and J-coupling values, normalizing the integral by the provided normalization value.
+    If only 'peaks' are present, it extracts chemical shift, intensity, and type.
+    The resulting DataFrame is sorted by chemical shift (ppm) in descending order and indexed from 1.
+    Parameters:
+        json_data (dict): The JSON data containing NMR assignments.
+        technique (str): The key specifying which NMR technique to extract (e.g., '1H', '13C').
+    Returns:
+        pd.DataFrame: A DataFrame containing the extracted NMR data, or an empty DataFrame if no data is found.
+    """
     df_data = []
     if json_data[technique]["multiplets"]["count"] == 0:
         if json_data[technique]["peaks"]["count"] == 0:
@@ -229,10 +339,21 @@ def get_1d_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
 
 def create_dataframes_from_mresnova_json(data: dict) -> dict:
     """
-    Returns a dictionary of pandas dataframes for each technique in the data dictionary.
+    Processes a dictionary containing NMR experiment data in JSON format and converts relevant entries into pandas DataFrames.
+    The function iterates through the input dictionary, identifies the type of each entry based on its key and value,
+    and constructs DataFrames accordingly. The resulting DataFrames are stored in a dictionary keyed by their respective identifiers.
+    Args:
+        data (dict): A dictionary containing NMR experiment data, where keys represent experiment or data types,
+                     and values contain associated metadata and data.
+    Returns:
+        dict: A dictionary where keys are identifiers for each processed data type, and values are the corresponding pandas DataFrames.
+    Notes:
+        - The function expects certain keys to match known NMR experiment types (from NMREXPERIMENTS).
+        - Handles both 1D and 2D NMR data, as well as various metadata and configuration entries.
+        - Some keys are processed into DataFrames with specific column arrangements.
+        - Unrecognized keys are skipped with a printed message.
     """
-    print("\ncreate_dataframes_from_mresnova_json(data: dict) -> dict:\n")
-    print("***** EEH ****")
+
     _dataframes = {}
     for k, v in data.items():
         print(f"Processing key: {k}")
@@ -321,24 +442,26 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
     return _dataframes
 
 
+# # Define a global constant for column renaming
+# globals.NMREXPERIMENTS_COLUMN_RENAME_MAP = {
+#     "H's": "numProtons",
+#     "Integral": "integral",
+#     "J's": "jCouplingVals",
+#     "Class": "jCouplingClass",
+#     "Intensity": "intensity",
+#     "Shift": "ppm",
+#     "Range": "range",
+#     "f2 (ppm)": "f2_ppm",
+#     "f1 (ppm)": "f1_ppm",
+#     "Type": "signaltype",
+# }
+
 def standardize_column_headings(dataframes: dict):
     for k in dataframes.keys():
         dataframes[k].rename(
-            columns={
-                "H's": "numProtons",
-                "Integral": "integral",
-                "J's": "jCouplingVals",
-                "Class": "jCouplingClass",
-                "Intensity": "intensity",
-                "Shift": "ppm",
-                "Range": "range",
-                "f2 (ppm)": "f2_ppm",
-                "f1 (ppm)": "f1_ppm",
-                "Type": "signaltype",
-            },
+            columns=NMREXPERIMENTS_COLUMN_RENAME_MAP,
             inplace=True,
         )
-
     return dataframes
 
 

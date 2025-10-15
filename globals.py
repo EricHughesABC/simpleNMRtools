@@ -1,50 +1,4 @@
-# import collections
-# import types
 
-# global svgDimensions
-
-# SVGDIMENSIONS = collections.namedtuple(
-#     "SVGDIMENSIONS", "MOLWIDTH MOLHEIGHT SVGWIDTH SVGHEIGHT"
-# )
-# svgDimensions = SVGDIMENSIONS(1000, 600, 1000, 600)
-
-
-# global CARBONSEPARATION
-# global PROTONSEPARATION
-
-# CARBONSEPARATION = 0.0025
-# PROTONSEPARATION = 0.005
-
-# global NMREXPERIMENTS
-
-# NMREXPERIMENTS = (
-#     "H1_1D",
-#     "C13_1D",
-#     "DEPT135",
-#     "HSQC",
-#     "HMBC",
-#     "COSY",
-#     "NOESY",
-#     "H1_pureshift",
-#     "HSQC_CLIPCOSY",
-#     "DDEPT_CH3_ONLY",
-# )
-
-
-
-# NODECOLORMAP = types.MappingProxyType({
-#     0: "#FFA500",
-#     1: "#98FB98",
-#     2: "yellow", 
-#     3: "#00FFFF",
-#     -1: "lightblue",  # For non-carbon atoms
-#     -2: "lightgrey",
-# })
-
-# print(svgDimensions.MOLWIDTH)
-# print(svgDimensions.MOLHEIGHT)
-# print(svgDimensions.SVGWIDTH)
-# print(svgDimensions.SVGHEIGHT)
 """
 Global configuration constants for the application.
 
@@ -121,6 +75,20 @@ NODE_COLOR_MAP = types.MappingProxyType({
     3: "#00FFFF",    # Cyan
     -1: "#ADD8E6",   # Light blue (non-carbon atoms)
     -2: "#D3D3D3",   # Light grey
+})
+
+# Define a global constant for column renaming
+NMREXPERIMENTS_COLUMN_RENAME_MAP = types.MappingProxyType({
+    "H's": "numProtons",
+    "Integral": "integral",
+    "J's": "jCouplingVals",
+    "Class": "jCouplingClass",
+    "Intensity": "intensity",
+    "Shift": "ppm",
+    "Range": "range",
+    "f2 (ppm)": "f2_ppm",
+    "f1 (ppm)": "f1_ppm",
+    "Type": "signaltype",
 })
 
 # Example usage (remove in production)

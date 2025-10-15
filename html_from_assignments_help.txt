@@ -1,0 +1,172 @@
+Help on module html_from_assignments:
+
+NAME
+    html_from_assignments
+
+CLASSES
+    builtins.object
+        NMRProblem
+
+    class NMRProblem(builtins.object)
+     |  NMRProblem(dataframes: dict)
+     |
+     |  Methods defined here:
+     |
+     |  JEOL_prediction_used(self)
+     |      Check if the data is a prediction from JEOL
+     |
+     |  __init__(self, dataframes: dict)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  add_missing_spectra(self)
+     |      Add missing spectra to the dataframes dictionary
+     |
+     |  exact_ppm_values_only(self)
+     |
+     |  get_molfile_string(self)
+     |
+     |  is_prediction(self)
+     |      Check if the data is a prediction
+     |
+     |  prediction_from_nmrshiftdb2(self)
+     |      Check if the data is a prediction from NMRSHIFTDB2
+     |
+     |  prepare_network_graph(self)
+     |
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |
+     |  from_excel_file(fn: pathlib._local.Path)
+     |      Create an NMRProblem object from an excel file.
+     |      excel files contains a number of sheets
+     |
+     |  from_mnova_dict(json_data: dict)
+     |      Create an NMRProblem object from a json file.
+     |
+     |  from_mnova_json_file(fn: pathlib._local.Path)
+     |      Create an NMRProblem object from a json file.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+
+FUNCTIONS
+    add_clipcosy_edges_to_graph(G2: networkx.classes.graph.Graph, keep: dict) -> networkx.classes.graph.Graph
+
+    add_cosy_edges_to_graph(G2: networkx.classes.graph.Graph, keep: dict) -> networkx.classes.graph.Graph
+
+    add_hmbc_edges_to_graph(
+        G2: networkx.classes.graph.Graph,
+        hmbc: pandas.core.frame.DataFrame,
+        h1: pandas.core.frame.DataFrame,
+        c13: pandas.core.frame.DataFrame
+    ) -> networkx.classes.graph.Graph
+
+    add_jCouplingVals_jCouplingClass_to_h1(
+        h1: pandas.core.frame.DataFrame,
+        h1_1D: pandas.core.frame.DataFrame
+    ) -> pandas.core.frame.DataFrame
+        Add jCouplingVals and jCouplingClass to h1 from h1_1D
+
+    add_jCouplingVals_jCouplingClass_to_nmrAssignments(
+        nmrAssignments: pandas.core.frame.DataFrame,
+        h1: pandas.core.frame.DataFrame
+    ) -> pandas.core.frame.DataFrame
+        Add jCouplingVals and jCouplingClass to nmrAssignments from h1
+
+    add_missing_columns_to_nmrExpt_dataframes(dataframes: dict)
+
+    add_technique(key: str, technique_keys: dict, technique_counts: dict, expt: str)
+
+    attach_symmetry_atom_index(nmrAssignments: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame
+
+    calc_minimum_ppm_separation(ppm_pks, ppmSeparation)
+
+    combine_multiple_nmrExpt_dataframes(dataframes)
+        Combine multiple NMR experiment dataframes into a single dataframe.
+        This is useful when there are multiple 1D or 2D spectra for the same experiment.
+
+    create_clipcosy_combinations(
+        cosy: pandas.core.frame.DataFrame,
+        h1: pandas.core.frame.DataFrame
+    ) -> dict
+
+    create_cosy_combinations(
+        cosy: pandas.core.frame.DataFrame,
+        h1: pandas.core.frame.DataFrame
+    ) -> dict
+
+    create_dataframes_from_mresnova_json(data: dict) -> dict
+        Returns a dictionary of pandas dataframes for each technique in the data dictionary.
+
+    create_htmlpage_from_graph(
+        G2: networkx.classes.graph.Graph,
+        fn_html: str,
+        fn_html_template: str,
+        jinjadata: dict
+    )
+
+    create_network_graph(c13, h1)
+
+    create_svg_string(
+        mol,
+        molWidth=1000,
+        molHeight=600,
+        svgWidth=1200,
+        svgHeight=700
+    )
+
+    do_intersect(p1, q1, p2, q2)
+
+    find_nearest(true_values: list, value: float)
+
+    get_1d_dataframe_from_json(json_data: dict, technique: str) -> pandas.core.frame.DataFrame
+
+    get_2D_dataframe_from_json(json_data: dict, technique: str) -> pandas.core.frame.DataFrame
+        Returns a pandas dataframe from the json_data dictionary for the specified technique.
+
+    h1_from_nmrAssignments(nmrAssignments: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame
+        _summary_
+
+        Args:
+            nmrAssignments (_type_): _description_
+
+    on_segment(p, q, r)
+
+    orientation(p, q, r)
+
+    read_in_mesrenova_json(fn: pathlib._local.Path) -> dict
+        Read in the JSON file exported from MestReNova.
+
+    read_in_mesrenova_json_multiple(fn: pathlib._local.Path) -> dict
+        Read in the JSON file exported from MestReNova.
+
+    remove_duplicate_cosy_combinations(cosy_combinations: dict) -> dict
+
+    return_nonempty_mnova_datasets(data: dict) -> dict
+
+    standardize_column_headings(dataframes: dict)
+
+    tidyup_ppm_values(
+        df: pandas.core.frame.DataFrame,
+        true_values: list,
+        column_name: str,
+        ppm_tolerance=0.005
+    ) -> pandas.core.frame.DataFrame
+
+DATA
+    CARBONSEPARATION = 0.0025
+    NMREXPERIMENTS = mappingproxy({'H1_1D': 'H1_1D', 'C13_1D': 'C13_1...C_...
+    PROTONSEPARATION = 0.005
+    excel_orig_df_columns = {'C13_1D': ['ppm', 'Intensity', 'Width', 'Area...
+    svgDimensions = SVGDimensions(mol_width=1000, mol_height=600, svg_widt...
+
+FILE
+    /Users/vsmw51/Library/CloudStorage/OneDrive-DurhamUniversity/projects/programming/2025/python/awh/simpleNMRtools2/html_from_assignments.py
+
+

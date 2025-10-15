@@ -1,9 +1,9 @@
 # Using https://github.com/docker/awesome-compose/tree/master/flask
-import sys
+# import sys
 import os
 import re
-import platform
-import socket
+# import platform
+# import socket
 import copy
 from functools import wraps
 from flask import Flask, render_template, request, json, send_from_directory, url_for, jsonify, abort
@@ -11,7 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 import time
 from flask_migrate import Migrate
-from flask_wtf.csrf import CSRFProtect
+# from flask_wtf.csrf import CSRFProtect
 from sqlalchemy.dialects.mysql import JSON
 from sqlalchemy import create_engine, Column, Integer, String
 
@@ -21,11 +21,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import numpy as np
-import pandas as pd
+# import pandas as pd
 
 import networkx as nx
 from networkx.readwrite import json_graph
-
 
 from pathlib import Path
 
@@ -43,7 +42,7 @@ from simulatedAnnealing_v5 import SimulatedAnnealing2
 global RUNNINGONPYTHONANYWHERE
 global REGISTRATIONTIMEOUT
 
-REGISTRATIONTIMEOUT = 100 * 60 * 60 * 24  # 100 days in seconds
+REGISTRATIONTIMEOUT = 1000 * 60 * 60 * 24  # 100 days in seconds
 
 # Path to the Sphinx-generated HTML documentation
 DOCS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs/build/html")

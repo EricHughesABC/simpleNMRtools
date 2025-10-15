@@ -1,0 +1,453 @@
+Help on module nmrsolution:
+
+NAME
+    nmrsolution
+
+CLASSES
+    builtins.object
+        NMRsolution
+
+    class NMRsolution(builtins.object)
+     |  NMRsolution(problemdata_json: html_from_assignments.NMRProblem)
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self, problemdata_json: html_from_assignments.NMRProblem)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  add_CH0_CH1_CH2_CH3_CH3CH1_to_C13(self) -> None
+     |      Labels C13 DataFrame rows with CH0, CH1, CH2, CH3, and CH3CH1 group information using HSQC data.
+     |
+     |      This function updates the C13 DataFrame to indicate the type of each carbon atom (e.g., CH0, CH1, CH2, CH3, CH3CH1, quaternary)
+     |      based on matching chemical shifts with the HSQC DataFrame, and sets the number of protons accordingly.
+     |
+     |  add_CH0_CH1_CH2_CH3_CH3CH1_to_C13_df(self) -> None
+     |      Labels C13 DataFrame rows with CH0, CH1, CH2, CH3, and CH3CH1 group information using HSQC data.
+     |
+     |      This function updates the C13 DataFrame to indicate the type of each carbon atom (e.g., CH0, CH1, CH2, CH3, CH3CH1, quaternary)
+     |      based on matching chemical shifts with the HSQC DataFrame, and sets the number of protons accordingly.
+     |
+     |  add_CH2_CH3CH_to_hsqc_dataframes(self) -> None
+     |      Updates the HSQC DataFrames with the number of protons and related columns for CH3, CH2, and CH1 groups.
+     |
+     |      This function sets the 'numProtons', 'integral', and 'attached_protons' columns in both the main and
+     |      DataFrame versions of HSQC for each group type, ensuring correct assignment for downstream NMR analysis.
+     |
+     |  assign_CH3_CH1_in_HSQC_using_H1(self) -> None
+     |      Assigns CH3 and CH1 group information in the HSQC DataFrame using the H1 DataFrame.
+     |
+     |      This function matches and labels CH3 and CH1 groups in the HSQC data based on the number of CH3 groups in the H1 data,
+     |      updating the number of protons and group flags accordingly.
+     |
+     |      Returns:
+     |          None
+     |
+     |  assign_CH3_CH1_in_HSQC_using_expected_molecule(self) -> None
+     |      Assigns CH3 and CH1 group information in the HSQC DataFrame using the expected molecule's properties.
+     |
+     |      This function matches and labels CH3 and CH1 groups in the HSQC data based on the expected
+     |      molecule's group counts and chemical shifts, handling various scenarios for group assignment
+     |      and updating related columns accordingly.
+     |
+     |  assign_CH3_CH2_CH1_in_HSQC_using_Assignments(self) -> None
+     |      Assigns CH3, CH2, and CH1 group information in the HSQC DataFrame using the Annotation column.
+     |
+     |      This function labels CH3, CH2, and CH1 groups in the HSQC data based on the Annotation values and intensity,
+     |      sets the number of protons, and updates related columns for integrals and attached protons.
+     |
+     |  assign_CH3_CH2_CH1_in_HSQC_using_DoubleDept(self) -> None
+     |      Assigns CH3, CH2, and CH1 group information in the HSQC DataFrame using Double DEPT experiment data.
+     |
+     |      This function labels CH3, CH2, and CH1 groups in the HSQC data based on matches to the Double DEPT CH3-only experiment,
+     |      sets the number of protons, and updates related columns for integrals and attached protons.
+     |
+     |  assign_CH3_CH2_CH1_overall(self)
+     |
+     |  attempt_assignment_CH3_CH2_CH1_to_C13_table(self)
+     |      Attempts to assign CH3, CH2, CH1, and CH0 groups from the molecular properties DataFrame
+     |      (`molprops_df`) to the C13 table (`c13`) based on the number of protons and chemical shift (ppm)
+     |      values. The function iterates over each group type, matches rows between the two tables using
+     |      optimal assignment (Hungarian algorithm) or nearest-neighbor matching, and updates the C13 table
+     |      with corresponding atom indices and properties. If the assignment cannot be completed due to
+     |      mismatched row counts, an error table is rendered for debugging.
+     |      Returns:
+     |          tuple: ("ok", 200) if assignment is successful, or (rendered_html, 400) if an error occurs.
+     |
+     |  check_c13_not_empty(self) -> Tuple[bool, str]
+     |      Checks if the C13 DataFrame is not empty and initializes the C13 DataFrame accordingly.
+     |
+     |      This function verifies the presence of C13 data, attempts to extract valid C13 signals,
+     |      and returns a tuple indicating success and a status message.
+     |
+     |      Returns:
+     |          tuple: (success, message) where success is a boolean indicating if C13 data is present,
+     |                 and message is a string describing the result.
+     |
+     |  check_h1_pureshift_not_empty(self) -> Tuple[bool, str]
+     |      Checks if the H1 or pureshift DataFrames are not empty and initializes the H1 DataFrame accordingly.
+     |
+     |      This function verifies the presence of H1 or pureshift data, attempts to extract valid H1 signals,
+     |      and returns a tuple indicating success and a status message.
+     |
+     |      Returns:
+     |          tuple: (success, message) where success is a boolean indicating if H1 data is present,
+     |                 and message is a string describing the result.
+     |
+     |  check_hsqc_assign_CH2_from_DEPT135(self)
+     |      Assigns CH2 group intensities in the HSQC dataframe using DEPT135 experiment data.
+     |
+     |      This function checks for the presence of CH2 carbons and updates the HSQC dataframe
+     |      by setting the intensity of CH2 signals to negative values based on DEPT135 results.
+     |      It handles both diastereotopic and non-diastereotopic CH2 cases and sets error messages
+     |      if the data is inconsistent or missing.
+     |
+     |  check_hsqc_df_not_empty(self) -> Tuple[bool, str]
+     |      Checks if the HSQC DataFrame is not empty and initializes the HSQC DataFrame accordingly.
+     |
+     |      This function verifies the presence of HSQC data, attempts to extract valid HSQC signals,
+     |      and returns a tuple indicating success and a status message.
+     |
+     |      Returns:
+     |          tuple: (success, message) where success is a boolean indicating if HSQC data is present,
+     |                 and message is a string describing the result.
+     |
+     |  check_what_experiments_are_present(self) -> None
+     |      Checks which NMR experiment data types are present in the available experiments.
+     |
+     |      This function sets boolean flags indicating the presence or absence of each expected NMR experiment
+     |      (e.g., HSQC, H1_pureshift, C13_1D, H1_1D, COSY, HMBC, NOESY, HSQC_CLIPCOSY, DDEPT_CH3_ONLY, DEPT135)
+     |      based on the contents of the expts_available attribute.
+     |
+     |  create_expected_molecule_from_molfilestring(
+     |      self,
+     |      molfilestr: str,
+     |      carbonAtomsInfo: pandas.core.frame.DataFrame,
+     |      df: pandas.core.frame.DataFrame,
+     |      prediction_from_nmrshiftdb: bool,
+     |      JEOL_predict: bool
+     |  ) -> expectedmolecule.expectedMolecule
+     |      Creates an expectedMolecule object from a molfile string and associated carbon atom information.
+     |
+     |      This function initializes an expectedMolecule using the provided molfile string,
+     |      carbon atom data, and optional NMR prediction data.
+     |
+     |      Args:
+     |          molfilestr (str): The molfile string representing the molecule.
+     |          carbonAtomsInfo (pd.DataFrame): DataFrame containing information about carbon atoms.
+     |          df (pd.DataFrame): DataFrame with C13 prediction data.
+     |          prediction_from_nmrshiftdb (bool): Whether to use NMRShiftDB predictions.
+     |
+     |      Returns:
+     |          expectedmolecule.expectedMolecule: The constructed expectedMolecule object.
+     |
+     |  create_svg_string(
+     |      self,
+     |      mol,
+     |      molWidth=1000,
+     |      molHeight=600,
+     |      svgWidth=1200,
+     |      svgHeight=700
+     |  )
+     |      Generates an SVG string representation of a molecule and computes normalized coordinates for carbon atoms.
+     |
+     |      This function draws the given RDKit molecule as an SVG, centers it within the specified dimensions,
+     |      and returns both the SVG string and a dictionary of normalized (x, y) coordinates for each carbon atom.
+     |
+     |      Args:
+     |          mol: RDKit molecule object to be drawn.
+     |          molWidth (int, optional): Width of the molecule drawing area in pixels. Defaults to 1000.
+     |          molHeight (int, optional): Height of the molecule drawing area in pixels. Defaults to 600.
+     |          svgWidth (int, optional): Total SVG width in pixels. Defaults to 1200.
+     |          svgHeight (int, optional): Total SVG height in pixels. Defaults to 700.
+     |
+     |      Returns:
+     |          tuple: (svg_string, new_xy3) where svg_string is the SVG representation of the molecule,
+     |                 and new_xy3 is a dict mapping atom indices to normalized (x, y) coordinates.
+     |
+     |  find_and_group_CH2s(self, df1)
+     |      Groups CH2 resonances in the provided DataFrame based on their chemical shift proximity.
+     |
+     |      This function identifies CH2 signals and clusters them into groups where each group contains
+     |      resonances close to each other in ppm, using a probability distribution threshold.
+     |      It returns the indices and values of these grouped CH2 resonances.
+     |
+     |      Args:
+     |          df1 (pd.DataFrame): DataFrame containing NMR resonance data
+     |                              with a 'CH2' boolean column and 'f1_ppm' values.
+     |
+     |      Returns:
+     |          tuple: (unique_idxs, unique_ch2s) where unique_idxs is a list of lists of indices for each group,
+     |                                            and unique_ch2s is a list of lists of grouped ppm values.
+     |
+     |  find_nearest(self, array, value)
+     |
+     |  init_CH_CH3_HSQC_from_DDEPT_CH3_only(self) -> None
+     |      Updates HSQC DataFrames with CH3 and CH1 group assignments using DDEPT CH3-only experiment data.
+     |
+     |      This function sets the CH3 and CH1 columns in the HSQC DataFrames based on the presence of CH3 signals
+     |      in the DDEPT CH3-only experiment, ensuring correct group assignments for downstream analysis.
+     |
+     |  init_c13_from_hsqc_and_hmbc(self) -> Tuple[pandas.core.frame.DataFrame, bool]
+     |      Initializes the C13 DataFrame using HSQC and HMBC experiment data.
+     |
+     |      This function generates a C13 DataFrame by combining and processing chemical shift values from the HSQC and HMBC DataFrames,
+     |      assigning group labels (CH0, CH1, CH2, CH3, CH3CH1, quaternary) and the number of protons for each carbon resonance.
+     |      If C13 data is already present, it returns the existing DataFrame and False.
+     |
+     |      Returns:
+     |          tuple: (c13_df, created) where c13_df is the resulting C13 DataFrame and created is a boolean indicating if new data was created.
+     |
+     |  init_class_from_json(self) -> Union[Tuple[bool, str], Tuple[bool, str, int]]
+     |      Initializes the class instance from a JSON configuration and sets up all experiment dataframes.
+     |
+     |      This function loads and processes all relevant NMR experiment data, sets up molecule and experiment attributes,
+     |      and returns a tuple indicating success and a status message or error code if initialization fails.
+     |
+     |      Returns:
+     |          tuple: (success, message) where success is a boolean indicating if initialization succeeded,
+     |                 and message is a string or error code describing the result.
+     |
+     |  init_h1_and_pureshift_from_c13_hsqc_hmbc_cosy(self) -> Tuple[pandas.core.frame.DataFrame, pandas.core.frame.DataFrame]
+     |      Initializes the H1 and pureshift DataFrames from C13, HSQC, HMBC, and COSY experiment data.
+     |
+     |      This function creates the H1 and pureshift DataFrames using information from the HSQC DataFrame,
+     |      ensuring the correct columns and ordering for downstream NMR analysis. If the data is already present,
+     |      it returns the existing DataFrames.
+     |
+     |      Returns:
+     |          tuple: (h1_df, pureshift_df) where both are pandas DataFrames containing H1 and pureshift data.
+     |
+     |  init_h1_from_pureshift(self) -> pandas.core.frame.DataFrame
+     |      Initializes the H1 DataFrame from the pureshift DataFrame if H1 data is missing.
+     |
+     |      This function creates the H1 DataFrame using information from the pureshift DataFrame,
+     |      ensuring the correct columns and ordering for downstream NMR analysis. If H1 data is already present,
+     |      it returns the existing H1 DataFrame.
+     |
+     |      Returns:
+     |          pd.DataFrame: The H1 DataFrame.
+     |
+     |  init_pureshift_from_h1(self) -> pandas.core.frame.DataFrame
+     |      Initializes the pureshift DataFrame from the H1 DataFrame if not already present.
+     |
+     |      This function copies the H1 DataFrame to the pureshift DataFrame if pureshift data is missing,
+     |      and returns the resulting pureshift DataFrame.
+     |
+     |      Returns:
+     |          pd.DataFrame: The pureshift DataFrame.
+     |
+     |  initialise_prior_to_carbon_assignment(self)
+     |
+     |  initiate_molgraph(self, json_data, G2)
+     |
+     |  process_and_merge_cosy_dfs(
+     |      self,
+     |      df: pandas.core.frame.DataFrame,
+     |      cosy: pandas.core.frame.DataFrame
+     |  ) -> pandas.core.frame.DataFrame
+     |      Merges two COSY DataFrames, aligning columns and removing duplicate cross-peaks.
+     |
+     |      This function drops columns from the first DataFrame that are not present in the second,
+     |      concatenates both DataFrames, and removes duplicate rows based on the 'f1_ppm' and 'f2_ppm' columns.
+     |
+     |      Args:
+     |          df (pd.DataFrame): The first COSY DataFrame to merge.
+     |          cosy (pd.DataFrame): The second COSY DataFrame to merge.
+     |
+     |      Returns:
+     |          pd.DataFrame: The merged COSY DataFrame with duplicates removed.
+     |
+     |  process_ddept_ch3_only(
+     |      self,
+     |      df: pandas.core.frame.DataFrame,
+     |      hsqc: pandas.core.frame.DataFrame
+     |  ) -> pandas.core.frame.DataFrame
+     |      Adds index and group information to the DDEPT CH3-only DataFrame using corresponding indices from the HSQC DataFrame.
+     |
+     |      This function populates the DDEPT CH3-only DataFrame with index columns and group assignments by matching chemical shifts to the HSQC DataFrame.
+     |
+     |      Args:
+     |          df (pd.DataFrame): The DDEPT CH3-only DataFrame to process.
+     |          hsqc (pd.DataFrame): The HSQC DataFrame used for index and group assignment.
+     |
+     |      Returns:
+     |          pd.DataFrame: The processed DDEPT CH3-only DataFrame with added indices and group columns.
+     |
+     |  process_hsqc_clipcosy(self, df, hsqc)
+     |
+     |  tidyup_hsqc_clipcosy(
+     |      self,
+     |      hsqc_clipcosy_df: pandas.core.frame.DataFrame,
+     |      c13: pandas.core.frame.DataFrame,
+     |      h1: pandas.core.frame.DataFrame
+     |  ) -> pandas.core.frame.DataFrame
+     |      Cleans and aligns the HSQC-CLIP-COSY DataFrame by filtering for negative intensity crosspeaks and adjusting ppm values.
+     |
+     |      This function filters the input DataFrame for negative intensity values, then aligns the chemical shift columns to the nearest values in the C13 and H1 DataFrames using specified tolerances.
+     |
+     |      Args:
+     |          hsqc_clipcosy_df (pd.DataFrame): The HSQC-CLIP-COSY DataFrame to tidy.
+     |          c13 (pd.DataFrame): The C13 DataFrame for reference ppm values.
+     |          h1 (pd.DataFrame): The H1 DataFrame for reference ppm values.
+     |
+     |      Returns:
+     |          pd.DataFrame: The tidied HSQC-CLIP-COSY DataFrame with aligned ppm values.
+     |
+     |  tidyup_ppm_values(
+     |      self,
+     |      df: pandas.core.frame.DataFrame,
+     |      true_values: list,
+     |      column_name: str,
+     |      ppm_tolerance=0.005
+     |  ) -> pandas.core.frame.DataFrame
+     |      Adjusts chemical shift values in a DataFrame to their nearest true values within a specified tolerance.
+     |
+     |      This function creates new columns for the original values and their probability of matching the adjusted value,
+     |      then replaces each value in the specified column with its nearest value from a provided list.
+     |
+     |      Args:
+     |          df (pd.DataFrame): The DataFrame containing chemical shift values to adjust.
+     |          true_values (list): List of reference values to match against.
+     |          column_name (str): Name of the column in df to adjust.
+     |          ppm_tolerance (float, optional): Standard deviation for probability calculation. Defaults to 0.005.
+     |
+     |      Returns:
+     |          pd.DataFrame: The DataFrame with adjusted values and probability columns.
+     |
+     |  transfer_hsqc_info_to_c13(self) -> None
+     |      Transfers group and proton information from the HSQC DataFrame to the C13 DataFrame.
+     |
+     |      This function synchronizes numProtons, CH3, CH2, CH1, and CH3CH1 columns from HSQC to C13,
+     |      and updates CH0 and quaternary flags for carbons with zero protons.
+     |
+     |      Returns:
+     |          None
+     |
+     |  transfer_hsqc_info_to_h1(self) -> None
+     |      Transfers group and proton information from the HSQC DataFrame to the H1 DataFrame.
+     |
+     |      This function synchronizes CH3CH1, CH3, CH2, CH1, and numProtons columns from HSQC to H1,
+     |      updates attached protons and integrals, and handles special cases for diastereotopic protons.
+     |
+     |  update_assignments_expt_dataframes(self)
+     |      Updates experimental NMR dataframes by synchronizing values from the C13 reference dataframe.
+     |
+     |      Copies C13-related values into various experiment dataframes,
+     |      augments the H1 dataframe with atom and coordinate information from HSQC, assigns J-coupling information,
+     |      and resets specific columns for further analysis.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+
+FUNCTIONS
+    add_all_cosy_edges_to_graph(
+        G2,
+        cosy: pandas.core.frame.DataFrame,
+        clipcosy: pandas.core.frame.DataFrame,
+        h1_all: pandas.core.frame.DataFrame
+    )
+        Add edges to the graph G2 from the cosy dataframe
+
+    add_all_hmbc_edges_to_graph(
+        G2,
+        hmbc: pandas.core.frame.DataFrame,
+        h1_all: pandas.core.frame.DataFrame,
+        c13_sorted: pandas.core.frame.DataFrame
+    )
+        Add edges to the graph G2 from the hmbc dataframe
+
+    add_clipcosy_edges_to_graph(G2: networkx.classes.graph.Graph, keep: dict) -> networkx.classes.graph.Graph
+
+    add_cosy_edges_to_graph(G2: networkx.classes.graph.Graph, keep: dict) -> networkx.classes.graph.Graph
+
+    add_hmbc_edges_to_graph(
+        G2: networkx.classes.graph.Graph,
+        hmbc: pandas.core.frame.DataFrame,
+        h1: pandas.core.frame.DataFrame,
+        c13: pandas.core.frame.DataFrame
+    ) -> networkx.classes.graph.Graph
+
+    assign_jcouplings(df1, df2)
+
+    assign_jcouplings_to_c13(c13, hsqc)
+
+    copy_over_values_c13_all_to_hetero2D(df, c13_all)
+        Copy over values from c13_all to hmbc dataframe
+
+    copy_over_values_c13_all_to_homo2D(df, c13_all)
+        Copy over values from c13_all to hmbc dataframe
+
+    create_clipcosy_combinations(
+        cosy: pandas.core.frame.DataFrame,
+        h1: pandas.core.frame.DataFrame
+    ) -> dict
+
+    create_cosy_combinations(
+        cosy: pandas.core.frame.DataFrame,
+        h1: pandas.core.frame.DataFrame
+    ) -> dict
+
+    create_network_graph(c13, h1)
+
+    remove_duplicate_cosy_combinations(cosy_combinations: dict) -> dict
+
+    warning_dialog(return_message, title_message, qstarted=True)
+
+DATA
+    Dict = typing.Dict
+        A generic version of dict.
+
+    List = typing.List
+        A generic version of list.
+
+    Tuple = typing.Tuple
+        Deprecated alias to builtins.tuple.
+
+        Tuple[X, Y] is the cross-product type of X and Y.
+
+        Example: Tuple[T1, T2] is a tuple of two elements corresponding
+        to type variables T1 and T2.  Tuple[int, float, str] is a tuple
+        of an int, a float and a string.
+
+        To specify a variable-length tuple of homogeneous type, use Tuple[T, ...].
+
+    Union = typing.Union
+        Union type; Union[X, Y] means either X or Y.
+
+        On Python 3.10 and higher, the | operator
+        can also be used to denote unions;
+        X | Y means the same thing to the type checker as Union[X, Y].
+
+        To define a union, use e.g. Union[int, str]. Details:
+        - The arguments must be types and there must be at least one.
+        - None as an argument is a special case and is replaced by
+          type(None).
+        - Unions of unions are flattened, e.g.::
+
+            assert Union[Union[int, str], float] == Union[int, str, float]
+
+        - Unions of a single argument vanish, e.g.::
+
+            assert Union[int] == int  # The constructor actually returns int
+
+        - Redundant arguments are skipped, e.g.::
+
+            assert Union[int, str, int] == Union[int, str]
+
+        - When comparing unions, the argument order is ignored, e.g.::
+
+            assert Union[int, str] == Union[str, int]
+
+        - You cannot subclass or instantiate a union.
+        - You can use Optional[X] as a shorthand for Union[X, None].
+
+FILE
+    /Users/vsmw51/Library/CloudStorage/OneDrive-DurhamUniversity/projects/programming/2025/python/awh/simpleNMRtools2/nmrsolution.py
+
+

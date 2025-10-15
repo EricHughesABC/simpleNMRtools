@@ -66,29 +66,12 @@ class expectedMolecule:
 
         else:
             self.mol_str = smiles_str
-            self.mol = Chem.MolFromMolBlock(smiles_str)
+            self.mol = Chem.MolFromMolBlock(self.mol_str_str)
             # create smiles string from rdkit mol
 
             self.smiles_str = Chem.MolToSmiles(self.mol)
 
-        # self.java_available = java.JAVA_AVAILABLE
-        # self.java_command = java.JAVA_COMMAND
-        # self.java_params = java.JAVA_PARAMS
 
-        # fix coordinates of molecule before creating png
-
-        # self.mol = Chem.AddHs(self.mol)
-        # AllChem.EmbedMolecule(self.mol, randomSeed=3)
-        # self.mol = Chem.RemoveHs(self.mol)
-
-        # self.mol.Compute2DCoords()
-
-        # self.svg_str, self.xy3, self.xy3_allatoms = self.create_svg_string(
-        #     molWidth=svgDimensions.MOLWIDTH,
-        #     molHeight=svgDimensions.MOLHEIGHT,
-        #     svgWidth=svgDimensions.SVGWIDTH,
-        #     svgHeight=svgDimensions.SVGHEIGHT,
-        # )
 
         self.svg_str, self.xy3, self.xy3_allatoms = self.create_svg_string(
             molWidth=svgDimensions.mol_width,
