@@ -2274,10 +2274,16 @@ class NMRsolution:
         self.hsqc["f2p_i"] = self.hsqc["f1_i"]
         self.hsqc["f2p_ppm"] = self.hsqc["f1_ppm"]
 
+        print("self.hsqc after adding index columns\n", self.hsqc)
+
         # add lookup dicts for hsqc
         self.hsqcH1ppmC13index = dict(zip(self.hsqc.f2_ppm, self.hsqc.f2p_i))
         self.hsqcH1ppmC13label = dict(zip(self.hsqc.f2_ppm, self.hsqc.f2Cp_i))
         self.hsqcH1ppmC13ppm = dict(zip(self.hsqc.f2_ppm, self.hsqc.f2p_ppm))
+
+        print("\nself.hsqcH1ppmC13ppm\n")
+        for k, v in self.hsqcH1ppmC13ppm.items():
+            print(f"{k}: {v}")
 
         self.hsqcH1indexC13index = dict(zip(self.hsqc.f2_i, self.hsqc.f2p_i))
         self.hsqcH1indexC13ppm = dict(zip(self.hsqc.f2_i, self.hsqc.f2p_ppm))
@@ -2377,8 +2383,18 @@ class NMRsolution:
         self.hmbc["f2H_i"] = ""
         self.hmbc["f2Cp_i"] = ""
 
+        print("\nFilling in hmbc dataframe with index columns\n")
+        print("n\self.hmbc.columns:\n", self.hmbc.columns)
+        print()
+        print(self.hmbc[["f1_ppm", "f2_ppm"]])
+
+        print("self.hsqcH1ppmC13ppm:\n", )
+        for k,v in self.hsqcH1ppmC13ppm.items():
+            print(f"{k}: {v}")
+
         # fill in hmbc dataframe
         for i in self.hmbc.index:
+            print(i, self.hmbc.loc[i, "f2_ppm"], self.hsqcH1ppmC13ppm.get(self.hmbc.loc[i, "f2_ppm"]))
             self.hmbc.loc[i, "f2p_ppm"] = float(self.hsqcH1ppmC13ppm.get(
                 self.hmbc.loc[i, "f2_ppm"]
             ))

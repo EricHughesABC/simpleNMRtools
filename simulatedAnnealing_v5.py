@@ -621,9 +621,9 @@ class SimulatedAnnealing2:
     def setup_run(
         self,
         max_iter: int = 100000,
-        max_temp: float = 1000.0,
+        max_temp: float = 100.0,
         min_temp: float = 0.1,
-        cooling_rate: float = 0.999,
+        cooling_rate: float = 0.99,
         randomize_mapping: bool = False,
     ) -> None:
         """

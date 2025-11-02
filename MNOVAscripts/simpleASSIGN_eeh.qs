@@ -371,57 +371,12 @@ function simpleASSIGN_eeh() {
     print("Post to the server");
     // var web_utils = new WebUtilsQT();
 
-    ////////////////////
-    // Do some checking
-    ////////////////////
-
-    // var chosen_spectra = spectra["chosenSpectra"]["data"][0];
-    // var hsqc = spectra["HSQC"];
-    // var h1_1d = spectra["H1_1D"];
-
-    // // check if there are any assignments if the user has chosen to use MNOVA manually assigned
-    // if( spectra["nmrAssignments"]["count"] == 0 && chosen_spectra == "MNova Manually Assigned"){
-    //     print("No assignments found");
-    //     MessageBox.warning("No MNOVA assignment data found");  
-    //     return;
-    // }
-
-    // // check if there are any C13 predictions if the user has chosen to use MNOVA Predict
-    // if( spectra["c13predictions"]["count"] == 0 && chosen_spectra == "MNOVA Predict"){
-    //     print("No C13 predictions found");
-    //     MessageBox.warning("No C13 predictions found");  
-    //     return;
-    // }
-
-    // // check if there are no integrals and no peaks in the HSQC spectrum
-    // if( hsqc["peaks"]["count"] == 0 && hsqc["integrals"]["count"] == 0){
-    //     print("No peaks or integrals found in HSQC spectrum");
-    //     MessageBox.warning("No peaks or integrals found in HSQC spectrum");  
-    //     return;
-    // }
-
-    // // warn the user that there are no integrals in the HSQC spectrum
-    // if(  hsqc["integrals"]["count"] == 0){
-    //     print("No peaks or integrals found in HSQC spectrum");
-    //     MessageBox.warning("No integrals found in HSQC spectrum, using peaks only. Program works best with integrals");  
-    // }
-
-    // // check if the number of peaks in hsqc is == number of multiplets in h1_1d
-    // if( h1_1d !== undefined ){
-    //     if( hsqc["peaks"]["count"] != h1_1d["multiplets"]["count"]){
-    //         print("Number of peaks in HSQC not equal to number of multiplets in H1_1D");
-    //         MessageBox.warning("Number of peaks in HSQC not equal to number of multiplets in H1_1D. Do not use H1_1D");  
-    //         return;
-    //     }
-    // }
 
     //////////////////////////////////////
     // choose which server we are using
     /////////////////////////////////////
 
     var server = server_address();
-    // var server = "http://simplenmr.pythonanywhere.com/";
-    // var server = "http://simplenmr.awh.durham.ac.uk/";
 
     ///////////////////////////////////////
     // Decide which entry point to call
@@ -446,8 +401,6 @@ function simpleASSIGN_eeh() {
     var rtn = web_utils.jsonRequest(entry_point, json_data_string,  "", "", false);
 
     print(rtn.url);
-
-
     
     // write rtn.response string to a html file
     var htmlfilename = result.directoryPath + "/html/" + result.name + "_d3.html";
@@ -472,25 +425,6 @@ function simpleASSIGN_eeh() {
 
     // display message dialog to tell the user the html file has been updated
     MessageBox.information("Molecule has been assigned and  the html file has been updated");
-
-    // // write rtn.response string to a html file
-    // var htmlfilename = result.directoryPath + "/html/" + result.name + "_d3.html";
-
-    // // create directory if it does not exist
-    // var dir = new Dir(result.directoryPath + "/html");
-    // if( !dir.exists ){
-    //     dir.mkdir(result.directoryPath + "/html");
-    // }
-
-    // // replace the dummy title in the html ouput with result.name
-    // htmloutputstr = rtn.response.replace( "dummy_title", result.name );
-
-    // var fout = new File(htmlfilename);
-    // if (fout.open(File.WriteOnly)) {
-    //     sout = new TextStream(fout, 'UTF-8');
-    //     sout.write(htmloutputstr);
-    // }
-    // fout.close();
 
     // open html file in browser
     if (typeof Application.openUrl === 'function') {

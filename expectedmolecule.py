@@ -66,7 +66,7 @@ class expectedMolecule:
 
         else:
             self.mol_str = smiles_str
-            self.mol = Chem.MolFromMolBlock(self.mol_str_str)
+            self.mol = Chem.MolFromMolBlock(self.mol_str)
             # create smiles string from rdkit mol
 
             self.smiles_str = Chem.MolToSmiles(self.mol)

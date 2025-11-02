@@ -1200,7 +1200,7 @@ class NMRProblem:
                 return False
             else:
                 print("All ppm values in f1_ppm and f2_ppm are accounted for in the expts_with_peaks.")
-                return True
+                return False # always set return to False for now EEH 30/Oct/2025
         else:
             return False
     

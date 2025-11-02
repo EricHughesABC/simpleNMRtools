@@ -1,10 +1,19 @@
-
-
-
 // Function to check if one string is a substring of another
 function isSubstring(sub, str) {
     return str.indexOf(sub) !== -1;
 }
+
+// spectra_keys = ["HSQC", 
+//                     "HMBC", 
+//                     "COSY", 
+//                     "NOESY", 
+//                     "H1_1D", 
+//                     "C13_1D", 
+//                     "DEPT135", 
+//                     "PureShift", 
+//                     "DDEPT_CH3_ONLY", 
+//                     "SKIP", 
+//                     "HSQC_CLIPCOSY"];
 
 spectra_keys = ["HSQC", 
                     "HMBC", 
@@ -14,24 +23,14 @@ spectra_keys = ["HSQC",
                     "C13_1D", 
                     "DEPT135", 
                     "PureShift", 
-                    "DDEPT_CH3_ONLY", 
+                    "HSQCCLIPCOSY", 
+                    "DOUBLEDEPTCH3",
                     "SKIP", 
-                    "HSQC_CLIPCOSY"];
+                ];
+
 function simpleUtils() {
 
     var doc = Application.mainWindow.activeDocument;
-
-    // simpleUtils.spectra_keys = ["HSQC", 
-    //                     "HMBC", 
-    //                     "COSY", 
-    //                     "NOESY", 
-    //                     "H1_1D", 
-    //                     "C13_1D", 
-    //                     "DEPT135", 
-    //                     "PureShift", 
-    //                     "DDEPT_CH3_ONLY", 
-    //                     "SKIP", 
-    //                     "HSQC_CLIPCOSY"];
 
 }
 
@@ -68,14 +67,6 @@ simpleUtils.prototype.splitPathAndFilename = function (path) {
         extension: extension
     };
 }
-
-        // var json_spectra_string = JSON.stringify(mnova_to_iupac, null, 4);
-        // var fout1 = new File(jsonfilename);
-        // if (fout1.open(File.WriteOnly)) {
-        //     sout1 = new TextStream(fout1, 'UTF-8');
-        //     sout1.writeln(json_spectra_string);
-        // }
-        // fout1.close();   
 
 simpleUtils.prototype.writeAsJsonToFile = function (data, filename) {
 
@@ -128,10 +119,6 @@ simpleUtils.prototype.identifySpectra = function(doc) {
 simpleUtils.prototype.findC13spectrum = function( spectra ) {
     var c13spectrum = undefined;
     for (var i=0; i<spectra.length; i++){
-        // if (spectra[i].dimCount == 1 && spectra[i].subtype == "13C"){
-        //     c13spectrum = spectra[i];
-        //     break;
-        // }
         if (spectra[i].subtype == "predicted, 13C"){
             continue
         }
@@ -233,27 +220,65 @@ simpleUtils.prototype.findHSQC = function(spectra) {
     return hsqcSpectrum;
 }
 
+simpleUtils.prototype.exptUniqueIdentifier = function(spectrum) {
+    var spec = spectrum;
+    const type = spec.type;
+    const subtype = spec.subtype.split(",")[0];
+    const pulsesequence = spec.getParam("Pulse Sequence");
+    const nucleus = spec.getParam("Nucleus");
+    const experiment = spec.getParam("Experiment");
+    const spectrum = spec.getParam("Title");
+    return nucleus + " " + experiment + " " + pulsesequence + " " + spectrum;
+}
 
-// spectitle = spectitle.replace(/\s/g, "_");
-// spectra[spectitle] = {};
-// spectra[spectitle]["datatype"] = "nmrspectrum";
-// spectra[spectitle]["origin"] = spec.originalFormat;
-// spectra[spectitle]["type"] = spec.type;
-// print("spec type", spec.type);
-// spectra[spectitle]["subtype"] = spec.subtype;
-// spectra[spectitle]["experimenttype"] = spec.experimentType;
-// spectra[spectitle]["experiment"] = spec.getParam("Experiment");
-// spectra[spectitle]["pulsesequence"] = spec.getParam("Pulse Sequence");
-// spectra[spectitle]["intrument"] = spec.getParam("Instrument");
-// spectra[spectitle]["probe"] = spec.getParam("Probe");
-// spectra[spectitle]["datafilename"] = spec.getParam("Data File Name");
-// // spectra[spectitle]["comment"] = spec.getParam("Comment");
-// spectra[spectitle]["nucleus"] = spec.getParam("Nucleus");
-// spectra[spectitle]["specfrequency"] = spec.getParam("Spectrometer Frequency");
-// test identifySpectra
 // var doc = Application.mainWindow.activeDocument;
 // var simpleutils = new simpleUtils();
-// var spectra = simpleutils.identifySpectra(doc);
+// var spectra_lst = simpleutils.identifySpectra(doc);
+
+// print("Number of spectra identified: " + spectra_lst.length + "\n");
+
+// for( var i=0; i < spectra_lst.length; i++){
+//     var spec = spectra_lst[i];
+//     print("spectrum: " + i);
+//     print("\tPulse Sequence: " + spec.getParam("Pulse Sequence"));
+//     print("\ttype: " + spec.type);
+//     print("\tsubtype: " + spec.subtype);
+//     print("\texperimentType: " + spec.experimentType);
+//     print("\tdimCount: " + spec.dimCount);
+//     print("\tnotes: " + spectra_lst[i]['page']['notes']);
+//     print("\tnotes: " + spec.getParam("Notes"));
+//     print("\tComment: " + spec.getParam("Comment"));
+//     print("\tExperiment: " + spec.getParam("Experiment"));
+//     print("\tClass: " + spec.getParam("Class"));
+//     print("\tNucleus: " + spec.getParam("Nucleus"));
+//     print("\tSpectrometer Frequency: " + spec.getParam("Spectrometer Frequency"));
+//     print("");
+// }
+
+// for( var i=0; i<spectra_lst.length; i++){
+//     var spectrum = spectra_lst[i];
+//     if(simpleutils.hasPeaks(spectrum)){
+//         print("spectrum with peaks found: " + spectrum.getParam("Experiment"));
+//     }
+//     else{
+//         print("spectrum with NO peaks: " + spectrum.getParam("Experiment"));
+//     }
+// }
+// // naming all spectra
+// for ( var i=0; i < spectra_lst.length; i++ ) {
+
+//     var unique_ID = simpleutils.exptUniqueIdentifier( spectra_lst[i] );
+//     print("Unique ID: " + unique_ID );
+// }
+    
+// // print out exxperiment_eeh property
+// for ( var i=0; i < spectra_lst.length; i++ ) {
+
+//     var expt_eeh = spectra_lst[i]["experimentEEH"];
+//     print("spectrum experimentEEH: " + expt_eeh );
+// }
+
+
 
 
 

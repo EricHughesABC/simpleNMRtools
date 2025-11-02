@@ -1,9 +1,4 @@
-// Function to check if one string is a substring of another
-// function isSubstring(sub, str) {
-//     return str.indexOf(sub) !== -1;
-// }
-
-var validHSQCPulseSequenceStrings =  ["hsqcedetgpsisp2.3.ptg",
+var validHSQCPulseSequenceStrings =  [ "hsqcedetgpsisp2.3.ptg",
                                         "hsqcedetgpsisp2.3",
                                         "gHSQCAD", 
                                         "hsqcedetgpsp.3",
@@ -11,7 +6,9 @@ var validHSQCPulseSequenceStrings =  ["hsqcedetgpsisp2.3.ptg",
                                         "inv4gp.wu",
                                         "hsqcetgp",
                                         "gns_noah3-BSScc.eeh",
-                                        "hsqcedetgpsisp2.4"];
+                                        "hsqcedetgpsisp2.4",
+                                        "hsqcedetgpsisp.2"
+                                        ];
 
 var validHMBCPulseSequenceStrings = ["ghmbc.wu", 
                                      "gHMBC", 
@@ -55,11 +52,6 @@ var validPURESHIFT1DH1PulseSequenceStrings = ["ja_PSYCHE_pr_03b",
 
 var validNOESYPulseSequenceStrings = ["noesygpphppzs"];
 
-// Function to check if one string is a substring of another
-// function isSubstring(sub, str) {
-//     return str.indexOf(sub) !== -1;
-// }
-
 function identify_spectrum(){
 
     const valid1DPulseSequences = {
@@ -78,6 +70,9 @@ function identify_spectrum(){
         "NOESY": validNOESYPulseSequenceStrings
     };
 
+    const validSpectraKeys = ["H1_1D", "C13_1D", "PURESHIFT", "DEPT135",
+                              "HSQC", "HMBC", "COSY", "DOUBLEDEPTCH3", "HSQCCLIPCOSY", "NOESY"];
+
     var doc = Application.mainWindow.activeDocument;
     var simpleutils = new simpleUtils();
     var spectra_lst = simpleutils.identifySpectra(doc);
@@ -92,15 +87,18 @@ function identify_spectrum(){
         var spectrumFound = false;
         var exptIdentifiedName = "";
 
+        spectrum["experimentIdentified"] = false;
+        spectrum["experimentEEH"] = "undefined";
+
         if(ndims == 2){
             var pulseSeqIdentified = false;
             for( var ky in valid2DPulseSequences){
                 if(comparePulseSequence(valid2DPulseSequences[ky], pulseSequence)){
-                    print( pulseSequence + " " + ky + " " + comparePulseSequence( valid2DPulseSequences[ky], pulseSequence) );
                     pulseSeqIdentified = true;
                     spectrumFound = true;
                     exptIdentifiedName = ky;
                     spectrum["experimentEEH"] = ky;
+                    spectrum["experimentIdentified"] = true;
                     break;
                 }
             }
@@ -130,6 +128,7 @@ function identify_spectrum(){
                     spectrumFound = true;
                     exptIdentifiedName = ky;
                     spectrum["experimentEEH"] = ky;
+                    spectrum["experimentIdentified"] = true;
                     break;
                 }
             }
@@ -137,10 +136,51 @@ function identify_spectrum(){
         
     }
 
+    // check if any unidentified spectra remain
+    // check if class has been used to identify the spectrum
+    for (var i=0; i<spectra_lst.length; i++){
+        var spectrum = spectra_lst[i];
+        if (!spectrum["experimentIdentified"]) {
+            var class_str =spectrum.getParam("Class");
+            var note_str = spectrum['page']['notes'];
+            print("Checking spectrum " + spectrum.getParam("Pulse Sequence") + " class: " + class_str + " note: " + note_str);
+            for (var j=0; j < validSpectraKeys.length; j++){
+                var ky = validSpectraKeys[j];
+                print("Comparing to " + ky);
+                if (class_str === ky) {
+                    spectrum["experimentIdentified"] = true;
+                    spectrum["experimentEEH"] = ky;
+                    break;
+                }
+                if (note_str === ky) {
+                    spectrum["experimentIdentified"] = true;
+                    spectrum["experimentEEH"] = ky;
+                    break;
+                }
+            }
+        }
+    }
+
+    // check if there are any unidentifed spectra and if there are ask the user to identify them
+    var unidentified_spectra = [];
+    print();
+    for (var i=0; i<spectra_lst.length; i++){
+        var spectrum = spectra_lst[i];
+        print("Pulse sequence: " + spectrum.getParam("Pulse Sequence") + ", experimentEEH: " + spectrum["experimentEEH"] + ", experimentIdentified: " + spectrum["experimentIdentified"]);
+        if (!spectrum["experimentIdentified"]) {
+            unidentified_spectra.push(spectrum);
+        }
+    }
+    print();
+    print("unidentified_spectra.length " + unidentified_spectra.length);
+    print();
+    if (unidentified_spectra.length > 0) {
+        idspectra_dialog( spec_lst );
+    }
+
     for( var i=0; i<spectra_lst.length; i++){
         var spectrum = spectra_lst[i];
         print("spectrum.experimentEEH " + spectrum.experimentEEH + " " + spectrum.getParam("Pulse Sequence"));
-
     }
     return spectra_lst;
 }
@@ -182,7 +222,3 @@ function isHSQC(spectrum) {
 
     return isHSQC;
 }
-
-
-
-

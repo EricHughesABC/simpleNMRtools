@@ -1,83 +1,242 @@
-import subprocess
-import os
-import platform
+import jpype
+import jpype.imports
+from jpype.types import *
 import pandas as pd
 from io import StringIO
 from functools import lru_cache
+import os
+import platform
+import threading
 
+# Change to script directory
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-# JAVAPARAMS = (
-#         "java",
-#         "-classpath",
-#         "predictorc.jar:cdk-2.7.1.jar:.",
-#         "MolFileParser",
-#         ""
-# )
+
+class NMRShiftDBBridge:
+    """Singleton class to manage JPype JVM and MolFileParser"""
+
+    _instance = None
+    _lock = threading.Lock()
+
+    def __new__(cls):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+                    cls._instance._initialized = False
+        return cls._instance
+
+    def __init__(self):
+        if self._initialized:
+            return
+
+        self.parser = None
+        self.is_ready = False
+        self._initialize_jvm()
+
+    def _initialize_jvm(self):
+        """Initialize JVM and load MolFileParser class"""
+        if jpype.isJVMStarted():
+            print("JVM already started")
+            self._load_parser()
+            return
+
+        try:
+            # Build classpath based on platform
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            lib_dir = os.path.join(current_dir, "lib")
+            build_dir = os.path.join(current_dir, "build")
+
+            # Collect all paths that might contain classes
+            classpath_parts = []
+
+            # Add lib directory if it exists
+            if os.path.exists(lib_dir):
+                # Add all JAR files in lib directory
+                for file in os.listdir(lib_dir):
+                    if file.endswith('.jar'):
+                        classpath_parts.append(os.path.join(lib_dir, file))
+                print(f"Found {len([f for f in os.listdir(lib_dir) if f.endswith('.jar')])} JAR files in lib/")
+
+            # Add build directory if it exists (for compiled .class files)
+            if os.path.exists(build_dir):
+                classpath_parts.append(build_dir)
+                print(f"Added build directory: {build_dir}")
+
+            # Add current directory (for .class files in root)
+            classpath_parts.append(current_dir)
+
+            # Also check for specific JAR files in current directory (fallback)
+            for jar_name in ["predictorc.jar", "cdk-2.7.1.jar"]:
+                jar_path = os.path.join(current_dir, jar_name)
+                if os.path.exists(jar_path) and jar_path not in classpath_parts:
+                    classpath_parts.append(jar_path)
+
+            if not classpath_parts:
+                raise Exception("No JAR files or class directories found. Please check lib/ directory.")
+
+            classpath = os.pathsep.join(classpath_parts)
+
+            print(f"Platform: {platform.system()}")
+            print(f"Classpath: {classpath}")
+
+            # Start JVM
+            jpype.startJVM(
+                jpype.getDefaultJVMPath(),
+                f"-Djava.class.path={classpath}",
+                "-Xmx2048m",  # 2GB heap for chemistry calculations
+                convertStrings=False
+            )
+
+            print("JVM started successfully")
+            self._load_parser()
+
+        except Exception as e:
+            print(f"Failed to initialize JVM: {e}")
+            import traceback
+            traceback.print_exc()
+            self.is_ready = False
+
+    def _load_parser(self):
+        """Load the MolFileParser class"""
+        try:
+            # Load the Java class
+            print("Attempting to load MolFileParser class...")
+            MolFileParser = jpype.JClass('MolFileParser')
+            print("MolFileParser class loaded")
+
+            self.parser = MolFileParser()
+            print("MolFileParser instance created")
+
+            # Check if initialization was successful
+            if hasattr(self.parser, 'isInitialized') and callable(self.parser.isInitialized):
+                self.is_ready = self.parser.isInitialized()
+                print(f"Parser isInitialized: {self.is_ready}")
+            else:
+                # Older version without isInitialized method
+                self.is_ready = True
+                print("Parser ready (no isInitialized method)")
+
+            if self.is_ready:
+                print("✓ MolFileParser initialized successfully")
+            else:
+                print("✗ MolFileParser failed to initialize (PredictionTool error)")
+
+            self._initialized = True
+
+        except Exception as e:
+            print(f"Failed to load MolFileParser: {e}")
+            import traceback
+            traceback.print_exc()
+            self.is_ready = False
+            self._initialized = True
+
+    def predict(self, molfile_string):
+        """
+        Predict NMR shifts for a molfile string
+        Returns pandas DataFrame with columns: min, mean, max
+        """
+        if not self.is_ready:
+            print("Parser not ready")
+            return pd.DataFrame(columns=["min", "mean", "max"])
+
+        try:
+            # Call Java method to get CSV string
+            csv_result = self.parser.predictFromMolfileAsCSV(molfile_string)
+
+            # Parse CSV into DataFrame
+            mol_df = pd.read_csv(StringIO(str(csv_result)), index_col=0)
+
+            # Adjust index to be 0-based (Java returns 1-based)
+            mol_df.index = mol_df.index - 1
+
+            # Rename columns to lowercase to match original function
+            mol_df.columns = ["min", "mean", "max"]
+
+            return mol_df
+
+        except Exception as e:
+            print(f"Error during prediction: {e}")
+            import traceback
+            traceback.print_exc()
+            return pd.DataFrame(columns=["min", "mean", "max"])
+
+    def get_carbon_count(self, molfile_string):
+        """Quick check for number of carbon atoms"""
+        if not self.is_ready:
+            return 0
+
+        try:
+            return self.parser.getCarbonCount(molfile_string)
+        except Exception as e:
+            print(f"Error getting carbon count: {e}")
+            return 0
+
+    def shutdown(self):
+        """Shutdown JVM (call this when application exits)"""
+        if jpype.isJVMStarted():
+            jpype.shutdownJVM()
+            print("JVM shut down")
 
 
-# @lru_cache(maxsize=None)
+# Global bridge instance
+_bridge = None
+_bridge_lock = threading.Lock()
+
+
+def _get_bridge():
+    """Get or create the global NMRShiftDB bridge"""
+    global _bridge
+    if _bridge is None:
+        with _bridge_lock:
+            if _bridge is None:
+                _bridge = NMRShiftDBBridge()
+    return _bridge
+
+
+@lru_cache(maxsize=None)
 def calculate_nmrpredictions_nmrshiftdb(molstr: str) -> pd.DataFrame:
-    """returns carbon chemical shift prediction using nmrshiftdb
+    """Returns carbon chemical shift prediction using nmrshiftdb
 
     Args:
-        javaparams (List): parameters to call Java nmrshittdb c13prectictor using subprocess
         molstr (str): mol string of molecule
 
     Returns:
-        pd.DataFrame: carbon 13 chemical shift prediction with columns min, mean, max or empty dataframe if an error occurred
+        pd.DataFrame: carbon 13 chemical shift prediction with columns min, mean, max
+                     or empty dataframe if an error occurred
     """
-    #             r"jre\\javawindows\\bin\\java",
+    bridge = _get_bridge()
+    return bridge.predict(molstr)
 
-    print("platform.system()", platform.system())
-    if platform.system() == "Windows":
-        print("Windows")
-        javaparams = [
-            r"jre\javawindows\bin\java.exe",
-            "-classpath",
-            "predictorc.jar;cdk-2.7.1.jar;.",
-            "MolFileParser",
-            "",
-        ]
-    else:
-        print("Not Windows")
-        javaparams = [
-            "java",
-            "-classpath",
-            "predictorc.jar:cdk-2.7.1.jar:.",
-            "MolFileParser",
-            "",
-        ]
 
-    # print("\njavaparams\n")
-    # print(javaparams)
+def get_carbon_count(molstr: str) -> int:
+    """Get the number of carbon atoms in a molecule
 
-    javaparams[-1] = molstr
+    Args:
+        molstr (str): mol string of molecule
 
-    result = subprocess.run(
-        javaparams, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
-    )
-    # print("result\n", result)
-    # print("calculate_nmrpredictions_nmrshiftdb(  molstr: str )-> pd.DataFrame: CALLED")
-    # print("result.returncode", result.returncode)
-    # print("result.stdout", result.stdout)
-    # print("result.stderr", result.stderr)
-    # Check if the command was successful
-    if result.returncode != 0:
-        return pd.DataFrame(columns=["min", "mean", "max"])
-    else:
-        print("return code == 0")
-        output = result.stdout.decode()
-        # print("output", output)
-        try:
-            mol_df = pd.read_csv(StringIO(output), index_col=0)
-            mol_df.index = mol_df.index - 1
-            return mol_df
-        except:
-            return pd.DataFrame(columns=["min", "mean", "max"])
+    Returns:
+        int: number of carbon atoms
+    """
+    bridge = _get_bridge()
+    return bridge.get_carbon_count(molstr)
+
+
+def shutdown_nmr_bridge():
+    """Shutdown the JVM (call when application exits)"""
+    global _bridge
+    if _bridge is not None:
+        _bridge.shutdown()
+
+
+# Register shutdown hook
+import atexit
+atexit.register(shutdown_nmr_bridge)
 
 
 if __name__ == "__main__":
+
+    import time
 
     molstr1 = """
 RDKit          2D
@@ -128,148 +287,44 @@ RDKit          2D
 M  END
 """
 
-    molstr2 = """
-JME 2024-04-29 Mon Sep 16 20:41:40 GMT+100 2024
-
- 18 20  0  0  0  0  0  0  0  0999 V2000
-    1.9124    7.5124    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    1.2124    6.3000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.5124    7.5124    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.0000    5.6000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.0000    4.2000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    1.2124    3.5000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    1.2124    2.1000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.0000    1.4000    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
-    2.4249    1.4000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    2.4249    0.0000    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
-    3.6373    2.1000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    4.8498    1.4000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    6.0622    2.1000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    6.0622    3.5000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    4.8498    4.2000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    3.6373    3.5000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    2.4249    4.2000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    2.4249    5.6000    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
-  2  1  1  0  0  0  0
-  3  2  1  0  0  0  0
-  4  2  1  0  0  0  0
-  5  4  1  0  0  0  0
-  6  5  1  0  0  0  0
-  7  6  1  0  0  0  0
-  8  7  2  0  0  0  0
-  9  7  1  0  0  0  0
- 10  9  2  0  0  0  0
- 11  9  1  0  0  0  0
- 12 11  2  0  0  0  0
- 13 12  1  0  0  0  0
- 14 13  2  0  0  0  0
- 15 14  1  0  0  0  0
- 16 15  2  0  0  0  0
- 16 11  1  0  0  0  0
- 17 16  1  0  0  0  0
- 17  6  2  0  0  0  0
- 18 17  1  0  0  0  0
- 18  2  1  0  0  0  0
-M  END
-
-"""
-
-    molstr3 = """
-  Mrv2011 09232414502D
-
- 10 11  0  0  0  0  0  0  0  0999 V2000
-    3.0480   -0.8048   -0.3219 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -2.0882   -1.5427   -0.1718 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -2.9764   -0.0278   -0.1718 C   0  0  0  0  0  0  0  0  0  0  0  0
-    1.4378    1.0900   -0.2919 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.1365    1.7665    0.0292 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.7438   -1.0832    0.7376 C   0  0  0  0  0  0  0  0  0  0  0  0
-    1.7233   -0.1862    0.0190 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -0.9324    0.9055    0.6303 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -0.6265   -0.5239    0.9877 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -1.5391   -0.2170   -0.1718 C   0  0  0  0  0  0  0  0  0  0  0  0
-  5  4  1  0  0  0  0
-  6  7  1  0  0  0  0
-  7  1  1  0  0  0  0
-  7  4  2  0  0  0  0
-  8  5  1  0  0  0  0
-  9  6  1  0  0  0  0
-  9  8  1  0  0  0  0
- 10  2  1  0  0  0  0
- 10  3  1  0  0  0  0
- 10  8  1  0  0  0  0
- 10  9  1  0  0  0  0
-M  END
-
-"""
-
-    molstr4 = """
- Mnova   09232416552D
-
- 10 11  0  0  0  0  0  0  0  0999 V2000
-   33.5340   16.7670    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   48.0542    8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   48.0542   -8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   62.5761  -16.7670    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   77.0963   -8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   77.0963    8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   62.5761   16.7670    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   91.6165    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-  100.0000   14.5202    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-  100.0000  -14.5202    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-  1  2  1  0  0  0  0
-  2  3  2  0  0  0  0
-  3  4  1  0  0  0  0
-  5  4  1  6  0  0  0
-  5  6  1  0  0  0  0
-  6  7  1  6  0  0  0
-  7  2  1  0  0  0  0
-  6  8  1  0  0  0  0
-  8  5  1  0  0  0  0
-  8  9  1  0  0  0  0
-  8 10  1  0  0  0  0
-M  END
-"""
-    molstr6 = """
-JME 2024-04-29 Mon Sep 23 21:25:06 GMT+100 2024
-
- 10 11  0  0  0  0  0  0  0  0999 V2000
-    0.0000    2.8000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    1.2124    2.1000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    1.2124    0.7000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    2.4249    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    3.6373    0.7000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    3.6373    2.1000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    2.4249    2.8000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    4.8497    1.4000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    5.5498    2.6124    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    5.5498    0.1876    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-  1  2  1  0  0  0  0
-  2  3  2  0  0  0  0
-  3  4  1  0  0  0  0
-  5  4  1  6  0  0  0
-  5  6  1  0  0  0  0
-  6  7  1  6  0  0  0
-  7  2  1  0  0  0  0
-  6  8  1  0  0  0  0
-  8  5  1  0  0  0  0
-  8  9  1  0  0  0  0
-  8 10  1  0  0  0  0
-M  END
-"""
-    # M  ZZC   1 10
-    # M  ZZC   2 6
-    # M  ZZC   3 5
-    # M  ZZC   4 4
-    # M  ZZC   5 3
-    # M  ZZC   6 2
-    # M  ZZC   7 7
-    # M  ZZC   8 1
-    # M  ZZC   9 8
-    # M  ZZC  10 9
-
-    molstr7 = "\r\nMnova   09232416552D\r\n\r\n 10 11  0  0  0  0  0  0  0  0999 V2000\r\n   33.5340   16.7670    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   48.0542    8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   48.0542   -8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   62.5761  -16.7670    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   77.0963   -8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   77.0963    8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   62.5761   16.7670    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   91.6165    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n  100.0000   14.5202    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n  100.0000  -14.5202    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n  1  2  1  0  0  0  0\r\n  2  3  2  0  0  0  0\r\n  3  4  1  0  0  0  0\r\n  5  4  1  6  0  0  0\r\n  5  6  1  0  0  0  0\r\n  6  7  1  6  0  0  0\r\n  7  2  1  0  0  0  0\r\n  6  8  1  0  0  0  0\r\n  8  5  1  0  0  0  0\r\n  8  9  1  0  0  0  0\r\n  8 10  1  0  0  0  0\r\nM  ZZC   1 10\r\nM  ZZC   2 6\r\nM  ZZC   3 5\r\nM  ZZC   4 4\r\nM  ZZC   5 3\r\nM  ZZC   6 2\r\nM  ZZC   7 7\r\nM  ZZC   8 1\r\nM  ZZC   9 8\r\nM  ZZC  10 9\r\nM  END\r\n"
     molstr5 = "\nMnova   09232416552D\n\n 10 11  0  0  0  0  0  0  0  0999 V2000\n   33.5340   16.7670    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   48.0542    8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   48.0542   -8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   62.5761  -16.7670    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   77.0963   -8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   77.0963    8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   62.5761   16.7670    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   91.6165    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n  100.0000   14.5202    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n  100.0000  -14.5202    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n  1  2  1  0  0  0  0\n  2  3  2  0  0  0  0\n  3  4  1  0  0  0  0\n  5  4  1  6  0  0  0\n  5  6  1  0  0  0  0\n  6  7  1  6  0  0  0\n  7  2  1  0  0  0  0\n  6  8  1  0  0  0  0\n  8  5  1  0  0  0  0\n  8  9  1  0  0  0  0\n  8 10  1  0  0  0  0\nM  ZZC   1 10\nM  ZZC   2 6\nM  ZZC   3 5\nM  ZZC   4 4\nM  ZZC   5 3\nM  ZZC   6 2\nM  ZZC   7 7\nM  ZZC   8 1\nM  ZZC   9 8\nM  ZZC  10 9\nM  END\n"
 
-    print(calculate_nmrpredictions_nmrshiftdb(molstr5))
-    # print( calculate_nmrpredictions_nmrshiftdb( JAVAPARAMS, "" ))
+    print("=" * 60)
+    print("Testing NMR Predictions via JPype")
+    print("=" * 60)
+
+    print("\nTest 1: molstr1")
+    print("-" * 60)
+    start = time.time()
+    result1 = calculate_nmrpredictions_nmrshiftdb(molstr1)
+    end = time.time()
+    print(result1)
+    print(f"Cached call took: {(end-start)*1000:.2f} ms")
+
+    print("\nTest 2: molstr5")
+    print("-" * 60)
+    start = time.time()
+    result3 = calculate_nmrpredictions_nmrshiftdb(molstr5)
+    end = time.time()
+    print(result3)
+    print(f"Cached call took: {(end-start)*1000:.2f} ms")
+
+    print("\nTest 3: Carbon count for molstr5")
+    print("-" * 60)
+    carbon_count = get_carbon_count(molstr5)
+    print(f"Carbon atoms: {carbon_count}")
+
+    print("\nTest 4: Cache test (calling molstr1 again - should be instant)")
+    print("-" * 60)
+
+    start = time.time()
+    result1_cached = calculate_nmrpredictions_nmrshiftdb(molstr1)
+    end = time.time()
+    print(f"Cached call took: {(end-start)*1000:.2f} ms")
+    print(result1_cached)
+
+    print("\n" + "=" * 60)
+    print("All tests completed")
+    print("=" * 60)
+
+
