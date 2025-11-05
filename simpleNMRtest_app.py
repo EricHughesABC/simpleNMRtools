@@ -947,7 +947,7 @@ def simpleMNOVA_display_molecule():
         if json_data["simulatedAnnealing"]["data"]["0"] and (simAnneal.predicted_weight > 0):  # True
 
             # simAnneal.setup_run(randomize_mapping=True)
-            simAnneal.run_optimization(25)
+            simAnneal.run_optimization(50)
 
             jsonGraphData, best_results = simAnneal.process_results(catoms_df, jsonGraphData)
 

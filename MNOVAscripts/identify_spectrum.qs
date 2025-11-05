@@ -65,13 +65,13 @@ function identify_spectrum(){
         "HSQC": validHSQCPulseSequenceStrings,
         "HMBC": validHMBCPulseSequenceStrings,
         "COSY": validCOSYCPulseSequenceStrings,
-        "DOUBLEDEPTCH3": validDOUBLEDEPTCH3PulseSequenceStrings,
-        "HSQCCLIPCOSY": validHSQCCLIPCOSYPulseSequenceStrings,
+        "DDEPT_CH3_ONLY": validDOUBLEDEPTCH3PulseSequenceStrings,
+        "HSQC_CLIPCOSY": validHSQCCLIPCOSYPulseSequenceStrings,
         "NOESY": validNOESYPulseSequenceStrings
     };
 
     const validSpectraKeys = ["H1_1D", "C13_1D", "PURESHIFT", "DEPT135",
-                              "HSQC", "HMBC", "COSY", "DOUBLEDEPTCH3", "HSQCCLIPCOSY", "NOESY"];
+                              "HSQC", "HMBC", "COSY", "DDEPT_CH3_ONLY", "HSQC_CLIPCOSY", "NOESY"];
 
     var doc = Application.mainWindow.activeDocument;
     var simpleutils = new simpleUtils();

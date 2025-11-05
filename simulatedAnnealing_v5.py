@@ -623,7 +623,7 @@ class SimulatedAnnealing2:
         max_iter: int = 100000,
         max_temp: float = 100.0,
         min_temp: float = 0.1,
-        cooling_rate: float = 0.99,
+        cooling_rate: float = 0.995,
         randomize_mapping: bool = False,
     ) -> None:
         """
