@@ -65,13 +65,13 @@ function identify_spectrum(){
         "HSQC": validHSQCPulseSequenceStrings,
         "HMBC": validHMBCPulseSequenceStrings,
         "COSY": validCOSYCPulseSequenceStrings,
-        "DOUBLEDEPTCH3": validDOUBLEDEPTCH3PulseSequenceStrings,
-        "HSQCCLIPCOSY": validHSQCCLIPCOSYPulseSequenceStrings,
+        "DDEPT_CH3_ONLY": validDOUBLEDEPTCH3PulseSequenceStrings,
+        "HSQC_CLIPCOSY": validHSQCCLIPCOSYPulseSequenceStrings,
         "NOESY": validNOESYPulseSequenceStrings
     };
 
     const validSpectraKeys = ["H1_1D", "C13_1D", "PURESHIFT", "DEPT135",
-                              "HSQC", "HMBC", "COSY", "DOUBLEDEPTCH3", "HSQCCLIPCOSY", "NOESY"];
+                              "HSQC", "HMBC", "COSY", "DDEPT_CH3_ONLY", "HSQC_CLIPCOSY", "NOESY"];
 
     var doc = Application.mainWindow.activeDocument;
     var simpleutils = new simpleUtils();
@@ -131,6 +131,17 @@ function identify_spectrum(){
                     spectrum["experimentIdentified"] = true;
                     break;
                 }
+                else{
+                    // check if Predicted is in the file name
+                    var title = spectrum.getParam("Title");
+                    if (isSubstring("Predicted", title)){
+                        spectrumFound = true;
+                        exptIdentifiedName = "Predicted";
+                        spectrum["experimentEEH"] = "Predicted";
+                        spectrum["experimentIdentified"] = true;
+                        break; 
+                    } 
+                }
             }
         }
         
@@ -175,13 +186,15 @@ function identify_spectrum(){
     print("unidentified_spectra.length " + unidentified_spectra.length);
     print();
     if (unidentified_spectra.length > 0) {
-        idspectra_dialog( spec_lst );
+        idspectra_dialog( spectra_lst );
     }
 
     for( var i=0; i<spectra_lst.length; i++){
         var spectrum = spectra_lst[i];
         print("spectrum.experimentEEH " + spectrum.experimentEEH + " " + spectrum.getParam("Pulse Sequence"));
     }
+
+    // update the spectrum list after dialog
     return spectra_lst;
 }
 

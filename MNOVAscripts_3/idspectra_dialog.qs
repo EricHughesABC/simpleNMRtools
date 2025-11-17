@@ -27,7 +27,7 @@ function idspectra_dialog(spec_lst ) {
     var simpleutils = new simpleUtils();
 
     // var NMRexpts = ["unidentified","H1_1D", "C13_1D", "DEPT135", "PureShift", "COSY", "HSQC", "HMBC", "HSQC_CLIPCOSY", "DDEPT_CH3_ONLY", "NOESY"];
-    var NMRexpts = ["undefined", "H1_1D", "C13_1D", "DEPT135", "PURESHIFT", "COSY", "HSQC", "HMBC", "HSQCCLIPCOSY", "DOUBLEDEPTCH3", "NOESY", "Predicted"];
+    var NMRexpts = ["undefined", "H1_1D", "C13_1D", "DEPT135", "PURESHIFT", "COSY", "HSQC", "HMBC", "HSQC_CLIPCOSY", "DDEPT_CH3_ONLY", "NOESY", "Predicted"];
 
     // create checkboxes for each spectrum in the list spectra_available
     print("\nCreating checkboxes for spectra:\n");
@@ -83,6 +83,27 @@ function idspectra_dialog(spec_lst ) {
             spec_lst[i_expt]['page']['notes'] = comboboxes1[ky].currentText;
             i_expt = i_expt + 1;
         }
+        // save the results to a json file contents of checkboxes1 and comboboxes1 as a dictionary
+        var results = {};
+        for( var ky in comboboxes1){
+            results[ky] = {
+                'uniqueExptID': checkboxes1[ky].checked,
+                'selected_experiment': comboboxes1[ky].currentText
+            };
+        }
+        var json_str = JSON.stringify(results, null, 4);
+        // write to a file
+        var file = new File();
+        var filepath = Application.homePath + "/idspectra_dialog_results.json";
+        if (file.open(filepath, File.WriteOnly | File.Text)) {
+            file.write(json_str);
+            file.close();
+            print("Results saved to " + filepath);
+        } else {
+            print("Error: Could not open file for writing: " + filepath);
+        }
+        
+        return spec_lst;
     }
 }
 

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mestre_ui version="1.0" name="simpleNMRtools.mui" toolbarcontext="WebServices" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../mui.xsd">
+    <actions>
+	    <!-- Actions will be identified by its name. Valid properties are text, checkable, tooltip, icon -->
+		<action name="simpleNMRtools_simplePREDICT_eeh">
+		    <text>predict</text>
+			<icon>ricares:predict.png</icon>
+		</action>
+		<action name="simpleNMRtools_simpleASSIGN_eeh">
+		    <text>assign</text>
+			<icon>ricares:assign.png</icon>
+		</action>
+        <action name="simpleNMRtools_simplePeakPick_eeh">
+		    <text>peak pick</text>
+			<icon>ricares:PeakPick2.png</icon>
+		</action>
+		<action name="simpleNMRtools_snapToCarbonHSQC_eeh">
+		    <text>Snap to Carbon</text>
+			<icon>ricares:snap.png</icon>
+		</action>
+		<action name="simpleNMRtools_simpleIntegrate">
+		    <text>Integrate 2D</text>
+			<icon>ricares:integrate2D.png</icon>
+		</action>
+        <action name="simpleNMRtools_simpleREPORT_eeh">
+		    <text>report</text>
+			<icon>ricares:Report.png</icon>
+		</action>	
+		<action name="simpleNMRtools_simpleNMRhelp">
+		    <text>help</text>
+			<icon>ricares:simpleHelp.png</icon>
+		</action>	
+	</actions>
+	<menus>
+	    <menu name = "Analysis" at="-1">
+		    <submenu name="Web Services">
+				<addaction name = "simpleNMRtools_simplePREDICT_eeh" at="asvOptions"/>
+				<addaction name = "simpleNMRtools_simpleASSIGN_eeh" at="asvOptions"/>
+				<addaction name = "simpleNMRtools_simplePeakPick_eeh" at="asvOptions"/>
+				<addaction name = "simpleNMRtools_snapToCarbonHSQC_eeh" at="asvOptions"/>
+				<addaction name = "simpleNMRtools_simpleREPORT_eeh" at="asvOptions"/>
+				<addaction name = "simpleNMRtools_simpleIntegrate" at="asvOptions"/>
+				<addaction name = "simpleNMRtools_simpleNMRhelp" at="asvOptions"/>
+			</submenu>
+		</menu>
+	</menus>
+	    <ribbon>
+		<page id="simpleNMRTools" title="_simpleNMRTools">
+			<group id="simplePredict_eeh" name="Simple Predict">
+			    <icon>ricares:predict.png</icon>
+				<addaction name="simpleNMRtools_simplePREDICT_eeh"/>
+			</group>
+            <group id="simpleAssign_eeh" name="Simple Assign">
+			    <icon>ricares:assign.png</icon>
+				<addaction name="simpleNMRtools_simpleASSIGN_eeh"/>
+			</group>
+            <group id="simplePeakPick_eeh" name="Simple PeakPick">
+			    <icon>ricares:PeakPick2.png</icon>
+				<addaction name="simpleNMRtools_simplePeakPick_eeh"/>
+			</group>
+			<group id="snapToCarbonHSQC_eeh" name="Snap to Carbon HSQC">
+			    <icon>ricares:snap.png</icon>
+				<addaction name="simpleNMRtools_snapToCarbonHSQC_eeh"/>
+			</group>
+			<group id="simpleIntegrate" name="Simple Integrate 2D">
+			    <icon>ricares:integrate2D.png</icon>
+				<addaction name="simpleNMRtools_simpleIntegrate"/>
+			</group>
+            <group id="simpleREPORT_eeh" name="Simple Report">
+			    <icon>ricares:Report.png</icon>
+				<addaction name="simpleNMRtools_simpleREPORT_eeh"/>
+			</group>
+			<group id="simpleNMRhelp" name="Simple Help">
+			    <icon>ricares:simpleHelp.png</icon>
+				<addaction name="simpleNMRtools_simpleNMRhelp"/>
+			</group>
+		</page>
+	</ribbon>
+</mestre_ui>

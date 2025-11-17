@@ -18,15 +18,6 @@ from rdkit.Chem import Draw
 from rdkit.Chem.rdchem import Mol
 from typing import Dict, List, Optional, Tuple
 
-# # node color map
-# color_map = {
-#     0: "#FFA500",
-#     1: "#98FB98",
-#     2: "yellow",
-#     3: "#00FFFF",
-#     -1: "lightblue",  # For non-carbon atoms
-#     -2: "lightgrey",
-# }
 
 from globals import SVG_DIMENSIONS as svgDimensions
 from globals import NODE_COLOR_MAP as color_map
@@ -430,14 +421,6 @@ class SimulatedAnnealing2:
 
         return graph_df
 
-    # def calc_xy3_coords(
-    #     self,
-    #     mol: Mol,
-    #     molWidth: int = 1000,
-    #     molHeight: int = 400,
-    #     svgWidth: int = 1200,
-    #     svgHeight: int = 600,
-    # ) -> Tuple[str, Dict[int, Tuple[float, float]]]:
     def calc_xy3_coords(
         self,
         mol: Mol,

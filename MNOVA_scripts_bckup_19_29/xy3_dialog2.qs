@@ -22,8 +22,7 @@ function xy3_dialog2(spectra_available, exptIdentifierIndex, dialogParameters, e
     var checkboxes1 = {};
     var comboboxes1 = {};
 
-    // var NMRexpts = ["SKIP", "H1_1D", "C13_1D", "DEPT135", "PureShift", "COSY", "HSQC", "HMBC", "HSQC_CLIPCOSY", "DDEPT_CH3_ONLY", "NOESY"];
-    var NMRexpts = ["SKIP", "H1_1D", "C13_1D", "DEPT135", "PureShift", "COSY", "HSQC", "HMBC", "HSQCCLIPCOSY", "DDEPTCH3ONLY", "NOESY"];
+    var NMRexpts = ["SKIP", "H1_1D", "C13_1D", "DEPT135", "PureShift", "COSY", "HSQC", "HMBC", "HSQC_CLIPCOSY", "DDEPT_CH3_ONLY", "NOESY"];
 
     // create checkboxes for each spectrum in the list spectra_available
     for (var i = 0; i < spectra_available.length; i++) {

@@ -1,18 +1,6 @@
 function simplePREDICT_eeh(){
 
 
-    // var spectra_keys = ["HSQC", 
-    //                     "HMBC", 
-    //                     "COSY", 
-    //                     "NOESY", 
-    //                     "H1_1D", 
-    //                     "C13_1D", 
-    //                     "DEPT135", 
-    //                     "PureShift", 
-    //                     "DDEPT_CH3_ONLY", 
-    //                     "SKIP", 
-    //                     "HSQC_CLIPCOSY"];
-
     var spectra_keys = ["HSQC", 
                         "HMBC", 
                         "COSY", 
@@ -21,9 +9,9 @@ function simplePREDICT_eeh(){
                         "C13_1D", 
                         "DEPT135", 
                         "PureShift", 
-                        "DDEPTCH3ONLY", 
+                        "DDEPT_CH3_ONLY", 
                         "SKIP", 
-                        "HSQCCLIPCOSY"];
+                        "HSQC_CLIPCOSY"];
 
     function stringInArray(needle, haystack){
         for( var i=0; i<haystack.length; i++){
@@ -70,6 +58,9 @@ function simplePREDICT_eeh(){
     
     // read in the json file and return the json object
     function readJsonFile(jsonfilename){
+        // print("Dir.current ", Dir.current());
+        // print("Dir.appDataUser ", Dir.appDataUser());
+        // print("Dir.application ", Dir.application());
 
         var jsonobj = {};
         var fin = new File(jsonfilename);
@@ -139,10 +130,13 @@ function simplePREDICT_eeh(){
                 MessageBox.warning("Host is not registered. Please register to use simpleNMR prediction.");
             }
             
+            print("Opening registration URL: ", responseObj.registration_url);
+            print("Type of Application.openUrl: ", typeof Application.openUrl);
             if (typeof Application.openUrl === 'function') {
                 Application.openUrl(responseObj.registration_url);
             } else {
                 print("Application.openUrl is not a function");
+                MessageBox.warning("Could not open registration URL: " + responseObj.registration_url + "\nPlease update your MNOVA version to to at least 15.0");
             }
             
             return; // Exit early
@@ -155,19 +149,26 @@ function simplePREDICT_eeh(){
     } catch (e) {
         // Not JSON or parsing error - continue with original response handling
         // replace the dummy title in the html output with result.name
+        // MessageBox.warning("No JSON response found. Please check the server response.");
+        // htmloutputstr = rtn.response.replace("dummy_title", result.name);
         print("Error parsing JSON response: ", e);
         MessageBox.warning("Error parsing JSON response: " + e + "\n" + rtn.response + "\nrtn.exitCode" + rtn.exitCode + "\nrtn.allErrorOutput" + rtn.allErrorOutput);
         return;
     }
+
+
   
     // return molecule from document
     var mol = getActiveMolecule(doc, Application.molecule);
+
+    
     
     var spectra = {};
     if( mol === undefined ){
         MessageBox.warning("No molecule found!")
         return;  
     }
+
 
     var smiles = mol.generateSMILES()
     spectra["smiles"] = {};
@@ -242,6 +243,14 @@ function simplePREDICT_eeh(){
     
     if ( assignments.hasAssignments() == true){
 
+        // // Allow user to insert modify IUPAC numbering
+        // var mnova_to_iupac = iupac_dialog();
+        // print("mnova_to_iupac\n", mnova_to_iupac);
+        // if( mnova_to_iupac === undefined ){
+        //     print("mnova_to_iupac is undefined");
+        //     return;
+        // }
+
         var count = 0;
         for ( var i=1; i <= mol.atomCount; i++) {    
             var atom = new Atom(mol.atom(i));
@@ -256,6 +265,7 @@ function simplePREDICT_eeh(){
                 	spectra["nmrAssignments"]["data"][i]["numProtons"] = atom.nH;
                 	spectra["nmrAssignments"]["data"][i]["f1_ppm"] = cshift.shift;
                 	spectra["nmrAssignments"]["data"][i]["label"] = atom.Label;
+                	// spectra["nmrAssignments"]["data"][i]["iupacLabel"] = mnova_to_iupac[i][1];
                 	spectra["nmrAssignments"]["data"][i]["iupacLabel"] = "";
                 	count++;
                 
@@ -310,6 +320,7 @@ function simplePREDICT_eeh(){
                 spectra[spectitle]["intrument"] = spec.getParam("Instrument");
                 spectra[spectitle]["probe"] = spec.getParam("Probe");
                 spectra[spectitle]["datafilename"] = spec.getParam("Data File Name");
+                // spectra[spectitle]["comment"] = spec.getParam("Comment");
                 spectra[spectitle]["nucleus"] = spec.getParam("Nucleus");
                 spectra[spectitle]["specfrequency"] = spec.getParam("Spectrometer Frequency");
                 // add solvent
@@ -321,6 +332,7 @@ function simplePREDICT_eeh(){
                 if( spectra[spectitle]["type"] == "1D" && spectra[spectitle]["nucleus"].indexOf(",") != -1 ){
                     spectra[spectitle]["type"] = "2D";
                 }
+                
         
                 // process multiplets
         
@@ -328,7 +340,9 @@ function simplePREDICT_eeh(){
                 
                 spectra[spectitle]["multiplets"] = {};
                 spectra[spectitle]["multiplets"]["datatype"] = "multiplets";
+                // spectra[spectitle]["multiplets"]["count"] = multiplets.count;
                 spectra[spectitle]["multiplets"]["normValue"] = multiplets.normValue;
+        
         
                 // loop through multiplets and add information
                 var good_multiplets = 0;
@@ -597,6 +611,8 @@ function simplePREDICT_eeh(){
     // match the peaks to the integrals by the delta values being in the range of the integrals in the two dimensions
     // if there is a match then replace the intensity value of the peak with the integral value
     
+    // var hsqc = spectra[chosen_spectra_ids["HSQC"]];
+    
     // assign H1_1D to a variable if it exists
     if( spectra["H1_1D"] !== undefined ){
         var h1_1d = spectra["H1_1D"];
@@ -677,6 +693,7 @@ function simplePREDICT_eeh(){
 
     var fout = new File(dialogParametersJsonFilename);
     if (fout.open(File.WriteOnly)) {
+        // var dialogParamsString = JSON.stringify(dialogParams, null, 4);
         sout = new TextStream(fout, 'UTF-8');
         sout.writeln(JSON.stringify(dialogParams));
     }
@@ -783,14 +800,17 @@ function simplePREDICT_eeh(){
 
         if(chosen_spectra["calcSimpleMNOVA"] == "MNOVA Predict"){
             // build entry point
+            // var entry_point = server + "simpleMNOVApredict"
             entry_point = server + "simpleMNOVA"
         }
         else if (chosen_spectra["calcSimpleMNOVA"] == "NMRSHIFTDB2 Predict"){
             // build entry point
+            // var entry_point = server + "simpleNMRSHIFTDB2predict"
             entry_point = server + "simpleMNOVA"
         }
         else if (chosen_spectra["calcSimpleMNOVA"] == "MNova Manually Assigned"){
             // build entry point
+            // var entry_point = server + "simpleMNOVAmanuallyassigned"
             if( spectra["nmrAssignments"]["count"] == 0 ){
                 MessageBox.warning("No MNOVA assignment data found");  
                 return;
@@ -805,6 +825,7 @@ function simplePREDICT_eeh(){
         progressDialog.visible = true;
 
 
+        // json_spectra_string = JSON.encode(json_spectra_string.encode, 'utf-8');
         var rtn = web_utils.jsonRequest(entry_point, json_spectra_string, "", "", false);
 
         progressDialog.visible = false;

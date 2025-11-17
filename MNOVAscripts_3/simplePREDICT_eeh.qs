@@ -21,9 +21,9 @@ function simplePREDICT_eeh(){
                         "C13_1D", 
                         "DEPT135", 
                         "PureShift", 
-                        "DDEPTCH3ONLY", 
+                        "DDEPT_CH3_ONLY", 
                         "SKIP", 
-                        "HSQCCLIPCOSY"];
+                        "HSQC_CLIPCOSY"];
 
     function stringInArray(needle, haystack){
         for( var i=0; i<haystack.length; i++){
@@ -112,6 +112,7 @@ function simplePREDICT_eeh(){
     var json_obj_string = JSON.stringify(json_obj,null,4);
     // print("json_obj_string ", json_obj_string);
     print( "Entry point", entry_point);
+    print( "json_obj_string", json_obj_string);
     rtn = web_utils.jsonRequest(entry_point, json_obj_string, "", "", false);
 
     // print("entry_point ", entry_point);

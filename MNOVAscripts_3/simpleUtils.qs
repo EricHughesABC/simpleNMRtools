@@ -23,8 +23,8 @@ spectra_keys = ["HSQC",
                     "C13_1D", 
                     "DEPT135", 
                     "PureShift", 
-                    "HSQCCLIPCOSY", 
-                    "DOUBLEDEPTCH3",
+                    "HSQC_CLIPCOSY", 
+                    "DDEPT_CH3_ONLY",
                     "SKIP", 
                 ];
 
