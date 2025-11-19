@@ -23,7 +23,7 @@ function simplePREDICT_eeh(){
                         "PureShift", 
                         "DDEPTCH3ONLY", 
                         "SKIP", 
-                        "HSQCCLIPCOSY"];
+                        "HSQC_CLIPCOSY"];
 
     function stringInArray(needle, haystack){
         for( var i=0; i<haystack.length; i++){

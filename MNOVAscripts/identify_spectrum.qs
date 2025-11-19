@@ -66,7 +66,7 @@ function identify_spectrum(){
         "HMBC": validHMBCPulseSequenceStrings,
         "COSY": validCOSYCPulseSequenceStrings,
         "DOUBLEDEPTCH3": validDOUBLEDEPTCH3PulseSequenceStrings,
-        "HSQCCLIPCOSY": validHSQCCLIPCOSYPulseSequenceStrings,
+        "HSQC_CLIPCOSY": validHSQCCLIPCOSYPulseSequenceStrings,
         "NOESY": validNOESYPulseSequenceStrings
     };
 

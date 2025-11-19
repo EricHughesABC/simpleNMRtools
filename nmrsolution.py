@@ -79,6 +79,8 @@ class NMRsolution:
 
         print("self.c13_df\n", self.c13_df)
 
+        print("self.hsqc_clipcosy_df\n", self.hsqc_clipcosy_df)
+
         # if hsqc_df is empty then return
         if self.hsqc_df.empty:
             self.nmrsolution_failed = True
