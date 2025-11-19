@@ -28,7 +28,7 @@ function simpleCompletePeakPick() {
     print("\nActive spectrum type: " + currentSpectrum["experimentEEH"]);
     print();
 
-    const expt_types = ["H1_1D", "C13_1D", "PURESHIFT", "DEPT135", "HSQC", "HMBC", "COSY", "NOESY", "DOUBLEDEPTCH3", "HSQCCLIPCOSY"];
+    const expt_types = ["H1_1D", "C13_1D", "H1_pureshift", "DEPT135", "HSQC", "HMBC", "COSY", "NOESY", "DDEPT_CH3_ONLY", "HSQC_CLIPCOSY"];
 
     var spectra_dict = {};
 
@@ -65,7 +65,7 @@ function simpleCompletePeakPick() {
     var peakPickingPath = 0;
 
     if (spectra_with_peaks.C13_1D.hasPeaks) peakPickingPath |= 1;
-    if (spectra_with_peaks.PURESHIFT.hasPeaks) peakPickingPath |= 2;
+    if (spectra_with_peaks.H1_pureshift.hasPeaks) peakPickingPath |= 2;
 
     if (spectra_with_peaks.HSQC && spectra_with_peaks.HSQC.hasPeaks) peakPickingPath |= 4;
 

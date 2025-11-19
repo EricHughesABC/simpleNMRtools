@@ -8,7 +8,7 @@ function simplePREDICT_eeh(){
                         "H1_1D", 
                         "C13_1D", 
                         "DEPT135", 
-                        "PureShift", 
+                        "H1_pureshift", 
                         "DDEPT_CH3_ONLY", 
                         "SKIP", 
                         "HSQC_CLIPCOSY"];

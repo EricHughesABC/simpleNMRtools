@@ -70,8 +70,12 @@ function identify_spectrum(){
         "NOESY": validNOESYPulseSequenceStrings
     };
 
+    // const validSpectraKeys = ["H1_1D", "C13_1D", "PURESHIFT", "DEPT135",
+    //                           "HSQC", "HMBC", "COSY", "DOUBLEDEPTCH3", "HSQCCLIPCOSY", "NOESY"];
+                              
+                              
     const validSpectraKeys = ["H1_1D", "C13_1D", "PURESHIFT", "DEPT135",
-                              "HSQC", "HMBC", "COSY", "DOUBLEDEPTCH3", "HSQCCLIPCOSY", "NOESY"];
+                              "HSQC", "HMBC", "COSY", "DOUBLEDEPTCH3", "HSQC_CLIPCOSY", "NOESY"];
 
     var doc = Application.mainWindow.activeDocument;
     var simpleutils = new simpleUtils();
@@ -175,7 +179,7 @@ function identify_spectrum(){
     print("unidentified_spectra.length " + unidentified_spectra.length);
     print();
     if (unidentified_spectra.length > 0) {
-        idspectra_dialog( spec_lst );
+        idspectra_dialog( spectra_lst );
     }
 
     for( var i=0; i<spectra_lst.length; i++){

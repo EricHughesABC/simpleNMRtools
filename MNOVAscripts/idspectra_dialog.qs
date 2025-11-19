@@ -26,8 +26,8 @@ function idspectra_dialog(spec_lst ) {
 
     var simpleutils = new simpleUtils();
 
-    // var NMRexpts = ["unidentified","H1_1D", "C13_1D", "DEPT135", "PureShift", "COSY", "HSQC", "HMBC", "HSQC_CLIPCOSY", "DDEPT_CH3_ONLY", "NOESY"];
-    var NMRexpts = ["undefined", "H1_1D", "C13_1D", "DEPT135", "PURESHIFT", "COSY", "HSQC", "HMBC", "HSQCCLIPCOSY", "DOUBLEDEPTCH3", "NOESY", "Predicted"];
+    var NMRexpts = ["unidentified","H1_1D", "C13_1D", "DEPT135", "PureShift", "COSY", "HSQC", "HMBC", "HSQC_CLIPCOSY", "DDEPT_CH3_ONLY", "NOESY", "Predicted"];
+    // var NMRexpts = ["undefined", "H1_1D", "C13_1D", "DEPT135", "PURESHIFT", "COSY", "HSQC", "HMBC", "HSQCCLIPCOSY", "DOUBLEDEPTCH3", "NOESY", "Predicted"];
 
     // create checkboxes for each spectrum in the list spectra_available
     print("\nCreating checkboxes for spectra:\n");
