@@ -167,7 +167,7 @@ class Result(db.Model):
     LAE = db.Column(db.Float)
     # Use JSON type for MySQL, fallback to Text for SQLite
     # json_result = db.Column(db.JSON().with_variant(db.Text, 'sqlite'), nullable=True)
-    json_result = Column(JSON)
+    json_result = db.Column(JSON)
     created_at = db.Column(db.DateTime, default=datetime.now(timezone('UTC')), index=True)
 
     def __repr__(self):

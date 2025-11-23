@@ -143,7 +143,7 @@
             <button title="Press to display HMBC links" style="border: 2px solid grey" class="color-container color-box action-button grey" id="hmbcButton">
                 HMBC
             </button>
-            <button title="Press to hide COSY links" class="normal color-container color-box action-button blue" >
+            <button id="sunkenButton" title="Press to hide COSY links" class="normal color-container color-box action-button blue" >
                 COSY
             </button>
         </div>
@@ -165,6 +165,12 @@
 
     <script>
 
+    // set up some constants
+    const svg_width_eeh = 1000;
+    const svg_height_eeh = 600;
+    const svg_center_x_eeh = svg_width_eeh / 2;
+    const svg_center_y_eeh = svg_height_eeh / 2;
+
     // Select the SVG element and add an id to it
     d3.select("svg").attr("id", "svg-image");
         
@@ -174,11 +180,11 @@
     const svgElement = document.querySelector('svg.center');
 
     // Update the width and height attributes
-    svgElement.setAttribute('width', '1000');
-    svgElement.setAttribute('height', '600');
+    svgElement.setAttribute('width', svg_width_eeh);
+    svgElement.setAttribute('height', svg_height_eeh);
 
     // Update the viewBox attribute
-    svgElement.setAttribute('viewBox', '0 0 1000 600');
+    svgElement.setAttribute('viewBox', `0 0 ${svg_width_eeh} ${svg_height_eeh}`);
 
     {% autoescape false %}
     // smiles string
@@ -256,8 +262,6 @@
       .domain([0, 1, 2, 3])
       .range([C, CH, CH2, CH3]); // Blue, Orange, Green, Red
 
-    // Set initial rotation angle
-    let rotation = 0;
 
     // Select the SVG element
 
@@ -489,103 +493,128 @@
         nodetextppm.push(textnodes[i+1]);
     }
 
-    var dragstartedFlag = false;
+    
 
-    // Drag handlers
-    function dragstarted(event, d) {
-        // change the opacity of the cosy links to 0
-        link.style("opacity", 0);
-        // Remove hmbc links
-        d3.select(this).raise().classed("active", true);
-        dragstartedFlag = true;
-    }
+// Transform state variables
+let panX = 0, panY = 0;
+let scaleLevel = 1;
+let rotation = 0;
+let lastTransform = d3.zoomIdentity;
+var dragstartedFlag = false;
 
-    function dragged(event, d) {
-        d.x = event.x;
-        d.y = event.y;
-        link.filter(l => l.source === d.id).attr("x1", d.x).attr("y1", d.y);
-        link.filter(l => l.target === d.id).attr("x2", d.x).attr("y2", d.y);
-        hmbclinks_svg.filter(l => l.source === d.id).attr("x1", d.x).attr("y1", d.y);
-        hmbclinks_svg.filter(l => l.target === d.id).attr("x2", d.x).attr("y2", d.y);
+// Drag handlers
+function dragstarted(event, d) {
+    link.style("opacity", 0);
+    d3.select(this).raise().classed("active", true);
+    dragstartedFlag = true;
+}
 
-        d3.select(this).attr("transform", `translate(${d.x},${d.y})`);
-    }
+function dragged(event, d) {
+    d.x = event.x;
+    d.y = event.y;
+    link.filter(l => l.source === d.id).attr("x1", d.x).attr("y1", d.y);
+    link.filter(l => l.target === d.id).attr("x2", d.x).attr("y2", d.y);
+    hmbclinks_svg.filter(l => l.source === d.id).attr("x1", d.x).attr("y1", d.y);
+    hmbclinks_svg.filter(l => l.target === d.id).attr("x2", d.x).attr("y2", d.y);
 
-    function dragended(event, d) {
-      d3.select(this).classed("active", false);
-      dragstartedFlag = false;
-      handleMouseOver(event, d); // Call handleMouseOut function to reset the view
-    }
+    d3.select(this).attr("transform", `translate(${d.x},${d.y})`);
+}
+
+function dragended(event, d) {
+    d3.select(this).classed("active", false);
+    dragstartedFlag = false;
+    handleMouseOver(event, d);
+}
 
 
-    // Function to handle zoom start
-    function handleZoomStart(event) {
-        console.log("Zoom started");
-        // do not update the screen while zooming
-    }
 
-    function handleZoom(event) {
-        currentTransform = event.transform;
+// Helper function to apply the combined transform
+function applyTransform() {
+    // Order: pan, then centered scale, then rotation
+    molimage.attr("transform", 
+        `translate(${panX}, ${panY}) ` +
+        `translate(${svg_center_x_eeh}, ${svg_center_y_eeh}) ` +
+        `scale(${scaleLevel}) ` +
+        `rotate(${rotation}) ` +
+        `translate(${-svg_center_x_eeh}, ${-svg_center_y_eeh})`
+    );
+}
 
-        molimage.attr("transform", `${currentTransform} rotate(${rotation}, ${500}, ${200})`);
-        // update
+// Helper function to update size-dependent elements
+function updateScaledElements() {
+    // Keep nodes the same size regardless of zoom level
+    allnodes.selectAll("circle")
+        .attr("r", nodeRadius / scaleLevel);
 
-        scaleLevel = event.transform.k;
+    // Keep text elements adjusted
+    allnodes.selectAll(".node-text-atomNumber")
+        .attr("font-size", `${fontSizeInt / scaleLevel}px`)
+        .attr("dy", `${-textOffsetInt / scaleLevel}px`);
 
-        currentTransform = event.transform;
+    allnodes.selectAll(".node-text-ppm")
+        .attr("font-size", `${fontSizeInt / scaleLevel}px`)
+        .attr("dy", `${textOffsetInt / scaleLevel}px`);
 
-        // Keep nodes the same size regardless of zoom level
-        allnodes.selectAll("circle")
-            .attr("r", nodeRadius / (scaleLevel));
+    // Keep link stroke width constant
+    linksGroup.selectAll("line")
+        .attr("stroke-width", `${hmbcEdgeWidth / scaleLevel}px`);
+}
 
-        // Keep text elements horizontal by applying a counter-rotation, adjust font size, and offset positions
-        allnodes.selectAll(".node-text-atomNumber")
-            .attr("font-size", `${fontSizeInt / scaleLevel}px`)        // Adjust font size
-            .attr("dy", `${-textOffsetInt / scaleLevel}px`);              // Adjust vertical offset for atom number text
 
-        allnodes.selectAll(".node-text-ppm")
-            .attr("font-size", `${fontSizeInt / scaleLevel}px`)        // Adjust font size
-            .attr("dy", `${textOffsetInt / scaleLevel}px`);               // Adjust vertical offset for ppm text
 
-        // Keep link stroke width constant by adjusting inversely with the scale level
-        linksGroup.selectAll("line")
-            .attr("stroke-width", `${hmbcEdgeWidth / scaleLevel}px`); // Adjust stroke width to counter zoom
-        
-    }
+function handleZoom(event) {
+    const { x, y, k } = event.transform;
 
-    function handleZoomEnd(event) {
-        console.log("Zoom ended");
-    }
-
-    // Function to handle rotation
-    function rotateSVG(angle) {
-        rotation = (rotation + angle) % 360;
-        // Apply the rotation around the new center
-        molimage.attr("transform", `${currentTransform} rotate(${rotation}, ${500}, ${200})`);
-
-        // Keep text elements horizontal by applying a counter-rotation
-        allnodes.selectAll(".node-text-atomNumber")
-            .attr("transform", `rotate(${-rotation})`)
-        allnodes.selectAll(".node-text-ppm")
-            .attr("transform", `rotate(${-rotation})`)
-    }
-
-    // Add keydown event listener for rotation
-    d3.select("body").on("keydown", (event) => {
-        if (event.key === "R" && event.shiftKey) {
-            rotateSVG(90);
+    // Only update pan position for drag events (not wheel/zoom)
+    if (event.sourceEvent) {
+        if (event.sourceEvent.type === 'mousemove' || event.sourceEvent.type === 'touchmove') {
+            // This is a pan/drag - accumulate the delta
+            const dx = x - lastTransform.x;
+            const dy = y - lastTransform.y;
+            panX += dx;
+            panY += dy;
         }
-        else if (event.key === "L" && event.shiftKey) {
-            rotateSVG(-90);
-        }
-        else if (event.key === "r" || event.key === "R") {
-            rotateSVG(10);
-        }
-        else if ( event.key === "l" || event.key === "L") {
-            rotateSVG(-10);
-        }
-    });
+    }
 
+    // Update scale level
+    scaleLevel = k;
+    lastTransform = event.transform;
+
+    applyTransform();
+    updateScaledElements();
+}
+
+
+
+// Function to handle rotation
+function rotateSVG(angle) {
+    rotation = (rotation + angle) % 360;
+    
+    applyTransform();
+
+    // Keep text elements horizontal by applying a counter-rotation
+    allnodes.selectAll(".node-text-atomNumber")
+        .attr("transform", `rotate(${-rotation})`);
+    allnodes.selectAll(".node-text-ppm")
+        .attr("transform", `rotate(${-rotation})`);
+}
+
+// Add keydown event listener for rotation
+d3.select("body").on("keydown", (event) => {
+    if (event.key === "R" && event.shiftKey) {
+        rotateSVG(90);
+    }
+    else if (event.key === "L" && event.shiftKey) {
+        rotateSVG(-90);
+    }
+    else if (event.key === "r" || event.key === "R") {
+        console.log("Rotate SVG");
+        rotateSVG(10);
+    }
+    else if (event.key === "l" || event.key === "L") {
+        rotateSVG(-10);
+    }
+});
 
     // Function to find nearest neighbors and non-nearest neighbours of a node with a specific attribute
     function findNearestNeighbors(nodeId, attribute) {
@@ -1249,8 +1278,6 @@
     });
 
 
-
-
     // Toggle code
     const hmbcbutton = document.getElementById('hmbcButton');
     let hmbcVisible = false;
@@ -1335,7 +1362,6 @@
         laeVisible = !laeVisible;
     });
 
-    let scaleLevel = 1;
 
   </script>
 </body>
