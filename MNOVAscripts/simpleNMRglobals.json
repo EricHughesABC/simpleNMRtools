@@ -1,0 +1,84 @@
+{ "experiments_dict"  : {
+                            "unidentified": "unidentified",
+                            "Predicted": "Predicted",
+                            "SKIP": "SKIP",
+                            "HSQC": "HSQC",
+                            "HMBC": "HMBC",
+                            "COSY": "COSY",
+                            "H1_1D": "H1_1D",
+                            "C13_1D": "C13_1D",
+                            "DEPT135": "DEPT135",
+                            "H1_pureshift": "H1_pureshift",
+                            "DDEPT_CH3_ONLY": "DDEPT_CH3_ONLY",
+                            "HSQC_CLIPCOSY": "HSQC_CLIPCOSY",
+                            "NOESY": "NOESY",
+                },
+    "experiments_list"  : [
+                                "unidentified",
+                                "Predicted",
+                                "SKIP",
+                                "HSQC",
+                                "HMBC",
+                                "COSY",
+                                "NOESY",
+                                "H1_1D",
+                                "C13_1D",
+                                "DEPT135",
+                                "H1_pureshift",
+                                "DDEPT_CH3_ONLY",
+                                "HSQC_CLIPCOSY",
+                    ],
+    "validHSQCPulseSequenceStrings" : ["hsqcedetgpsisp2.3.ptg",
+                                        "hsqcedetgpsisp2.3",
+                                        "gHSQCAD", 
+                                        "hsqcedetgpsp.3",
+                                        "gHSQC",
+                                        "inv4gp.wu",
+                                        "hsqcetgp",
+                                        "gns_noah3-BSScc.eeh",
+                                        "hsqcedetgpsisp2.4"
+                    ],
+    "validHMBCPulseSequenceStrings" : [ "ghmbc.wu", 
+                                        "gHMBC", 
+                                        "hmbcetgpl3nd", 
+                                        "hmbcetgpl3nd.ptg",
+                                        "gHMBCAD",
+                                        "hmbcgpndqf",
+                                        "gns_noah3-BSScc.eeh",
+                                        "shmbcctetgpl2nd",
+                                        "hmbcgplpndqf"
+                    ],
+    "validCOSYCPulseSequenceStrings" : ["cosygpqf", 
+                                        "cosygp", 
+                                        "gcosy", 
+                                        "cosygpmfppqf", 
+                                        "cosygpmfqf", 
+                                        "gCOSY",
+                                        "cosygpppqf_ptype",
+                                        "cosyqf45",
+                                        "cosygpmfphpp"
+                    ],
+
+    "validDEPT135PulseSequenceStrings" : ["dept135.wu", "DEPT", "deptsp135"],
+
+    "validDOUBLEDEPTCH3PulseSequenceStrings" : ["hcdeptedetgpzf"],
+
+    "validHSQCCLIPCOSYPulseSequenceStrings" : ["hsqc_clip_cosy_mc_notation.eeh",
+                                             "gns_noah3-BSScc.eeh"
+                    ],
+
+    "valid1DH1PulseSequenceStrings" : ["zg30",  
+                                     "s2pul", 
+                                     "zg", 
+                                     "zgcppr",
+                                     ],
+
+    "valid1DC13PulseSequenceStrings" : ["zgdc30", "s2pul", "zgpg30",
+                                      "zgzrse", "zg0dc.fr"
+                    ],
+
+    "validPURESHIFT1DH1PulseSequenceStrings" : ["ja_PSYCHE_pr_03b", 
+                                              "reset_psychetse.ptg"],
+
+    "validNOESYPulseSequenceStrings" :   ["noesygpphppzs"]
+}

@@ -57,7 +57,7 @@ function identify_spectrum(){
     const valid1DPulseSequences = {
         "H1_1D": valid1DH1PulseSequenceStrings,
         "C13_1D": valid1DC13PulseSequenceStrings,
-        "PURESHIFT": validPURESHIFT1DH1PulseSequenceStrings,
+        "H1_pureshift": validPURESHIFT1DH1PulseSequenceStrings,
         "DEPT135": validDEPT135PulseSequenceStrings,
     };
 
@@ -65,17 +65,16 @@ function identify_spectrum(){
         "HSQC": validHSQCPulseSequenceStrings,
         "HMBC": validHMBCPulseSequenceStrings,
         "COSY": validCOSYCPulseSequenceStrings,
-        "DOUBLEDEPTCH3": validDOUBLEDEPTCH3PulseSequenceStrings,
+        "DDEPT_CH3_ONLY": validDOUBLEDEPTCH3PulseSequenceStrings,
         "HSQC_CLIPCOSY": validHSQCCLIPCOSYPulseSequenceStrings,
         "NOESY": validNOESYPulseSequenceStrings
     };
 
-    // const validSpectraKeys = ["H1_1D", "C13_1D", "PURESHIFT", "DEPT135",
-    //                           "HSQC", "HMBC", "COSY", "DOUBLEDEPTCH3", "HSQCCLIPCOSY", "NOESY"];
-                              
-                              
-    const validSpectraKeys = ["H1_1D", "C13_1D", "PURESHIFT", "DEPT135",
-                              "HSQC", "HMBC", "COSY", "DOUBLEDEPTCH3", "HSQC_CLIPCOSY", "NOESY"];
+                 
+    // const validSpectraKeys = ["H1_1D", "C13_1D", "H1_pureshift", "DEPT135",
+    //                           "HSQC", "HMBC", "COSY", "DDEPT_CH3_ONLY", "HSQC_CLIPCOSY", "NOESY"];
+
+    const validSpectraKeys = spectra_keys;
 
     var doc = Application.mainWindow.activeDocument;
     var simpleutils = new simpleUtils();
@@ -117,7 +116,7 @@ function identify_spectrum(){
                     else if(ky == "C13_1D" && subtype == "13C"){
                         pulseSeqIdentified = true;
                     }
-                    else if(ky == "PURESHIFT"){
+                    else if(ky == "H1_pureshift"){
                         pulseSeqIdentified = true;
                     }
                     else if(ky == "DEPT135" && subtype == "13C"){

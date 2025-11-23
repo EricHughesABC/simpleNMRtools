@@ -10,7 +10,7 @@
             margin: 0 auto;
             overflow: hidden; /* Prevent scrollbars from appearing */
         }
-        .tooltip {
+       .tooltip {
             position: absolute;
             background-color: #fff;
             border: 1px solid #ddd;
@@ -20,7 +20,7 @@
             pointer-events: none;
             display: inline-block;
             max-width: 800px; /* Set max-width for the tooltip */
-        }
+        } 
 
         /* Style for the SVG border */
         svg {
@@ -91,6 +91,7 @@
         .grey { background-color: #808080; }
         .blue { background-color: #ADD8E6; }
         .red { background-color: #FF0000; }
+
 
 
        /* Normal button styles */
@@ -306,7 +307,7 @@ Q 60.9 331.0, 63.1 331.0
             <button title="Press to display HMBC links" style="border: 2px solid grey" class="color-container color-box action-button grey" id="hmbcButton">
                 HMBC
             </button>
-            <button title="Press to hide COSY links" class="normal color-container color-box action-button blue" >
+            <button id="sunkenButton" title="Press to hide COSY links" class="normal color-container color-box action-button blue" >
                 COSY
             </button>
         </div>
@@ -329,6 +330,7 @@ Q 60.9 331.0, 63.1 331.0
             </a>
             <button title="Open simpleNMR help pages" class="color-container color-box action-button white" onclick="window.open('http://simplenmr.pythonanywhere.com/documentation/index.html', '_blank')">
                 Help
+                <!-- <span class="buttontooltip">simpleNMR help pages</span> -->
             </button>
         </div>
     </div>   
@@ -4100,7 +4102,6 @@ Q 60.9 331.0, 63.1 331.0
     d3.select("#infoButton")
     .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
 
-
     // Set the visible property of the catoms array to false
     // loop through the nodes
     catoms.forEach(node => {
@@ -4770,6 +4771,7 @@ Q 60.9 331.0, 63.1 331.0
         best_results.best_lae_atomNumber = lae_best_atomNumber;
 
         // update the INFO tooltip
+        // d3.select("#info_results").html(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, NODE ${best_results.best_lae_atomNumber} LAE: ${best_results.best_lae.toFixed(2)}`);
         d3.select("#infoButton")
         .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
 

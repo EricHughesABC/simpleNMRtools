@@ -1,32 +1,68 @@
+// Read in simpleNMRglobals.json file
+// and parse the JSON content to get experiments_dict
+
+// read in the json file and return the json object
+function readJsonFile(jsonfilename){
+
+    var jsonobj = {};
+    var fin = new File(jsonfilename);
+    if (fin.open(File.ReadOnly)) {
+        var sin = new TextStream(fin, 'UTF-8');
+        var jsonstr = sin.readAll();
+        jsonobj = JSON.parse(jsonstr);
+    }
+    else{
+        MessageBox.warning("Could not open json file\n" + jsonfilename);
+    }
+    fin.close();
+    return jsonobj;
+}
+
+// var jsonFilePath = "simpleNMRglobals.json";
+// var globals = readJsonFile(jsonFilePath);
+// var experiments_dict = globals.experiments_dict;
+// var spectra_keys = Object.keys(experiments_dict);
+
 // Function to check if one string is a substring of another
 function isSubstring(sub, str) {
     return str.indexOf(sub) !== -1;
 }
 
-// spectra_keys = ["HSQC", 
-//                     "HMBC", 
-//                     "COSY", 
-//                     "NOESY", 
-//                     "H1_1D", 
-//                     "C13_1D", 
-//                     "DEPT135", 
-//                     "PureShift", 
-//                     "DDEPT_CH3_ONLY", 
-//                     "SKIP", 
-//                     "HSQC_CLIPCOSY"];
-
-spectra_keys = ["HSQC", 
-                    "HMBC", 
-                    "COSY", 
-                    "NOESY", 
-                    "H1_1D", 
-                    "C13_1D", 
-                    "DEPT135", 
-                    "PureShift", 
-                    "HSQCCLIPCOSY", 
-                    "DOUBLEDEPTCH3",
-                    "SKIP", 
+const spectra_keys = ["unidentified",
+                      "Predicted",    
+                      "SKIP", 
+                      "HSQC", 
+                      "HMBC", 
+                      "COSY", 
+                      "H1_1D", 
+                      "C13_1D", 
+                      "DEPT135", 
+                      "H1_pureshift", 
+                      "DDEPT_CH3_ONLY", 
+                      "HSQC_CLIPCOSY",
+                      "NOESY", 
                 ];
+
+
+
+
+// create a one to one spectra_dict
+
+const experiments_dict = {
+                            "unidentified": "unidentified",
+                            "Predicted": "Predicted",
+                            "SKIP": "SKIP",
+                            "HSQC": "HSQC",
+                            "HMBC": "HMBC",
+                            "COSY": "COSY",
+                            "H1_1D": "H1_1D",
+                            "C13_1D": "C13_1D",
+                            "DEPT135": "DEPT135",
+                            "H1_pureshift": "H1_pureshift",
+                            "DDEPT_CH3_ONLY": "DDEPT_CH3_ONLY",
+                            "HSQC_CLIPCOSY": "HSQC_CLIPCOSY",
+                            "NOESY": "NOESY",
+                };
 
 function simpleUtils() {
 

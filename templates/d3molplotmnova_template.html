@@ -86,32 +86,6 @@
         .blue { background-color: #ADD8E6; }
         .red { background-color: #FF0000; }
 
-        .buttontooltip {
-            visibility: hidden;
-            width: 400px; /* Adjust width as needed */
-            background-color: #555;
-            color: #fff;
-            text-align: left;
-            border-radius: 5px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%; /* Position above the button */
-            left: 50%;
-            margin-left: -60px; /* Center the tooltip */
-            opacity: 0; /* Hide by default */
-            transition: opacity 0.3s; /* Smooth transition */
-        }
-
-        .action-button {
-            position: relative; /* Needed for absolute positioning of tooltip */
-        }
-
-        .action-button:hover .buttontooltip {
-            visibility: visible;
-            opacity: 1; /* Show the tooltip on hover */
-        }
-
        /* Normal button styles */
        button.normal {
             background-color: #ADD8E6;
@@ -151,49 +125,41 @@
   
     <div class="container">
         <div class="group">
-            <button style="border: 2px solid orange" class="color-container color-box action-button orange" >
+            <button title="Quaternary Carbons" style="border: 2px solid orange" class="color-container color-box action-button orange" >
                 -C-<sub></sub>
             </button>
-            <button style="border: 2px solid #98FB98" class="color-container color-box action-button green" >
+            <button title="Methine Carbons" style="border: 2px solid #98FB98" class="color-container color-box action-button green" >
                 -CH<sub></sub>
             </button>
-            <button style="border: 2px solid yellow" class="color-container color-box action-button yellow" >
+            <button title="Methylene Carbons" style="border: 2px solid yellow" class="color-container color-box action-button yellow" >
                 -CH<sub>2</sub>
             </button>
-            <button style="border: 2px solid cyan" class="color-container color-box action-button cyan" >
+            <button title="Methyl Carbons" style="border: 2px solid cyan" class="color-container color-box action-button cyan" >
                 -CH<sub>3</sub>
             </button>
         </div>
         <div class="group">
             <!-- <button id="sunkenButton" class="normal color-container color-box action-button">Click Me</button> -->
-            <button style="border: 2px solid grey" class="color-container color-box action-button grey" id="hmbcButton">
+            <button title="Press to display HMBC links" style="border: 2px solid grey" class="color-container color-box action-button grey" id="hmbcButton">
                 HMBC
-                <span  class="buttontooltip">Press to display HMBC links</span>
             </button>
-            <button id="sunkenButton" class="normal color-container color-box action-button blue" >
+            <button title="Press to hide COSY links" class="normal color-container color-box action-button blue" >
                 COSY
-                <span  class="buttontooltip">Press to hide COSY links</span>
             </button>
         </div>
         <div class="group">
-            <button id="infoButton" class="color-container color-box action-button white">
+            <button title="Information about the current view" id="infoButton" class="color-container color-box action-button white">
                 INFO
-                <span class="buttontooltip" id="info_results">Minimization Results</span>
             </button>   
-            <button class="color-container color-box action-button white"  onclick="updateMovedAtoms()">
+            <button title="Apply the changes updating the ppm values and atom numbers" class="color-container color-box action-button white"  onclick="updateMovedAtoms()">
                 Update
-                <span class="buttontooltip">Apply the changes updating the ppm values and atom numbers</span>
             </button>
-            <button class="color-container color-box action-button white" onclick="exportToMnova()">
+            <button title="Export information as JSON for use in assignment in MNOVA" class="color-container color-box action-button white" onclick="exportToMnova()">
                 Export
-                <span class="buttontooltip">Export information as JSON for use in assignment in MNOVA</span>
             </button>
-            <button class="color-container color-box action-button white" onclick="window.open('http://simplenmr.pythonanywhere.com/documentation/index.html', '_blank')">
+            <button title="Open simpleNMR help pages" class="color-container color-box action-button white" onclick="window.open('http://simplenmr.pythonanywhere.com/documentation/index.html', '_blank')">
                 Help
-                <span class="buttontooltip">simpleNMR help pages</span>
             </button>
-            
-   
         </div>
     </div>   
 
@@ -227,7 +193,7 @@
     const dataFrom = `{{dataFrom}}`;
     // oldjsondata
     const oldjsondata = {{oldjsondata}};
-//  
+  
     // title
     const title = `{{title}}`;
     {% endautoescape %}
@@ -341,8 +307,8 @@
 
 
     // Modify INFO tooltip to display the best results from the optimization with only 2 decimal places
-    // d3.select("#info_results").html(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)} NODE ${best_results.best_lae_atomNumber} LAE: ${best_results.best_lae.toFixed(2)}`);
-    d3.select("#info_results").html(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+    d3.select("#infoButton")
+    .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
 
 
     // Set the visible property of the catoms array to false
@@ -422,8 +388,6 @@
                 return "#808080"; // Grey color for short range HMBC links
             }
         });
-        
-        console.log("HMBC links colored by distance");
     }
 
     // Create the COSY links to start
@@ -458,7 +422,7 @@
         .attr("opacity", 0) // Initially hidden with opacity
         .attr("stroke-width", hmbcEdgeWidth);
 
-    // colorHmbcLinksByDistance(); // Color HMBC links by distance
+    // Color HMBC links by distance
     colorHmbcLinksByDistance(mapping, node_offset);
 
 
@@ -495,7 +459,6 @@
     // Append atomNumber text
     allnodes.append("text")
         .attr("class", "node-text-atomNumber")
-        // .text(d => `${d.id}, ${d.atomNumber}`) // Display the id
         .text(d => `${d.atomNumber}`) // Display the id
         .attr("dy", -textOffsetInt) // Center the text vertically
         .attr("font-size", fontSizeStr) // Set font size to 16 pixels
@@ -533,8 +496,6 @@
         // change the opacity of the cosy links to 0
         link.style("opacity", 0);
         // Remove hmbc links
-        // hmbcLinks.forEach(eachHMBClink => eachHMBClink.remove());
-        // hmbcLinks = []; // Clear the hmbc links array
         d3.select(this).raise().classed("active", true);
         dragstartedFlag = true;
     }
@@ -566,8 +527,6 @@
     function handleZoom(event) {
         currentTransform = event.transform;
 
-        // console.log(`Zooming: k: ${currentTransform.k}, x: ${currentTransform.x}, y: ${currentTransform.y}`);
-        // arrow.attr("transform", `${currentTransform} rotate(${rotation}, ${500}, ${200})`);
         molimage.attr("transform", `${currentTransform} rotate(${rotation}, ${500}, ${200})`);
         // update
 
@@ -581,12 +540,10 @@
 
         // Keep text elements horizontal by applying a counter-rotation, adjust font size, and offset positions
         allnodes.selectAll(".node-text-atomNumber")
-            // .attr("transform", `rotate(${-rotationAngle})`)
             .attr("font-size", `${fontSizeInt / scaleLevel}px`)        // Adjust font size
             .attr("dy", `${-textOffsetInt / scaleLevel}px`);              // Adjust vertical offset for atom number text
 
         allnodes.selectAll(".node-text-ppm")
-            // .attr("transform", `rotate(${-rotationAngle})`)
             .attr("font-size", `${fontSizeInt / scaleLevel}px`)        // Adjust font size
             .attr("dy", `${textOffsetInt / scaleLevel}px`);               // Adjust vertical offset for ppm text
 
@@ -598,15 +555,12 @@
 
     function handleZoomEnd(event) {
         console.log("Zoom ended");
-        // reapply the rotation
-        //svg.attr("transform", `${currentTransform} rotate(${rotation}, ${0}, ${0})`);
     }
 
     // Function to handle rotation
     function rotateSVG(angle) {
         rotation = (rotation + angle) % 360;
         // Apply the rotation around the new center
-        // arrow.attr("transform", `${currentTransform} rotate(${rotation}, ${500}, ${200})`);
         molimage.attr("transform", `${currentTransform} rotate(${rotation}, ${500}, ${200})`);
 
         // Keep text elements horizontal by applying a counter-rotation
@@ -625,7 +579,6 @@
             rotateSVG(-90);
         }
         else if (event.key === "r" || event.key === "R") {
-            console.log("Rotate SVG");
             rotateSVG(10);
         }
         else if ( event.key === "l" || event.key === "L") {
@@ -753,7 +706,6 @@
 
         // check if the HMBC button is sunken and if it is release it and  reset the HMBC links to hidden and default colour
         if (d3.select("#hmbcButton").classed("sunken")){
-            console.log("sunken");
             hmbcVisible = false;
             d3.select("#hmbcButton").classed("sunken", false);
             hmbclinks_svg.attr("opacity", 0);
@@ -762,7 +714,6 @@
 
             // check if the COSY button is not sunken, if it is not, set the opacity of the cosy links to 1
             if (!d3.select("#sunkenButton").classed("sunken")){
-                console.log("COSY button not sunken");
                 // change the opacity of the cosy links to 1
                 link.style("opacity", 1);
             }
@@ -889,7 +840,6 @@
         hmbclinks_svg.filter(l => l.target === d.id).attr("opacity", 0);
 
         if (d3.select("#infoButton").classed("sunken")){
-            console.log("sunken");
             laeVisible = false;
             d3.select("#infoButton").classed("sunken", false);
 
@@ -935,7 +885,6 @@
         // update atomNumber
         nodesGroup.selectAll(".node text.node-text-atomNumber")
             .data(nodes)
-            // .text(d => `${d.id},${d.atomNumber}`)
             .text(d => `${d.atomNumber}`)
             .raise(); // Display the id
 
@@ -988,7 +937,6 @@
 
 
         // define mapping
-        // var mapping = {};
         for(var i=0; i<catoms_orig.length; i++) {
             mapping[catoms_orig[i]["id"]] = catoms_orig[i]["id"];
         }
@@ -1004,32 +952,26 @@
             var id2 = catoms_orig_dict[atomNumber1];
             mapping[nodes[i]["id"]] = id2;
         }
-        console.log(`mapping\n`);
-        for (const [key, value] of Object.entries(mapping)) {
-            console.log(`${key}: ${value}`);
-        }
+
 
         // recaclulate correlation penalty
-
         var best_weight = computeTotalWeight2D(links, mapping, shortest_paths, node_offset);
-        console.log(`best_weight ${best_weight}`);
 
         // update the best results
-      
         best_results.best_weight = best_weight;
         best_results.best_mae = mae;
         best_results.best_lae = lae_best;
         best_results.best_lae_atomNumber = lae_best_atomNumber;
 
         // update the INFO tooltip
-        d3.select("#info_results").html(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, NODE ${best_results.best_lae_atomNumber} LAE: ${best_results.best_lae.toFixed(2)}`);
-
+        d3.select("#infoButton")
+        .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+        
         colorHmbcLinksByDistance(mapping, node_offset);
     }
 
     function updateMovedAtoms3() {
 
-        console.log("updateMovedAtoms3");
         // Find the moved nodes and store them in the moved_nodes array
         const moved_nodes = [];
         const removed = [];
@@ -1135,7 +1077,6 @@
 
                 if (d.cosy) {
                     let weight = shortestPaths[uu][vv];
-                    // console.log(`cosy weight ${weight} ${Math.pow(weight - 1, 3)}`);
                     totalWeight += Math.pow(weight - 1, 3);
                 }
                 if (d.hmbc) {
@@ -1143,7 +1084,6 @@
                     if (weight < 3) {
                         weight = 2;
                     }
-                    // console.log(`weight ${weight} ${Math.pow(weight - 2, 3)}`);
                     totalWeight += Math.pow(weight - 2, 3);
                 }
             }
@@ -1214,7 +1154,6 @@
 
     function exportToMnova() {
 
-        console.log("exportToMnova");
         var workingDirectory = "{{workingDirectory}}";
         var workingFilename = "{{workingFilename}}";
 
@@ -1294,14 +1233,6 @@
     }
 
 
-    function publish() {
-        console.log('Publishing');
-    }
-
-    function savehtmpage(){
-        console.log('Saving HTML page');
-    }
-
     const cosybutton = document.getElementById('sunkenButton');
 
     // Toggle between 'sunken' and 'normal' styles when clicked
@@ -1311,10 +1242,8 @@
 
         if (linksVisible) {
             d3.selectAll(".cosy-link").style("display", "none");
-            // this.textContent = "Show Links";
         } else {
             d3.selectAll(".cosy-link").style("display", "inline");
-            // this.textContent = "Hide Links";
         }
         linksVisible = !linksVisible;
     });
@@ -1333,20 +1262,16 @@
         if (hmbcVisible) {
             // Show all HMBC edges with opacity
             d3.selectAll(".hmbc-link").attr("opacity", 1);
-            console.log("HMBC links visible:", hmbcVisible);
             // If the cosy button is not sunken, set the opacity of the cosy links to 0
             if (!d3.select("#sunkenButton").classed("sunken")) {
-                console.log("COSY button not sunken");
                 // change the opacity of the cosy links to 0
                 link.style("opacity", 0);
             }
         } else {
             // Hide all HMBC edges with opacity
             d3.selectAll(".hmbc-link").attr("opacity", 0);
-            console.log("HMBC links hidden:", !hmbcVisible);
             // If the cosy button is not sunken, set the opacity of the cosy links to 1
             if (!d3.select("#sunkenButton").classed("sunken")) {
-                console.log("COSY button not sunken");
                 // change the opacity of the cosy links to 1
                 link.style("opacity", 1);       
             }
@@ -1364,12 +1289,10 @@
         infobutton.classList.toggle('sunken');
 
         if (d3.select("#infoButton").classed("sunken")){
-            console.log("sunken");
             laeVisible = true;
         }
         else {
             laeVisible = false;
-            console.log("not sunken");
         }
 
         // check if infoButton is sunken
@@ -1393,8 +1316,6 @@
             // set the best lae node to red using the atomNumber and lae_best_atomNumber
 
             allnodes.each(function(d) {
-                // 'this' refers to the current DOM element
-                // const atomNumber = d3.select(this).attr("atomNumber");
                 const atomNumber = d.atomNumber;
                 if (atomNumber == best_results.best_lae_atomNumber) {
                     d3.select(this).select("circle").style("fill", "red");
