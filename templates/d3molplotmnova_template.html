@@ -394,6 +394,45 @@
         });
     }
 
+    function reorderElements() {
+        const svg = d3.select('svg');
+        
+        // Get both groups
+        const linksGroupNode = svg.select('.links-group').node();
+        const nodesGroupNode = svg.select('.nodes-group').node();
+        
+        if (!linksGroupNode || !nodesGroupNode) {
+            console.error("Could not find links or nodes group");
+            return;
+        }
+        
+        // CRITICAL: Ensure linksGroup comes before nodesGroup in SVG
+        // Remove and re-insert linksGroup as the first child
+        const svgNode = svg.node();
+        svgNode.removeChild(linksGroupNode);
+        svgNode.insertBefore(linksGroupNode, nodesGroupNode);
+        
+        // Now reorder links within the linksGroup (COSY → grey HMBC → red HMBC)
+        d3.selectAll(".cosy-link").each(function() {
+            linksGroupNode.appendChild(this);
+        });
+        
+        d3.selectAll(".hmbc-link").each(function() {
+            const color = d3.select(this).attr("stroke");
+            if (color === "#808080" || color === "rgb(128, 128, 128)") {
+                linksGroupNode.appendChild(this);
+            }
+        });
+        
+        d3.selectAll(".hmbc-link").each(function() {
+            const color = d3.select(this).attr("stroke");
+            if (color === "#FF5733" || color === "rgb(255, 87, 51)") {
+                linksGroupNode.appendChild(this);
+            }
+        });
+        console.log("Elements reordered: links before nodes");
+    }
+
     // Create the COSY links to start
     // Create a group for links
     const link = linksGroup.selectAll(".links-group")
@@ -493,7 +532,7 @@
         nodetextppm.push(textnodes[i+1]);
     }
 
-    
+    reorderElements();
 
 // Transform state variables
 let panX = 0, panY = 0;
@@ -997,6 +1036,7 @@ d3.select("body").on("keydown", (event) => {
         .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
         
         colorHmbcLinksByDistance(mapping, node_offset);
+        reorderElements();
     }
 
     function updateMovedAtoms3() {

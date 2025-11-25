@@ -22,6 +22,25 @@
             max-width: 800px; /* Set max-width for the tooltip */
         } 
 
+        .custom-tooltip {
+            visibility: hidden;
+            position: absolute;
+            background-color: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px; /* Your custom size */
+            white-space: nowrap;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #infoButton:hover .custom-tooltip {
+            visibility: visible;
+        }
+
         /* Style for the SVG border */
         svg {
             position: relative; /* Set position relative to make it a positioning context */
@@ -312,9 +331,10 @@ Q 60.9 331.0, 63.1 331.0
             </button>
         </div>
         <div class="group">
-            <button title="Information about the current view" id="infoButton" class="color-container color-box action-button white">
+            <button id="infoButton" class="color-container color-box action-button white">
                 INFO
-            </button>   
+                <span class="custom-tooltip" id="info_tooltip">Tooltip text here</span>
+            </button> 
             <button title="Apply the changes updating the ppm values and atom numbers" class="color-container color-box action-button white"  onclick="updateMovedAtoms()">
                 Update
             </button>
@@ -4105,9 +4125,9 @@ Q 60.9 331.0, 63.1 331.0
 
 
     // Modify INFO tooltip to display the best results from the optimization with only 2 decimal places
-    d3.select("#infoButton")
-    .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
-
+    // d3.select("#infoButton")
+    // .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+    d3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
     // Set the visible property of the catoms array to false
     // loop through the nodes
     catoms.forEach(node => {
@@ -4159,6 +4179,8 @@ Q 60.9 331.0, 63.1 331.0
     }
 
     nodes = JSON.parse(JSON.stringify(catoms.filter(node => node.visible)));
+
+
     
 
     // Set initial positions of nodes and links
@@ -4188,6 +4210,47 @@ Q 60.9 331.0, 63.1 331.0
         
         console.log("HMBC links colored by distance");
     }
+
+
+function reorderElements() {
+    const svg = d3.select('svg');
+    
+    // Get both groups
+    const linksGroupNode = svg.select('.links-group').node();
+    const nodesGroupNode = svg.select('.nodes-group').node();
+    
+    if (!linksGroupNode || !nodesGroupNode) {
+        console.error("Could not find links or nodes group");
+        return;
+    }
+    
+    // CRITICAL: Ensure linksGroup comes before nodesGroup in SVG
+    // Remove and re-insert linksGroup as the first child
+    const svgNode = svg.node();
+    svgNode.removeChild(linksGroupNode);
+    svgNode.insertBefore(linksGroupNode, nodesGroupNode);
+    
+    // Now reorder links within the linksGroup (COSY → grey HMBC → red HMBC)
+    d3.selectAll(".cosy-link").each(function() {
+        linksGroupNode.appendChild(this);
+    });
+    
+    d3.selectAll(".hmbc-link").each(function() {
+        const color = d3.select(this).attr("stroke");
+        if (color === "#808080" || color === "rgb(128, 128, 128)") {
+            linksGroupNode.appendChild(this);
+        }
+    });
+    
+    d3.selectAll(".hmbc-link").each(function() {
+        const color = d3.select(this).attr("stroke");
+        if (color === "#FF5733" || color === "rgb(255, 87, 51)") {
+            linksGroupNode.appendChild(this);
+        }
+    });
+    
+    console.log("Elements reordered: links before nodes");
+}
 
     // Create the COSY links to start
     // Create a group for links
@@ -4223,12 +4286,12 @@ Q 60.9 331.0, 63.1 331.0
 
     // colorHmbcLinksByDistance(); // Color HMBC links by distance
     colorHmbcLinksByDistance(mapping, node_offset);
-
+    console.log("4235 :: Reordering elements now");
+    // reorderElements(); // Reorder elements to ensure correct layering
 
 
     const svg_display = d3.select('svg')
     const nodesGroup = d3.select("svg g").attr("class", "nodes-group");
-
     // Create the nodes
     const allnodes = nodesGroup.selectAll(".nodes-group")
       .data(nodes)
@@ -4272,6 +4335,8 @@ Q 60.9 331.0, 63.1 331.0
         .attr("font-size", fontSizeStr) // Set font size to 16 pixels
         .attr("text-anchor", "middle"); // Center the text horizontally
 
+
+
     // Tooltip for node hover
     const tooltip = d3.select("#tooltip");
 
@@ -4288,6 +4353,8 @@ Q 60.9 331.0, 63.1 331.0
         nodetextatomNumber.push(textnodes[i]);
         nodetextppm.push(textnodes[i+1]);
     }
+
+    reorderElements();
 
 
 
@@ -4324,16 +4391,20 @@ function dragended(event, d) {
 
 
 
-// Helper function to apply the combined transform
 function applyTransform() {
-    // Order: pan, then centered scale, then rotation
-    molimage.attr("transform", 
+    const transformString = 
         `translate(${panX}, ${panY}) ` +
         `translate(${svg_center_x_eeh}, ${svg_center_y_eeh}) ` +
         `scale(${scaleLevel}) ` +
         `rotate(${rotation}) ` +
-        `translate(${-svg_center_x_eeh}, ${-svg_center_y_eeh})`
-    );
+        `translate(${-svg_center_x_eeh}, ${-svg_center_y_eeh})`;
+    
+    // Apply transform to background image
+    molimage.attr("transform", transformString);
+    
+    // CRITICAL: Apply the same transform to links and nodes groups
+    linksGroup.attr("transform", transformString);
+    nodesGroup.attr("transform", transformString);
 }
 
 // Helper function to update size-dependent elements
@@ -4536,6 +4607,8 @@ d3.select("body").on("keydown", (event) => {
             hmbclinks_svg.attr("opacity", 0);
             // hmbclinks_svg.attr("stroke", hmbcEdgeColor);
             colorHmbcLinksByDistance(mapping, node_offset);
+            console.log("4568 :: Reordering elements now");
+            
         }
         var circlenodes = document.querySelectorAll('.node circle');
         
@@ -4791,10 +4864,13 @@ d3.select("body").on("keydown", (event) => {
         best_results.best_lae_atomNumber = lae_best_atomNumber;
 
         // update the INFO tooltip
-        d3.select("#infoButton")
-        .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+            // d3.select("#infoButton")
+            // .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+        d3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
 
         colorHmbcLinksByDistance(mapping, node_offset);
+        console.log("4829 :: Reordering elements now");
+        reorderElements();
     }
 
     function updateMovedAtoms3() {
