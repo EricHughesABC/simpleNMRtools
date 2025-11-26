@@ -22,6 +22,25 @@
             max-width: 800px; /* Set max-width for the tooltip */
         }
 
+        .custom-tooltip {
+            visibility: hidden;
+            position: absolute;
+            background-color: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px; /* Your custom size */
+            white-space: nowrap;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #infoButton:hover .custom-tooltip {
+            visibility: visible;
+        }
+
         /* Style for the SVG border */
         svg {
             position: relative; /* Set position relative to make it a positioning context */
@@ -148,8 +167,9 @@
             </button>
         </div>
         <div class="group">
-            <button title="Information about the current view" id="infoButton" class="color-container color-box action-button white">
+            <button  id="infoButton" class="color-container color-box action-button white">
                 INFO
+                <span class="custom-tooltip" id="info_tooltip">Tooltip text here</span>
             </button>   
             <button title="Apply the changes updating the ppm values and atom numbers" class="color-container color-box action-button white"  onclick="updateMovedAtoms()">
                 Update
@@ -311,8 +331,7 @@
 
 
     // Modify INFO tooltip to display the best results from the optimization with only 2 decimal places
-    d3.select("#infoButton")
-    .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+    d3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
 
 
     // Set the visible property of the catoms array to false
@@ -370,7 +389,9 @@
 
     // Set initial positions of nodes and links
 
-    const linksGroup = d3.select("svg g").attr("class", "links-group");
+    const linksGroup = d3.select('svg').select('.links-group').empty() 
+        ? d3.select('svg').insert('g', ':first-child').attr('class', 'links-group')
+        : d3.select('svg').select('.links-group');
 
     // Filter links that have the attribute cosy as true
     // const cosyLinks = links.filter(link => link.cosy);
@@ -394,44 +415,44 @@
         });
     }
 
-    function reorderElements() {
-        const svg = d3.select('svg');
-        
-        // Get both groups
-        const linksGroupNode = svg.select('.links-group').node();
-        const nodesGroupNode = svg.select('.nodes-group').node();
-        
-        if (!linksGroupNode || !nodesGroupNode) {
-            console.error("Could not find links or nodes group");
-            return;
-        }
-        
-        // CRITICAL: Ensure linksGroup comes before nodesGroup in SVG
-        // Remove and re-insert linksGroup as the first child
-        const svgNode = svg.node();
-        svgNode.removeChild(linksGroupNode);
-        svgNode.insertBefore(linksGroupNode, nodesGroupNode);
-        
-        // Now reorder links within the linksGroup (COSY → grey HMBC → red HMBC)
-        d3.selectAll(".cosy-link").each(function() {
-            linksGroupNode.appendChild(this);
-        });
-        
-        d3.selectAll(".hmbc-link").each(function() {
-            const color = d3.select(this).attr("stroke");
-            if (color === "#808080" || color === "rgb(128, 128, 128)") {
-                linksGroupNode.appendChild(this);
-            }
-        });
-        
-        d3.selectAll(".hmbc-link").each(function() {
-            const color = d3.select(this).attr("stroke");
-            if (color === "#FF5733" || color === "rgb(255, 87, 51)") {
-                linksGroupNode.appendChild(this);
-            }
-        });
-        console.log("Elements reordered: links before nodes");
+function reorderElements() {
+    const svg = d3.select('svg');
+    
+    // Get both groups
+    const linksGroupNode = svg.select('.links-group').node();
+    const nodesGroupNode = svg.select('.nodes-group').node();
+    
+    if (!linksGroupNode || !nodesGroupNode) {
+        console.error("Could not find links or nodes group");
+        return;
     }
+    
+    // CRITICAL: Ensure linksGroup comes before nodesGroup in SVG
+    // Remove and re-insert linksGroup as the first child
+    const svgNode = svg.node();
+    svgNode.removeChild(linksGroupNode);
+    svgNode.insertBefore(linksGroupNode, nodesGroupNode);
+    
+    // Now reorder links within the linksGroup (COSY → grey HMBC → red HMBC)
+    d3.selectAll(".cosy-link").each(function() {
+        linksGroupNode.appendChild(this);
+    });
+    
+    d3.selectAll(".hmbc-link").each(function() {
+        const color = d3.select(this).attr("stroke");
+        if (color === "#808080" || color === "rgb(128, 128, 128)") {
+            linksGroupNode.appendChild(this);
+        }
+    });
+    
+    d3.selectAll(".hmbc-link").each(function() {
+        const color = d3.select(this).attr("stroke");
+        if (color === "#FF5733" || color === "rgb(255, 87, 51)") {
+            linksGroupNode.appendChild(this);
+        }
+    });
+    console.log("Elements reordered: links before nodes");
+}
 
     // Create the COSY links to start
     // Create a group for links
@@ -471,7 +492,10 @@
 
 
     const svg_display = d3.select('svg')
-    const nodesGroup = d3.select("svg g").attr("class", "nodes-group");
+    // Create/select nodesGroup AFTER
+    const nodesGroup = d3.select('svg').select('.nodes-group').empty()
+        ? d3.select('svg').append('g').attr('class', 'nodes-group') 
+        : d3.select('svg').select('.nodes-group');
 
     // Create the nodes
     const allnodes = nodesGroup.selectAll(".nodes-group")
@@ -569,14 +593,19 @@ function dragended(event, d) {
 
 // Helper function to apply the combined transform
 function applyTransform() {
-    // Order: pan, then centered scale, then rotation
-    molimage.attr("transform", 
+    const transformString = 
         `translate(${panX}, ${panY}) ` +
         `translate(${svg_center_x_eeh}, ${svg_center_y_eeh}) ` +
         `scale(${scaleLevel}) ` +
         `rotate(${rotation}) ` +
-        `translate(${-svg_center_x_eeh}, ${-svg_center_y_eeh})`
-    );
+        `translate(${-svg_center_x_eeh}, ${-svg_center_y_eeh})`;
+    
+    // Apply transform to background image
+    molimage.attr("transform", transformString);
+    
+    // CRITICAL: Apply the same transform to links and nodes groups
+    linksGroup.attr("transform", transformString);
+    nodesGroup.attr("transform", transformString);
 }
 
 // Helper function to update size-dependent elements
@@ -1031,10 +1060,9 @@ d3.select("body").on("keydown", (event) => {
         best_results.best_lae = lae_best;
         best_results.best_lae_atomNumber = lae_best_atomNumber;
 
-        // update the INFO tooltip
-        d3.select("#infoButton")
-        .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
-        
+
+        vd3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+
         colorHmbcLinksByDistance(mapping, node_offset);
         reorderElements();
     }
