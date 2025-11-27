@@ -123,7 +123,7 @@
         }
     </style>
 
-    <title>{{title}}</title>
+     <title>{{title}}</title>
     <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 <body>
@@ -136,7 +136,8 @@
     {% autoescape false %}
     {{svg_container}} 
     {% endautoescape %}
-    </div>
+    </div>  
+    
 
     <!-- Tooltip for displaying node information -->
     <div id="tooltip" class="tooltip">Tooltip content</div>
@@ -206,6 +207,7 @@
     // Update the viewBox attribute
     svgElement.setAttribute('viewBox', `0 0 ${svg_width_eeh} ${svg_height_eeh}`);
 
+    
     {% autoescape false %}
     // smiles string
     const smilesString = "{{smilesString}}";
@@ -223,9 +225,9 @@
     // title
     const title = `{{title}}`;
     {% endautoescape %}
-    
 
-        // node offset
+
+    // node offset
     let node_offset = 0;
     if(dataFrom == 'mnova'){
         node_offset = 0;
@@ -325,11 +327,9 @@
     var best_results = {{best_results}};
 
   
-
     var svg_bckgrnd_image_str = `{{svg_container}}`;
     {% endautoescape %}
-
-
+    
     // Modify INFO tooltip to display the best results from the optimization with only 2 decimal places
     d3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
 
@@ -1060,8 +1060,10 @@ d3.select("body").on("keydown", (event) => {
         best_results.best_lae = lae_best;
         best_results.best_lae_atomNumber = lae_best_atomNumber;
 
-
-        vd3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+        // update the INFO tooltip
+        // d3.select("#infoButton")
+        // .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+        d3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
 
         colorHmbcLinksByDistance(mapping, node_offset);
         reorderElements();
