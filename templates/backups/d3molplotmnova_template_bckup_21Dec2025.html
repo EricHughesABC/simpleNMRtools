@@ -40,7 +40,7 @@
         #infoButton:hover .custom-tooltip {
             visibility: visible;
         }
-        
+
         /* Style for the SVG border */
         svg {
             position: relative; /* Set position relative to make it a positioning context */
@@ -55,16 +55,15 @@
         .container {
             display: flex; /* Use flexbox */
             justify-content: center; /* Center the content horizontally */
-            align-items: flex-start; /* Align groups at the top */
             margin: 0 auto; /* Set the left and right margins to auto to center the container */
         }
 
         .group {
             border: 1px solid black;
             border-radius: 10px; /* Adjust the value to change the roundness of the corners */
-            display: flex;
-            align-items: flex-start; /* Align buttons at the top within group */
+            display: block;
             margin-right: 10px; /* Add some space between the groups */
+            padding: 10px; /* Add padding inside the border */
             padding: 10px; /* Add padding inside the border */
         }
 
@@ -82,9 +81,6 @@
             width: 100px;
             height: 50px;
             border-radius: 7px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .striped-rectangle {
@@ -108,33 +104,6 @@
         .grey { background-color: #808080; }
         .blue { background-color: #ADD8E6; }
         .red { background-color: #FF0000; }
-        .white { background-color: #FFFFFF; }
-
-        .buttontooltip {
-            visibility: hidden;
-            width: 400px; /* Adjust width as needed */
-            background-color: #555;
-            color: #fff;
-            text-align: left;
-            border-radius: 5px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%; /* Position above the button */
-            left: 50%;
-            margin-left: -200px; /* Center the tooltip */
-            opacity: 0; /* Hide by default */
-            transition: opacity 0.3s; /* Smooth transition */
-        }
-
-        .action-button {
-            position: relative; /* Needed for absolute positioning of tooltip */
-        }
-
-        .action-button:hover .buttontooltip {
-            visibility: visible;
-            opacity: 1; /* Show the tooltip on hover */
-        }
 
        /* Normal button styles */
        button.normal {
@@ -194,14 +163,14 @@
             <button title="Press to display HMBC links" style="border: 2px solid grey" class="color-container color-box action-button grey" id="hmbcButton">
                 HMBC
             </button>
-            <button title="Press to hide COSY links" id="sunkenButton" class="normal color-container color-box action-button blue" >
+            <button id="sunkenButton" title="Press to hide COSY links" class="normal color-container color-box action-button blue" >
                 COSY
             </button>
         </div>
         <div class="group">
-            <button id="infoButton" class="color-container color-box action-button white">
+            <button  id="infoButton" class="color-container color-box action-button white">
                 INFO
-                <span class="buttontooltip" id="info_results">Minimization Results</span>
+                <span class="custom-tooltip" id="info_tooltip">Tooltip text here</span>
             </button>   
             <button title="Apply the changes updating the ppm values and atom numbers" class="color-container color-box action-button white"  onclick="updateMovedAtoms()">
                 Update
@@ -209,15 +178,11 @@
             <button title="Export information as JSON for use in assignment in MNOVA" class="color-container color-box action-button white" onclick="exportToMnova()">
                 Export
             </button>
-            <button title="Report the assignments for publication" class="color-container color-box action-button white" onclick="reportAssignments()">
-                Report Assignments
-            </button>
-            <button title="Open simpleNMR help pages"class="color-container color-box action-button white" onclick="window.open('http://test-simplenmr.pythonanywhere.com/documentation/index.html', '_blank')">
+            <button title="Open simpleNMR help pages" class="color-container color-box action-button white" onclick="window.open('http://simplenmr.pythonanywhere.com/documentation/index.html', '_blank')">
                 Help
             </button>
-            
         </div>
-    </div>  
+    </div>   
 
     <script>
 
@@ -1284,54 +1249,6 @@ d3.select("body").on("keydown", (event) => {
                 }
             }
         }
-    }
-
-    function reportAssignments() {
-        // using the current nodes print out the assignments seperately for carbons and protons
-        // create a string to print out in a single text block do not use carriege retruns to separate lines
-        console.log("reportAssignmnets");
-        var carbonAssignments = "Carbon Assignments (ppm): ";
-        var protonAssignments = "Proton Assignments (ppm): ";
-
-        // sort nodes by atomNumber
-        nodes.sort((a, b) => a.atomNumber - b.atomNumber);
-
-        nodes.forEach(node => {
-            carbonAssignments += `C${node.atomNumber} ${node.ppm.toFixed(2)}, `;
-        });
-        // replace the last comma with a full stop
-        carbonAssignments = carbonAssignments.slice(0, -2) + ".\n";
-
-        // create the proton assignments
-        nodes.forEach(node => {
-            if (node.numProtons > 0) {
-                protonAssignments += `C${node.atomNumber} `;
-                for (var i = 0; i < node.H1_ppm.length; i++) {
-                    protonAssignments += `${node.H1_ppm[i].toFixed(2)}`;
-                    if (i < node.H1_ppm.length - 1) {
-                        protonAssignments += " & ";
-                    }
-                }
-                protonAssignments += ", ";
-            }
-        });
-        // replace the last comma with a full stop
-        protonAssignments = protonAssignments.slice(0, -2) + ".\n";
-
-        console.log(carbonAssignments);
-        console.log(protonAssignments);
-
-        // display the assignments in an alert box
-        alert(carbonAssignments + "\n" + protonAssignments + "\n\n(The assignments have also been copied to the clipboard)");
-
-        // is it possible to copy the assignments to the clipboard
-        var assignmentText = carbonAssignments + "\n" + protonAssignments;
-        navigator.clipboard.writeText(assignmentText).then(function() {
-            console.log('Assignments copied to clipboard');
-        }, function(err) {
-            console.error('Could not copy text: ', err);
-        });
-
     }
 
     function exportToMnova() {

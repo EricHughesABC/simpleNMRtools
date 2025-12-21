@@ -29,7 +29,9 @@ from pathlib import Path
 from html_from_assignments import NMRProblem
 import jsonUtils
 
+import expectedmolecule
 import nmrsolution
+
 from globals import SVG_DIMENSIONS as svgDimensions
 
 from simulatedAnnealing_v5 import SimulatedAnnealing2
@@ -423,6 +425,56 @@ def docs(filename):
         Response: The requested documentation file.
     """
     return send_from_directory(DOCS_DIR, filename)
+
+
+# create a route that accepts a molfile string via post and calculates the C13 ppm predictions using nmrshiftDB and returns the predictions as a JSON object
+@app.route("/predict_c13_shifts/", methods=["POST"])
+def predict_c13_shifts():
+    """Predict C13 NMR chemical shifts from a given molfile.
+
+    This endpoint accepts a molfile string via POST request, processes it using nmrshiftDB,
+    and returns the predicted C13 chemical shifts as a JSON object.
+
+    Returns:
+        Response: A JSON object containing the predicted C13 chemical shifts or an error message.
+    """
+
+    print("predict_c13_shifts called")
+    print("request\n\t", request)
+    if request.method != "POST":
+        return "Only POST requests are accepted", 400
+
+    
+    json_data = request.get_json()
+    print("json_data\t", json_data)
+    if json_data is None or "molstring" not in json_data:
+        print("No molfile data received")
+        return "No molfile data received", 400
+
+    molfile = json_data["molstring"]
+    # # Create a temporary NMRProblem instance to use nmrshiftDB prediction
+    # problem = NMRProblem()
+    # problem.molfile = molfile
+
+    # Use nmrshiftDB to predict C13 shifts
+    predicted_shifts = expectedmolecule.calc_c13_chemical_shifts_using_nmrshift2D(molfile)
+
+    print("predicted_shifts\n\n", predicted_shifts)
+
+    # convert pandas dataframe to dictionary include AtomIndex in the output which is the index of the dataframe
+
+
+    predicted_shifts_dict = predicted_shifts.to_dict(orient='index')
+
+    return {"predicted_c13_shifts": predicted_shifts_dict}
+
+    # except json.JSONDecodeError as e:
+    #     print(f"Invalid JSON: {e}")
+    #     return f"Invalid JSON: {e}", 400
+    # except Exception as e:
+    #     print(f"Error during prediction: {e}")
+    #     return f"Error during prediction: {e}", 500
+    
 
 
 @app.route("/", methods=["GET"])
