@@ -11,3 +11,5 @@ If you still prefer to run the simpleNMR server locally, get in touch via email 
 I will attempt to add instructions on the this page to help users in the near future
 
 Eric Hughes
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/EricHughesABC/simpleNMRtools)
