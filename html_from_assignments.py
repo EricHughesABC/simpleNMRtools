@@ -1302,11 +1302,11 @@ class NMRProblem:
         nmrAssignments = attach_symmetry_atom_index(nmrAssignments)
 
         # create svg image of background molecule
-        molWidth = svgDimensions.MOLWIDTH
-        molHeight = svgDimensions.MOLHEIGHT
+        molWidth = svgDimensions.mol_width
+        molHeight = svgDimensions.mol_height
 
-        svgWidth = svgDimensions.SVGWIDTH
-        svgHeight = svgDimensions.SVGHEIGHT
+        svgWidth = svgDimensions.svg_width
+        svgHeight = svgDimensions.svg_height
 
         # fix coordinates of molecule before creating png
 
