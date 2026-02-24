@@ -457,11 +457,11 @@ function simpleCompletePeakPick() {
 
     // print out the pk_coords F1_ppm and F2_ppm values
 
-    for (var i=0; i < pk_coords.length; i++){
-        print( "\tPeak coord " + (i+1) + ": F1_ppm: " + pk_coords[i].F1_ppm + ", F2_ppm: " + pk_coords[i].F2_ppm + ", intensity: " + pk_coords[i].intensity );
-    }
+    // for (var i=0; i < pk_coords.length; i++){
+    //     print( "\tPeak coord " + (i+1) + ": F1_ppm: " + pk_coords[i].F1_ppm + ", F2_ppm: " + pk_coords[i].F2_ppm + ", intensity: " + pk_coords[i].intensity );
+    // }
     
-    print();
+    // print();
 
     // // display all peak coordinates found on the spectrum
     // if (pk_coords.length == 0)
