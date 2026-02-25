@@ -19,7 +19,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             pointer-events: none;
             display: inline-block;
-            max-width: 1000px; /* Set max-width for the tooltip */
+            max-width: 250px; /* Set max-width for the tooltip */
         }
 
         .custom-tooltip {
@@ -30,7 +30,6 @@
             padding: 5px 10px;
             border-radius: 4px;
             font-size: 14px; /* Your custom size */
-            white-space: nowrap;
             z-index: 1000;
             bottom: 125%;
             left: 50%;
@@ -112,7 +111,7 @@
 
         .buttontooltip {
             visibility: hidden;
-            width: 500px; /* Adjust width as needed */
+            width: 200px; /* Adjust width as needed */
             background-color: #555;
             color: #fff;
             text-align: left;
@@ -367,9 +366,7 @@
     {% endautoescape %}
     
     // Modify INFO tooltip to display the best results from the optimization with only 2 decimal places
-    // d3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
-    // d3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, Uncorrelated Nodes: ${isolatedCarbonsCount} out of ${nodes.length}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
-    d3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, Uncorrelated Nodes: ${isolatedCarbonsCount} out of ${nodes.length}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+    d3.select("#info_tooltip").html(`Correlation Penalty: ${best_results.best_weight}<br> Uncorrelated Nodes: ${isolatedCarbonsCount} out of ${nodes.length}<br> MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
 
 
     // Set the visible property of the catoms array to false
@@ -1101,9 +1098,7 @@ d3.select("body").on("keydown", (event) => {
         // update the INFO tooltip
         // d3.select("#infoButton")
         // .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
-        //d3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
-        // d3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, Uncorrelated Carbons: ${isolatedCarbonsCount}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
-        d3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, Uncorrelated Nodes: ${isolatedCarbonsCount} out of ${nodes.length}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+        d3.select("#info_tooltip").html(`Correlation Penalty: ${best_results.best_weight}<br> Uncorrelated Nodes: ${isolatedCarbonsCount} out of ${nodes.length}<br> MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
 
         colorHmbcLinksByDistance(mapping, node_offset);
         reorderElements();
