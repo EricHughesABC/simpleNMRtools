@@ -31,6 +31,19 @@ release = '0.0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+'myst_parser', # Enables Markdown parsing
+]
+
+source_suffix = {
+'.rst': 'restructuredtext',
+'.md': 'markdown',
+}
+
+# Optional: Enable extra MyST features
+myst_enable_extensions = [
+"colon_fence", # ::: fenced blocks
+"deflist", # Definition lists
+"footnotes", # Footnotes
 ]
 
 # Add any paths that contain templates here, relative to this directory.

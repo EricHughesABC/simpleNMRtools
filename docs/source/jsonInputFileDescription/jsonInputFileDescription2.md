@@ -101,7 +101,7 @@ The file is made up of two types of JSON data structures:
 ```
 [↑ Back to list](#list-of-the-components-in-the-file)
   - #### 1.3 hostname
-```json
+```python
     "hostname": {
         "datatype": "hostname",
         "count": 1,
@@ -115,7 +115,7 @@ The file is made up of two types of JSON data structures:
 
 - #### 1.4 workingDirectory
 
-```json
+```python
     "workingDirectory": {
         "datatype": "workingDirectory",
         "count": 1,
@@ -128,7 +128,7 @@ The file is made up of two types of JSON data structures:
 [↑ Back to list](#list-of-the-components-in-the-file)
 - #### 1.5 workingFilename
 
-```json
+```python
     "workingFilename": {
         "datatype": "workingFilename"
         "count": 1,
@@ -141,7 +141,7 @@ The file is made up of two types of JSON data structures:
 
   - #### 1.6 MNOVAcalcMethod
 
-```json
+```python
     "MNOVAcalcMethod": {
         "datatype": "MNOVAcalcMethod",
         "count": 1,
@@ -155,7 +155,7 @@ The file is made up of two types of JSON data structures:
 
 - #### 1.7 carbonCalcPositionsMethod
   Not really used by the program, but included for backward compatibility
-  ```json
+  ```python
       "carbonCalcPositionsMethod": {
           "datatype": "carbonCalcPositionsMethod",
           "count": 1,
@@ -331,11 +331,11 @@ The file is made up of two types of JSON data structures:
               "3": "[13C, 1H] HSQC-EDITED hsqcedetgpsp.3 exam_CMCse_1.3.ser_4 HSQC",
               "4": "[13C, 1H] HMBC hmbcetgpl3nd exam_CMCse_1.4.ser_5 HMBC"
           }
-      },
+      }
   ```
   [↑ Back to list](#list-of-the-components-in-the-file)
   
-- #### 1.13 spectraWithPeaks
+- #### 1.13 spectraWithPeaks
   
   ```python
       "spectraWithPeaks": {
@@ -400,7 +400,7 @@ The file is made up of two types of JSON data structures:
 
 ### 2 Spectra data
 
-```json
+```python
 
 data_spectrum_name: {
 		"spectrum_attributes": str, int, or list
@@ -415,7 +415,7 @@ data_spectrum_name: {
 
 - #### 2.1 spectrum_attributes
 
-  ```json
+  ```python
         "datatype": str,                 # Identifier for the type of data
         "pulsesequence": str,
         "experimenttype": str,           # HSQC, HMBC, COSY, C13_1D, 
@@ -429,7 +429,7 @@ data_spectrum_name: {
   ```
   
 - #### 2.2 peaks
-  ```json
+  ```python
     "peaks": {
         "count": int,                # number of peaks in data
         "datatype": str,             # "peaks"
@@ -458,7 +458,7 @@ data_spectrum_name: {
   
 - #### 2.3 integrals
 
-  ```json
+  ```python
       "integrals": {
           "count": int                               # number of integrals
           "normValue": int,                          # integral normalisation value not used
@@ -497,7 +497,7 @@ data_spectrum_name: {
 
 The multiplets data is normally not used by simpleNMR, but is added to each spectrum dataset for compatibiliity. It is only used in a 1-D proton dataset when the simpleNMR program was being developed. It is kept for compatibility. Appendix A describes what information is recorded when it is used. for now, the minimum information is described below that is added to the file.
 
-```json
+```python
       "multiplets": {
         "datatype": "multiplets",
         "normValue": 1,
@@ -513,66 +513,65 @@ The multiplets data is normally not used by simpleNMR, but is added to each spec
 ### Multiplet example of 1D proton dataset
 
 ```python
-        			.
-  						.
-    					.
-  			"multiplets": {
-            "datatype": "multiplets",
-            "normValue": 17635.57460361719,
-            "count": 11,
-            "data": {
-                "0": {
-                    "delta1": 6.02835345402265,
-                    "nH": 1,
-                    "realH": 1,
-                    "integralValue": 17635.57460361719,
-                    "category": "dd",
-                    "type": 0,
-                    "jlistcount": 2,
-                    "jvals": [
-                        0.8076171875,
-                        15.78369140625
-                    ]
-                },
-                "1": {
-                    "delta1": 5.479175846577852,
-                    "nH": 1,
-                    "realH": 1,
-                    "integralValue": 17993.810027956963,
-                    "category": "tt",
-                    "type": 0,
-                    "jlistcount": 2,
-                    "jvals": [
-                        1.6058349609375,
-                        3.89111328125
-                    ]
-                },
+    "multiplets": {
+        "datatype": "multiplets",
+        "normValue": 17635.57460361719,
+        "count": 11,
+        "data": {
+            "0": {
+                "delta1": 6.02835345402265,
+                "nH": 1,
+                "realH": 1,
+                "integralValue": 17635.57460361719,
+                "category": "dd",
+                "type": 0,
+                "jlistcount": 2,
+                "jvals": [
+                    0.8076171875,
+                    15.78369140625
+                ]
             },
-            "integrals": {
-            "datatype": "integrals",
-            "count": 11,
-            "normValue": 17635.57460361719,
-            "data": {
-                "0": {
-                    "intensity": 17635.57460361719,
-                    "rangeMin1": 5.985485831704805,
-                    "rangeMin2": 0,
-                    "rangeMax1": 6.08238015447256,
-                    "rangeMax2": 0,
-                    "delta1": 6.0339329930886825,
-                    "delta2": 0,
-                    "type": 0
-                },
-                "1": {
-                    "intensity": 17993.810027956963,
-                    "rangeMin1": 5.451617112141305,
-                    "rangeMin2": 0,
-                    "rangeMax1": 5.529512548091851,
-                    "rangeMax2": 0,
-                    "delta1": 5.490564830116578,
-                    "delta2": 0,
-                    "type": 0
-                }
+            "1": {
+                "delta1": 5.479175846577852,
+                "nH": 1,
+                "realH": 1,
+                "integralValue": 17993.810027956963,
+                "category": "tt",
+                "type": 0,
+                "jlistcount": 2,
+                "jvals": [
+                    1.6058349609375,
+                    3.89111328125
+                ]
+            },
+        },
+    }
+    "integrals": {
+        "datatype": "integrals",
+        "count": 11,
+        "normValue": 17635.57460361719,
+        "data": {
+            "0": {
+                "intensity": 17635.57460361719,
+                "rangeMin1": 5.985485831704805,
+                "rangeMin2": 0,
+                "rangeMax1": 6.08238015447256,
+                "rangeMax2": 0,
+                "delta1": 6.0339329930886825,
+                "delta2": 0,
+                "type": 0
+            },
+            "1": {
+                "intensity": 17993.810027956963,
+                "rangeMin1": 5.451617112141305,
+                "rangeMin2": 0,
+                "rangeMax1": 5.529512548091851,
+                "rangeMax2": 0,
+                "delta1": 5.490564830116578,
+                "delta2": 0,
+                "type": 0
             }
+        }
+    }
 ```
 

@@ -7,18 +7,19 @@ Welcome to simpleNMR's documentation!
 =====================================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Contents:
 
-   mnovaInstallation/mnovaInstallation
-   dataPreparation/dataPreparation
-   structures/structures
-   simplePeakPick/simplePeakPick
-   simpleIntegrate2D/simpleIntegrate2D
-   simplePREDICT/simplePREDICT
-   simpleHTMLGUI/simpleHTMLGUI
-   simpleASSIGN/simpleASSIGN
-   simpleREPORT/simpleREPORT
+   mnovaInstallation/mnovaInstallation.rst
+   dataPreparation/dataPreparation.rst
+   structures/structures.rst
+   simplePeakPick/simplePeakPick.rst
+   simpleIntegrate2D/simpleIntegrate2D.rst
+   simplePREDICT/simplePREDICT.rst
+   simpleHTMLGUI/simpleHTMLGUI.rst
+   simpleASSIGN/simpleASSIGN.rst
+   simpleREPORT/simpleREPORT.rst
+   jsonInputFileDescription/jsonInputFileDescription2
    
 
 

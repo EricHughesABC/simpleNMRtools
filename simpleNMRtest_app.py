@@ -427,6 +427,30 @@ def docs(filename):
     return send_from_directory(DOCS_DIR, filename)
 
 
+# create a set of example routes for displaying a number of final examples for showing some results
+@app.route("/example1/")
+def example1():
+    """Render the first example page.
+
+    This endpoint serves the example1.html template, which can be used to demonstrate specific features or results.
+
+    Returns:
+        Response: The rendered example1.html template.
+    """
+    return render_template("example1.html")
+
+@app.route("/example2/")
+def example2():
+    """Render the second example page.
+
+    This endpoint serves the example2.html template, which can be used to demonstrate specific features or results.
+
+    Returns:
+        Response: The rendered example2.html template.
+    """
+    return render_template("example2.html")
+
+
 # create a route that accepts a molfile string via post and calculates the C13 ppm predictions using nmrshiftDB and returns the predictions as a JSON object
 @app.route("/predict_c13_shifts/", methods=["POST"])
 def predict_c13_shifts():
