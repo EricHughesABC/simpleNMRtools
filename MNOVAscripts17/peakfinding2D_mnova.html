@@ -1,0 +1,610 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { Scatter } from 'recharts';
+
+/**
+ * Gaussian filter implementation for 2D arrays
+ */
+function gaussianFilter(matrix, sigma) {
+    if (sigma === 0) return matrix;
+    
+    var rows = matrix.length;
+    var cols = matrix[0].length;
+    
+    var kernelSize = Math.max(3, Math.ceil(6 * sigma) | 1);
+    var kernelRadius = Math.floor(kernelSize / 2);
+    
+    var kernel = [];
+    var sum = 0;
+    for (var i = 0; i < kernelSize; i++) {
+        var x = i - kernelRadius;
+        var value = Math.exp(-(x * x) / (2 * sigma * sigma));
+        kernel[i] = value;
+        sum += value;
+    }
+    
+    for (var i = 0; i < kernelSize; i++) {
+        kernel[i] /= sum;
+    }
+    
+    var tempResult = [];
+    for (var r = 0; r < rows; r++) {
+        tempResult[r] = [];
+        for (var c = 0; c < cols; c++) {
+            var value = 0;
+            for (var k = 0; k < kernelSize; k++) {
+                var sourceCol = c + k - kernelRadius;
+                sourceCol = Math.max(0, Math.min(cols - 1, sourceCol));
+                value += matrix[r][sourceCol] * kernel[k];
+            }
+            tempResult[r][c] = value;
+        }
+    }
+    
+    var result = [];
+    for (var r = 0; r < rows; r++) {
+        result[r] = [];
+        for (var c = 0; c < cols; c++) {
+            var value = 0;
+            for (var k = 0; k < kernelSize; k++) {
+                var sourceRow = r + k - kernelRadius;
+                sourceRow = Math.max(0, Math.min(rows - 1, sourceRow));
+                value += tempResult[sourceRow][c] * kernel[k];
+            }
+            result[r][c] = value;
+        }
+    }
+    
+    return result;
+}
+
+/**
+ * Maximum filter implementation
+ */
+function maximumFilter(matrix, size) {
+    var rows = matrix.length;
+    var cols = matrix[0].length;
+    var result = [];
+    var radius = Math.floor(size / 2);
+    
+    for (var r = 0; r < rows; r++) {
+        result[r] = [];
+        for (var c = 0; c < cols; c++) {
+            var maxValue = -Infinity;
+            
+            for (var dr = -radius; dr <= radius; dr++) {
+                for (var dc = -radius; dc <= radius; dc++) {
+                    var nr = r + dr;
+                    var nc = c + dc;
+                    
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                        maxValue = Math.max(maxValue, matrix[nr][nc]);
+                    }
+                }
+            }
+            
+            result[r][c] = maxValue;
+        }
+    }
+    
+    return result;
+}
+
+function abs2D(matrix) {
+    var result = [];
+    for (var r = 0; r < matrix.length; r++) {
+        result[r] = [];
+        for (var c = 0; c < matrix[r].length; c++) {
+            result[r][c] = Math.abs(matrix[r][c]);
+        }
+    }
+    return result;
+}
+
+function findCoordinates(mask) {
+    var coords = [];
+    for (var r = 0; r < mask.length; r++) {
+        for (var c = 0; c < mask[r].length; c++) {
+            if (mask[r][c]) {
+                coords.push([r, c]);
+            }
+        }
+    }
+    return coords;
+}
+
+function extractValues(matrix, coords) {
+    var values = [];
+    for (var i = 0; i < coords.length; i++) {
+        var r = coords[i][0];
+        var c = coords[i][1];
+        values.push(matrix[r][c]);
+    }
+    return values;
+}
+
+function logicalAnd(mask1, mask2) {
+    var result = [];
+    for (var r = 0; r < mask1.length; r++) {
+        result[r] = [];
+        for (var c = 0; c < mask1[r].length; c++) {
+            result[r][c] = mask1[r][c] && mask2[r][c];
+        }
+    }
+    return result;
+}
+
+function compareEqual(matrix1, matrix2) {
+    var result = [];
+    for (var r = 0; r < matrix1.length; r++) {
+        result[r] = [];
+        for (var c = 0; c < matrix1[r].length; c++) {
+            result[r][c] = matrix1[r][c] === matrix2[r][c];
+        }
+    }
+    return result;
+}
+
+function greaterThan(matrix, threshold) {
+    var result = [];
+    for (var r = 0; r < matrix.length; r++) {
+        result[r] = [];
+        for (var c = 0; c < matrix[r].length; c++) {
+            result[r][c] = matrix[r][c] > threshold;
+        }
+    }
+    return result;
+}
+
+/**
+ * Peak detection function with enhanced debugging
+ */
+function findPeakCandidatesReal(spectrum, ppmScales, useLocalMaxima, minDistance) {
+    if (typeof useLocalMaxima === 'undefined') useLocalMaxima = true;
+    if (typeof minDistance === 'undefined') minDistance = 3;
+    
+    console.log('Running peak detection with minDistance =', minDistance);
+    
+    var coords = [];
+    var intensities = [];
+    
+    if (useLocalMaxima) {
+        var absSpectrum = abs2D(spectrum);
+        var smoothed = gaussianFilter(absSpectrum, 1.0);
+        
+        // Find all local maxima first (without distance filtering)
+        var maxFiltered = maximumFilter(smoothed, 3); // Use fixed small size first
+        var localMaxima = compareEqual(maxFiltered, smoothed);
+        var nonZeroMask = greaterThan(smoothed, 0);
+        var peakMask = logicalAnd(localMaxima, nonZeroMask);
+        
+        var allCoords = findCoordinates(peakMask);
+        var allIntensities = extractValues(smoothed, allCoords);
+        
+        console.log('Found', allCoords.length, 'initial local maxima');
+        
+        // Sort peaks by intensity (descending) to prioritize stronger peaks
+        var peakData = [];
+        for (var i = 0; i < allCoords.length; i++) {
+            peakData.push({
+                coord: allCoords[i],
+                intensity: allIntensities[i]
+            });
+        }
+        peakData.sort(function(a, b) { return b.intensity - a.intensity; });
+        
+        // Apply distance filtering
+        var finalCoords = [];
+        var finalIntensities = [];
+        
+        for (var i = 0; i < peakData.length; i++) {
+            var currentPeak = peakData[i];
+            var tooClose = false;
+            
+            // Check distance to all already accepted peaks
+            for (var j = 0; j < finalCoords.length; j++) {
+                var distance = Math.sqrt(
+                    Math.pow(currentPeak.coord[0] - finalCoords[j][0], 2) + 
+                    Math.pow(currentPeak.coord[1] - finalCoords[j][1], 2)
+                );
+                
+                if (distance < minDistance) {
+                    tooClose = true;
+                    break;
+                }
+            }
+            
+            if (!tooClose) {
+                finalCoords.push(currentPeak.coord);
+                finalIntensities.push(currentPeak.intensity);
+            }
+        }
+        
+        coords = finalCoords;
+        intensities = finalIntensities;
+        
+        console.log('After distance filtering with minDistance=' + minDistance + ':', coords.length, 'peaks remain');
+        
+    } else {
+        var absSpectrum = abs2D(spectrum);
+        var mask = greaterThan(absSpectrum, 0);
+        
+        coords = findCoordinates(mask);
+        intensities = extractValues(absSpectrum, coords);
+        
+        console.log('Found', coords.length, 'non-zero points in thresholded spectrum');
+    }
+    
+    return {
+        coords: coords,
+        intensities: intensities
+    };
+}
+
+/**
+ * Generate synthetic HSQC spectrum
+ */
+function generateHSQCSpectrum(size) {
+    // Initialize empty spectrum
+    const spectrum = Array(size).fill(null).map(() => Array(size).fill(0));
+    
+    // Generate 10-15 random peaks typical for HSQC
+    const numPeaks = 8 + Math.floor(Math.random() * 8); // 8-15 peaks
+    
+    // Typical chemical shift ranges for HSQC
+    const protonRanges = [
+        { min: 0.8, max: 2.0 },   // Aliphatic CH3/CH2
+        { min: 2.0, max: 4.5 },   // CH2 near electronegative atoms
+        { min: 4.5, max: 6.0 },   // CH near oxygen
+        { min: 6.5, max: 8.5 }    // Aromatic CH
+    ];
+    
+    const carbonRanges = [
+        { min: 10, max: 50 },     // Aliphatic carbons
+        { min: 50, max: 80 },     // CH near electronegative atoms
+        { min: 100, max: 140 },   // Aromatic carbons
+        { min: 160, max: 180 }    // Carbonyl region
+    ];
+    
+    for (let i = 0; i < numPeaks; i++) {
+        // Select random chemical shift ranges
+        const hRange = protonRanges[Math.floor(Math.random() * protonRanges.length)];
+        const cRange = carbonRanges[Math.floor(Math.random() * carbonRanges.length)];
+        
+        // Generate peak position in ppm
+        const hPpm = hRange.min + Math.random() * (hRange.max - hRange.min);
+        const cPpm = cRange.min + Math.random() * (cRange.max - cRange.min);
+        
+        // Convert to array indices
+        const hIndex = Math.floor((10 - hPpm) / 10 * size); // Proton axis: 10 to 0 ppm
+        const cIndex = Math.floor(cPpm / 200 * size);       // Carbon axis: 0 to 200 ppm
+        
+        // Generate peak with Gaussian shape
+        const intensity = 0.5 + Math.random() * 0.5; // Random intensity 0.5-1.0
+        const width = 3 + Math.random() * 4; // Peak width 3-7 points
+        
+        for (let dr = -10; dr <= 10; dr++) {
+            for (let dc = -10; dc <= 10; dc++) {
+                const r = cIndex + dr;
+                const c = hIndex + dc;
+                
+                if (r >= 0 && r < size && c >= 0 && c < size) {
+                    const distance = Math.sqrt(dr * dr + dc * dc);
+                    const peakValue = intensity * Math.exp(-(distance * distance) / (2 * width * width));
+                    spectrum[r][c] += peakValue;
+                }
+            }
+        }
+    }
+    
+    // Add some noise
+    for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+            spectrum[r][c] += (Math.random() - 0.5) * 0.02; // Small noise
+        }
+    }
+    
+    // Apply threshold to remove noise
+    const threshold = 0.1;
+    for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+            if (spectrum[r][c] < threshold) {
+                spectrum[r][c] = 0;
+            }
+        }
+    }
+    
+    return spectrum;
+}
+
+const HSQCPeakDetection = () => {
+    const [spectrumSize] = useState(512); // 512x512 data matrix
+    const [minDistance, setMinDistance] = useState(5);
+    const [useLocalMaxima, setUseLocalMaxima] = useState(true);
+    const [isProcessing, setIsProcessing] = useState(false);
+    
+    // Generate spectrum and scales
+    const spectrum = useMemo(() => generateHSQCSpectrum(spectrumSize), [spectrumSize]);
+    
+    const ppmScales = useMemo(() => [
+        Array.from({length: spectrumSize}, (_, i) => 10 - (i / spectrumSize) * 10), // Proton: 10 to 0 ppm
+        Array.from({length: spectrumSize}, (_, i) => (i / spectrumSize) * 200)      // Carbon: 0 to 200 ppm
+    ], [spectrumSize]);
+    
+    // Detect peaks
+    const [peakResults, setPeakResults] = useState({ coords: [], intensities: [] });
+    
+    useEffect(() => {
+        console.log('Peak detection triggered with minDistance:', minDistance, 'useLocalMaxima:', useLocalMaxima);
+        setIsProcessing(true);
+        // Small delay to show processing state
+        const timeoutId = setTimeout(() => {
+            const results = findPeakCandidatesReal(spectrum, ppmScales, useLocalMaxima, minDistance);
+            console.log('Peak detection completed. Found:', results.coords.length, 'peaks');
+            setPeakResults(results);
+            setIsProcessing(false);
+        }, 10);
+        
+        return () => clearTimeout(timeoutId);
+    }, [spectrum, ppmScales, useLocalMaxima, minDistance]);
+    
+    // Convert peaks to plot data
+    const plotData = useMemo(() => {
+        return peakResults.coords.map((coord, i) => ({
+            x: ppmScales[0][coord[1]], // Proton ppm
+            y: ppmScales[1][coord[0]], // Carbon ppm
+            intensity: peakResults.intensities[i],
+            size: Math.max(20, peakResults.intensities[i] * 100)
+        }));
+    }, [peakResults, ppmScales]);
+    
+    // Create contour plot data with multiple intensity levels
+    const contourData = useMemo(() => {
+        const step = 2; // Higher resolution for better contours
+        const data = [];
+        
+        // Define contour levels (as fractions of max intensity)
+        const contourLevels = [0.1, 0.2, 0.4, 0.6, 0.8];
+        
+        // Find max intensity for scaling
+        let maxIntensity = 0;
+        for (let r = 0; r < spectrumSize; r += step) {
+            for (let c = 0; c < spectrumSize; c += step) {
+                if (spectrum[r][c] > maxIntensity) {
+                    maxIntensity = spectrum[r][c];
+                }
+            }
+        }
+        
+        // Generate contour data
+        for (let r = 0; r < spectrumSize; r += step) {
+            for (let c = 0; c < spectrumSize; c += step) {
+                const intensity = spectrum[r][c];
+                if (intensity > 0.05) { // Only plot significant intensities
+                    const normalizedIntensity = intensity / maxIntensity;
+                    
+                    // Determine contour level
+                    let level = 0;
+                    for (let i = contourLevels.length - 1; i >= 0; i--) {
+                        if (normalizedIntensity >= contourLevels[i]) {
+                            level = i + 1;
+                            break;
+                        }
+                    }
+                    
+                    if (level > 0) {
+                        data.push({
+                            x: ppmScales[0][c],
+                            y: ppmScales[1][r],
+                            intensity: intensity,
+                            normalizedIntensity: normalizedIntensity,
+                            level: level
+                        });
+                    }
+                }
+            }
+        }
+        
+        return data;
+    }, [spectrum, ppmScales, spectrumSize]);
+    
+    return (
+        <div className="p-6 max-w-6xl mx-auto">
+            <h1 className="text-3xl font-bold mb-6 text-center">HSQC Spectrum Peak Detection</h1>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div className="bg-white p-4 rounded-lg shadow">
+                    <h3 className="text-lg font-semibold mb-3">Detection Parameters</h3>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Use Local Maxima
+                            </label>
+                            <input
+                                type="checkbox"
+                                checked={useLocalMaxima}
+                                onChange={(e) => setUseLocalMaxima(e.target.checked)}
+                                className="w-4 h-4"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Min Distance: {minDistance}
+                            </label>
+                            <input
+                                type="range"
+                                min="3"
+                                max="15"
+                                value={minDistance}
+                                onChange={(e) => setMinDistance(parseInt(e.target.value))}
+                                className="w-full"
+                            />
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="bg-white p-4 rounded-lg shadow">
+                    <h3 className="text-lg font-semibold mb-3">Spectrum Info</h3>
+                    <div className="space-y-2 text-sm">
+                        <p><strong>Size:</strong> {spectrumSize} × {spectrumSize}</p>
+                        <p><strong>Proton Range:</strong> 0-10 ppm</p>
+                        <p><strong>Carbon Range:</strong> 0-200 ppm</p>
+                        <p><strong>Type:</strong> Synthetic HSQC</p>
+                    </div>
+                </div>
+                
+                <div className="bg-white p-4 rounded-lg shadow">
+                    <h3 className="text-lg font-semibold mb-3">Detection Results</h3>
+                    <div className="space-y-2 text-sm">
+                        <p><strong>Peaks Found:</strong> {peakResults.coords.length}</p>
+                        <p><strong>Status:</strong> {isProcessing ? 'Processing...' : 'Complete'}</p>
+                        <p><strong>Method:</strong> {useLocalMaxima ? 'Local Maxima' : 'All Non-zero'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            {/* Spectrum visualization */}
+            <div className="bg-white p-6 rounded-lg shadow mb-6">
+                <h3 className="text-lg font-semibold mb-4">HSQC Spectrum with Detected Peaks</h3>
+                <div style={{ width: '100%', height: '600px' }}>
+                    <svg width="100%" height="100%" viewBox="0 0 800 600">
+                        {/* Background */}
+                        <rect x="50" y="50" width="700" height="500" fill="#f8f9fa" stroke="none" />
+                        
+                        {/* Contour plot - multiple levels */}
+                        {contourData.map((point, i) => {
+                            const colors = ['#e3f2fd', '#bbdefb', '#90caf9', '#42a5f5', '#1976d2'];
+                            const sizes = [1, 1.5, 2, 2.5, 3];
+                            const opacity = [0.3, 0.4, 0.6, 0.8, 1.0];
+                            
+                            return (
+                                <circle
+                                    key={`contour-${i}`}
+                                    cx={50 + (10 - point.x) / 10 * 700}
+                                    cy={550 - point.y / 200 * 500}
+                                    r={sizes[point.level - 1]}
+                                    fill={colors[point.level - 1]}
+                                    opacity={opacity[point.level - 1]}
+                                />
+                            );
+                        })}
+                        
+                        {/* Detected peaks */}
+                        {plotData.map((peak, i) => (
+                            <g key={`peak-${i}`}>
+                                <circle
+                                    cx={50 + (10 - peak.x) / 10 * 700}
+                                    cy={550 - peak.y / 200 * 500}
+                                    r={Math.max(4, Math.min(12, peak.size / 8))}
+                                    fill="#FF6B35"
+                                    stroke="#FFFFFF"
+                                    strokeWidth="2"
+                                    opacity="0.9"
+                                />
+                                <text
+                                    x={50 + (10 - peak.x) / 10 * 700 + 10}
+                                    y={550 - peak.y / 200 * 500 + 4}
+                                    fontSize="11"
+                                    fill="#000000"
+                                    fontWeight="bold"
+                                    stroke="#FFFFFF"
+                                    strokeWidth="0.5"
+                                >
+                                    {i + 1}
+                                </text>
+                            </g>
+                        ))}
+                        
+                        {/* Axes */}
+                        <g stroke="black" strokeWidth="1">
+                            <line x1="50" y1="50" x2="50" y2="550" />
+                            <line x1="50" y1="550" x2="750" y2="550" />
+                        </g>
+                        
+                        {/* Axis labels */}
+                        <text x="400" y="590" textAnchor="middle" fontSize="14" fontWeight="bold">
+                            ¹H Chemical Shift (ppm)
+                        </text>
+                        <text x="25" y="300" textAnchor="middle" fontSize="14" fontWeight="bold" transform="rotate(-90, 25, 300)">
+                            ¹³C Chemical Shift (ppm)
+                        </text>
+                        
+                        {/* Tick marks and labels */}
+                        {[0, 2, 4, 6, 8, 10].map(ppm => (
+                            <g key={`h-tick-${ppm}`}>
+                                <line x1={50 + (10 - ppm) / 10 * 700} y1="550" x2={50 + (10 - ppm) / 10 * 700} y2="560" stroke="black" />
+                                <text x={50 + (10 - ppm) / 10 * 700} y="575" textAnchor="middle" fontSize="12">{ppm}</text>
+                            </g>
+                        ))}
+                        
+                        {[0, 50, 100, 150, 200].map(ppm => (
+                            <g key={`c-tick-${ppm}`}>
+                                <line x1="40" y1={550 - ppm / 200 * 500} x2="50" y2={550 - ppm / 200 * 500} stroke="black" />
+                                <text x="35" y={550 - ppm / 200 * 500 + 4} textAnchor="end" fontSize="12">{ppm}</text>
+                            </g>
+                        ))}
+                        
+                        {/* Contour level legend */}
+                        <g transform="translate(620, 70)">
+                            <text x="0" y="0" fontSize="12" fontWeight="bold">Intensity</text>
+                            <text x="0" y="15" fontSize="10">Levels</text>
+                            {[1, 2, 3, 4, 5].map(level => {
+                                const colors = ['#e3f2fd', '#bbdefb', '#90caf9', '#42a5f5', '#1976d2'];
+                                const labels = ['10%', '20%', '40%', '60%', '80%'];
+                                return (
+                                    <g key={level} transform={`translate(0, ${25 + level * 15})`}>
+                                        <circle cx="8" cy="0" r="4" fill={colors[level - 1]} />
+                                        <text x="18" y="3" fontSize="9">{labels[level - 1]}</text>
+                                    </g>
+                                );
+                            })}
+                        </g>
+                    </svg>
+                </div>
+                
+                <div className="mt-4 text-sm text-gray-600">
+                    <p><strong>Legend:</strong> Blue contour levels = Spectrum intensity (10%-80%), Orange circles = Detected peaks</p>
+                    <p>Peak size is proportional to intensity. Numbers indicate peak ID.</p>
+                </div>
+            </div>
+            
+            {/* Peak table */}
+            <div className="bg-white p-6 rounded-lg shadow">
+                <h3 className="text-lg font-semibold mb-4">Detected Peaks Table</h3>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr className="bg-gray-50">
+                                <th className="border border-gray-300 px-4 py-2">#</th>
+                                <th className="border border-gray-300 px-4 py-2">¹H (ppm)</th>
+                                <th className="border border-gray-300 px-4 py-2">¹³C (ppm)</th>
+                                <th className="border border-gray-300 px-4 py-2">Intensity</th>
+                                <th className="border border-gray-300 px-4 py-2">Array Indices</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {plotData.slice(0, 20).map((peak, i) => ( // Show first 20 peaks
+                                <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                                    <td className="border border-gray-300 px-4 py-2 text-center">{i + 1}</td>
+                                    <td className="border border-gray-300 px-4 py-2 text-center">{peak.x.toFixed(2)}</td>
+                                    <td className="border border-gray-300 px-4 py-2 text-center">{peak.y.toFixed(1)}</td>
+                                    <td className="border border-gray-300 px-4 py-2 text-center">{peak.intensity.toFixed(3)}</td>
+                                    <td className="border border-gray-300 px-4 py-2 text-center">
+                                        [{peakResults.coords[i][0]}, {peakResults.coords[i][1]}]
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    {plotData.length > 20 && (
+                        <p className="mt-2 text-sm text-gray-600">
+                            Showing first 20 of {plotData.length} peaks
+                        </p>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default HSQCPeakDetection;

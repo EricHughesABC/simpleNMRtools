@@ -1,0 +1,57 @@
+{
+    "VALID_1D_PULSE_SEQUENCES": {
+
+        "H1_1D_PulseSequences": ["zg30",  
+                                        "s2pul", 
+                                        "zg", 
+                                        "zgcppr"],
+
+        "C13_1D_PulseSequences": ["zgdc30", "s2pul", "zgpg30",
+                                        "zgzrse", "zg0dc.fr"],
+        
+        "H1_pureshift_PulseSequences": ["ja_PSYCHE_pr_03b", 
+                        "reset_psychetse.ptg"],
+
+        "DEPT135_PulseSequences": ["dept135.wu", "DEPT", "deptsp135"]
+    },
+
+    "VALID_2D_PULSE_SEQUENCES": {
+
+        "HSQC_PulseSequences": ["hsqcedetgpsisp2.3.ptg",
+                                "hsqcedetgpsisp2.3",
+                                "gHSQCAD", 
+                                "hsqcedetgpsp.3",
+                                "gHSQC",
+                                "inv4gp.wu",
+                                "hsqcetgp",
+                                "gns_noah3-BSScc.eeh",
+                                "hsqcedetgpsisp2.4"],
+
+        "HMBC_PulseSequences": ["ghmbc.wu", 
+                                     "gHMBC", 
+                                     "hmbcetgpl3nd", 
+                                     "hmbcetgpl3nd.ptg",
+                                     "gHMBCAD",
+                                     "hmbcgpndqf",
+                                     "gns_noah3-BSScc.eeh",
+                                     "shmbcctetgpl2nd",
+                                     "hmbcgplpndqf"],
+
+        "COSY_PulseSequences": ["cosygpqf", 
+                                      "cosygp", 
+                                      "gcosy", 
+                                      "cosygpmfppqf", 
+                                      "cosygpmfqf", 
+                                      "gCOSY",
+                                      "cosygpppqf_ptype",
+                                      "cosyqf45",
+                                      "cosygpmfphpp"],
+
+        "DDEPT_CH3_ONLY_PulseSequences": ["ddept_ch3_only.wu", "DDEPT_CH3_ONLY", "ddept_ch3_only_sp"]   
+        
+
+    
+
+}
+
+}

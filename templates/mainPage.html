@@ -19,7 +19,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             pointer-events: none;
             display: inline-block;
-            max-width: 800px; /* Set max-width for the tooltip */
+            max-width: 250px; /* Set max-width for the tooltip */
         } 
 
         .custom-tooltip {
@@ -55,6 +55,7 @@
         .container {
             display: flex; /* Use flexbox */
             justify-content: center; /* Center the content horizontally */
+            align-items: flex-start; /* Align groups at the top */
             margin: 0 auto; /* Set the left and right margins to auto to center the container */
         }
 
@@ -3962,7 +3963,8 @@ M  END
     // best_results
     var best_results = {'best_weight': 2, 'best_mae': 0.6649137259476112, 'best_lae': 2.257222668008966, 'best_lae_atomNumber': 16};
 
-  
+    const isolatedCarbons = findIsolatedNodes(nodes, links);
+    const isolatedCarbonsCount = isolatedCarbons.length;  
 
     var svg_bckgrnd_image_str = `<?xml version='1.0' encoding='iso-8859-1'?>
 <svg class="center" version='1.1' baseProfile='full'
@@ -4127,7 +4129,7 @@ Q 60.9 331.0, 63.1 331.0
     // Modify INFO tooltip to display the best results from the optimization with only 2 decimal places
     // d3.select("#infoButton")
     // .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
-    d3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+    d3.select("#info_tooltip").html(`Correlation Penalty: ${best_results.best_weight}<br> Uncorrelated Nodes: ${isolatedCarbonsCount} out of ${nodes.length}<br> MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
     // Set the visible property of the catoms array to false
     // loop through the nodes
     catoms.forEach(node => {
@@ -4866,7 +4868,7 @@ d3.select("body").on("keydown", (event) => {
         // update the INFO tooltip
             // d3.select("#infoButton")
             // .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
-        d3.select("#info_tooltip").text(`Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+        d3.select("#info_tooltip").html(`Correlation Penalty: ${best_results.best_weight}<br> Uncorrelated Nodes: ${isolatedCarbonsCount} out of ${nodes.length}<br> MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
 
         colorHmbcLinksByDistance(mapping, node_offset);
         console.log("4829 :: Reordering elements now");
@@ -5239,6 +5241,19 @@ hmbcbutton.addEventListener('click', toggleHmbcVisibility);
         }
         laeVisible = !laeVisible;
     });
+
+    function findIsolatedNodes(nodes, links) {
+        const connectedIds = new Set();
+        
+        links.forEach(link => {
+            connectedIds.add(link.source);
+            connectedIds.add(link.target);
+        });
+        
+        return nodes.filter(node => 
+            node.symbol === 'C' && !connectedIds.has(node.id)
+        );
+    }
 
   </script>
 </body>

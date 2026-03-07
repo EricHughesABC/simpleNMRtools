@@ -450,6 +450,17 @@ def example2():
     """
     return render_template("example2.html")
 
+@app.route("/simulatedAnnealingDemo/")
+def example3():
+    """Render the simulated annealing demo page.
+
+    This endpoint serves the run_minimization_v4.html template, which can be used to demonstrate the simulated annealing process.
+
+    Returns:
+        Response: The rendered run_minimization_v4.html template.
+    """
+    return render_template("run_minimization_v4.html")
+
 
 # create a route that accepts a molfile string via post and calculates the C13 ppm predictions using nmrshiftDB and returns the predictions as a JSON object
 @app.route("/predict_c13_shifts/", methods=["POST"])

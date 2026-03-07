@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        .plot-container {
+            width: 1000px;
+            height: 400px;
+            margin: 0 auto;
+            overflow: hidden; /* Prevent scrollbars from appearing */
+            /* add a visible boder */
+            border: 1px solid #ddd;
+        }
+        .plot-container2 {
+            width: 1000px;
+            height: 200px;
+            margin: 0 auto;
+            overflow: hidden; /* Prevent scrollbars from appearing */
+            /* add a visible boder */
+            border: 1px solid #ddd;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 8px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+            display: inline-block;
+            max-width: 800px; /* Set max-width for the tooltip */
+        }
+
+        /* Style for the SVG border */
+        svg {
+            position: relative; /* Set position relative to make it a positioning context */
+        }
+
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    
+        .container {
+            display: flex; /* Use flexbox */
+            justify-content: center; /* Center the content horizontally */
+            margin: 0 auto; /* Set the left and right margins to auto to center the container */
+        }
+
+        .group {
+            border: 1px solid black;
+            border-radius: 10px; /* Adjust the value to change the roundness of the corners */
+            display: block;
+            margin-right: 10px; /* Add some space between the groups */
+            padding: 10px; /* Add padding inside the border */
+            padding: 10px; /* Add padding inside the border */
+        }
+
+        .group:last-child {
+            margin-right: 0; /* Remove margin from the last group */
+        }
+
+        .color-container {
+            position: relative;
+            display: inline-block;
+            
+        }
+
+        .color-box {
+            width: 100px;
+            height: 50px;
+            border-radius: 7px;
+        }
+
+        .striped-rectangle {
+            width: 100px;
+            height: 50px;
+            background: repeating-linear-gradient(90deg, #ccc, #ccc 10px, #fff 10px, #fff 20px);
+        }
+
+        .color-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: black; /* Adjust text color as needed */
+        }
+
+        .orange { background-color: #FFA500; }
+        .green { background-color: #98FB98; }
+        .yellow { background-color: yellow; }
+        .cyan { background-color: #00FFFF; }
+        .grey { background-color: #808080; }
+        .blue { background-color: #ADD8E6; }
+        .red { background-color: #FF0000; }
+        .pink { background-color: #f8cce2; }    
+
+        .buttontooltip {
+            visibility: hidden;
+            width: 400px; /* Adjust width as needed */
+            background-color: #555;
+            color: #fff;
+            text-align: left;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the button */
+            left: 50%;
+            margin-left: -60px; /* Center the tooltip */
+            opacity: 0; /* Hide by default */
+            transition: opacity 0.3s; /* Smooth transition */
+        }
+
+        .action-button {
+            position: relative; /* Needed for absolute positioning of tooltip */
+        }
+
+        .action-button:hover .buttontooltip {
+            visibility: visible;
+            opacity: 1; /* Show the tooltip on hover */
+        }
+
+       /* Normal button styles */
+       button.normal {
+            background-color: #ADD8E6;
+            color: black;
+            border: 2px solid #ADD8E6; 
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        /* Sunken (clicked) button styles */
+        button.sunken {
+            background-color: #dae3e6;
+            box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.2);
+            transform: translateY(2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- centre title -->
+    <h3 style="text-align: center;">HMBC-COSY OPTIMIZATION</h3>
+    <!-- <p id="time-result"></p>
+    <p id="start_values"></p> -->
+    <p style="text-align: center;" id="results"></p>
+
+    <div class="plot-container2" id="plot-container0">
+        <svg id="progress_plot" width="1000" height="500"></svg>
+    </div>
+
+    <div class="plot-container" id="plot-container">
+    
+        <?xml version='1.0' encoding='iso-8859-1'?>
+        <svg class="center" version='1.1' baseProfile='full' id="svg-image"
+        xmlns='http://www.w3.org/2000/svg'
+                xmlns:rdkit='http://www.rdkit.org/xml'
+                xmlns:xlink='http://www.w3.org/1999/xlink'
+            xml:space='preserve'
+    width=1000 height=600 viewBox='0 0 1000 600'>
+    <!-- END OF HEADER -->
+    <g transform='translate(0, -100)'>
+    <rect style='opacity:1.0;fill:none;stroke:none' width='1000.0' height='600.0' x='0.0' y='0.0'> </rect>
+    <path class='bond-0 atom-0 atom-1' d='M 919.9,367.3 L 848.9,345.6' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-1 atom-1 atom-2' d='M 848.9,345.6 L 832.1,273.2' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-2 atom-2 atom-3' d='M 832.1,273.2 L 761.1,251.6' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-3 atom-3 atom-4' d='M 761.1,251.6 L 706.8,302.3' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-3 atom-3 atom-4' d='M 768.7,259.7 L 714.4,310.4' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-4 atom-4 atom-5' d='M 706.8,302.3 L 635.8,280.6' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-5 atom-5 atom-6' d='M 635.8,280.6 L 619.0,208.2' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-6 atom-5 atom-7' d='M 635.8,280.6 L 581.5,331.3' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-7 atom-7 atom-8' d='M 581.5,331.3 L 590.6,405.0' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-8 atom-8 atom-9' d='M 590.6,405.0 L 523.3,436.4' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-9 atom-9 atom-10' d='M 523.3,436.4 L 472.6,382.1' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-10 atom-10 atom-11' d='M 472.6,382.1 L 508.6,317.1' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-11 atom-11 atom-7' d='M 508.6,317.1 L 581.5,331.3' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-12 atom-11 atom-12' d='M 508.6,317.1 L 470.3,253.5' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-13 atom-12 atom-13' d='M 470.3,253.5 L 396.0,254.9' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-14 atom-13 atom-14' d='M 396.0,254.9 L 360.1,319.8' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-15 atom-14 atom-15' d='M 360.1,319.8 L 398.4,383.5' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-16 atom-15 atom-10' d='M 398.4,383.5 L 472.6,382.1' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-17 atom-15 atom-16' d='M 398.4,383.5 L 362.4,448.4' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-18 atom-16 atom-17' d='M 362.4,448.4 L 288.1,449.8' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-19 atom-17 atom-18' d='M 288.1,449.8 L 249.9,386.1' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-19 atom-17 atom-18' d='M 297.7,444.0 L 259.4,380.4' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-20 atom-18 atom-19' d='M 249.9,386.1 L 285.8,321.2' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-21 atom-19 atom-14' d='M 285.8,321.2 L 360.1,319.8' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-22 atom-19 atom-20' d='M 285.8,321.2 L 247.5,257.5' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-23 atom-20 atom-21' d='M 247.5,257.5 L 173.3,258.9' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-24 atom-21 atom-22' d='M 173.3,258.9 L 137.3,323.9' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-25 atom-22 atom-23' d='M 137.3,323.9 L 175.6,387.5' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-26 atom-23 atom-18' d='M 175.6,387.5 L 249.9,386.1' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-27 atom-22 atom-24' d='M 137.3,323.9 L 104.7,324.4' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-27 atom-22 atom-24' d='M 104.7,324.4 L 72.0,325.0' style='fill:none;fill-rule:evenodd;stroke:#FF0000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-28 atom-19 atom-25' d='M 285.8,321.2 L 321.8,256.2' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-29 atom-11 atom-26' d='M 508.6,317.1 L 544.5,252.2' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-30 atom-2 atom-27' d='M 832.1,273.2 L 886.4,222.6' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-31 atom-27 atom-28' d='M 886.4,222.6 L 869.6,150.2' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path class='bond-32 atom-27 atom-29' d='M 886.4,222.6 L 957.4,244.2' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />
+    <path d='M 852.4,346.7 L 848.9,345.6 L 848.0,342.0' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />
+    <path d='M 764.6,252.7 L 761.1,251.6 L 758.4,254.1' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />
+    <path d='M 709.5,299.7 L 706.8,302.3 L 703.2,301.2' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />
+    <path d='M 590.1,401.3 L 590.6,405.0 L 587.2,406.6' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />
+    <path d='M 526.7,434.8 L 523.3,436.4 L 520.8,433.7' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />
+    <path d='M 472.2,256.7 L 470.3,253.5 L 466.6,253.6' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />
+    <path d='M 399.7,254.8 L 396.0,254.9 L 394.2,258.1' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />
+    <path d='M 364.2,445.2 L 362.4,448.4 L 358.7,448.5' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />
+    <path d='M 291.9,449.7 L 288.1,449.8 L 286.2,446.6' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />
+    <path d='M 249.4,260.7 L 247.5,257.5 L 243.8,257.6' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />
+    <path d='M 177.0,258.8 L 173.3,258.9 L 171.5,262.1' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />
+    <path d='M 173.7,384.3 L 175.6,387.5 L 179.3,387.4' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />
+    <path class='atom-24' d='M 42.6 318.2
+    L 44.5 318.2
+    L 44.5 324.2
+    L 51.7 324.2
+    L 51.7 318.2
+    L 53.7 318.2
+    L 53.7 332.4
+    L 51.7 332.4
+    L 51.7 325.8
+    L 44.5 325.8
+    L 44.5 332.4
+    L 42.6 332.4
+    L 42.6 318.2
+    ' fill='#FF0000'/>
+    <path class='atom-24' d='M 56.6 325.2
+    Q 56.6 321.8, 58.2 319.9
+    Q 59.9 318.0, 63.1 318.0
+    Q 66.2 318.0, 67.9 319.9
+    Q 69.6 321.8, 69.6 325.2
+    Q 69.6 328.7, 67.9 330.6
+    Q 66.2 332.6, 63.1 332.6
+    Q 59.9 332.6, 58.2 330.6
+    Q 56.6 328.7, 56.6 325.2
+    M 63.1 331.0
+    Q 65.2 331.0, 66.4 329.5
+    Q 67.6 328.1, 67.6 325.2
+    Q 67.6 322.5, 66.4 321.1
+    Q 65.2 319.6, 63.1 319.6
+    Q 60.9 319.6, 59.7 321.0
+    Q 58.6 322.4, 58.6 325.2
+    Q 58.6 328.1, 59.7 329.5
+    Q 60.9 331.0, 63.1 331.0
+    ' fill='#FF0000'/>
+    <path  d='M 919.9,367.3 L 848.9,345.6' class='bond-selector bond-0 atom-0 atom-1' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 848.9,345.6 L 832.1,273.2' class='bond-selector bond-1 atom-1 atom-2' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 832.1,273.2 L 761.1,251.6' class='bond-selector bond-2 atom-2 atom-3' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 761.1,251.6 L 706.8,302.3' class='bond-selector bond-3 atom-3 atom-4' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 706.8,302.3 L 635.8,280.6' class='bond-selector bond-4 atom-4 atom-5' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 635.8,280.6 L 619.0,208.2' class='bond-selector bond-5 atom-5 atom-6' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 635.8,280.6 L 581.5,331.3' class='bond-selector bond-6 atom-5 atom-7' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 581.5,331.3 L 590.6,405.0' class='bond-selector bond-7 atom-7 atom-8' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 590.6,405.0 L 523.3,436.4' class='bond-selector bond-8 atom-8 atom-9' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 523.3,436.4 L 472.6,382.1' class='bond-selector bond-9 atom-9 atom-10' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 472.6,382.1 L 508.6,317.1' class='bond-selector bond-10 atom-10 atom-11' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 508.6,317.1 L 581.5,331.3' class='bond-selector bond-11 atom-11 atom-7' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 508.6,317.1 L 470.3,253.5' class='bond-selector bond-12 atom-11 atom-12' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 470.3,253.5 L 396.0,254.9' class='bond-selector bond-13 atom-12 atom-13' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 396.0,254.9 L 360.1,319.8' class='bond-selector bond-14 atom-13 atom-14' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 360.1,319.8 L 398.4,383.5' class='bond-selector bond-15 atom-14 atom-15' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 398.4,383.5 L 472.6,382.1' class='bond-selector bond-16 atom-15 atom-10' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 398.4,383.5 L 362.4,448.4' class='bond-selector bond-17 atom-15 atom-16' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 362.4,448.4 L 288.1,449.8' class='bond-selector bond-18 atom-16 atom-17' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 288.1,449.8 L 249.9,386.1' class='bond-selector bond-19 atom-17 atom-18' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 249.9,386.1 L 285.8,321.2' class='bond-selector bond-20 atom-18 atom-19' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 285.8,321.2 L 360.1,319.8' class='bond-selector bond-21 atom-19 atom-14' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 285.8,321.2 L 247.5,257.5' class='bond-selector bond-22 atom-19 atom-20' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 247.5,257.5 L 173.3,258.9' class='bond-selector bond-23 atom-20 atom-21' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 173.3,258.9 L 137.3,323.9' class='bond-selector bond-24 atom-21 atom-22' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 137.3,323.9 L 175.6,387.5' class='bond-selector bond-25 atom-22 atom-23' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 175.6,387.5 L 249.9,386.1' class='bond-selector bond-26 atom-23 atom-18' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 137.3,323.9 L 63.1,325.2' class='bond-selector bond-27 atom-22 atom-24' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 285.8,321.2 L 321.8,256.2' class='bond-selector bond-28 atom-19 atom-25' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 508.6,317.1 L 544.5,252.2' class='bond-selector bond-29 atom-11 atom-26' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 832.1,273.2 L 886.4,222.6' class='bond-selector bond-30 atom-2 atom-27' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 886.4,222.6 L 869.6,150.2' class='bond-selector bond-31 atom-27 atom-28' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <path  d='M 886.4,222.6 L 957.4,244.2' class='bond-selector bond-32 atom-27 atom-29' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='919.9' cy='367.3' r='1.8' class='atom-selector atom-0' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='848.9' cy='345.6' r='1.8' class='atom-selector atom-1' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='832.1' cy='273.2' r='1.8' class='atom-selector atom-2' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='761.1' cy='251.6' r='1.8' class='atom-selector atom-3' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='706.8' cy='302.3' r='1.8' class='atom-selector atom-4' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='635.8' cy='280.6' r='1.8' class='atom-selector atom-5' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='619.0' cy='208.2' r='1.8' class='atom-selector atom-6' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='581.5' cy='331.3' r='1.8' class='atom-selector atom-7' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='590.6' cy='405.0' r='1.8' class='atom-selector atom-8' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='523.3' cy='436.4' r='1.8' class='atom-selector atom-9' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='472.6' cy='382.1' r='1.8' class='atom-selector atom-10' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='508.6' cy='317.1' r='1.8' class='atom-selector atom-11' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='470.3' cy='253.5' r='1.8' class='atom-selector atom-12' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='396.0' cy='254.9' r='1.8' class='atom-selector atom-13' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='360.1' cy='319.8' r='1.8' class='atom-selector atom-14' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='398.4' cy='383.5' r='1.8' class='atom-selector atom-15' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='362.4' cy='448.4' r='1.8' class='atom-selector atom-16' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='288.1' cy='449.8' r='1.8' class='atom-selector atom-17' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='249.9' cy='386.1' r='1.8' class='atom-selector atom-18' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='285.8' cy='321.2' r='1.8' class='atom-selector atom-19' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='247.5' cy='257.5' r='1.8' class='atom-selector atom-20' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='173.3' cy='258.9' r='1.8' class='atom-selector atom-21' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='137.3' cy='323.9' r='1.8' class='atom-selector atom-22' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='175.6' cy='387.5' r='1.8' class='atom-selector atom-23' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='63.1' cy='325.2' r='1.8' class='atom-selector atom-24' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='321.8' cy='256.2' r='1.8' class='atom-selector atom-25' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='544.5' cy='252.2' r='1.8' class='atom-selector atom-26' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='886.4' cy='222.6' r='1.8' class='atom-selector atom-27' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='869.6' cy='150.2' r='1.8' class='atom-selector atom-28' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    <circle  cx='957.4' cy='244.2' r='1.8' class='atom-selector atom-29' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />
+    </g>
+    </svg>
+     
+    </div>
+
+    <br>
+    <div class="container">
+        <div class="group">
+            <button style="border: 2px solid orange" class="color-container color-box action-button orange" >
+                -C-<sub></sub>
+            </button>
+            <button style="border: 2px solid #98FB98" class="color-container color-box action-button green" >
+                -CH<sub></sub>
+            </button>
+            <button style="border: 2px solid yellow" class="color-container color-box action-button yellow" >
+                -CH<sub>2</sub>
+            </button>
+            <button style="border: 2px solid cyan" class="color-container color-box action-button cyan" >
+                -CH<sub>3</sub>
+            </button>
+        </div>
+        <div class="group">
+            <!-- <button id="sunkenButton" class="normal color-container color-box action-button">Click Me</button> -->
+            <button style="border: 2px solid pink" class="color-container color-box action-button pink" >
+                HMBC
+            </button>
+            <button id="sunkenButton" class="normal color-container color-box action-button blue" >
+                COSY
+                <span  class="buttontooltip">Press to hide cosy links</span>
+            </button>
+        </div>
+    </div>
+
+
+<script>
+    // add a one second delay to allow theuser to see the image
+    setTimeout(function() {
+        // remove the image
+
+    }, 1000);
+
+     var catoms = [
+    {
+        "atomNumber": 29,
+        "id": 1,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 3,
+        "ppm": 11.910777331991033,
+        "ppm_calculated": 12.194,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.9198815436024287,
+        "y": 0.6121100779138541
+    },
+    {
+        "atomNumber": 28,
+        "id": 2,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 2,
+        "ppm": 24.320239707912968,
+        "ppm_calculated": 25.222,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.8488543340899599,
+        "y": 0.5759956136385855
+    },
+    {
+        "atomNumber": 24,
+        "id": 3,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 1,
+        "ppm": 50.21410864286535,
+        "ppm_calculated": 49.448,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.8320986830141089,
+        "y": 0.45541567145527134
+    },
+    {
+        "atomNumber": 23,
+        "id": 4,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 1,
+        "ppm": 129.29893206392973,
+        "ppm_calculated": 129.623,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.7610723938889555,
+        "y": 0.4193027411588616
+    },
+    {
+        "atomNumber": 22,
+        "id": 5,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 1,
+        "ppm": 138.5683944638333,
+        "ppm_calculated": 137.665,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.7067907111918689,
+        "y": 0.5037743549823428
+    },
+    {
+        "atomNumber": 21,
+        "id": 6,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 1,
+        "ppm": 40.63787076107022,
+        "ppm_calculated": 39.388,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.6357570589681927,
+        "y": 0.46765528877049745
+    },
+    {
+        "atomNumber": 27,
+        "id": 7,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 3,
+        "ppm": 21.063632203360108,
+        "ppm_calculated": 20.364,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.619007850603549,
+        "y": 0.347081482502619
+    },
+    {
+        "atomNumber": 11,
+        "id": 8,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 1,
+        "ppm": 55.91249425693455,
+        "ppm_calculated": 55.527,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.5814753762711059,
+        "y": 0.5521269025939787
+    },
+    {
+        "atomNumber": 12,
+        "id": 9,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 2,
+        "ppm": 29.10171641293331,
+        "ppm_calculated": 27.414,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.5905724844959733,
+        "y": 0.6749648616576052
+    },
+    {
+        "atomNumber": 13,
+        "id": 10,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 2,
+        "ppm": 25.538870366343435,
+        "ppm_calculated": 25.92,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.5232866494203808,
+        "y": 0.7273379678584387
+    },
+    {
+        "atomNumber": 2,
+        "id": 11,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 1,
+        "ppm": 56.79507554180227,
+        "ppm_calculated": 55.987,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.47260368112629225,
+        "y": 0.6368684966966276
+    },
+    {
+        "atomNumber": 1,
+        "id": 12,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 0,
+        "ppm": 42.124948522963884,
+        "ppm_calculated": 42.674,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.5085668950860726,
+        "y": 0.5285803271097425
+    },
+    {
+        "atomNumber": 14,
+        "id": 13,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 2,
+        "ppm": 39.7243093799339,
+        "ppm_calculated": 38.019,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.4702824643169928,
+        "y": 0.422528698699145
+    },
+    {
+        "atomNumber": 15,
+        "id": 14,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 2,
+        "ppm": 21.08802288369934,
+        "ppm_calculated": 21.132,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.39603389920081744,
+        "y": 0.4247652398754327
+    },
+    {
+        "atomNumber": 4,
+        "id": 15,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 1,
+        "ppm": 51.357045495217186,
+        "ppm_calculated": 50.28,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.3600706852410371,
+        "y": 0.5330534094623179
+    },
+    {
+        "atomNumber": 3,
+        "id": 16,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 1,
+        "ppm": 31.890300588744495,
+        "ppm_calculated": 31.791,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.3983551160101168,
+        "y": 0.6391050378729153
+    },
+    {
+        "atomNumber": 17,
+        "id": 17,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 2,
+        "ppm": 31.959942805278732,
+        "ppm_calculated": 32.002,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.36239190205033656,
+        "y": 0.7473932074598005
+    },
+    {
+        "atomNumber": 18,
+        "id": 18,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 1,
+        "ppm": 121.28836051495348,
+        "ppm_calculated": 121.605,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.28814333693416116,
+        "y": 0.7496297486360883
+    },
+    {
+        "atomNumber": 6,
+        "id": 19,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 0,
+        "ppm": 140.93935651527744,
+        "ppm_calculated": 141.006,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.24985798577776605,
+        "y": 0.6435781202254907
+    },
+    {
+        "atomNumber": 5,
+        "id": 20,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 0,
+        "ppm": 36.46683138564387,
+        "ppm_calculated": 36.511,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.28582212012486174,
+        "y": 0.5352899506386056
+    },
+    {
+        "atomNumber": 10,
+        "id": 21,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 2,
+        "ppm": 37.34286849148181,
+        "ppm_calculated": 37.249,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.24753032625725924,
+        "y": 0.42923372029143136
+    },
+    {
+        "atomNumber": 9,
+        "id": 22,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 2,
+        "ppm": 31.790111401435205,
+        "ppm_calculated": 31.597,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.17328176114108385,
+        "y": 0.43147026146771905
+    },
+    {
+        "atomNumber": 8,
+        "id": 23,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 1,
+        "ppm": 71.35303649333981,
+        "ppm_calculated": 71.396,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.13731854718130354,
+        "y": 0.5397584310546043
+    },
+    {
+        "atomNumber": 7,
+        "id": 24,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 2,
+        "ppm": 42.577096517938855,
+        "ppm_calculated": 41.903,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.17561034104890605,
+        "y": 0.6458161953806374
+    },
+    {
+        "atomNumber": 19,
+        "id": 26,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 3,
+        "ppm": 18.941643013847024,
+        "ppm_calculated": 18.519,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.32178533408464205,
+        "y": 0.4270017810517205
+    },
+    {
+        "atomNumber": 16,
+        "id": 27,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 3,
+        "ppm": 12.263879133764899,
+        "ppm_calculated": 14.168,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.5445301090458529,
+        "y": 0.4202921575228573
+    },
+    {
+        "atomNumber": 25,
+        "id": 28,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 1,
+        "ppm": 32.00962752448829,
+        "ppm_calculated": 32.173,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.8863803657111956,
+        "y": 0.3709440576317902
+    },
+    {
+        "atomNumber": 26,
+        "id": 29,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 3,
+        "ppm": 19.203616987860983,
+        "ppm_calculated": 20.037,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.8696320777338674,
+        "y": 0.2503702513639117
+    },
+    {
+        "atomNumber": 30,
+        "id": 30,
+        "iupacLabel": "",
+        "jCouplingClass": "",
+        "jCouplingVals": "",
+        "numProtons": 3,
+        "ppm": 21.228043456017147,
+        "ppm_calculated": 20.037,
+        "symbol": "C",
+        "visible": "false",
+        "x": 0.9574140179348718,
+        "y": 0.4070631238436356
+    }
+];
+
+  
+    // nodes
+    var graph_nodes = [{'symbol': 'C', 'atomNumber': 6, 'ppm': 140.93935651527744, 'ppm_calculated': 141.006, 'numProtons': 0, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.24985798577776605, 'y': 0.6435781202254907, 'id': 19}, {'symbol': 'C', 'atomNumber': 22, 'ppm': 138.5683944638333, 'ppm_calculated': 137.665, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.7067907111918689, 'y': 0.5037743549823428, 'H1_ppm': [5.221086575381741], 'id': 5}, {'symbol': 'C', 'atomNumber': 23, 'ppm': 129.29893206392973, 'ppm_calculated': 129.623, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.7610723938889555, 'y': 0.4193027411588616, 'H1_ppm': [5.066135723438959], 'id': 4}, {'symbol': 'C', 'atomNumber': 18, 'ppm': 121.28836051495348, 'ppm_calculated': 121.605, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.28814333693416116, 'y': 0.7496297486360883, 'H1_ppm': [5.349310791671152], 'id': 18}, {'symbol': 'C', 'atomNumber': 8, 'ppm': 71.35303649333981, 'ppm_calculated': 71.396, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.13731854718130354, 'y': 0.5397584310546043, 'H1_ppm': [3.4113029367751673], 'id': 23}, {'symbol': 'C', 'atomNumber': 2, 'ppm': 56.79507554180227, 'ppm_calculated': 55.987, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.47260368112629225, 'y': 0.6368684966966276, 'H1_ppm': [0.9327418676883226], 'id': 11}, {'symbol': 'C', 'atomNumber': 11, 'ppm': 55.91249425693455, 'ppm_calculated': 55.527, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5814753762711059, 'y': 0.5521269025939787, 'H1_ppm': [1.1137826774949187], 'id': 8}, {'symbol': 'C', 'atomNumber': 4, 'ppm': 51.357045495217186, 'ppm_calculated': 50.28, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.3600706852410371, 'y': 0.5330534094623179, 'H1_ppm': [1.6031607399938266], 'id': 15}, {'symbol': 'C', 'atomNumber': 24, 'ppm': 50.21410864286535, 'ppm_calculated': 49.448, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.8320986830141089, 'y': 0.45541567145527134, 'H1_ppm': [0.9133035269797892], 'id': 3}, {'symbol': 'C', 'atomNumber': 7, 'ppm': 42.577096517938855, 'ppm_calculated': 41.903, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.17561034104890605, 'y': 0.6458161953806374, 'H1_ppm': [2.2814122817490703, 2.2396167499248385], 'id': 24}, {'symbol': 'C', 'atomNumber': 1, 'ppm': 42.124948522963884, 'ppm_calculated': 42.674, 'numProtons': 0, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5085668950860726, 'y': 0.5285803271097425, 'id': 12}, {'symbol': 'C', 'atomNumber': 21, 'ppm': 40.63787076107022, 'ppm_calculated': 39.388, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.6357570589681927, 'y': 0.46765528877049745, 'H1_ppm': [2.074021794722506], 'id': 6}, {'symbol': 'C', 'atomNumber': 14, 'ppm': 39.7243093799339, 'ppm_calculated': 38.019, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.4702824643169928, 'y': 0.422528698699145, 'H1_ppm': [1.9682103217497697, 1.1259509968867831], 'id': 13}, {'symbol': 'C', 'atomNumber': 10, 'ppm': 37.34286849148181, 'ppm_calculated': 37.249, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.24753032625725924, 'y': 0.42923372029143136, 'H1_ppm': [1.6904552051963346, 0.9836345657384518], 'id': 21}, {'symbol': 'C', 'atomNumber': 5, 'ppm': 36.46683138564387, 'ppm_calculated': 36.511, 'numProtons': 0, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.28582212012486174, 'y': 0.5352899506386056, 'id': 20}, {'symbol': 'C', 'atomNumber': 25, 'ppm': 32.00962752448829, 'ppm_calculated': 32.173, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.8863803657111956, 'y': 0.3709440576317902, 'H1_ppm': [1.5601054181733567], 'id': 28}, {'symbol': 'C', 'atomNumber': 17, 'ppm': 31.959942805278732, 'ppm_calculated': 32.002, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.36239190205033656, 'y': 0.7473932074598005, 'H1_ppm': [1.9229906997935537, 1.518943723908745], 'id': 17}, {'symbol': 'C', 'atomNumber': 3, 'ppm': 31.890300588744495, 'ppm_calculated': 31.791, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.3983551160101168, 'y': 0.6391050378729153, 'H1_ppm': [1.4183353237468348], 'id': 16}, {'symbol': 'C', 'atomNumber': 9, 'ppm': 31.790111401435205, 'ppm_calculated': 31.597, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.17328176114108385, 'y': 0.43147026146771905, 'H1_ppm': [1.7164725440866233, 1.441079502349372], 'id': 22}, {'symbol': 'C', 'atomNumber': 12, 'ppm': 29.10171641293331, 'ppm_calculated': 27.414, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5905724844959733, 'y': 0.6749648616576052, 'H1_ppm': [1.7846522927926003, 1.332320003581263], 'id': 9}, {'symbol': 'C', 'atomNumber': 13, 'ppm': 25.538870366343435, 'ppm_calculated': 25.92, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5232866494203808, 'y': 0.7273379678584387, 'H1_ppm': [1.4574814828899185, 1.2298562018674397], 'id': 10}, {'symbol': 'C', 'atomNumber': 28, 'ppm': 24.320239707912968, 'ppm_calculated': 25.222, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.8488543340899599, 'y': 0.5759956136385855, 'H1_ppm': [1.5297897986563191, 1.0336673953326638], 'id': 2}, {'symbol': 'C', 'atomNumber': 30, 'ppm': 21.228043456017147, 'ppm_calculated': 20.037, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.9574140179348718, 'y': 0.4070631238436356, 'H1_ppm': [1.113586961789721], 'id': 30}, {'symbol': 'C', 'atomNumber': 15, 'ppm': 21.08802288369934, 'ppm_calculated': 21.132, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.39603389920081744, 'y': 0.4247652398754327, 'H1_ppm': [1.433893153060124, 1.398417680114446], 'id': 14}, {'symbol': 'C', 'atomNumber': 27, 'ppm': 21.063632203360108, 'ppm_calculated': 20.364, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.619007850603549, 'y': 0.347081482502619, 'H1_ppm': [0.9503512473011835], 'id': 7}, {'symbol': 'C', 'atomNumber': 26, 'ppm': 19.203616987860983, 'ppm_calculated': 20.037, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.8696320777338674, 'y': 0.2503702513639117, 'H1_ppm': [0.9525490353787543], 'id': 29}, {'symbol': 'C', 'atomNumber': 19, 'ppm': 18.941643013847024, 'ppm_calculated': 18.519, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.32178533408464205, 'y': 0.4270017810517205, 'H1_ppm': [0.8992027247686676], 'id': 26}, {'symbol': 'C', 'atomNumber': 16, 'ppm': 12.263879133764899, 'ppm_calculated': 14.168, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5445301090458529, 'y': 0.4202921575228573, 'H1_ppm': [0.9329687415967736], 'id': 27}, {'symbol': 'C', 'atomNumber': 29, 'ppm': 11.910777331991033, 'ppm_calculated': 12.194, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.9198815436024287, 'y': 0.6121100779138541, 'H1_ppm': [0.6728305527790548], 'id': 1}];
+    // nodes_orig
+    var nodes_orig = [{'symbol': 'C', 'atomNumber': 6, 'ppm': 140.93935651527744, 'ppm_calculated': 141.006, 'numProtons': 0, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.24985798577776605, 'y': 0.6435781202254907, 'id': 19}, {'symbol': 'C', 'atomNumber': 22, 'ppm': 138.5683944638333, 'ppm_calculated': 137.665, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.7067907111918689, 'y': 0.5037743549823428, 'H1_ppm': [5.221086575381741], 'id': 5}, {'symbol': 'C', 'atomNumber': 23, 'ppm': 129.29893206392973, 'ppm_calculated': 129.623, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.7610723938889555, 'y': 0.4193027411588616, 'H1_ppm': [5.066135723438959], 'id': 4}, {'symbol': 'C', 'atomNumber': 18, 'ppm': 121.28836051495348, 'ppm_calculated': 121.605, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.28814333693416116, 'y': 0.7496297486360883, 'H1_ppm': [5.349310791671152], 'id': 18}, {'symbol': 'C', 'atomNumber': 8, 'ppm': 71.35303649333981, 'ppm_calculated': 71.396, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.13731854718130354, 'y': 0.5397584310546043, 'H1_ppm': [3.4113029367751673], 'id': 23}, {'symbol': 'C', 'atomNumber': 2, 'ppm': 56.79507554180227, 'ppm_calculated': 55.987, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.47260368112629225, 'y': 0.6368684966966276, 'H1_ppm': [0.9327418676883226], 'id': 11}, {'symbol': 'C', 'atomNumber': 11, 'ppm': 55.91249425693455, 'ppm_calculated': 55.527, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5814753762711059, 'y': 0.5521269025939787, 'H1_ppm': [1.1137826774949187], 'id': 8}, {'symbol': 'C', 'atomNumber': 4, 'ppm': 51.357045495217186, 'ppm_calculated': 50.28, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.3600706852410371, 'y': 0.5330534094623179, 'H1_ppm': [1.6031607399938266], 'id': 15}, {'symbol': 'C', 'atomNumber': 24, 'ppm': 50.21410864286535, 'ppm_calculated': 49.448, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.8320986830141089, 'y': 0.45541567145527134, 'H1_ppm': [0.9133035269797892], 'id': 3}, {'symbol': 'C', 'atomNumber': 7, 'ppm': 42.577096517938855, 'ppm_calculated': 41.903, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.17561034104890605, 'y': 0.6458161953806374, 'H1_ppm': [2.2814122817490703, 2.2396167499248385], 'id': 24}, {'symbol': 'C', 'atomNumber': 1, 'ppm': 42.124948522963884, 'ppm_calculated': 42.674, 'numProtons': 0, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5085668950860726, 'y': 0.5285803271097425, 'id': 12}, {'symbol': 'C', 'atomNumber': 21, 'ppm': 40.63787076107022, 'ppm_calculated': 39.388, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.6357570589681927, 'y': 0.46765528877049745, 'H1_ppm': [2.074021794722506], 'id': 6}, {'symbol': 'C', 'atomNumber': 14, 'ppm': 39.7243093799339, 'ppm_calculated': 38.019, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.4702824643169928, 'y': 0.422528698699145, 'H1_ppm': [1.9682103217497697, 1.1259509968867831], 'id': 13}, {'symbol': 'C', 'atomNumber': 10, 'ppm': 37.34286849148181, 'ppm_calculated': 37.249, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.24753032625725924, 'y': 0.42923372029143136, 'H1_ppm': [1.6904552051963346, 0.9836345657384518], 'id': 21}, {'symbol': 'C', 'atomNumber': 5, 'ppm': 36.46683138564387, 'ppm_calculated': 36.511, 'numProtons': 0, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.28582212012486174, 'y': 0.5352899506386056, 'id': 20}, {'symbol': 'C', 'atomNumber': 25, 'ppm': 32.00962752448829, 'ppm_calculated': 32.173, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.8863803657111956, 'y': 0.3709440576317902, 'H1_ppm': [1.5601054181733567], 'id': 28}, {'symbol': 'C', 'atomNumber': 17, 'ppm': 31.959942805278732, 'ppm_calculated': 32.002, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.36239190205033656, 'y': 0.7473932074598005, 'H1_ppm': [1.9229906997935537, 1.518943723908745], 'id': 17}, {'symbol': 'C', 'atomNumber': 3, 'ppm': 31.890300588744495, 'ppm_calculated': 31.791, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.3983551160101168, 'y': 0.6391050378729153, 'H1_ppm': [1.4183353237468348], 'id': 16}, {'symbol': 'C', 'atomNumber': 9, 'ppm': 31.790111401435205, 'ppm_calculated': 31.597, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.17328176114108385, 'y': 0.43147026146771905, 'H1_ppm': [1.7164725440866233, 1.441079502349372], 'id': 22}, {'symbol': 'C', 'atomNumber': 12, 'ppm': 29.10171641293331, 'ppm_calculated': 27.414, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5905724844959733, 'y': 0.6749648616576052, 'H1_ppm': [1.7846522927926003, 1.332320003581263], 'id': 9}, {'symbol': 'C', 'atomNumber': 13, 'ppm': 25.538870366343435, 'ppm_calculated': 25.92, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5232866494203808, 'y': 0.7273379678584387, 'H1_ppm': [1.4574814828899185, 1.2298562018674397], 'id': 10}, {'symbol': 'C', 'atomNumber': 28, 'ppm': 24.320239707912968, 'ppm_calculated': 25.222, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.8488543340899599, 'y': 0.5759956136385855, 'H1_ppm': [1.5297897986563191, 1.0336673953326638], 'id': 2}, {'symbol': 'C', 'atomNumber': 30, 'ppm': 21.228043456017147, 'ppm_calculated': 20.037, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.9574140179348718, 'y': 0.4070631238436356, 'H1_ppm': [1.113586961789721], 'id': 30}, {'symbol': 'C', 'atomNumber': 15, 'ppm': 21.08802288369934, 'ppm_calculated': 21.132, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.39603389920081744, 'y': 0.4247652398754327, 'H1_ppm': [1.433893153060124, 1.398417680114446], 'id': 14}, {'symbol': 'C', 'atomNumber': 27, 'ppm': 21.063632203360108, 'ppm_calculated': 20.364, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.619007850603549, 'y': 0.347081482502619, 'H1_ppm': [0.9503512473011835], 'id': 7}, {'symbol': 'C', 'atomNumber': 26, 'ppm': 19.203616987860983, 'ppm_calculated': 20.037, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.8696320777338674, 'y': 0.2503702513639117, 'H1_ppm': [0.9525490353787543], 'id': 29}, {'symbol': 'C', 'atomNumber': 19, 'ppm': 18.941643013847024, 'ppm_calculated': 18.519, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.32178533408464205, 'y': 0.4270017810517205, 'H1_ppm': [0.8992027247686676], 'id': 26}, {'symbol': 'C', 'atomNumber': 16, 'ppm': 12.263879133764899, 'ppm_calculated': 14.168, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5445301090458529, 'y': 0.4202921575228573, 'H1_ppm': [0.9329687415967736], 'id': 27}, {'symbol': 'C', 'atomNumber': 29, 'ppm': 11.910777331991033, 'ppm_calculated': 12.194, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.9198815436024287, 'y': 0.6121100779138541, 'H1_ppm': [0.6728305527790548], 'id': 1}];
+    // nodes_now
+    var nodes_now = [{'symbol': 'C', 'atomNumber': 6, 'ppm': 140.93935651527744, 'ppm_calculated': 141.006, 'numProtons': 0, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.24985798577776605, 'y': 0.6435781202254907, 'id': 19}, {'symbol': 'C', 'atomNumber': 22, 'ppm': 138.5683944638333, 'ppm_calculated': 137.665, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.7067907111918689, 'y': 0.5037743549823428, 'H1_ppm': [5.221086575381741], 'id': 5}, {'symbol': 'C', 'atomNumber': 23, 'ppm': 129.29893206392973, 'ppm_calculated': 129.623, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.7610723938889555, 'y': 0.4193027411588616, 'H1_ppm': [5.066135723438959], 'id': 4}, {'symbol': 'C', 'atomNumber': 18, 'ppm': 121.28836051495348, 'ppm_calculated': 121.605, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.28814333693416116, 'y': 0.7496297486360883, 'H1_ppm': [5.349310791671152], 'id': 18}, {'symbol': 'C', 'atomNumber': 8, 'ppm': 71.35303649333981, 'ppm_calculated': 71.396, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.13731854718130354, 'y': 0.5397584310546043, 'H1_ppm': [3.4113029367751673], 'id': 23}, {'symbol': 'C', 'atomNumber': 2, 'ppm': 56.79507554180227, 'ppm_calculated': 55.987, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.47260368112629225, 'y': 0.6368684966966276, 'H1_ppm': [0.9327418676883226], 'id': 11}, {'symbol': 'C', 'atomNumber': 11, 'ppm': 55.91249425693455, 'ppm_calculated': 55.527, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5814753762711059, 'y': 0.5521269025939787, 'H1_ppm': [1.1137826774949187], 'id': 8}, {'symbol': 'C', 'atomNumber': 4, 'ppm': 51.357045495217186, 'ppm_calculated': 50.28, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.3600706852410371, 'y': 0.5330534094623179, 'H1_ppm': [1.6031607399938266], 'id': 15}, {'symbol': 'C', 'atomNumber': 24, 'ppm': 50.21410864286535, 'ppm_calculated': 49.448, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.8320986830141089, 'y': 0.45541567145527134, 'H1_ppm': [0.9133035269797892], 'id': 3}, {'symbol': 'C', 'atomNumber': 7, 'ppm': 42.577096517938855, 'ppm_calculated': 41.903, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.17561034104890605, 'y': 0.6458161953806374, 'H1_ppm': [2.2814122817490703, 2.2396167499248385], 'id': 24}, {'symbol': 'C', 'atomNumber': 1, 'ppm': 42.124948522963884, 'ppm_calculated': 42.674, 'numProtons': 0, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5085668950860726, 'y': 0.5285803271097425, 'id': 12}, {'symbol': 'C', 'atomNumber': 21, 'ppm': 40.63787076107022, 'ppm_calculated': 39.388, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.6357570589681927, 'y': 0.46765528877049745, 'H1_ppm': [2.074021794722506], 'id': 6}, {'symbol': 'C', 'atomNumber': 14, 'ppm': 39.7243093799339, 'ppm_calculated': 38.019, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.4702824643169928, 'y': 0.422528698699145, 'H1_ppm': [1.9682103217497697, 1.1259509968867831], 'id': 13}, {'symbol': 'C', 'atomNumber': 10, 'ppm': 37.34286849148181, 'ppm_calculated': 37.249, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.24753032625725924, 'y': 0.42923372029143136, 'H1_ppm': [1.6904552051963346, 0.9836345657384518], 'id': 21}, {'symbol': 'C', 'atomNumber': 5, 'ppm': 36.46683138564387, 'ppm_calculated': 36.511, 'numProtons': 0, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.28582212012486174, 'y': 0.5352899506386056, 'id': 20}, {'symbol': 'C', 'atomNumber': 25, 'ppm': 32.00962752448829, 'ppm_calculated': 32.173, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.8863803657111956, 'y': 0.3709440576317902, 'H1_ppm': [1.5601054181733567], 'id': 28}, {'symbol': 'C', 'atomNumber': 17, 'ppm': 31.959942805278732, 'ppm_calculated': 32.002, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.36239190205033656, 'y': 0.7473932074598005, 'H1_ppm': [1.9229906997935537, 1.518943723908745], 'id': 17}, {'symbol': 'C', 'atomNumber': 3, 'ppm': 31.890300588744495, 'ppm_calculated': 31.791, 'numProtons': 1, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.3983551160101168, 'y': 0.6391050378729153, 'H1_ppm': [1.4183353237468348], 'id': 16}, {'symbol': 'C', 'atomNumber': 9, 'ppm': 31.790111401435205, 'ppm_calculated': 31.597, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.17328176114108385, 'y': 0.43147026146771905, 'H1_ppm': [1.7164725440866233, 1.441079502349372], 'id': 22}, {'symbol': 'C', 'atomNumber': 12, 'ppm': 29.10171641293331, 'ppm_calculated': 27.414, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5905724844959733, 'y': 0.6749648616576052, 'H1_ppm': [1.7846522927926003, 1.332320003581263], 'id': 9}, {'symbol': 'C', 'atomNumber': 13, 'ppm': 25.538870366343435, 'ppm_calculated': 25.92, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5232866494203808, 'y': 0.7273379678584387, 'H1_ppm': [1.4574814828899185, 1.2298562018674397], 'id': 10}, {'symbol': 'C', 'atomNumber': 28, 'ppm': 24.320239707912968, 'ppm_calculated': 25.222, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.8488543340899599, 'y': 0.5759956136385855, 'H1_ppm': [1.5297897986563191, 1.0336673953326638], 'id': 2}, {'symbol': 'C', 'atomNumber': 30, 'ppm': 21.228043456017147, 'ppm_calculated': 20.037, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.9574140179348718, 'y': 0.4070631238436356, 'H1_ppm': [1.113586961789721], 'id': 30}, {'symbol': 'C', 'atomNumber': 15, 'ppm': 21.08802288369934, 'ppm_calculated': 21.132, 'numProtons': 2, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.39603389920081744, 'y': 0.4247652398754327, 'H1_ppm': [1.433893153060124, 1.398417680114446], 'id': 14}, {'symbol': 'C', 'atomNumber': 27, 'ppm': 21.063632203360108, 'ppm_calculated': 20.364, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.619007850603549, 'y': 0.347081482502619, 'H1_ppm': [0.9503512473011835], 'id': 7}, {'symbol': 'C', 'atomNumber': 26, 'ppm': 19.203616987860983, 'ppm_calculated': 20.037, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.8696320777338674, 'y': 0.2503702513639117, 'H1_ppm': [0.9525490353787543], 'id': 29}, {'symbol': 'C', 'atomNumber': 19, 'ppm': 18.941643013847024, 'ppm_calculated': 18.519, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.32178533408464205, 'y': 0.4270017810517205, 'H1_ppm': [0.8992027247686676], 'id': 26}, {'symbol': 'C', 'atomNumber': 16, 'ppm': 12.263879133764899, 'ppm_calculated': 14.168, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.5445301090458529, 'y': 0.4202921575228573, 'H1_ppm': [0.9329687415967736], 'id': 27}, {'symbol': 'C', 'atomNumber': 29, 'ppm': 11.910777331991033, 'ppm_calculated': 12.194, 'numProtons': 3, 'iupacLabel': '', 'jCouplingVals': '', 'jCouplingClass': '', 'x': 0.9198815436024287, 'y': 0.6121100779138541, 'H1_ppm': [0.6728305527790548], 'id': 1}];
+    // links
+    var graph_edges = [{'weight': 1, 'hmbc': true, 'source': 19, 'target': 24}, {'weight': 1, 'hmbc': true, 'source': 19, 'target': 17}, {'weight': 1, 'hmbc': true, 'source': 19, 'target': 21}, {'cosy': true, 'hmbc': true, 'source': 5, 'target': 4}, {'cosy': true, 'hmbc': true, 'source': 5, 'target': 6}, {'weight': 1, 'hmbc': true, 'source': 5, 'target': 30}, {'weight': 1, 'hmbc': true, 'source': 5, 'target': 15}, {'weight': 1, 'hmbc': true, 'source': 5, 'target': 8}, {'cosy': true, 'hmbc': true, 'source': 4, 'target': 15}, {'weight': 1, 'hmbc': true, 'source': 4, 'target': 28}, {'weight': 1, 'hmbc': true, 'source': 4, 'target': 10}, {'weight': 1, 'hmbc': true, 'source': 4, 'target': 6}, {'weight': 1, 'hmbc': true, 'source': 18, 'target': 24}, {'weight': 1, 'hmbc': true, 'source': 18, 'target': 20}, {'weight': 1, 'hmbc': true, 'source': 18, 'target': 17}, {'cosy': true, 'hmbc': true, 'source': 23, 'target': 24}, {'cosy': true, 'source': 23, 'target': 22}, {'weight': 1, 'hmbc': true, 'source': 23, 'target': 21}, {'cosy': true, 'hmbc': true, 'source': 11, 'target': 16}, {'weight': 1, 'hmbc': true, 'source': 11, 'target': 13}, {'weight': 1, 'hmbc': true, 'source': 11, 'target': 2}, {'weight': 1, 'hmbc': true, 'source': 11, 'target': 9}, {'weight': 1, 'hmbc': true, 'source': 11, 'target': 12}, {'weight': 1, 'hmbc': true, 'source': 11, 'target': 1}, {'weight': 1, 'hmbc': true, 'source': 11, 'target': 8}, {'cosy': true, 'hmbc': true, 'source': 8, 'target': 6}, {'cosy': true, 'hmbc': true, 'source': 8, 'target': 9}, {'weight': 1, 'hmbc': true, 'source': 8, 'target': 2}, {'weight': 1, 'hmbc': true, 'source': 8, 'target': 13}, {'weight': 1, 'hmbc': true, 'source': 8, 'target': 1}, {'cosy': true, 'hmbc': true, 'source': 15, 'target': 10}, {'cosy': true, 'hmbc': true, 'source': 15, 'target': 28}, {'weight': 1, 'hmbc': true, 'source': 15, 'target': 26}, {'weight': 1, 'hmbc': true, 'source': 15, 'target': 27}, {'weight': 1, 'hmbc': true, 'source': 3, 'target': 13}, {'weight': 1, 'hmbc': true, 'source': 3, 'target': 17}, {'weight': 1, 'hmbc': true, 'source': 3, 'target': 14}, {'weight': 1, 'hmbc': true, 'source': 3, 'target': 20}, {'weight': 1, 'hmbc': true, 'source': 3, 'target': 29}, {'weight': 1, 'hmbc': true, 'source': 3, 'target': 21}, {'weight': 1, 'hmbc': true, 'source': 24, 'target': 20}, {'weight': 1, 'hmbc': true, 'source': 24, 'target': 22}, {'weight': 1, 'hmbc': true, 'source': 12, 'target': 13}, {'weight': 1, 'hmbc': true, 'source': 12, 'target': 9}, {'weight': 1, 'hmbc': true, 'source': 12, 'target': 2}, {'weight': 1, 'hmbc': true, 'source': 12, 'target': 16}, {'weight': 1, 'hmbc': true, 'source': 12, 'target': 30}, {'weight': 1, 'hmbc': true, 'source': 12, 'target': 1}, {'cosy': true, 'source': 6, 'target': 30}, {'weight': 1, 'hmbc': true, 'source': 6, 'target': 9}, {'cosy': true, 'source': 13, 'target': 14}, {'weight': 1, 'hmbc': true, 'source': 13, 'target': 1}, {'cosy': true, 'hmbc': true, 'source': 21, 'target': 29}, {'weight': 1, 'hmbc': true, 'source': 21, 'target': 22}, {'weight': 1, 'hmbc': true, 'source': 21, 'target': 20}, {'weight': 1, 'hmbc': true, 'source': 20, 'target': 16}, {'cosy': true, 'hmbc': true, 'source': 28, 'target': 26}, {'cosy': true, 'source': 28, 'target': 7}, {'weight': 1, 'hmbc': true, 'source': 28, 'target': 10}, {'weight': 1, 'hmbc': true, 'source': 16, 'target': 2}, {'cosy': true, 'hmbc': true, 'source': 9, 'target': 2}, {'cosy': true, 'hmbc': true, 'source': 10, 'target': 27}, {'weight': 1, 'hmbc': true, 'source': 7, 'target': 26}];
+    // molgraph
+    var molgraph = {'directed': false, 'multigraph': false, 'graph': {}, 
+                    'nodes': [{'symbol': 'C', 'atom_number': 6, 'numProtons': 3, 'id0': 0, 'ppm': 11.910777331991033, 'atomNumber': 29, 'id': 0}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 2, 'id0': 1, 'ppm': 24.320239707912968, 'atomNumber': 28, 'id': 1}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 1, 'id0': 2, 'ppm': 50.21410864286535, 'atomNumber': 24, 'id': 2}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 1, 'id0': 3, 'ppm': 129.29893206392973, 'atomNumber': 23, 'id': 3}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 1, 'id0': 4, 'ppm': 138.5683944638333, 'atomNumber': 22, 'id': 4},
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 1, 'id0': 5, 'ppm': 40.63787076107022, 'atomNumber': 21, 'id': 5}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 3, 'id0': 6, 'ppm': 21.063632203360108, 'atomNumber': 27, 'id': 6}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 1, 'id0': 7, 'ppm': 55.91249425693455, 'atomNumber': 11, 'id': 7}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 2, 'id0': 8, 'ppm': 29.10171641293331, 'atomNumber': 12, 'id': 8}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 2, 'id0': 9, 'ppm': 25.538870366343435, 'atomNumber': 13, 'id': 9}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 1, 'id0': 10, 'ppm': 56.79507554180227, 'atomNumber': 2, 'id': 10}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 0, 'id0': 11, 'ppm': 42.124948522963884, 'atomNumber': 1, 'id': 11}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 2, 'id0': 12, 'ppm': 39.7243093799339, 'atomNumber': 14, 'id': 12}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 2, 'id0': 13, 'ppm': 21.08802288369934, 'atomNumber': 15, 'id': 13}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 1, 'id0': 14, 'ppm': 51.357045495217186, 'atomNumber': 4, 'id': 14}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 1, 'id0': 15, 'ppm': 31.890300588744495, 'atomNumber': 3, 'id': 15}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 2, 'id0': 16, 'ppm': 31.959942805278732, 'atomNumber': 17, 'id': 16}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 1, 'id0': 17, 'ppm': 121.28836051495348, 'atomNumber': 18, 'id': 17}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 0, 'id0': 18, 'ppm': 140.93935651527744, 'atomNumber': 6, 'id': 18}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 0, 'id0': 19, 'ppm': 36.46683138564387, 'atomNumber': 5, 'id': 19}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 2, 'id0': 20, 'ppm': 37.34286849148181, 'atomNumber': 10, 'id': 20}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 2, 'id0': 21, 'ppm': 31.790111401435205, 'atomNumber': 9, 'id': 21}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 1, 'id0': 22, 'ppm': 71.35303649333981, 'atomNumber': 8, 'id': 22}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 2, 'id0': 23, 'ppm': 42.577096517938855, 'atomNumber': 7, 'id': 23}, 
+                                {'symbol': 'O', 'atom_number': 8, 'numProtons': 1, 'id0': 24, 'ppm': 10000, 'id': 24}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 3, 'id0': 25, 'ppm': 18.941643013847024, 'atomNumber': 19, 'id': 25}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 3, 'id0': 26, 'ppm': 12.263879133764899, 'atomNumber': 16, 'id': 26}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 1, 'id0': 27, 'ppm': 32.00962752448829, 'atomNumber': 25, 'id': 27}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 3, 'id0': 28, 'ppm': 19.203616987860983, 'atomNumber': 26, 'id': 28}, 
+                                {'symbol': 'C', 'atom_number': 6, 'numProtons': 3, 'id0': 29, 'ppm': 21.228043456017147, 'atomNumber': 30, 'id': 29}], 
+                    'links': [{'source': 0, 'target': 1}, {'source': 1, 'target': 2}, {'source': 2, 'target': 3}, {'source': 2, 'target': 27}, 
+                                {'source': 3, 'target': 4}, {'source': 4, 'target': 5}, {'source': 5, 'target': 6}, {'source': 5, 'target': 7}, 
+                                {'source': 7, 'target': 8}, {'source': 7, 'target': 11}, {'source': 8, 'target': 9}, {'source': 9, 'target': 10}, 
+                                {'source': 10, 'target': 11}, {'source': 10, 'target': 15}, {'source': 11, 'target': 12}, {'source': 11, 'target': 26}, 
+                                {'source': 12, 'target': 13}, {'source': 13, 'target': 14}, {'source': 14, 'target': 15}, {'source': 14, 'target': 19}, 
+                                {'source': 15, 'target': 16}, {'source': 16, 'target': 17}, {'source': 17, 'target': 18}, {'source': 18, 'target': 19}, 
+                                {'source': 18, 'target': 23}, {'source': 19, 'target': 20}, {'source': 19, 'target': 25}, {'source': 20, 'target': 21}, 
+                                {'source': 21, 'target': 22}, {'source': 22, 'target': 23}, {'source': 22, 'target': 24}, {'source': 27, 'target': 28}, 
+                                {'source': 27, 'target': 29}]};
+    // shortest_paths
+    var shortest_paths = {"0": {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 6, "8": 7, "9": 8, "10": 8, "11": 7, "12": 8, "13": 9, "14": 10, "15": 9, "16": 10, "17": 11, "18": 12, "19": 11, "20": 12, "21": 13, "22": 14, "23": 13, "24": 15, "25": 12, "26": 8, "27": 3, "28": 4, "29": 4}, "1": {"0": 1, "1": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 5, "7": 5, "8": 6, "9": 7, "10": 7, "11": 6, "12": 7, "13": 8, "14": 9, "15": 8, "16": 9, "17": 10, "18": 11, "19": 10, "20": 11, "21": 12, "22": 13, "23": 12, "24": 14, "25": 11, "26": 7, "27": 2, "28": 3, "29": 3}, "2": {"0": 2, "1": 1, "2": 0, "3": 1, "4": 2, "5": 3, "6": 4, "7": 4, "8": 5, "9": 6, "10": 6, "11": 5, "12": 6, "13": 7, "14": 8, "15": 7, "16": 8, "17": 9, "18": 10, "19": 9, "20": 10, "21": 11, "22": 12, "23": 11, "24": 13, "25": 10, "26": 6, "27": 1, "28": 2, "29": 2}, "3": {"0": 3, "1": 2, "2": 1, "3": 0, "4": 1, "5": 2, "6": 3, "7": 3, "8": 4, "9": 5, "10": 5, "11": 4, "12": 5, "13": 6, "14": 7, "15": 6, "16": 7, "17": 8, "18": 9, "19": 8, "20": 9, "21": 10, "22": 11, "23": 10, "24": 12, "25": 9, "26": 5, "27": 2, "28": 3, "29": 3}, "4": {"0": 4, "1": 3, "2": 2, "3": 1, "4": 0, "5": 1, "6": 2, "7": 2, "8": 3, "9": 4, "10": 4, "11": 3, "12": 4, "13": 5, "14": 6, "15": 5, "16": 6, "17": 7, "18": 8, "19": 7, "20": 8, "21": 9, "22": 10, "23": 9, "24": 11, "25": 8, "26": 4, "27": 3, "28": 4, "29": 4}, "5": {"0": 5, "1": 4, "2": 3, "3": 2, "4": 1, "5": 0, "6": 1, "7": 1, "8": 2, "9": 3, "10": 3, "11": 2, "12": 3, "13": 4, "14": 5, "15": 4, "16": 5, "17": 6, "18": 7, "19": 6, "20": 7, "21": 8, "22": 9, "23": 8, "24": 10, "25": 7, "26": 3, "27": 4, "28": 5, "29": 5}, "6": {"0": 6, "1": 5, "2": 4, "3": 3, "4": 2, "5": 1, "6": 0, "7": 2, "8": 3, "9": 4, "10": 4, "11": 3, "12": 4, "13": 5, "14": 6, "15": 5, "16": 6, "17": 7, "18": 8, "19": 7, "20": 8, "21": 9, "22": 10, "23": 9, "24": 11, "25": 8, "26": 4, "27": 5, "28": 6, "29": 6}, "7": {"0": 6, "1": 5, "2": 4, "3": 3, "4": 2, "5": 1, "6": 2, "7": 0, "8": 1, "9": 2, "10": 2, "11": 1, "12": 2, "13": 3, "14": 4, "15": 3, "16": 4, "17": 5, "18": 6, "19": 5, "20": 6, "21": 7, "22": 8, "23": 7, "24": 9, "25": 6, "26": 2, "27": 5, "28": 6, "29": 6}, "8": {"0": 7, "1": 6, "2": 5, "3": 4, "4": 3, "5": 2, "6": 3, "7": 1, "8": 0, "9": 1, "10": 2, "11": 2, "12": 3, "13": 4, "14": 4, "15": 3, "16": 4, "17": 5, "18": 6, "19": 5, "20": 6, "21": 7, "22": 8, "23": 7, "24": 9, "25": 6, "26": 3, "27": 6, "28": 7, "29": 7}, "9": {"0": 8, "1": 7, "2": 6, "3": 5, "4": 4, "5": 3, "6": 4, "7": 2, "8": 1, "9": 0, "10": 1, "11": 2, "12": 3, "13": 4, "14": 3, "15": 2, "16": 3, "17": 4, "18": 5, "19": 4, "20": 5, "21": 6, "22": 7, "23": 6, "24": 8, "25": 5, "26": 3, "27": 7, "28": 8, "29": 8}, "10": {"0": 8, "1": 7, "2": 6, "3": 5, "4": 4, "5": 3, "6": 4, "7": 2, "8": 2, "9": 1, "10": 0, "11": 1, "12": 2, "13": 3, "14": 2, "15": 1, "16": 2, "17": 3, "18": 4, "19": 3, "20": 4, "21": 5, "22": 6, "23": 5, "24": 7, "25": 4, "26": 2, "27": 7, "28": 8, "29": 8}, "11": {"0": 7, "1": 6, "2": 5, "3": 4, "4": 3, "5": 2, "6": 3, "7": 1, "8": 2, "9": 2, "10": 1, "11": 0, "12": 1, "13": 2, "14": 3, "15": 2, "16": 3, "17": 4, "18": 5, "19": 4, "20": 5, "21": 6, "22": 7, "23": 6, "24": 8, "25": 5, "26": 1, "27": 6, "28": 7, "29": 7}, "12": {"0": 8, "1": 7, "2": 6, "3": 5, "4": 4, "5": 3, "6": 4, "7": 2, "8": 3, "9": 3, "10": 2, "11": 1, "12": 0, "13": 1, "14": 2, "15": 3, "16": 4, "17": 5, "18": 4, "19": 3, "20": 4, "21": 5, "22": 6, "23": 5, "24": 7, "25": 4, "26": 2, "27": 7, "28": 8, "29": 8}, "13": {"0": 9, "1": 8, "2": 7, "3": 6, "4": 5, "5": 4, "6": 5, "7": 3, "8": 4, "9": 4, "10": 3, "11": 2, "12": 1, "13": 0, "14": 1, "15": 2, "16": 3, "17": 4, "18": 3, "19": 2, "20": 3, "21": 4, "22": 5, "23": 4, "24": 6, "25": 3, "26": 3, "27": 8, "28": 9, "29": 9}, "14": {"0": 10, "1": 9, "2": 8, "3": 7, "4": 6, "5": 5, "6": 6, "7": 4, "8": 4, "9": 3, "10": 2, "11": 3, "12": 2, "13": 1, "14": 0, "15": 1, "16": 2, "17": 3, "18": 2, "19": 1, "20": 2, "21": 3, "22": 4, "23": 3, "24": 5, "25": 2, "26": 4, "27": 9, "28": 10, "29": 10}, "15": {"0": 9, "1": 8, "2": 7, "3": 6, "4": 5, "5": 4, "6": 5, "7": 3, "8": 3, "9": 2, "10": 1, "11": 2, "12": 3, "13": 2, "14": 1, "15": 0, "16": 1, "17": 2, "18": 3, "19": 2, "20": 3, "21": 4, "22": 5, "23": 4, "24": 6, "25": 3, "26": 3, "27": 8, "28": 9, "29": 9}, "16": {"0": 10, "1": 9, "2": 8, "3": 7, "4": 6, "5": 5, "6": 6, "7": 4, "8": 4, "9": 3, "10": 2, "11": 3, "12": 4, "13": 3, "14": 2, "15": 1, "16": 0, "17": 1, "18": 2, "19": 3, "20": 4, "21": 5, "22": 4, "23": 3, "24": 5, "25": 4, "26": 4, "27": 9, "28": 10, "29": 10}, "17": {"0": 11, "1": 10, "2": 9, "3": 8, "4": 7, "5": 6, "6": 7, "7": 5, "8": 5, "9": 4, "10": 3, "11": 4, "12": 5, "13": 4, "14": 3, "15": 2, "16": 1, "17": 0, "18": 1, "19": 2, "20": 3, "21": 4, "22": 3, "23": 2, "24": 4, "25": 3, "26": 5, "27": 10, "28": 11, "29": 11}, "18": {"0": 12, "1": 11, "2": 10, "3": 9, "4": 8, "5": 7, "6": 8, "7": 6, "8": 6, "9": 5, "10": 4, "11": 5, "12": 4, "13": 3, "14": 2, "15": 3, "16": 2, "17": 1, "18": 0, "19": 1, "20": 2, "21": 3, "22": 2, "23": 1, "24": 3, "25": 2, "26": 6, "27": 11, "28": 12, "29": 12}, "19": {"0": 11, "1": 10, "2": 9, "3": 8, "4": 7, "5": 6, "6": 7, "7": 5, "8": 5, "9": 4, "10": 3, "11": 4, "12": 3, "13": 2, "14": 1, "15": 2, "16": 3, "17": 2, "18": 1, "19": 0, "20": 1, "21": 2, "22": 3, "23": 2, "24": 4, "25": 1, "26": 5, "27": 10, "28": 11, "29": 11}, "20": {"0": 12, "1": 11, "2": 10, "3": 9, "4": 8, "5": 7, "6": 8, "7": 6, "8": 6, "9": 5, "10": 4, "11": 5, "12": 4, "13": 3, "14": 2, "15": 3, "16": 4, "17": 3, "18": 2, "19": 1, "20": 0, "21": 1, "22": 2, "23": 3, "24": 3, "25": 2, "26": 6, "27": 11, "28": 12, "29": 12}, "21": {"0": 13, "1": 12, "2": 11, "3": 10, "4": 9, "5": 8, "6": 9, "7": 7, "8": 7, "9": 6, "10": 5, "11": 6, "12": 5, "13": 4, "14": 3, "15": 4, "16": 5, "17": 4, "18": 3, "19": 2, "20": 1, "21": 0, "22": 1, "23": 2, "24": 2, "25": 3, "26": 7, "27": 12, "28": 13, "29": 13}, "22": {"0": 14, "1": 13, "2": 12, "3": 11, "4": 10, "5": 9, "6": 10, "7": 8, "8": 8, "9": 7, "10": 6, "11": 7, "12": 6, "13": 5, "14": 4, "15": 5, "16": 4, "17": 3, "18": 2, "19": 3, "20": 2, "21": 1, "22": 0, "23": 1, "24": 1, "25": 4, "26": 8, "27": 13, "28": 14, "29": 14}, "23": {"0": 13, "1": 12, "2": 11, "3": 10, "4": 9, "5": 8, "6": 9, "7": 7, "8": 7, "9": 6, "10": 5, "11": 6, "12": 5, "13": 4, "14": 3, "15": 4, "16": 3, "17": 2, "18": 1, "19": 2, "20": 3, "21": 2, "22": 1, "23": 0, "24": 2, "25": 3, "26": 7, "27": 12, "28": 13, "29": 13}, "24": {"0": 15, "1": 14, "2": 13, "3": 12, "4": 11, "5": 10, "6": 11, "7": 9, "8": 9, "9": 8, "10": 7, "11": 8, "12": 7, "13": 6, "14": 5, "15": 6, "16": 5, "17": 4, "18": 3, "19": 4, "20": 3, "21": 2, "22": 1, "23": 2, "24": 0, "25": 5, "26": 9, "27": 14, "28": 15, "29": 15}, "25": {"0": 12, "1": 11, "2": 10, "3": 9, "4": 8, "5": 7, "6": 8, "7": 6, "8": 6, "9": 5, "10": 4, "11": 5, "12": 4, "13": 3, "14": 2, "15": 3, "16": 4, "17": 3, "18": 2, "19": 1, "20": 2, "21": 3, "22": 4, "23": 3, "24": 5, "25": 0, "26": 6, "27": 11, "28": 12, "29": 12}, "26": {"0": 8, "1": 7, "2": 6, "3": 5, "4": 4, "5": 3, "6": 4, "7": 2, "8": 3, "9": 3, "10": 2, "11": 1, "12": 2, "13": 3, "14": 4, "15": 3, "16": 4, "17": 5, "18": 6, "19": 5, "20": 6, "21": 7, "22": 8, "23": 7, "24": 9, "25": 6, "26": 0, "27": 7, "28": 8, "29": 8}, "27": {"0": 3, "1": 2, "2": 1, "3": 2, "4": 3, "5": 4, "6": 5, "7": 5, "8": 6, "9": 7, "10": 7, "11": 6, "12": 7, "13": 8, "14": 9, "15": 8, "16": 9, "17": 10, "18": 11, "19": 10, "20": 11, "21": 12, "22": 13, "23": 12, "24": 14, "25": 11, "26": 7, "27": 0, "28": 1, "29": 1}, "28": {"0": 4, "1": 3, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 6, "8": 7, "9": 8, "10": 8, "11": 7, "12": 8, "13": 9, "14": 10, "15": 9, "16": 10, "17": 11, "18": 12, "19": 11, "20": 12, "21": 13, "22": 14, "23": 13, "24": 15, "25": 12, "26": 8, "27": 1, "28": 0, "29": 2}, "29": {"0": 4, "1": 3, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 6, "8": 7, "9": 8, "10": 8, "11": 7, "12": 8, "13": 9, "14": 10, "15": 9, "16": 10, "17": 11, "18": 12, "19": 11, "20": 12, "21": 13, "22": 14, "23": 13, "24": 15, "25": 12, "26": 8, "27": 1, "28": 2, "29": 0}};
+    // best_results
+    var best_results = {'best_weight': 8477, 'best_mae': 0.6156299444816151, 'best_lae': 1.9041208662351004, 'best_lae_atomNumber': 16};
+
+    var node_mapping = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12, 13: 13, 14: 14, 15: 15, 16: 16, 17: 17, 18: 18, 19: 19, 20: 20, 21: 21, 22: 22, 23: 23, 24: 24, 26: 26, 27: 27, 28: 28, 29: 29, 30: 30}
+
+
+
+    // build a weight line plot for the current weight during the optimization
+
+        // Set dimensions
+        const plot_width = 1000, plot_height = 200, margin = { top: 20, right: 100, bottom: 20, left: 100 };
+        // const svg = d3.select("svg").attr("width", width).attr("height", height);
+        const plot_svg = d3.select("#progress_plot").attr("width", plot_width).attr("height", plot_height);
+
+        // Graph area
+        const graphWidth = plot_width - margin.left - margin.right;
+        const graphHeight = plot_height - margin.top - margin.bottom;
+        const plot_g = plot_svg.append("g").attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+        // X scale (time)
+        const plot_xScale = d3.scaleLinear().domain([0, 6000]).range([0, graphWidth]);
+
+        // Y scale for weight
+        const plot_yScaleWeight = d3.scaleLinear().domain([0, 401]).range([graphHeight, 0]);
+
+        // Y scale for temperature (separate axis)
+        const plot_yScaleTemp = d3.scaleLinear().domain([0, 101]).range([graphHeight, 0]);
+
+        // Create axes
+        const plot_xAxis = d3.axisBottom(plot_xScale);
+        const plot_yAxisLeft = d3.axisLeft(plot_yScaleWeight);
+        const plot_yAxisRight = d3.axisRight(plot_yScaleTemp);
+
+        // Add axes
+        plot_g.append("g").attr("class", "x-axis").attr("transform", `translate(0, ${graphHeight})`).call(plot_xAxis);
+        plot_g.append("g").attr("class", "y-axis-left").call(plot_yAxisLeft);
+                // add label to "weight" to the left y axis
+        plot_g.append("text")
+            .attr("class", "y-axis-label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -60)
+            .attr("x", -graphHeight / 2)
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Weight");
+        plot_g.append("g").attr("class", "y-axis-right").attr("transform", `translate(${graphWidth},0)`).call(plot_yAxisRight);
+
+        // add label to "temperature" to the right y axis
+        plot_g.append("text")
+            .attr("class", "y-axis-label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", +graphWidth + 40)
+            .attr("x", -graphHeight / 2)
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Temperature");
+
+
+
+        // Line generators
+        const lineCurrentWeight = d3.line().x(d => plot_xScale(d.iteration)).y(d => plot_yScaleWeight(d.current_weight));
+        const lineBestWeight = d3.line().x(d => plot_xScale(d.iteration)).y(d => plot_yScaleWeight(d.best_weight));
+        const lineTemp = d3.line().x(d => plot_xScale(d.iteration)).y(d => plot_yScaleTemp(d.current_temp));
+
+        // Paths for lines
+        const pathCurrentWeight = plot_g.append("path").attr("stroke", "blue").attr("fill", "none").attr("stroke-width", 2);
+        const pathBestWeight = plot_g.append("path").attr("stroke", "green").attr("fill", "none").attr("stroke-width", 2);
+        const pathTemp = plot_g.append("path").attr("stroke", "red").attr("fill", "none").attr("stroke-width", 2).attr("stroke-dasharray", "5,5");
+
+        // Add a legend for the 3 lines in the top right corner
+        const legend = plot_g.append("g").attr("class", "legend").attr("transform", `translate(${graphWidth - 100}, 10)`);
+        legend.append("text").attr("x", 15).attr("y", 10).text("Current Weight").attr("font-size", "12px").attr("fill", "blue");
+        legend.append("text").attr("x", 15).attr("y", 25).text("Best Weight").attr("font-size", "12px").attr("fill", "green");
+        legend.append("text").attr("x", 15).attr("y", 40).text("Temperature").attr("font-size", "12px").attr("fill", "red");
+
+
+
+    // Select the SVG element and add an id to it
+    // d3.select("svg").attr("id", "svg-image");
+        
+    // Select the first <g> element and add an id to it
+    d3.select("#svg-image").select("g").attr("id", "molimage")
+
+    const svgElement = document.querySelector('svg.center');
+
+    // Update the width and height attributes
+    svgElement.setAttribute('width', '1000');
+    svgElement.setAttribute('height', '600');
+
+    // Update the viewBox attribute
+    svgElement.setAttribute('viewBox', '0 0 1000 600');
+
+        // smiles string
+        const smilesString = "CC(C)Cc1ccc(C(C)C(=O)O)cc1";
+    // molfile
+
+    // working directory
+    // const workingDirectory = `/Users/vsmw51/Library/CloudStorage/Dropbox/Mac/Downloads/4Eric/Ibuprofen`;
+    // working filename
+    // const workingFilename = `Ibuprofen`;
+    // data from
+    const dataFrom = `nmrshiftdb2`;
+    // title
+    // const title = `dummy_title`;
+    
+
+        // node offset
+    let node_offset = 0;
+    if(dataFrom == 'mnova'){
+        node_offset = 1;
+    }
+
+    // Define scale functions for x and y coordinates
+    const xScale = d3.scaleLinear().domain([0, 1]).range([0, 1000]);
+    const yScale = d3.scaleLinear().domain([0, 1]).range([0, 600]);
+
+    // define colour blind friendly colours with 50% transparency
+    const orange = 'rgba(255, 165, 0, 1)';
+    const blue = 'rgba(173, 216, 230, 1)';
+    const green = 'rgba(152, 251, 152, 1)';
+    const yellow = 'rgba(255, 255, 0, 1)';
+    const purple = 'rgba(128, 0, 128, 1)';
+    const cyan = 'rgba(0, 255, 255, 1)';
+    const grey = 'rgba(128, 128, 128, 1)';
+    const pink = 'rgba(255, 192, 203, 1)';
+
+    const black = 'rgba(0, 0, 0, 1)';
+    const white = 'rgba(255, 255, 255, 1)';
+
+    // assign colours to parts of the molecule
+    const CH3 = cyan;
+    const CH2 = yellow;
+    const CH = green;
+    const C = orange;
+
+    const cosyEdgeColor = blue;
+    const cosyEdgeHoverOpacity = 0.0;
+    const hmbcEdgeColor = pink;
+
+    const nodeHoverColor = "lightgrey";
+    const nodeHoverOpacity = 0.4;
+    const textHoverOpacity = 0;
+
+    // define node dimensions
+    const nodeRadius = 22;
+    const nodeRadiusSmall = 15;
+    const nodeRadiusLarge = 26;
+
+    // define edge widths
+    const cosyEdgeWidth = 8;
+    const hmbcEdgeWidth = 4;
+    const noesyEdgeWidth = 8;
+
+    // define font size
+    const fontSizeStr = "12px";
+    const fontSizeInt = 12;
+
+    const textOffsetInt = 8;
+
+    // Define color scale for nodes based on numProtons
+    const colorScale = d3.scaleOrdinal()
+      .domain([0, 1, 2, 3])
+      .range([C, CH, CH2, CH3]); // Blue, Orange, Green, Red
+
+    // Set initial rotation angle
+    let rotation = 0;
+
+    // Select the SVG element
+
+    // Initial transformation
+    const initialTransform = d3.zoomIdentity.translate(0, 0);
+
+    // Track the current transform
+    let currentTransform = initialTransform;
+
+    // Append a group element to hold the content
+    const svg = d3.select("#svg-image").attr("transform", initialTransform);
+
+    // const arrow = d3.select("#arrow");
+    const molimage = d3.select("#molimage");
+
+    var mapping = node_mapping;
+
+        // Set the visible property of the catoms array to false
+    // loop through the nodes
+    catoms.forEach(node => {
+        node.visible = false;
+    });
+
+    var nodes = graph_nodes;
+    var links = graph_edges;
+
+    // Set the visible property of the catoms array to false
+    // loop through the nodes
+    nodes.forEach(node => {
+        // find the id of the node in the catoms array set  visible property to the catom object to true
+        const catom = catoms.find(catom => catom.id === node.id);
+        if (catom) {
+            catom.visible = true;
+            catom.ppm =  node.ppm;
+            catom.iupacLabel = node.iupacLabel;
+            catom.jCouplingVals = node.jCouplingVals;
+            catom.jCouplingClass = node.jCouplingClass;
+            catom.H1_ppm = node.H1_ppm;
+        }
+    })
+
+    var catoms_orig = JSON.parse(JSON.stringify(catoms));
+
+    // Set initial positions of nodes and links
+    nodes.forEach(node => {
+        node.x = xScale(node.x);
+        node.y = yScale(node.y);
+    });
+
+    nodes_orig.forEach(node => {
+        node.x = xScale(node.x);
+        node.y = yScale(node.y);
+    });
+
+    catoms.forEach(node => {
+        node.x = xScale(node.x);
+        node.y = yScale(node.y);
+    });
+
+    catoms_orig.forEach(node => {
+        node.x = xScale(node.x);
+        node.y = yScale(node.y);
+    });
+
+    nodes = JSON.parse(JSON.stringify(catoms.filter(node => node.visible)));
+
+    // Set initial positions of nodes and links
+
+    // const linksGroup = d3.select("svg g").attr("class", "links-group");
+    const linksGroup = d3.select("#svg-image").select("g").attr("class", "links-group");
+
+    // Filter links that have the attribute cosy as true
+    // const cosyLinks = links.filter(link => link.cosy);
+    const cosyLinks = links.filter(eachLink => eachLink.cosy);
+    const hmbcLinksData = links.filter(eachLink => eachLink.hmbc);
+
+
+    // const hmbclinks_svg = linksGroup.selectAll(".links-group")
+    //                 .data(hmbcLinksData)
+    //                 .enter().append("line")
+    //                 .attr("class", "link")
+    //                 .attr("class", "hmbc-link")
+    //                 .attr("stroke", hmbcEdgeColor)
+    //                 .attr("x1", d => catoms.find(node => node.id === mapping[d.source]).x)
+    //                 .attr("y1", d => catoms.find(node => node.id === mapping[d.source]).y)
+    //                 .attr("x2", d => catoms.find(node => node.id === mapping[d.target]).x)
+    //                 .attr("y2", d => catoms.find(node => node.id === mapping[d.target]).y)
+    //                 .attr("source", d => d.source)
+    //                 .attr("target", d => d.target)
+    //                 .attr("opacity", d => (shortest_paths[mapping[d.source]][mapping[d.target]] > 3 ? 1 : 0))
+    //                 .attr("stroke-width", hmbcEdgeWidth) // Set the stroke width to 8 pixels
+    //                 .attr("weight", d => shortest_paths[mapping[d.source]][mapping[d.target]]);
+
+    const hmbclinks_svg = linksGroup.selectAll(".links-group")
+                    .data(hmbcLinksData)
+                    .enter().append("line")
+                    .attr("class", "link")
+                    .attr("class", "hmbc-link")
+                    .attr("stroke", d => calculate_indivdual_weight_hmbc(1, 
+                                                                catoms.find(node => node.id === node_mapping[d.source]).id, 
+                                                                catoms.find(node => node.id === node_mapping[d.target]).id, 
+                                                                node_mapping, shortest_paths) > 0 ? "pink" : "green")
+                    // .attr("stroke", d => (shortest_paths[mapping[d.source]][mapping[d.target]] > 3 ? pink : hmbcEdgeColor))
+                    .attr("x1", d => catoms.find(node => node.id === mapping[d.source]).x)
+                    .attr("y1", d => catoms.find(node => node.id === mapping[d.source]).y)
+                    .attr("x2", d => catoms.find(node => node.id === mapping[d.target]).x)
+                    .attr("y2", d => catoms.find(node => node.id === mapping[d.target]).y)
+                    .attr("source", d => d.source)
+                    .attr("target", d => d.target)
+                    // .attr("opacity", d => (shortest_paths[mapping[d.source]][mapping[d.target]] > 3 ? 1 : 0))
+                    .attr("opacity", 1)
+                    .attr("stroke-width", hmbcEdgeWidth) // Set the stroke width to 8 pixels
+                    .attr("weight", 1);
+
+
+
+
+    // Create the COSY links to start
+    // Create a group for links
+    const link = linksGroup.selectAll(".links-group")
+        .data(cosyLinks)
+        .enter().append("line")
+        .attr("class", "link")
+        .attr("class", "cosy-link")
+        .attr("stroke", cosyEdgeColor)
+        .attr("source", d => d.source)
+        .attr("target", d => d.target)
+        .attr("x1", d => catoms.find(node => node.id === mapping[d.source]).x)
+        .attr("y1", d => catoms.find(node => node.id === mapping[d.source]).y)
+        .attr("x2", d => catoms.find(node => node.id === mapping[d.target]).x)
+        .attr("y2", d => catoms.find(node => node.id === mapping[d.target]).y)
+        .attr("stroke-width", cosyEdgeWidth); // Set the stroke width to 8 pixels
+
+    
+
+    // const svg_display = d3.select('svg')
+    // const nodesGroup = d3.select("svg g").attr("class", "nodes-group");
+
+    const svg_display = d3.select("#svg-image"); // Selects the second SVG
+    const nodesGroup = svg_display.select("g").attr("class", "nodes-group");
+
+    // Create the nodes
+    const allnodes = nodesGroup.selectAll(".nodes-group")
+        .data(catoms)
+        .enter().append("g")
+        .attr("class", "node")
+        .attr("transform", d => `translate(${d.x},${d.y})`)
+        .attr("atomNumber", d => d.atomNumber)
+        .attr("id", d => d.id)
+        .attr("ppm", d => d.ppm)
+        .attr("ppm_calculated", d => d.ppm_calculated)
+        .attr("numProtons", d => d.numProtons)
+        .attr("x", d => d.x)
+        .attr("y", d => d.y);
+
+
+    // Add circles to represent nodes
+    allnodes.append("circle")
+      .attr("r", nodeRadius)
+      .attr("fill", d => colorScale(d.numProtons)) // Set fill color based on numProtons
+
+    // Append atomNumber text
+    allnodes.append("text")
+        .attr("class", "node-text-atomNumber")
+        // .text(d => `${d.id}, ${d.atomNumber}`) // Display the id
+        // .text(d => `${d.id}`) // Display the id
+        .text(d => d.ppm.toFixed(2))
+        // .attr("dy", -textOffsetInt) // Center the text vertically
+        .attr("font-size", fontSizeStr) // Set font size to 16 pixels
+        .attr("text-anchor", "middle"); // Center the text horizontally
+
+    // Prepare and run minimization
+
+    var carbon_nodes_id = [];
+    for( var i=0; i<catoms.length; i++) {
+        carbon_nodes_id.push(catoms[i].id);
+    }
+
+    // group the node ids by the number of protons
+    var grouped_nodes_by_numProtons = {};
+    grouped_nodes_by_numProtons[0] = [];
+    grouped_nodes_by_numProtons[1] = [];
+    grouped_nodes_by_numProtons[2] = [];
+    grouped_nodes_by_numProtons[3] = [];
+    for (var i=0; i<catoms.length; i++) {
+        grouped_nodes_by_numProtons[catoms[i].numProtons].push(catoms[i].id);
+    }
+
+    // nodes_to_nProtons
+    var nodes_to_nProtons = {};
+    for( var i=0; i<catoms.length; i++) {
+        nodes_to_nProtons[catoms[i].id] = catoms[i].numProtons;
+    }
+
+
+
+    function modify_mapping(grouped_nodes_by_numProtons, nodes_to_nProtons, carbon_nodes_id, current_mapping) {
+        let new_mapping = Object.assign({}, current_mapping);
+
+        // Step 1: Choose a random key (node in graph1)
+            // choose a random carbon_id_node
+        let random_carbon_id_node = carbon_nodes_id[Math.floor(Math.random() * carbon_nodes_id.length)];
+
+        let nprotons_key = nodes_to_nProtons[random_carbon_id_node];
+
+        let v1 = -1;
+        let v2 = -1;
+
+        // Step 2: Randomly select a value from its possible mappings
+        let possible_values = grouped_nodes_by_numProtons[nprotons_key];
+        let chosen_value = possible_values[Math.floor(Math.random() * possible_values.length)];
+
+        // Step 3: Check if the chosen value is different from the key
+        let swapped = false;
+        if (random_carbon_id_node != chosen_value) {
+            v1 = new_mapping[random_carbon_id_node];
+            v2 = new_mapping[chosen_value];
+            new_mapping[random_carbon_id_node] = v2;
+            new_mapping[chosen_value] = v1;
+
+            swapped = true;
+        }
+
+        return [new_mapping, swapped, v1, v2];
+    }
+
+    function calculate_weight(graph_edges, shortest_paths, node_mapping) {
+        let weight = 0;
+        for (var i = 0; i < graph_edges.length; i++) {
+            let edge = graph_edges[i];
+            let source = node_mapping[edge.source];
+            let target = node_mapping[edge.target];
+            let cosy = edge.cosy;
+            let hmbc = edge.hmbc;
+
+            if(cosy || hmbc) {
+                let uu = source-1;
+                let vv = target-1;
+
+                if(uu == vv) {
+                    continue;
+                }
+
+                if(cosy) {
+                    let distance = shortest_paths[uu][vv];
+                    weight += Math.pow(distance - 1, 1);
+                }
+
+                if(hmbc) {
+                    let distance = shortest_paths[uu][vv];
+                    if(distance < 3) {
+                        distance = 2;
+                    }
+                    weight += Math.pow(distance - 2, 1);
+                }
+            }
+        }
+        return weight;
+    }
+
+    function calculate_indivdual_weight_hmbc(iteration, source, target, node_mapping, shortest_paths) {
+        let weight = 0;
+        // let uu = node_mapping[source];
+        // let vv = node_mapping[target];
+        let uu = source;
+        let vv = target;
+
+        // if(uu == vv) {
+        //     return 0;
+        // }
+
+        let distance = shortest_paths[uu-1][vv-1];
+        if(distance < 3) {
+                        distance = 2;
+                    }
+        weight = distance - 2;
+
+        // console.log(`${iteration}, uu: ${uu}, vv: ${vv}, weight: ${weight}`);
+
+        return weight;
+    }
+
+
+    var max_iter = 500000;
+    var max_temp = 100.0;
+    var min_temp = 0.5;
+    var cooling_rate = 0.999;
+    var current_temp = max_temp;
+    var temperature = max_temp;
+
+    var temperature = max_temp;
+    var current_mapping = node_mapping;
+    var best_mapping = current_mapping;
+    var initial_weight = calculate_weight(graph_edges, shortest_paths, current_mapping);
+    var current_weight = calculate_weight(graph_edges, shortest_paths, current_mapping);
+    var best_weight = current_weight;
+
+
+    var num_iterated = 0;
+
+    // Simulated Annealing
+
+    // time code
+
+    console.time("Execution Time");
+    const start = performance.now();
+
+
+
+    var i = 0;
+    var max_plot_points = 0;
+
+    // Plot Data array
+    let plot_data = [];
+
+    function iterate() {
+        if (i >= 1000000 || temperature < min_temp) {
+            console.log("Finished Iterations");
+            return;
+        }
+
+        var [neighbor_mapping, swapped, v1, v2] = modify_mapping(grouped_nodes_by_numProtons, nodes_to_nProtons, carbon_nodes_id, current_mapping);
+
+        if (swapped) {
+            var neighbor_weight = calculate_weight(graph_edges, shortest_paths, neighbor_mapping);
+
+            if (neighbor_weight < current_weight || Math.random() < Math.exp((current_weight - neighbor_weight) / temperature)) {
+                current_mapping = neighbor_mapping;
+                current_weight = neighbor_weight;
+            }
+
+            if (current_weight < best_weight) {
+                best_mapping = current_mapping;
+                best_weight = current_weight;
+            }
+            temperature *= cooling_rate;
+            if (i % 1 === 0) {
+                updateLinks( catoms, plot_data, current_mapping, current_weight, best_weight, temperature, max_plot_points, v1, v2);
+                max_plot_points++;
+            }
+        }
+        i++;
+        setTimeout(iterate, 0); // Allows UI updates in between iterations
+
+    }
+
+    setTimeout(() => {
+        console.log("Starting minimization...");
+        iterate();
+        updateLinks(catoms, plot_data, best_mapping, best_weight, best_weight, min_temp, max_plot_points);
+    }, 2000);
+
+
+
+    // insert results into <p> tag
+    document.getElementById("results").innerHTML = `Current weight: ${best_weight}, Iterations taken:  ${num_iterated}`;
+
+
+    function updateLinks( catoms, plot_data, current_mapping, current_weight, best_weight, current_temp=1000.0, iteration=0, v1, v2) {
+        // Get the current mapping from the mapping list
+
+
+        plot_data.push({ 
+            iteration,
+            current_weight: Number(current_weight) || 0, 
+            best_weight: Number(best_weight) || 0, 
+            current_temp: Number(current_temp) || 0 
+        });
+
+        pathCurrentWeight.datum(plot_data).attr("d", lineCurrentWeight);
+        pathBestWeight.datum(plot_data).attr("d", lineBestWeight);
+        pathTemp.datum(plot_data).attr("d", lineTemp);
+
+
+        hmbclinks_svg
+            .attr("x1", d => catoms.find(node => node.id === current_mapping[d.source]).x)
+            .attr("y1", d => catoms.find(node => node.id === current_mapping[d.source]).y)
+            .attr("x2", d => catoms.find(node => node.id === current_mapping[d.target]).x)
+            .attr("y2", d => catoms.find(node => node.id === current_mapping[d.target]).y)
+            .attr("stroke", d => calculate_indivdual_weight_hmbc(iteration, 
+                                                                catoms.find(node => node.id === current_mapping[d.source]).id, 
+                                                                catoms.find(node => node.id === current_mapping[d.target]).id, 
+                                                                node_mapping, shortest_paths) > 0 ? "pink" : "green");
+        // Update the cosy links
+        link
+            .attr("x1", d => catoms.find(node => node.id === current_mapping[d.source]).x)
+            .attr("y1", d => catoms.find(node => node.id === current_mapping[d.source]).y)
+            .attr("x2", d => catoms.find(node => node.id === current_mapping[d.target]).x)
+            .attr("y2", d => catoms.find(node => node.id === current_mapping[d.target]).y);
+
+
+        // console.log(`v1: ${v1}, v2: ${v2}`);
+        // Update the text in the nodes
+        allnodes
+            .attr("transform", d => `translate(${catoms.find(node => node.id === current_mapping[d.id]).x}, ${catoms.find(node => node.id === current_mapping[d.id]).y})`);
+
+        // highlight the nodes that have been swapped by setting the rim of the circle to red
+        allnodes.select("circle")
+            .attr("stroke", d => (d.id === current_mapping[v1] || d.id === current_mapping[v2]) ? "red" : "black")
+            .attr("stroke-width", d => (d.id === current_mapping[v1] || d.id === current_mapping[v2]) ? 3 : 0);
+
+        document.getElementById("results").innerHTML = `Current weight: ${current_weight}, Best weight: ${best_weight}, Current temperature: ${current_temp.toFixed(1)}`; 
+    }
+
+
+
+
+    function floydWarshall(graph) {
+        // // Example graph
+        // const graph = {
+        //     A: {B: 1, C: 1},
+        //     B: {A: 1, C: 1, D: 1},
+        //     C: {A: 1, B: 2, D: 1},
+        //     D: {B: 1, C: 1}
+        // };
+        const nodes = Object.keys(graph);
+        const dist = {};
+
+        // Initialize the distance matrix
+        for (let node of nodes) {
+            dist[node] = {};
+            for (let otherNode of nodes) {
+                dist[node][otherNode] = Infinity;
+            }
+            dist[node][node] = 0;  // Distance to itself is 0
+        }
+
+        // Set the edges distances
+        for (let node in graph) {
+            for (let neighbor in graph[node]) {
+                dist[node][neighbor] = graph[node][neighbor];
+            }
+        }
+
+        // Floyd-Warshall main loop
+        for (let k of nodes) {
+            for (let i of nodes) {
+                for (let j of nodes) {
+                    dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
+                }
+            }
+        }
+        return dist; // Return the shortest distance between all pairs
+    }
+
+    // create a graph from the molgraph information that can be used in the floyd warshall algorithm
+    var graphmol = {};
+
+    for ( var i=0; i < molgraph["nodes"].length; i++) {
+
+        var node = molgraph["nodes"][i];
+        var node_id = node.id;
+
+        graphmol[node_id] = {};
+
+        for (var j=0; j < molgraph["links"].length; j++ ) {
+            var edge = molgraph["links"][j];
+            var source = edge.source;
+            var target = edge.target;
+            var weight = 1;
+
+            if (source == node_id) {
+                graphmol[node_id][target] = weight;
+            }
+            if (target == node_id) {
+                graphmol[node_id][source] = weight;
+            }
+        }
+    }
+
+    // console.log(JSON.stringify(graphmol));
+
+    const shortestPaths2 = floydWarshall(graphmol);
+    // console.log(JSON.stringify(shortestPaths2));
+    
+</script>
+
+</body>
+</html>
