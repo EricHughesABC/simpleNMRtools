@@ -80,6 +80,25 @@
             display: inline-block;
             max-width: 800px; /* Set max-width for the tooltip */
         }
+
+        .custom-tooltip {
+            visibility: hidden;
+            position: absolute;
+            background-color: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px; /* Your custom size */
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(50%);
+            max-width: 800px; /* Set max-width for the tooltip */
+        }
+
+        #infoButton:hover .custom-tooltip {
+            visibility: visible;
+        }
         
         /*
          * svg — Absolutely fill the .plot-container intrinsic-ratio wrapper
@@ -235,9 +254,6 @@
             color: black; /* Adjust text color as needed */
         }
 
-
-        
-
         .orange { background-color: #FFA500; }
         .green { background-color: #98FB98; }
         .yellow { background-color: yellow; }
@@ -245,26 +261,23 @@
         .grey { background-color: #808080; }
         .blue { background-color: #ADD8E6; }
         .red { background-color: #FF0000; }
-        .white { background-color: #FFFFFF; } 
+        .white { background-color: #FFFFFF; }
 
         .buttontooltip {
-            /* add a border */
-            border: 1px solid black;
             visibility: hidden;
-            background-color: white;
-            color: black;
+            width: 200px; /* Adjust width as needed */
+            background-color: #555;
+            color: #fff;
             text-align: left;
             border-radius: 5px;
-            padding: 10px;
+            padding: 5px;
             position: absolute;
-            font: 16px Arial, sans-serif;
             z-index: 1;
             bottom: 125%; /* Position above the button */
-            left: 25%;
-            margin-left: 5px; /* Center the tooltip */
+            left: 50%;
+            margin-left: -200px; /* Center the tooltip */
             opacity: 0; /* Hide by default */
             transition: opacity 0.3s; /* Smooth transition */
-            max-width: 600px; /* Set max-width for the tooltip */
         }
 
         .action-button {
@@ -601,9 +614,9 @@
     {% endautoescape %}
     
     // Modify INFO tooltip to display the best results from the optimization with only 2 decimal places
-    // d3.select("#info_tooltip").html(`Correlation Penalty:&nbsp;${best_results.best_weight}<br>Uncorrelated&nbsp;Nodes:&nbsp;${isolatedCarbonsCount}&nbsp;out&nbsp;of&nbsp;${nodes.length}<br>MAE:&nbsp;${best_results.best_mae.toFixed(2)},&nbsp;LAE:&nbsp;${best_results.best_lae.toFixed(2)}&nbsp;(NODE&nbsp;${best_results.best_lae_atomNumber})`);
-    var info_tooltip_str = create_tooltip_string(best_results.best_weight, best_results.best_mae, best_results.best_lae, best_results.best_lae_atomNumber, isolatedCarbonsCount, nodes.length, links.length);
-    d3.select("#info_tooltip").html(info_tooltip_str);
+    d3.select("#info_tooltip").html(`Correlation Penalty: ${best_results.best_weight}<br> Uncorrelated Nodes: ${isolatedCarbonsCount} out of ${nodes.length}<br> MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+
+
     // Set the visible property of the catoms array to false
     // loop through the nodes
     catoms.forEach(node => {
@@ -1400,57 +1413,11 @@ d3.select("body").on("keydown", (event) => {
         // update the INFO tooltip
         // d3.select("#infoButton")
         // .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
-        var info_tooltip_str = create_tooltip_string(best_results.best_weight, best_results.best_mae, best_results.best_lae, best_results.best_lae_atomNumber, isolatedCarbonsCount, nodes.length, links.length);
-        // d3.select("#info_tooltip").html(`Correlation Penalty:&nbsp;${best_results.best_weight}<br>Uncorrelated&nbsp;Nodes:&nbsp;${isolatedCarbonsCount}&nbsp;out&nbsp;of&nbsp;${nodes.length}<br>MAE:&nbsp;${best_results.best_mae.toFixed(2)},&nbsp;LAE:&nbsp;${best_results.best_lae.toFixed(2)}&nbsp;(NODE&nbsp;${best_results.best_lae_atomNumber})`);
-        d3.select("#info_tooltip").html(info_tooltip_str);
+        d3.select("#info_tooltip").html(`Correlation Penalty: ${best_results.best_weight}<br> Uncorrelated Nodes: ${isolatedCarbonsCount} out of ${nodes.length}<br> MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+
         colorHmbcLinksByDistance(mapping, node_offset);
         reorderElements();
     }
-
-    function create_tooltip_string(weight, mae, lae, lae_atomNumber, isolatedCarbonsCount, totalNodes, totalEdges) {
-        // if weight is between 0 and 5, use a green color for the weight value, if it is between 5 and 15,use an  orange colour, if it is above 15, use a red colour and in bold font  
-        var weight_color = "green";
-        var weight_fontWeight = "bold";
-        var fontSize = "20px";
-        if (weight > 0 && weight <= 5) {
-            weight_color = "orange";
-        } else if (weight > 5) {
-            weight_color = "red";
-        }
-        // if the isolatedCarbonsCount is 0, use a green color for the isolatedCarbonsCount value, if it is between 1 and 3, use an orange colour, if it is above 3, use a red colour and in bold font
-        var isolatedCarbonsColor = "green";
-        var isolatedCarbonsFontWeight = "bold";
-        if (isolatedCarbonsCount > 0 && isolatedCarbonsCount <= 3) {
-            isolatedCarbonsColor = "orange";
-        } else if (isolatedCarbonsCount > 3) {
-            isolatedCarbonsColor = "red";
-        }
-
-        // highlight the MAE and LAE values depending on their values, if the MAE is between 0 and 1, use a green color for the MAE value, if it is between 1 and 2, use an orange colour, if it is above 2, use a red colour and in bold font. If the LAE is between 0 and 2, use a green color for the LAE value, if it is between 2 and 4, use an orange colour, if it is above 4, use a red colour and in bold font
-        var mae_color = "green";
-        var mae_fontWeight = "bold";
-        if (mae > 1 && mae <= 2) {
-            mae_color = "orange";
-        } else if (mae > 2) {
-            mae_color = "red";
-        }
-        // highlight the LAE values depending on their values
-        var lae_color = "green";
-        var lae_fontWeight = "bold";
-        if (lae > 2 && lae <= 10) {
-            lae_color = "orange";
-        } else if (lae > 10) {
-            lae_color = "red";
-        }
-        if ( totalEdges === 0 ||  totalEdges === undefined) {
-            return `Correlation Penalty:&nbsp;<span style="color: red; font-weight:${weight_fontWeight}; font-size:${fontSize};">Unused</span><br>Uncorrelated&nbsp;Nodes:&nbsp;<span style="color:${isolatedCarbonsColor}; font-weight:${isolatedCarbonsFontWeight}; font-size:${fontSize};">${isolatedCarbonsCount}</span>&nbsp;out&nbsp;of&nbsp;${totalNodes}<br>MAE:&nbsp;<span style="color:${mae_color}; font-weight:${mae_fontWeight}; font-size:${fontSize};">${mae.toFixed(2)}</span>,&nbsp;LAE:&nbsp;<span style="color:${lae_color}; font-weight:${lae_fontWeight}; font-size:${fontSize};">${lae.toFixed(2)}</span>&nbsp;(NODE&nbsp;${lae_atomNumber})`;
-        }
-        else{
-            return `Correlation Penalty:&nbsp;<span style="color:${weight_color}; font-weight:${weight_fontWeight}; font-size:${fontSize};">${weight}</span><br>Uncorrelated&nbsp;Nodes:&nbsp;<span style="color:${isolatedCarbonsColor}; font-weight:${isolatedCarbonsFontWeight}; font-size:${fontSize};">${isolatedCarbonsCount}</span>&nbsp;out&nbsp;of&nbsp;${totalNodes}<br>MAE:&nbsp;<span style="color:${mae_color}; font-weight:${mae_fontWeight}; font-size:${fontSize};">${mae.toFixed(2)}</span>,&nbsp;LAE:&nbsp;<span style="color:${lae_color}; font-weight:${lae_fontWeight}; font-size:${fontSize};">${lae.toFixed(2)}</span>&nbsp;(NODE&nbsp;${lae_atomNumber})`;
-        }
-    }
-
-
 
     function updateMovedAtoms3() {
 

@@ -4,70 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /*
-         * .plot-container — Fluid aspect-ratio wrapper for the molecule SVG
-         * ─────────────────────────────────────────────────────────────────────
-         * PROBLEM SOLVED: The original container used a fixed width and height
-         * (1000 px × 600 px).  On screens narrower than 1000 px the SVG was
-         * clipped, and on tablets rotating to portrait the layout broke entirely.
-         *
-         * APPROACH — "padding-bottom intrinsic ratio" technique:
-         *   Setting height:0 and using padding-bottom as a percentage of the
-         *   element's own *width* is the most cross-browser-compatible way to
-         *   lock an aspect ratio.  It works identically in Chrome, Firefox, and
-         *   Safari, unlike the newer CSS aspect-ratio property which Firefox and
-         *   Safari handle inconsistently when the child uses percentage heights.
-         *
-         *   padding-bottom: 60%  →  600 ÷ 1000 = 0.6  →  preserves 5:3 ratio.
-         *   At 800 px wide: padding-bottom = 480 px  (= 800 × 0.60) ✓
-         *   At 400 px wide: padding-bottom = 240 px  (= 400 × 0.60) ✓
-         *
-         * HEIGHT CAP with min():
-         *   On a default-size browser window the SVG alone could consume nearly
-         *   the full viewport height, pushing the button bar off screen.
-         *   min(60%, calc(100vh - 180px)) picks whichever value is smaller:
-         *     • 60%            — the natural aspect-ratio height
-         *     • 100vh - 180px  — leaves 180 px for the button bar, gaps, and
-         *                        the body top padding (two button rows ≈ 130 px,
-         *                        container padding/gaps ≈ 30 px, body top ≈ 20 px)
-         *   The SVG shrinks via preserveAspectRatio="xMidYMid meet" (set in JS)
-         *   when this cap is hit, so the molecule is never distorted.
-         *
-         * position:relative — makes this div the positioning context for the
-         *   absolutely-positioned SVG child (see svg {} rule below).
-         *
-         * max-width:1000px — prevents the container (and therefore the SVG)
-         *   from growing beyond the original design width on large monitors.
-         *
-         * overflow:hidden — clips any SVG content that extends outside the
-         *   container during pan/zoom operations.
-         */
         .plot-container {
-            position: relative;
-            width: 100%;
-            max-width: 1000px;
-            height: 0;
-            padding-bottom: min(60%, calc(100vh - 180px));
+            width: 1000px;
+            height: 600px;
             margin: 0 auto;
-            overflow: hidden;
-        }
-        /*
-         * body — Remove default browser margins; replace <br> spacers with CSS
-         * ─────────────────────────────────────────────────────────────────────
-         * The original template used two <br> tags above the SVG container and
-         * one below it to create visual breathing room.  Those ~80 px of extra
-         * height were invisible to the viewport budget calculation and caused
-         * the button bar to be pushed off screen.  Replacing them with a
-         * controlled padding value means the space is predictable and is
-         * accounted for in the 180 px constant used by the min() cap above.
-         *
-         * margin:0     — overrides the browser default (~8 px on all sides).
-         * padding-top  — 12 px of space above the SVG container.
-         * padding-bottom — 8 px of space below the button bar.
-         */
-        body {
-            margin: 0;
-            padding: 12px 0 8px;
+            overflow: hidden; /* Prevent scrollbars from appearing */
         }
         .tooltip {
             position: absolute;
@@ -78,42 +19,30 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             pointer-events: none;
             display: inline-block;
-            max-width: 800px; /* Set max-width for the tooltip */
+            max-width: 300px; /* Set max-width for the tooltip */
+        }
+
+        .custom-tooltip {
+            visibility: hidden;
+            position: absolute;
+            background-color: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px; /* Your custom size */
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #infoButton:hover .custom-tooltip {
+            visibility: visible;
         }
         
-        /*
-         * svg — Absolutely fill the .plot-container intrinsic-ratio wrapper
-         * ─────────────────────────────────────────────────────────────────────
-         * PROBLEM SOLVED: Setting width/height to "100%" on an SVG works in
-         * Chrome when the parent has aspect-ratio set, but Firefox and Safari
-         * cannot resolve a percentage height when the parent's height is 0 (as
-         * it is with the padding-bottom technique).  The solution is to take the
-         * SVG out of normal flow with position:absolute and stretch it to fill
-         * the padding-area of the container, which has a concrete pixel height
-         * regardless of how it was created.
-         *
-         * position:absolute / top:0 / left:0 / width:100% / height:100%:
-         *   The SVG sits exactly over the padding area of .plot-container.
-         *   All three browsers (Chrome, Firefox, Safari) correctly resolve
-         *   100% width and 100% height for an absolutely-positioned child.
-         *
-         * display:block — removes the small baseline gap that inline-level SVGs
-         *   create beneath themselves.
-         *
-         * touch-action:none — tells the browser not to intercept touch events
-         *   (e.g. for page scrolling or zooming) while a pointer is inside the
-         *   SVG.  Without this, on iOS and Android the first touchmove inside
-         *   the SVG is consumed by the browser scroll handler, making node drag
-         *   unreliable on tablets.
-         */
+        /* Style for the SVG border */
         svg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: block;
-            touch-action: none;
+            position: relative; /* Set position relative to make it a positioning context */
         }
 
         .center {
@@ -122,54 +51,24 @@
             margin-right: auto;
         }
     
-        /*
-         * .container — Responsive button-bar wrapper
-         * ─────────────────────────────────────────────────────────────────────
-         * flex-wrap:wrap — allows the three button groups to wrap onto a second
-         *   line instead of overflowing the viewport when the window is narrow
-         *   (e.g. portrait tablet or phone).
-         *
-         * gap / padding use clamp() — see .color-box below for a full
-         *   explanation of the clamp() technique.  Here it keeps the spacing
-         *   between groups proportional: tight on small screens, comfortable
-         *   at full width, and capped so it doesn't grow excessively on very
-         *   large monitors.
-         *     clamp(4px, 0.6vw, 8px):  at 800 px → 4.8 px; at 1200 px → 7.2 px
-         */
         .container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: flex-start;
-            margin: 0 auto;
-            gap:     clamp(4px, 0.6vw, 8px);
-            padding: clamp(4px, 0.6vw, 8px);
+            display: flex; /* Use flexbox */
+            justify-content: center; /* Center the content horizontally */
+            align-items: flex-start; /* Align groups at the top */
+            margin: 0 auto; /* Set the left and right margins to auto to center the container */
         }
 
-        /*
-         * .group — Individual bordered button cluster
-         * ─────────────────────────────────────────────────────────────────────
-         * flex-wrap:wrap — if the viewport is so narrow that even a single
-         *   group's buttons don't fit on one line, they wrap rather than
-         *   overflow.
-         *
-         * gap / padding use clamp() — scale fluidly with viewport width.
-         *   clamp(3px, 0.5vw, 6px):  floor 3 px, cap 6 px, preferred ~0.5% vw
-         *   clamp(4px, 0.8vw, 10px): floor 4 px, cap 10 px, preferred ~0.8% vw
-         */
         .group {
             border: 1px solid black;
-            border-radius: 10px;
+            border-radius: 10px; /* Adjust the value to change the roundness of the corners */
             display: flex;
-            flex-wrap: wrap;
-            align-items: flex-start;
-            gap:     clamp(3px, 0.5vw, 6px);
-            padding: clamp(4px, 0.8vw, 10px);
+            align-items: flex-start; /* Align buttons at the top within group */
+            margin-right: 10px; /* Add some space between the groups */
+            padding: 10px; /* Add padding inside the border */
         }
 
         .group:last-child {
-            /* gap on .container handles spacing between groups uniformly;
-               no margin override is needed on the last child. */
+            margin-right: 0; /* Remove margin from the last group */
         }
 
         .color-container {
@@ -178,52 +77,18 @@
             
         }
 
-        /*
-         * .color-box — Individual assignment button
-         * ─────────────────────────────────────────────────────────────────────
-         * PROBLEM SOLVED: Fixed pixel dimensions (100 × 50 px) meant buttons
-         * were unchanged on small screens, pushing groups off the right edge,
-         * and could grow awkwardly large on monitors wider than 1000 px.
-         *
-         * APPROACH — CSS clamp(minimum, preferred, maximum):
-         *   clamp() picks a value that is never below the minimum nor above the
-         *   maximum, with the preferred value (in viewport-width units, vw)
-         *   scaling fluidly between them.  This removes the need for multiple
-         *   @media breakpoints that cause abrupt jumps.
-         *
-         *   width:  clamp(52px, 8.5vw, 100px)
-         *     • 52 px  — minimum: buttons remain tappable on narrow phones
-         *     • 8.5vw  — preferred: ≈ 1/12 of the viewport, so ~12 buttons
-         *                fill the full width at any screen size
-         *     • 100 px — maximum: original design size; never exceeded on large
-         *                monitors so the bar doesn't spread across the screen
-         *
-         *   height: clamp(36px, 4.5vw, 50px)
-         *     • Scales proportionally with width so buttons don't become
-         *       disproportionately tall or flat at extremes.
-         *
-         *   font-size: clamp(10px, 1.1vw, 14px)
-         *     • Text shrinks with the button so it always fits inside without
-         *       overflow or line-breaking.
-         */
         .color-box {
-            width:  clamp(52px, 8.5vw, 100px);
-            height: clamp(36px, 4.5vw,  50px);
-            font-size: clamp(10px, 1.1vw, 14px);
+            width: 100px;
+            height: 50px;
             border-radius: 7px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /*
-         * .striped-rectangle — Unassigned-carbon pattern swatch
-         * Uses the same fluid clamp() dimensions as .color-box so the swatch
-         * stays the same size as the colour buttons at every viewport width.
-         */
         .striped-rectangle {
-            width:  clamp(52px, 8.5vw, 100px);
-            height: clamp(36px, 4.5vw,  50px);
+            width: 100px;
+            height: 50px;
             background: repeating-linear-gradient(90deg, #ccc, #ccc 10px, #fff 10px, #fff 20px);
         }
 
@@ -235,9 +100,6 @@
             color: black; /* Adjust text color as needed */
         }
 
-
-        
-
         .orange { background-color: #FFA500; }
         .green { background-color: #98FB98; }
         .yellow { background-color: yellow; }
@@ -245,26 +107,23 @@
         .grey { background-color: #808080; }
         .blue { background-color: #ADD8E6; }
         .red { background-color: #FF0000; }
-        .white { background-color: #FFFFFF; } 
+        .white { background-color: #FFFFFF; }
 
         .buttontooltip {
-            /* add a border */
-            border: 1px solid black;
             visibility: hidden;
-            background-color: white;
-            color: black;
+            width: 200px; /* Adjust width as needed */
+            background-color: #555;
+            color: #fff;
             text-align: left;
             border-radius: 5px;
-            padding: 10px;
+            padding: 5px;
             position: absolute;
-            font: 16px Arial, sans-serif;
             z-index: 1;
             bottom: 125%; /* Position above the button */
-            left: 25%;
-            margin-left: 5px; /* Center the tooltip */
+            left: 50%;
+            margin-left: -200px; /* Center the tooltip */
             opacity: 0; /* Hide by default */
             transition: opacity 0.3s; /* Smooth transition */
-            max-width: 600px; /* Set max-width for the tooltip */
         }
 
         .action-button {
@@ -292,35 +151,14 @@
             box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.2);
             transform: translateY(2px);
         }
-
-        /*
-         * Touch / coarse-pointer override
-         * ─────────────────────────────────────────────────────────────────────
-         * (pointer: coarse) matches any device whose primary input is imprecise
-         * (finger on a touchscreen), regardless of screen size.  Tablets in
-         * both orientations and phones match; desktop mice do not.
-         *
-         * The clamp() rules on .color-box already handle continuous scaling
-         * across all viewport widths.  This rule does only one thing: raises
-         * the *minimum* button height from 36 px to 44 px, which is the
-         * Apple/Google recommended minimum tap-target size for touch UIs.
-         * Width and font-size are left to their existing clamp() values.
-         *
-         * Note: the touch-action:none on the svg element (above) is the other
-         * half of touch support — it prevents iOS/Android from swallowing the
-         * first touchmove for scroll instead of passing it to D3's drag handler.
-         */
-        @media (pointer: coarse) {
-            .color-box {
-                height: clamp(44px, 4.5vw, 60px);
-            }
-        }
     </style>
 
      <title>{{title}}</title>
     <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 <body>
+    <br>
+    <br>
 
      <!-- SVG container with background molecule image -->
 
@@ -333,6 +171,7 @@
 
     <!-- Tooltip for displaying node information -->
     <div id="tooltip" class="tooltip">Tooltip content</div>
+    <br>
   
     <div class="container">
         <div class="group">
@@ -370,7 +209,7 @@
                 Export
             </button>
             <button title="Report the assignments for publication" class="color-container color-box action-button white" onclick="reportAssignments()">
-                Report
+                Report Assignments
             </button>
             <button title="Open simpleNMR help pages"class="color-container color-box action-button white" onclick="window.open('http://simplenmr.pythonanywhere.com/documentation/index.html', '_blank')">
                 Help
@@ -381,36 +220,11 @@
 
     <script>
 
-    /*
-     * Design-space dimensions
-     * ─────────────────────────────────────────────────────────────────────────
-     * These constants define the SVG *viewBox* coordinate space — the fixed
-     * 1000 × 600 grid in which the server generates all atom positions and in
-     * which D3 places all nodes, links, and transforms.
-     *
-     * They are NOT the pixel dimensions of the rendered element on screen.
-     * The browser maps this coordinate space to whatever pixel size the
-     * .plot-container happens to be (via viewBox + preserveAspectRatio set
-     * below), scaling everything uniformly without any JS involvement.
-     *
-     * Keeping these as named constants (rather than inline literals) means
-     * the viewBox, xScale/yScale, and applyTransform() rotation centre all
-     * stay in sync if the design dimensions ever change.
-     */
-    const svg_width_eeh  = 1000;
+    // set up some constants
+    const svg_width_eeh = 1000;
     const svg_height_eeh = 600;
-    const svg_center_x_eeh = svg_width_eeh  / 2;   // 500 — retained for any legacy references
-    const svg_center_y_eeh = svg_height_eeh / 2;   // 300 — retained for any legacy references
-
-    /*
-     * Touch / coarse-pointer detection
-     * ─────────────────────────────────────────────────────────────────────────
-     * Evaluated once at page load.  matchMedia('(pointer: coarse)') returns
-     * true for touchscreen devices (tablets, phones) and false for mouse-driven
-     * devices.  The result is used below to increase node radii so that carbon
-     * atoms are easier to tap and drag with a finger.
-     */
-    const isTouch = window.matchMedia('(pointer: coarse)').matches;
+    const svg_center_x_eeh = svg_width_eeh / 2;
+    const svg_center_y_eeh = svg_height_eeh / 2;
 
     // Select the SVG element and add an id to it
     d3.select("svg").attr("id", "svg-image");
@@ -420,36 +234,12 @@
 
     const svgElement = document.querySelector('svg.center');
 
-    /*
-     * SVG element responsive setup
-     * ─────────────────────────────────────────────────────────────────────────
-     * The server may have written fixed pixel values (e.g. width="1000"
-     * height="600") directly into the <svg> element.  These are overridden here
-     * so that CSS — not inline attributes — controls the rendered dimensions.
-     *
-     * width / height → "100%"
-     *   Together with the position:absolute CSS rule, the SVG stretches to
-     *   fill its .plot-container parent exactly, at any screen size.
-     *
-     * viewBox → "0 0 1000 600"
-     *   Declares the internal coordinate system.  All atom positions, node
-     *   x/y values, link endpoints, and transforms use coordinates in this
-     *   0–1000 / 0–600 space.  The browser maps it to screen pixels
-     *   automatically — no JavaScript recalculation is needed on resize.
-     *
-     * preserveAspectRatio → "xMidYMid meet"
-     *   "meet": scale the viewBox uniformly (maintain aspect ratio) until it
-     *   fits inside the element rectangle — equivalent to CSS object-fit:contain.
-     *   "xMidYMid": centre the viewBox horizontally and vertically within the
-     *   element when the element's aspect ratio differs from 5:3 (e.g. when
-     *   the viewport height cap kicks in and the element is wider than it is
-     *   5:3 tall).  This keeps the molecule centred rather than pinned to a
-     *   corner.
-     */
-    svgElement.setAttribute('width',  '100%');
-    svgElement.setAttribute('height', '100%');
+    // Update the width and height attributes
+    svgElement.setAttribute('width', svg_width_eeh);
+    svgElement.setAttribute('height', svg_height_eeh);
+
+    // Update the viewBox attribute
     svgElement.setAttribute('viewBox', `0 0 ${svg_width_eeh} ${svg_height_eeh}`);
-    svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
     
     {% autoescape false %}
@@ -477,24 +267,9 @@
         node_offset = 0;
     }
 
-    /*
-     * Coordinate scales — normalised server space → SVG viewBox space
-     * ─────────────────────────────────────────────────────────────────────────
-     * The server stores all atom positions as normalised values in [0, 1].
-     * These scales map them into the SVG viewBox coordinate space (0–1000,
-     * 0–600) so D3 can place nodes and links at the correct positions
-     * relative to the background molecule image.
-     *
-     * These scales are *constant* — they never change on resize.  The browser
-     * handles all further scaling (viewBox → screen pixels) automatically via
-     * preserveAspectRatio, so no JS recalculation is needed when the window
-     * is resized or the device is rotated.  Attempting to recompute these
-     * scales in screen pixels on resize would cause a mismatch between the
-     * background SVG (which the browser scales in viewBox space) and the D3
-     * overlay (which would then be in a different coordinate space).
-     */
-    const xScale = d3.scaleLinear().domain([0, 1]).range([0, svg_width_eeh]);
-    const yScale = d3.scaleLinear().domain([0, 1]).range([0, svg_height_eeh]);
+    // Define scale functions for x and y coordinates
+    const xScale = d3.scaleLinear().domain([0, 1]).range([0, 1000]);
+    const yScale = d3.scaleLinear().domain([0, 1]).range([0, 600]);
 
     // define colour blind friendly colours with 50% transparency
     const orange = 'rgba(255, 165, 0, 1)';
@@ -522,20 +297,10 @@
     const nodeHoverOpacity = 0.4;
     const textHoverOpacity = 0;
 
-    /*
-     * Node radii — larger on touch screens for easier tap/drag interaction
-     * ─────────────────────────────────────────────────────────────────────────
-     * On a coarse-pointer (touchscreen) device, carbon atom nodes are given
-     * larger radii so they are easier to tap and drag with a finger.
-     * The values are in SVG viewBox units (not screen pixels), so they scale
-     * correctly with the rest of the diagram at any screen size.
-     *   nodeRadius      — default resting size of each node circle
-     *   nodeRadiusSmall — size applied to non-hovered neighbours on mouseover
-     *   nodeRadiusLarge — size applied to the hovered node on mouseover
-     */
-    const nodeRadius      = isTouch ? 28 : 22;
-    const nodeRadiusSmall = isTouch ? 20 : 15;
-    const nodeRadiusLarge = isTouch ? 32 : 26;
+    // define node dimensions
+    const nodeRadius = 22;
+    const nodeRadiusSmall = 15;
+    const nodeRadiusLarge = 26;
 
     // define edge widths
     const cosyEdgeWidth = 8;
@@ -601,9 +366,9 @@
     {% endautoescape %}
     
     // Modify INFO tooltip to display the best results from the optimization with only 2 decimal places
-    // d3.select("#info_tooltip").html(`Correlation Penalty:&nbsp;${best_results.best_weight}<br>Uncorrelated&nbsp;Nodes:&nbsp;${isolatedCarbonsCount}&nbsp;out&nbsp;of&nbsp;${nodes.length}<br>MAE:&nbsp;${best_results.best_mae.toFixed(2)},&nbsp;LAE:&nbsp;${best_results.best_lae.toFixed(2)}&nbsp;(NODE&nbsp;${best_results.best_lae_atomNumber})`);
-    var info_tooltip_str = create_tooltip_string(best_results.best_weight, best_results.best_mae, best_results.best_lae, best_results.best_lae_atomNumber, isolatedCarbonsCount, nodes.length, links.length);
-    d3.select("#info_tooltip").html(info_tooltip_str);
+    d3.select("#info_tooltip").html(`Correlation Penalty: ${best_results.best_weight}<br> Uncorrelated Nodes: ${isolatedCarbonsCount} out of ${nodes.length}<br> MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+
+
     // Set the visible property of the catoms array to false
     // loop through the nodes
     catoms.forEach(node => {
@@ -828,51 +593,6 @@ function reorderElements() {
 
     reorderElements();
 
-    /*
-     * Resize and orientation-change handling
-     * ─────────────────────────────────────────────────────────────────────────
-     * Because all D3 node coordinates are stored in SVG viewBox space
-     * (0–1000 / 0–600) and the browser scales the entire SVG uniformly via
-     * viewBox + preserveAspectRatio, there is *nothing to reposition* when the
-     * window is resized or the device is rotated.  The background molecule
-     * image and all D3 nodes/links scale together automatically.
-     *
-     * The only actions needed on resize are:
-     *   1. applyTransform() — redraws the current pan/zoom/rotation state.
-     *      The rotation centre is always the viewBox centre (500, 300), so no
-     *      recalculation is needed here either.
-     *   2. updateScaledElements() — re-applies counter-scaling so that node
-     *      circles and text stay visually the same size at any zoom level.
-     *
-     * Debounce (150 ms):
-     *   Both 'resize' and 'orientationchange' fire many times per second during
-     *   a window drag or device rotation animation.  Debouncing ensures
-     *   applyTransform() is called only once, 150 ms after the last event,
-     *   avoiding unnecessary layout thrashing.
-     *
-     * Three event listeners for full browser coverage:
-     *   'resize'            — window size change on desktop; also fires on
-     *                         mobile when the soft keyboard appears/disappears.
-     *   'orientationchange' — legacy event; fires on older iOS and Android
-     *                         browsers that do not support screen.orientation.
-     *   screen.orientation  — modern W3C API; used on current Chrome/Firefox/
-     *                         Safari where 'orientationchange' may be deprecated.
-     */
-    let resizeTimer;
-    function onResize() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            applyTransform();
-            updateScaledElements();
-        }, 150);
-    }
-
-    window.addEventListener('resize', onResize);
-    window.addEventListener('orientationchange', onResize);  // legacy Safari/Android
-    if (screen.orientation) {
-        screen.orientation.addEventListener('change', onResize); // modern API
-    }
-
 // Transform state variables
 let panX = 0, panY = 0;
 let scaleLevel = 1;
@@ -906,36 +626,14 @@ function dragended(event, d) {
 
 
 
-/*
- * applyTransform — apply the current pan / zoom / rotation state
- * ───────────────────────────────────────────────────────────────────────────
- * All three SVG groups (background molecule image, COSY/HMBC link lines, and
- * carbon-atom nodes) receive the *same* transform string so they remain
- * perfectly aligned with each other at any zoom level or rotation angle.
- *
- * The transform is built as a sequence of SVG operations (applied right-to-
- * left, as is standard for SVG/CSS transforms):
- *
- *   translate(-cx, -cy)  — move the viewBox centre to the origin
- *   rotate(rotation)     — rotate around the origin (= around the centre)
- *   scale(scaleLevel)    — scale uniformly around the origin
- *   translate(cx, cy)    — move the origin back to the viewBox centre
- *   translate(panX, panY)— apply accumulated pan offset
- *
- * Rotation centre: cx = 500, cy = 300 (centre of the 1000 × 600 viewBox).
- * Using viewBox-space coordinates here is critical — if screen-pixel
- * coordinates were used instead, the rotation centre would drift as the
- * browser window is resized, causing the molecule to spin off-centre.
- */
+// Helper function to apply the combined transform
 function applyTransform() {
-    const cx = svg_width_eeh  / 2;   // 500 — viewBox centre x
-    const cy = svg_height_eeh / 2;   // 300 — viewBox centre y
     const transformString = 
         `translate(${panX}, ${panY}) ` +
-        `translate(${cx}, ${cy}) ` +
+        `translate(${svg_center_x_eeh}, ${svg_center_y_eeh}) ` +
         `scale(${scaleLevel}) ` +
         `rotate(${rotation}) ` +
-        `translate(${-cx}, ${-cy})`;
+        `translate(${-svg_center_x_eeh}, ${-svg_center_y_eeh})`;
     
     // Apply transform to background image
     molimage.attr("transform", transformString);
@@ -1052,19 +750,19 @@ d3.select("body").on("keydown", (event) => {
         // When numProtons is 0
         if (d.numProtons == 0) {
             if (d.ppm_calculated.length == 0) {
-                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C&nbsp;=&nbsp;${d.ppm.toFixed(2)}&nbsp;ppm`;
+                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} ppm`;
             }
             else {
-                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C&nbsp;=&nbsp;${d.ppm.toFixed(2)}&nbsp;(${d.ppm_calculated.toFixed(2)})&nbsp;ppm`;
+                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} (${d.ppm_calculated.toFixed(2)}) ppm`;
             }
         } 
         else if (d.H1_ppm.length == 1) {
             // Expect d.H1 to be an array of length 1
             if (d.ppm_calculated.length == 0) {
-                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C&nbsp;=&nbsp;${d.ppm.toFixed(2)}&nbsp;ppm, <sup>1</sup>H&nbsp;=&nbsp;${d.H1_ppm[0].toFixed(2)}&nbsp;ppm`;
+                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} ppm, <sup>1</sup>H = ${d.H1_ppm[0].toFixed(2)} ppm`;
             }
             else {
-                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C&nbsp;=&nbsp;${d.ppm.toFixed(2)}&nbsp;(${d.ppm_calculated.toFixed(2)})&nbsp;ppm, <sup>1</sup>H&nbsp;=&nbsp;${d.H1_ppm[0].toFixed(2)}&nbsp;ppm`;
+                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} (${d.ppm_calculated.toFixed(2)}) ppm, <sup>1</sup>H = ${d.H1_ppm[0].toFixed(2)} ppm`;
             }
                 // var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} ppm, <sup>1</sup>H = ${d.H1_ppm[0].toFixed(2)} ppm`;
             // if jCouplingVals is not empty, add the J coupling values
@@ -1081,12 +779,12 @@ d3.select("body").on("keydown", (event) => {
         else {
             // Expect d.H1 to be an array of length 2
             if (d.ppm_calculated.length == 0) {
-                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C&nbsp;=&nbsp;${d.ppm.toFixed(2)}&nbsp;ppm, <sup>1</sup>H&nbsp;=&nbsp;${d.H1_ppm[0].toFixed(2)} & ${d.H1_ppm[1].toFixed(2)}&nbsp;ppm`;
+                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} ppm, <sup>1</sup>H = ${d.H1_ppm[0].toFixed(2)} & ${d.H1_ppm[1].toFixed(2)} ppm`;
             }
             else {
-                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C&nbsp;=&nbsp;${d.ppm.toFixed(2)}&nbsp;(${d.ppm_calculated.toFixed(2)})&nbsp;ppm, <sup>1</sup>H&nbsp;=&nbsp;${d.H1_ppm[0].toFixed(2)} & ${d.H1_ppm[1].toFixed(2)}&nbsp;ppm`;
+                var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} (${d.ppm_calculated.toFixed(2)}) ppm, <sup>1</sup>H = ${d.H1_ppm[0].toFixed(2)} & ${d.H1_ppm[1].toFixed(2)} ppm`;
             }
-            // var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C&nbsp;=&nbsp;${d.ppm.toFixed(2)}&nbsp;ppm, <sup>1</sup>H&nbsp;=&nbsp;${d.H1_ppm[0].toFixed(2)} & ${d.H1_ppm[1].toFixed(2)}&nbsp;ppm`;
+            // var htmlstr =  `C${d.atomNumber} ${d.iupacLabel} <b>${generateHTMLnumProtonsString(d.numProtons)}</b>: <sup>13</sup>C = ${d.ppm.toFixed(2)} ppm, <sup>1</sup>H = ${d.H1_ppm[0].toFixed(2)} & ${d.H1_ppm[1].toFixed(2)} ppm`;
             // add the J coupling values if not empty
             // print("d.jCouplingClass.length, d.jCouplingVals.length", d.jCouplingClass.length, d.jCouplingVals.length);
             if(d.jCouplingClass.length > 0) {
@@ -1400,57 +1098,11 @@ d3.select("body").on("keydown", (event) => {
         // update the INFO tooltip
         // d3.select("#infoButton")
         // .attr("title", `Correlation Penalty: ${best_results.best_weight}, MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
-        var info_tooltip_str = create_tooltip_string(best_results.best_weight, best_results.best_mae, best_results.best_lae, best_results.best_lae_atomNumber, isolatedCarbonsCount, nodes.length, links.length);
-        // d3.select("#info_tooltip").html(`Correlation Penalty:&nbsp;${best_results.best_weight}<br>Uncorrelated&nbsp;Nodes:&nbsp;${isolatedCarbonsCount}&nbsp;out&nbsp;of&nbsp;${nodes.length}<br>MAE:&nbsp;${best_results.best_mae.toFixed(2)},&nbsp;LAE:&nbsp;${best_results.best_lae.toFixed(2)}&nbsp;(NODE&nbsp;${best_results.best_lae_atomNumber})`);
-        d3.select("#info_tooltip").html(info_tooltip_str);
+        d3.select("#info_tooltip").html(`Correlation Penalty: ${best_results.best_weight}<br> Uncorrelated Nodes: ${isolatedCarbonsCount} out of ${nodes.length}<br> MAE: ${best_results.best_mae.toFixed(2)}, LAE: ${best_results.best_lae.toFixed(2)} (NODE ${best_results.best_lae_atomNumber})`);
+
         colorHmbcLinksByDistance(mapping, node_offset);
         reorderElements();
     }
-
-    function create_tooltip_string(weight, mae, lae, lae_atomNumber, isolatedCarbonsCount, totalNodes, totalEdges) {
-        // if weight is between 0 and 5, use a green color for the weight value, if it is between 5 and 15,use an  orange colour, if it is above 15, use a red colour and in bold font  
-        var weight_color = "green";
-        var weight_fontWeight = "bold";
-        var fontSize = "20px";
-        if (weight > 0 && weight <= 5) {
-            weight_color = "orange";
-        } else if (weight > 5) {
-            weight_color = "red";
-        }
-        // if the isolatedCarbonsCount is 0, use a green color for the isolatedCarbonsCount value, if it is between 1 and 3, use an orange colour, if it is above 3, use a red colour and in bold font
-        var isolatedCarbonsColor = "green";
-        var isolatedCarbonsFontWeight = "bold";
-        if (isolatedCarbonsCount > 0 && isolatedCarbonsCount <= 3) {
-            isolatedCarbonsColor = "orange";
-        } else if (isolatedCarbonsCount > 3) {
-            isolatedCarbonsColor = "red";
-        }
-
-        // highlight the MAE and LAE values depending on their values, if the MAE is between 0 and 1, use a green color for the MAE value, if it is between 1 and 2, use an orange colour, if it is above 2, use a red colour and in bold font. If the LAE is between 0 and 2, use a green color for the LAE value, if it is between 2 and 4, use an orange colour, if it is above 4, use a red colour and in bold font
-        var mae_color = "green";
-        var mae_fontWeight = "bold";
-        if (mae > 1 && mae <= 2) {
-            mae_color = "orange";
-        } else if (mae > 2) {
-            mae_color = "red";
-        }
-        // highlight the LAE values depending on their values
-        var lae_color = "green";
-        var lae_fontWeight = "bold";
-        if (lae > 2 && lae <= 10) {
-            lae_color = "orange";
-        } else if (lae > 10) {
-            lae_color = "red";
-        }
-        if ( totalEdges === 0 ||  totalEdges === undefined) {
-            return `Correlation Penalty:&nbsp;<span style="color: red; font-weight:${weight_fontWeight}; font-size:${fontSize};">Unused</span><br>Uncorrelated&nbsp;Nodes:&nbsp;<span style="color:${isolatedCarbonsColor}; font-weight:${isolatedCarbonsFontWeight}; font-size:${fontSize};">${isolatedCarbonsCount}</span>&nbsp;out&nbsp;of&nbsp;${totalNodes}<br>MAE:&nbsp;<span style="color:${mae_color}; font-weight:${mae_fontWeight}; font-size:${fontSize};">${mae.toFixed(2)}</span>,&nbsp;LAE:&nbsp;<span style="color:${lae_color}; font-weight:${lae_fontWeight}; font-size:${fontSize};">${lae.toFixed(2)}</span>&nbsp;(NODE&nbsp;${lae_atomNumber})`;
-        }
-        else{
-            return `Correlation Penalty:&nbsp;<span style="color:${weight_color}; font-weight:${weight_fontWeight}; font-size:${fontSize};">${weight}</span><br>Uncorrelated&nbsp;Nodes:&nbsp;<span style="color:${isolatedCarbonsColor}; font-weight:${isolatedCarbonsFontWeight}; font-size:${fontSize};">${isolatedCarbonsCount}</span>&nbsp;out&nbsp;of&nbsp;${totalNodes}<br>MAE:&nbsp;<span style="color:${mae_color}; font-weight:${mae_fontWeight}; font-size:${fontSize};">${mae.toFixed(2)}</span>,&nbsp;LAE:&nbsp;<span style="color:${lae_color}; font-weight:${lae_fontWeight}; font-size:${fontSize};">${lae.toFixed(2)}</span>&nbsp;(NODE&nbsp;${lae_atomNumber})`;
-        }
-    }
-
-
 
     function updateMovedAtoms3() {
 

@@ -84,7 +84,9 @@ function predictCarbon_eeh() {
             "atom_idx": atom_idx-1, // zero based index changed EEH 2025-sep-06
             "atomNumber": atom.number,
             "numProtons": atom.nH,
-            "ppm": predictionResult[i].shift.value
+            // "ppm": predictionResult[i].shift.value
+            "ppm": parseFloat(predictionResult[i].shift.value.toFixed(4))
+
         }
         c13predictions["count"] += 1;
     }
