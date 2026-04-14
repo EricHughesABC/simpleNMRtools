@@ -64,7 +64,7 @@ NMREXPERIMENTS = types.MappingProxyType({
     "NOESY": "NOESY",
     "H1_pureshift": "H1_pureshift",
     "HSQC_CLIPCOSY": "HSQC_CLIPCOSY",
-    "DDEPT_CH3_ONLY": "DDEPT_CH3_ONLY",
+    "DDEPTCH3ONLY": "DDEPTCH3ONLY",
 })
 
 # Node color mapping for visualization

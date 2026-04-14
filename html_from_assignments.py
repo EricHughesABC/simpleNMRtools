@@ -109,9 +109,6 @@ def return_nonempty_mnova_datasets(data: dict) -> dict:
 
     dicts_to_keep = {}
     for k, v in data.items():
-        print(f"Processing key: {k}")
-        print(f"\tdata[{k}].keys()\n", v.keys(), "\n")
-        print(f"v.items():\n", v.items(), "\n")
         if v["datatype"] == "nmrspectrum":
             if (
                 (v["multiplets"]["count"] > 0)
@@ -240,7 +237,6 @@ def get_2D_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
     >>> print(df.head())
     """
 
-    print("technique: ", technique)
     df_data = []
 
     signaltype = "peaks"
@@ -288,7 +284,7 @@ def get_1d_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
     df_data = []
     if json_data[technique]["multiplets"]["count"] == 0:
         if json_data[technique]["peaks"]["count"] == 0:
-            print(f"no peaks found in {technique}")
+            # print(f"no peaks found in {technique}")
             return pd.DataFrame()
         else:
             pks_data = json_data[technique]["peaks"]["data"]
@@ -303,7 +299,7 @@ def get_1d_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
 
         df = pd.DataFrame(df_data, columns=["ppm", "Intensity", "Type"])
 
-        print(f"\nget_1d_dataframe_from_json {technique}:\n\n {df}\n")
+        # print(f"\nget_1d_dataframe_from_json {technique}:\n\n {df}\n")
 
     else:
         # find peaks from  from multiplets key
@@ -356,7 +352,6 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
 
     _dataframes = {}
     for k, v in data.items():
-        print(f"Processing key: {k}")
         # split the key by "_" and check if the first part is in NMREXPERIMENTS
         k1 = k.split("_")
         if len(k1) == 2:
@@ -368,7 +363,6 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
         else:
             k1 = k1[0]
 
-        print(f"k1: {k1}")
         if k1 in NMREXPERIMENTS:
             if v["type"].lower() == "2d":
                 df = get_2D_dataframe_from_json(data, k)
@@ -376,8 +370,6 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
             elif v["type"].lower() == "1d":
                 df = get_1d_dataframe_from_json(data, k)
                 _dataframes[k] = df
-
-        
 
         elif k1 in [
             "allAtomsInfo",
@@ -437,24 +429,8 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
         else:
             print(f"Skipping {k1}")
 
-    print("_dataframes keys: ", _dataframes.keys())
-
     return _dataframes
 
-
-# # Define a global constant for column renaming
-# globals.NMREXPERIMENTS_COLUMN_RENAME_MAP = {
-#     "H's": "numProtons",
-#     "Integral": "integral",
-#     "J's": "jCouplingVals",
-#     "Class": "jCouplingClass",
-#     "Intensity": "intensity",
-#     "Shift": "ppm",
-#     "Range": "range",
-#     "f2 (ppm)": "f2_ppm",
-#     "f1 (ppm)": "f1_ppm",
-#     "Type": "signaltype",
-# }
 
 def standardize_column_headings(dataframes: dict):
     for k in dataframes.keys():
@@ -881,7 +857,6 @@ def add_hmbc_edges_to_graph(
     G2: nx.Graph, hmbc: pd.DataFrame, h1: pd.DataFrame, c13: pd.DataFrame
 ) -> nx.Graph:
     # add HMBC edges to G2
-    print("Adding HMBC edges 2")
     count = 0
     for i, row in hmbc.iterrows():
         # find the rows in h1 that have the same ppm vaslue as the f1_ppm value in the row
@@ -967,33 +942,22 @@ def combine_multiple_nmrExpt_dataframes(dataframes):
     This is useful when there are multiple 1D or 2D spectra for the same experiment.
     """
 
-    print("\ncombine_multiple_nmrExpt_dataframes(dataframes: dict) -> dict:\n")
-
-    print("dataframes keys: ", dataframes.keys())
-
     # group the expt dataframes by their experiment type
     nmrExptsDataframes = {}
     nmrExptsToDelete = []
     for k, v in dataframes.items():
         # split the key by "_" once from the right
-        print(f"Processing key: {k}")
         nameSplit = k.rsplit("_", 1)
         k_number = ""
         k1 = nameSplit[0]
         if len(nameSplit) == 2:
             k_number = nameSplit[1]
         if k1 in NMREXPERIMENTS:
-            print( f"{k} shape: {v.shape}"  )
             if k1 not in nmrExptsDataframes:
                 nmrExptsDataframes[k1] = []
             nmrExptsDataframes[k1].append(v)
             if k_number.isdigit():
                 nmrExptsToDelete.append(k)
-
-    # # print the number of dataframes in each group
-    # print("\nNumber of dataframes in each NMR experiment group:")
-    # for k, v in nmrExptsDataframes.items():
-    #     print(f"{k}: {len(v)} dataframes")
     
     # combine the dataframes in each group
     for k, v in nmrExptsDataframes.items(): 
@@ -1019,10 +983,7 @@ def combine_multiple_nmrExpt_dataframes(dataframes):
             dataframes[k] = v[0]
         else:
             print(f"No data for {k}")
-    # print out the keys of the combined dataframes and the number of rows in each dataframe
-    print("\nCombined NMR experiment dataframes:")
-    for k, v in dataframes.items():
-        print(f"{k}: {v.shape[0]} rows")
+
 
     # remove dataframes that were found in nmrExptsToDelete
     for k in nmrExptsToDelete:
@@ -1030,57 +991,28 @@ def combine_multiple_nmrExpt_dataframes(dataframes):
             del dataframes[k]
             print(f"Removed {k} from dataframes")
 
-    print("\nFinal dataframes keys:")
-    for k in dataframes.keys():
-        print(f"{k}: {dataframes[k].shape[0]} rows")
-
     return dataframes
 
 
 class NMRProblem:
     def __init__(self, dataframes: dict):
         self.dataframes = dataframes
-        print("\nNMRProblem.__init__(self, dataframes: dict):\n")
-        print("*********************************************")
-        print("self.dataframes.keys():", self.dataframes.keys() )
+
         # data is a dictionary of pandas dataframes
         self.add_missing_spectra()
-        print("\nadd_missing_spectra()")
-        print("915 self.dataframes.keys():\n", self.dataframes.keys() )
         self.dataframes = standardize_column_headings(self.dataframes)
-        print("\nstandardize_column_headings(self.dataframes)")
-        print("917 self.dataframes.keys():\n", self.dataframes.keys() )
-
-        # print(self.dataframes["C13_1D_0"].head())
 
         self.dataframes = combine_multiple_nmrExpt_dataframes(self.dataframes)
-        print("\ncombine_multiple_nmrExpt_dataframes(self.dataframes)")
-        print("\n923 self.dataframes.keys():", self.dataframes.keys() )
-
-        # print(self.dataframes["C13_1D"].head())
 
         self.dataframes = add_missing_columns_to_nmrExpt_dataframes(self.dataframes)
-        print("\nadd_missing_columns_to_nmrExpt_dataframes(self.dataframes)")
-        print("\n927 self.dataframes.keys():", self.dataframes.keys() )
-
-        print(self.dataframes["C13_1D"].head())
 
         hsqc_H1_pks = self.dataframes["HSQC"].f2_ppm.values
         c13_pks = self.dataframes["C13_1D"].ppm.values
-        # self.carbonSeparation = calc_minimum_ppm_separation(c13_pks, CARBONSEPARATION)
-        # self.protonSeparation = calc_minimum_ppm_separation(hsqc_H1_pks, PROTONSEPARATION)
 
         self.carbonSeparation = CARBONSEPARATION
         self.protonSeparation = PROTONSEPARATION
 
-        print("*********************************************")
-
-        print("self.carbonSeparation", self.carbonSeparation)
-        print("self.protonSeparation", self.protonSeparation)
-        print("*********************************************")
-
         self.exact_ppm_values = self.exact_ppm_values_only()
-        print("self.exact_ppm_values:", self.exact_ppm_values)
 
     @classmethod
     def from_mnova_json_file(cls, fn: Path):
@@ -1094,49 +1026,19 @@ class NMRProblem:
 
         data = read_in_mesrenova_json(cls.json_data)
         dataframes = create_dataframes_from_mresnova_json(data)
-        print("dataframes keys: ", dataframes.keys())
         return cls(dataframes)
     
-    # @classmethod
-    # def from_mnova_json_file_multiple(cls, fn: Path):
-    #     """
-    #     Create an NMRProblem object from a json file.
-    #     """
-    #     with open(fn, "r") as f:
-    #         cls.json_data = json.load(f)
-
-    #     # convert the json data into a dictionary of pandas dataframes
-
-    #     data = read_in_mesrenova_json_multiple(cls.json_data)
-    #     dataframes = create_dataframes_from_mresnova_json(data)
-    #     return cls(dataframes)
-
     @classmethod
     def from_mnova_dict(cls, json_data: dict):
         """
         Create an NMRProblem object from a json file.
         """
-        print("\nfrom_mnova_dict(cls,json_data: dict):\n")
         cls.json_data = json_data
         # convert the json data into a dictionary of pandas dataframes
         data = read_in_mesrenova_json(cls.json_data)
         dataframes = create_dataframes_from_mresnova_json(data)
-        print("\nfrom_mnova_dict\n")
-        print("dataframes keys: ", dataframes.keys())
         return cls(dataframes)
     
-        # @classmethod
-    # def from_mnova_dict_multiple(cls, json_data: dict):
-    #     """
-    #     Create an NMRProblem object from a json file.
-    #     """
-    #     print("\nfrom_mnova_dict(cls,json_data: dict):\n")
-    #     cls.json_data = json_data
-    #     # convert the json data into a dictionary of pandas dataframes
-    #     data = read_in_mesrenova_json_multiple(cls.json_data)
-    #     dataframes = create_dataframes_from_mresnova(data)
-    #     return cls(dataframes)
-
     @classmethod
     def from_excel_file(cls, fn: Path):
         """
@@ -1159,40 +1061,19 @@ class NMRProblem:
             f1_ppm_expts = set()
 
             for expt in expts_with_peaks:
-                if expt in ["HSQC", "HSQC_CLIPCOSY", "HMBC", "DDEPT_CH3_ONLY"]:
+                if expt in ["HSQC", "HSQC_CLIPCOSY", "HMBC", "DDEPTCH3ONLY"]:
                     # add f2_ppm values to f2_ppm_expts set
-                    print(f"1036 Processing expt: {expt}")
-                    print(self.dataframes[expt].columns)
                     f2_ppm_set = set(self.dataframes[expt]["f2_ppm"].values)
                     f2_ppm_expts.update(f2_ppm_set)
                     
                     f1_ppm_set = set(self.dataframes[expt]["f1_ppm"].values)
                     f1_ppm_expts.update(f1_ppm_set)
 
-                    print("\n****************************\n\n")
-                    print(f"{expt} f1_ppm: {len(f1_ppm_set - f1_ppm)}, {f1_ppm_set - f1_ppm}, f2_ppm: {len(f2_ppm_set - f2_ppm)}, {f2_ppm_set - f2_ppm}")
-                    print("\n****************************\n\n")
-
-
                 elif expt in ["COSY"]:
                     f2_ppm_set = set(self.dataframes[expt]["f2_ppm"].values)
                     f2_ppm_expts.update(f2_ppm_set)
                     f1_ppm_set = set(self.dataframes[expt]["f1_ppm"].values)
                     f2_ppm_expts.update(f1_ppm_set)
-
-                    
-                    print("\n****************************\n\n")
-                    print(f"{expt} f1_ppm: {len(f1_ppm_set - f1_ppm)}, {f1_ppm_set - f1_ppm}, f2_ppm: {len(f2_ppm_set - f2_ppm)}, {f2_ppm_set - f2_ppm}")
-                    print("\n****************************\n\n")
-
-                    
-
-
-            print("f1_ppm_expts:", f1_ppm_expts)
-            print("f2_ppm_expts:", f2_ppm_expts)
-
-            print("extra f1_ppm:", f1_ppm - f1_ppm_expts)
-            print("extra f2_ppm:", f2_ppm - f2_ppm_expts)
 
             #  check if f1_ppm - f1_ppm_expts is empty
             if len(f1_ppm - f1_ppm_expts) > 0 or len(f2_ppm - f2_ppm_expts) > 0:
@@ -1209,8 +1090,6 @@ class NMRProblem:
         """
         Check if the data is a prediction
         """
-
-        print("self.dataframes[\"MNOVAcalcMethod\"].loc[0, \"MNOVAcalcMethod\"]\n", self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"])
 
         if self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"] in [
             "MNOVA Predict",
@@ -1231,16 +1110,13 @@ class NMRProblem:
             self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"]
             == "NMRSHIFTDB2 Predict"
         ):
-            print("Prediction from NMRSHIFTDB2")
             return True
         elif (
             self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"]
             == "JEOL Predict"
         ):
-            print("Prediction from JEOL")
             return True
         else:
-            print("Prediction from MNOVA")
             return False  
               
     def JEOL_prediction_used(self):
@@ -1252,16 +1128,13 @@ class NMRProblem:
             self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"]
             == "JEOL Predict"
         ):
-            print("Prediction from JEOL")
             return True
         elif (
             self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"]
             == "MNOVA Predict"
         ):
-            print("Prediction from MNOVA")
             return True
         else:
-            print("Prediction from NMRSHIFTDB2")
             return False
 
     def add_missing_spectra(self):
@@ -1297,7 +1170,7 @@ class NMRProblem:
         hsqc = self.dataframes["HSQC"]
         h1_1d = self.dataframes["H1_1D"]
         clipcosy = self.dataframes["HSQC_CLIPCOSY"]
-        ddept = self.dataframes["DDEPT_CH3_ONLY"]
+        ddept = self.dataframes["DDEPTCH3ONLY"]
 
         nmrAssignments = attach_symmetry_atom_index(nmrAssignments)
 
@@ -1311,12 +1184,6 @@ class NMRProblem:
         # fix coordinates of molecule before creating png
 
         self.mol = Chem.MolFromMolBlock(self.dataframes["molfile"].loc[0, "molfile"])
-
-        # mol = Chem.AddHs(mol)
-        # AllChem.EmbedMolecule(mol, randomSeed=3)
-        # mol = Chem.RemoveHs(mol)
-
-        # mol.Compute2DCoords()
 
         svg_str, new_xy3 = create_svg_string(
             self.mol,
@@ -1332,18 +1199,9 @@ class NMRProblem:
             nmrAssignments.at[idx, "x"] = new_xy3_plus1[row["atom_idx"]][0]
             nmrAssignments.at[idx, "y"] = new_xy3_plus1[row["atom_idx"]][1]
 
-        print("\n994 nmrAssignments\n", nmrAssignments, "\n")
-
-        print("Adding x and y coordinates to carbonAtomsInfo")
-        print("\n997 carbonAtomsInfo\n", self.carbonAtomsInfo, "\n")
-
-        print("\n999 new_xy3\n")
-        for key, value in new_xy3.items():
-            print(key, value)
 
         # add x and y coordinates to catomAtomsInfo
         for idx, row in self.carbonAtomsInfo.iterrows():
-            print("idx", idx, row["atom_idx"])
             self.carbonAtomsInfo.at[idx, "x"] = new_xy3[row["atom_idx"]][0]
             self.carbonAtomsInfo.at[idx, "y"] = new_xy3[row["atom_idx"]][1]
 

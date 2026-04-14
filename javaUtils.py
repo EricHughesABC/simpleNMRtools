@@ -102,7 +102,7 @@ class NMRShiftDBBridge:
         try:
             # Load the Java class
             print("Attempting to load MolFileParser class...")
-            MolFileParser = jpype.JClass('MolFileParser')
+            MolFileParser = jpype.JClass('MolFileParser') # added lib/ prefix to match package structure
             print("MolFileParser class loaded")
 
             self.parser = MolFileParser()

@@ -133,7 +133,7 @@ EXCEL_DF_COLUMNS = {
         "f2p_ppm",
     ],
     
-    "ddept_ch3_only": [
+    "ddeptch3only": [
         "f1_ppm",
         "f2_ppm",
         "intensity",
@@ -272,7 +272,7 @@ EXCEL_ORIG_DF_COLUMNS = {
         "Annotation",
     ],
     
-    "DDEPT_CH3_ONLY": [
+    "DDEPTCH3ONLY": [
         "f2 (ppm)",
         "f1 (ppm)",
         "Intensity",

@@ -7,7 +7,8 @@ var validHSQCPulseSequenceStrings =  [ "hsqcedetgpsisp2.3.ptg",
                                         "hsqcetgp",
                                         "gns_noah3-BSScc.eeh",
                                         "hsqcedetgpsisp2.4",
-                                        "hsqcedetgpsisp.2"
+                                        "hsqcedetgpsisp.2",
+                                        "js_hsqc.jxp"
                                         ];
 
 var validHMBCPulseSequenceStrings = ["ghmbc.wu", 
@@ -17,7 +18,8 @@ var validHMBCPulseSequenceStrings = ["ghmbc.wu",
                                      "gHMBCAD",
                                      "hmbcgpndqf",
                                     "gns_noah3-BSScc.eeh",
-                                    "shmbcctetgpl2nd"];
+                                    "shmbcctetgpl2nd",
+                                    "js_hmbcet.jxp"];
 
 var validCOSYCPulseSequenceStrings = ["cosygpqf", 
                                       "cosygp", 
@@ -25,6 +27,7 @@ var validCOSYCPulseSequenceStrings = ["cosygpqf",
                                       "cosygpmfppqf", 
                                       "cosygpmfqf", 
                                       "gCOSY",
+                                      "js_cosy.jxp",
                                       "cosygpppqf_ptype",
                                       "cosyqf45",
                                       "cosygpmfphpp"];
@@ -44,7 +47,7 @@ var valid1DH1PulseSequenceStrings = ["zg30",
                                      ];
 
 var valid1DC13PulseSequenceStrings = ["zgdc30", "s2pul", "zgpg30",
-                                      "zgzrse", "zg0dc.fr"
+                                      "zgzrse", "zg0dc.fr", "js_carbon.jxp"
 ];
 
 var validPURESHIFT1DH1PulseSequenceStrings = ["ja_PSYCHE_pr_03b", 

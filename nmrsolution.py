@@ -52,8 +52,6 @@ class NMRsolution:
 
         self.expts_available = set(problemdata_json.dataframes["chosenSpectra"]["expt"])
 
-        print("self.expts_available", self.expts_available)
-
         # remove "SKIP" from expts_available
         if "SKIP" in self.expts_available:
             self.expts_available.remove("SKIP")
@@ -68,18 +66,13 @@ class NMRsolution:
         self.hmbc_df = problemdata_json.dataframes["HMBC"]
         self.cosy_df = problemdata_json.dataframes["COSY"]
         self.dept_df = problemdata_json.dataframes["DEPT135"]
-        self.ddept_ch3_only_df = problemdata_json.dataframes["DDEPT_CH3_ONLY"]
+        self.ddept_ch3_only_df = problemdata_json.dataframes["DDEPTCH3ONLY"]
         self.hsqc_clipcosy_df = problemdata_json.dataframes["HSQC_CLIPCOSY"]
         self.h1_df = problemdata_json.dataframes["H1_1D"]
-        print("problemdata_json.dataframes.keys()", problemdata_json.dataframes.keys())
         self.pureshift_df = problemdata_json.dataframes["H1_pureshift"]
         self.c13_df = problemdata_json.dataframes["C13_1D"]
 
         self.dept135_not_used_to_solve_problem = True
-
-        print("self.c13_df\n", self.c13_df)
-
-        print("self.hsqc_clipcosy_df\n", self.hsqc_clipcosy_df)
 
         # if hsqc_df is empty then return
         if self.hsqc_df.empty:
@@ -106,11 +99,6 @@ class NMRsolution:
         self.solution_error_code = self.expected_molecule.nmrshiftdb_failed_code
 
         # check if we need to use dept to assign CH2 in hsqc or has the user annotated the CH2 in the hsqc dataframe
-        # print("nmrsolution line 108")
-        # print("self.hsqc_df before check_hsqc_assign_CH2_from_DEPT\n", self.hsqc_df)
-
-        print("self.hsqc_df.columns\n", self.hsqc_df.columns)
-
         if (
             (self.expected_molecule.num_CH2_carbon_atoms > 0)
             and (self.hsqc_df[self.hsqc_df.intensity < 0].shape[0] == 0)
@@ -128,9 +116,6 @@ class NMRsolution:
             # multiply the intensity and the integral by -1 in the hsqc_df where CH2 is present in the annotation column
             self.hsqc_df.loc[self.hsqc_df.Annotation == "CH2", "intensity"] = -1.0
             self.hsqc_df.loc[self.hsqc_df.Annotation == "CH2", "integral"] = -1.0
-
-        # print("self.hsqc_df after check_hsqc_assign_CH2_from_DEPT\n", self.hsqc_df)
-        # print(self.hsqc_df)
 
     def initiate_molgraph(
         self, 
@@ -187,7 +172,6 @@ class NMRsolution:
 
             if G2_node in G2.nodes():
                 molgraph.nodes[node]["ppm"] = G2.nodes[G2_node]["ppm"]
-                # molgraph.nodes[node]["numProtons"] = G2.nodes[node]["numProtons"]
                 # check if the atmomNumber can be converted to an integer if not dont try
                 if isinstance(G2.nodes[G2_node]["atomNumber"], (float, int)):
                     molgraph.nodes[node]["atomNumber"] = int(
@@ -526,12 +510,6 @@ class NMRsolution:
                 return
 
             # check if the number of dept rows equals the number of protonated carbons in molprops_df
-            print()
-            print("len(self.dept_df)", len(self.dept_df))
-            print("mol.num_carbon_atoms_with_protons", mol.num_carbon_atoms_with_protons)
-            print("mol.num_sym_carbon_atoms_with_protons", mol.num_sym_carbon_atoms_with_protons)
-            print()
-
             if (len(self.dept_df) > mol.num_carbon_atoms_with_protons) or (len(self.dept_df) < mol.num_sym_carbon_atoms_with_protons):
                 self.nmrsolution_failed = True
                 self.nmrsolution_error_message = "<p> Please check the number of carbon peaks in the DEPT data as the number does not equal to the number of protonated carbons in the given molecule</p>"
@@ -565,9 +543,7 @@ class NMRsolution:
             # if yes no distasterotopic CH2 carbons, therefore each CH2 carbon has only one proton group
 
             if self.hsqc_df.shape[0] == self.dept_df.shape[0]:
-                print("no diasterotopic CH2 carbons")
                 # loop through dept_CH2, find closest ppm value in hsqc and set the intensity to negative
-                # tol = 0.0025  # CARBONSEPARATION
                 tol = self.problemdata_json.carbonSeparation
                 for v1 in dept_CH2["ppm"]:
 
@@ -579,7 +555,6 @@ class NMRsolution:
                     self.hsqc_df.loc[idx, "intensity"] = -1.0
 
             elif self.hsqc_df.shape[0] > self.dept_df.shape[0]:
-                print("diasterotopic CH2 carbons")
                 # loop through dept_CH2, find closest ppm value in hsqc and set the intensity to negative
                 # tol = 0.0025  # CARBONSEPARATION
                 tol = self.problemdata_json.carbonSeparation
@@ -628,7 +603,6 @@ class NMRsolution:
         while len(ch2_vals):
             # choose first from the list
             p0 = ch2_vals[0]
-            print("p0", p0, type(p0))
             # find list of hmbc values that are similar to the first in the list
             similar_ch2s = [
                 p
@@ -848,8 +822,6 @@ class NMRsolution:
             pd.DataFrame: The pureshift DataFrame.
         """
 
-        print("init_pureshift_from_h1")
-
         if self.PURESHIFT_data_present:
             return self.pureshift_df
 
@@ -915,7 +887,6 @@ class NMRsolution:
         """
 
         # label c13 values as CH2 or not using the hsqc_df_
-        print("add_CH0_CH1_CH2_CH3_CH3CH1_to_C13_df")
         self.c13_df["CH0"] = False
         self.c13_df["CH1"] = False
         self.c13_df["CH2"] = False
@@ -973,7 +944,6 @@ class NMRsolution:
         for idx, ppm in zip(self.c13.index, self.c13.ppm):
             if not self.c13.loc[idx, "quaternary"] and not self.c13.loc[idx, "CH2"]:
                 self.c13.loc[idx, "CH3CH1"] = True
-                # self.c13.loc[idx, "numProtons"] = 1
 
     def init_CH_CH3_HSQC_from_DDEPT_CH3_only(self) -> None:
         """
@@ -1014,7 +984,6 @@ class NMRsolution:
         Returns:
             tuple: (c13_df, created) where c13_df is the resulting C13 DataFrame and created is a boolean indicating if new data was created.
         """
-        print("init_c13_from_hsqc_and_hmbc")
 
         if self.C13_data_present:
             return self.c13_df, False
@@ -1252,7 +1221,7 @@ class NMRsolution:
             self.HSQC_CLIPCOSY_data_present = False
             self.HSQC_CLIPCOSY_data_missing = True
 
-        if {"DDEPT_CH3_ONLY"}.issubset(self.expts_available):
+        if {"DDEPTCH3ONLY"}.issubset(self.expts_available):
             self.DDEPT_CH3_ONLY_data_present = True
             self.DDEPT_CH3_ONLY_data_missing = False
         else:
@@ -1385,7 +1354,6 @@ class NMRsolution:
                    and message is a string describing the result.
         """
 
-        print("self.hsqc_df:\n", self.hsqc_df)
         if not self.hsqc_df.empty:
             # copy rows where signaltype is Compound or 0
             self.hsqc = self.hsqc_df[
@@ -1415,9 +1383,6 @@ class NMRsolution:
 
             self.hsqc["CH2"] = False
             self.numtimes_HSQC_CH2_set_to_FALSE += 1
-            # print(
-            #     "line 1043, check_hsqc_df_not_empty, self.numtimes_HSQC_CH2_set_to_FALSE"
-            # )
             self.hsqc["CH3CH1"] = False
             self.hsqc["CH3"] = False
             self.hsqc["CH1"] = False
@@ -1455,7 +1420,6 @@ class NMRsolution:
         df[f"{column_name}_prob"] = 0
 
         # create dataframe with ppm values and their nearest true value
-        # dfnew = df.assign(nearest_true_value = df[column_name].apply(lambda x: find_nearest(true_values, x)))
         df[column_name] = df[column_name].apply(
             lambda x: self.find_nearest(true_values, x)
         )
@@ -1478,7 +1442,6 @@ class NMRsolution:
         DataFrame versions of HSQC for each group type, ensuring correct assignment for downstream NMR analysis.
         """
 
-        print("add_CH2_CH3CH_to_hsqc_dataframes")
         self.hsqc["numProtons"] = -1
         self.hsqc["integral"] = -1
         self.hsqc["attached_protons"] = -1
@@ -1578,8 +1541,6 @@ class NMRsolution:
         molecule's group counts and chemical shifts, handling various scenarios for group assignment
         and updating related columns accordingly.
         """
-        print("c13_from_hsqc and H1_data_missing")
-
         expected_molecule = self.expected_molecule
         hsqc = self.hsqc
 
@@ -1590,8 +1551,6 @@ class NMRsolution:
         ]
 
         CH1_mol_df = expected_molecule.molprops_df[expected_molecule.molprops_df.CH1]
-
-        print(f"CH1_mol_df.shape[0]: {CH1_mol_df.shape[0]}")
 
         CH3CH1_sym_mol_df = expected_molecule.sym_molprops_df[
             expected_molecule.sym_molprops_df.CH3CH1
@@ -1608,11 +1567,6 @@ class NMRsolution:
         CH3CH1_hsqc_df = hsqc[hsqc.CH3CH1].copy()
 
         num_CH3CH1_hsqc = CH3CH1_hsqc_df.shape[0]
-        print(f"num_CH3CH1_hsqc: {num_CH3CH1_hsqc}")
-
-        print(f"CH3CH1_hsqc_df.shape[0]: {CH3CH1_hsqc_df.shape[0]}")
-        print(f"CH3CH1_mol_df.shape[0]: {CH3CH1_mol_df.shape[0]}")
-        print(f"CH3CH1_sym_mol_df.shape[0]: {CH3CH1_sym_mol_df.shape[0]}")
 
         if num_CH3CH1_hsqc == 0:
             #  skip if no CH3CH1 groups in HSQC
@@ -1621,9 +1575,6 @@ class NMRsolution:
         if self.dept135_not_used_to_solve_problem:
             if num_CH3CH1_hsqc > CH3CH1_mol_df.shape[0]:
                 #  if more CH3CH1 groups in HSQC than expected molecule then we have a problem
-                print(
-                    "more CH3CH1 groups in HSQC than expected molecule, this is a problem"
-                )
                 self.nmrsolution_failed = True
                 self.nmrsolution_error_message = "CH3CH1 HSQC > CH3CH1 expected molecule"
                 self.nmrsolution_error_code = 401
@@ -1631,7 +1582,6 @@ class NMRsolution:
 
         #  check if CH3 groups already assigned and if so assign CH1 groups
         if (CH3_mol_df.shape[0] > 0) and hsqc.CH3.sum() > 0:
-            print("CH3 groups already assigned")
             #  set the CH1 to True where hsqc.numprotons < 0
             hsqc.loc[hsqc.numProtons < 0, "CH1"] = True
             hsqc.loc[hsqc.numProtons < 0, "numProtons"] = 1
@@ -1642,15 +1592,12 @@ class NMRsolution:
 
             hsqc.loc[CH3CH1_hsqc_df.index, "CH1"] = True
             hsqc.loc[CH3CH1_hsqc_df.index, "numProtons"] = 1
-            print("no CH3 groups in expected molecule setting all CH3CH1 groups to CH1")
             return
 
         # if no CH1 groups in expected molecule assign all CH3CH1 groups to CH3
         elif CH1_mol_df.shape[0] == 0:
-            print("no CH1 groups in expected molecule")
             hsqc.loc[CH3CH1_hsqc_df.index, "CH3"] = True
             hsqc.loc[CH3CH1_hsqc_df.index, "numProtons"] = 3
-            print("no CH1 groups in expected molecule setting all CH3CH1 groups to CH3")
             return
         
         #  if not all CH3CH1 peaks are picked
@@ -1658,7 +1605,6 @@ class NMRsolution:
         #  check if we think we have symmetry in the expected molecule
         if CH3CH1_sym_mol_df.shape[0] < CH3CH1_mol_df.shape[0] and CH3CH1_hsqc_df.shape[0] < CH3CH1_sym_mol_df.shape[0]:
 
-            print("not all HSQC peaks picked yet")
             # loop through the CH3CH1_hsqc_df and try to match with CH3CH1_mol_df 
             CH3CH1_sym_mol_df = CH3CH1_sym_mol_df[~CH3CH1_sym_mol_df.picked]
             for idx, row in CH3CH1_hsqc_df.iterrows():
@@ -1666,9 +1612,6 @@ class NMRsolution:
                 closest_match = CH3CH1_sym_mol_df.iloc[
                     (CH3CH1_sym_mol_df["ppm"] - row.f1_ppm).abs().argsort()[:1]
                 ]
-                print(f"closest_match: \n{closest_match}")
-                print(f"closest_matc.columns: {closest_match.columns} ")
-                print(f"closest_match.totalNumHs: {closest_match.totalNumHs.values[0]}")
                 if not closest_match.empty:
                     # update the hsqc dataframe with the closest match
                     hsqc.loc[row.name, "numProtons"] = closest_match.totalNumHs.values[0]
@@ -1678,31 +1621,8 @@ class NMRsolution:
                     CH3CH1_sym_mol_df.loc[closest_match.index, "picked"] = True
                     CH3CH1_sym_mol_df = CH3CH1_sym_mol_df[~CH3CH1_sym_mol_df.picked]
             
-        # elif CH3CH1_hsqc_df.shape[0] < CH3CH1_mol_df.shape[0]:
-
-        #     # loop through the CH3CH1_hsqc_df and try to match with CH3CH1_mol_df 
-        #     CH3CH1_mol_df = CH3CH1_mol_df[~CH3CH1_mol_df.picked]
-        #     for idx, row in CH3CH1_hsqc_df.iterrows():
-        #         # find the closest match in the CH3CH1_mol_df
-        #         closest_match = CH3CH1_mol_df.iloc[
-        #             (CH3CH1_mol_df["ppm"] - row.f1_ppm).abs().argsort()[:1]
-        #         ]
-        #         if not closest_match.empty:
-        #             # update the hsqc dataframe with the closest match
-        #             hsqc.loc[row.name, "numProtons"] = closest_match.totalNumHs.values[0]
-        #             hsqc.loc[row.name, "CH3"] = closest_match.CH3.values[0]
-        #             hsqc.loc[row.name, "CH1"] = closest_match.CH1.values[0]
-        #             # mark the closest match as picked in the CH3CH1_mol_df
-
-        #             CH3CH1_mol_df.loc[closest_match.index, "picked"] = True
-        #             CH3CH1_mol_df = CH3CH1_mol_df[~CH3CH1_mol_df.picked]
-
-  
-
-
         else:
 
-            print("we have both CH3 and CH1 groups in the expected molecule")
             # we have both CH3 and CH1 groups in the expected molecule
 
             # split the CH3CH1 based on ppm value above and below 67 ppm
@@ -1710,13 +1630,6 @@ class NMRsolution:
 
             CH3CH1_hsqc_df_lessthan_67 = CH3CH1_hsqc_df[CH3CH1_hsqc_df.f1_ppm < 67]
             CH3CH1_hsqc_df_morethan_67 = CH3CH1_hsqc_df[CH3CH1_hsqc_df.f1_ppm >= 67]
-
-            print(
-                f"CH3CH1_hsqc_df_lessthan_67.shape[0]: {CH3CH1_hsqc_df_lessthan_67.shape[0]}"
-            )
-            print(
-                f"CH3CH1_hsqc_df_morethan_67.shape[0]: {CH3CH1_hsqc_df_morethan_67.shape[0]}"
-            )
 
             #  label the CH3CH1 groups above 67 ppm as CH1
             hsqc.loc[CH3CH1_hsqc_df_morethan_67.index, "CH1"] = True
@@ -1727,13 +1640,6 @@ class NMRsolution:
             CH3CH1_mol_df_lessthan_67 = CH3CH1_mol_df[CH3CH1_mol_df.ppm < 67]
             CH3CH1_mol_df_morethan_67 = CH3CH1_mol_df[CH3CH1_mol_df.ppm >= 67]
 
-            print(
-                f"CH3CH1_mol_df_lessthan_67.shape[0]: {CH3CH1_mol_df_lessthan_67.shape[0]}"
-            )
-            print(
-                f"CH3CH1_mol_df_morethan_67.shape[0]: {CH3CH1_mol_df_morethan_67.shape[0]}"
-            )
-
             CH3_mol_df_lessthan_67 = CH3CH1_mol_df_lessthan_67[
                 CH3CH1_mol_df_lessthan_67.CH3
             ]
@@ -1741,21 +1647,13 @@ class NMRsolution:
                 CH3CH1_mol_df_lessthan_67.CH1
             ]
 
-            # print(f"CH3_mol_df_lessthan_67.shape[0]: {CH3_mol_df_lessthan_67.shape[0]}")
-            # print(f"CH1_mol_df_lessthan_67.shape[0]: {CH1_mol_df_lessthan_67.shape[0]}")
-            # print(
-            #     f"CH3CH1_hsqc_df_lessthan_67.shape[0]: {CH3CH1_hsqc_df_lessthan_67.shape[0]}"
-            # )
-
             # if there are no CH1 groups below 67 ppm in the expected molecule then we can set the hsqc CH3CH1 groups to CH3
             if CH1_mol_df_lessthan_67.shape[0] == 0:
-                print("no CH1 groups below 67 ppm in expected molecule")
                 hsqc.loc[CH3CH1_hsqc_df_lessthan_67.index, "CH3"] = True
                 hsqc.loc[CH3CH1_hsqc_df_lessthan_67.index, "numProtons"] = 3
 
             # check the numbers
             elif CH3CH1_hsqc_df.shape[0] == CH3CH1_mol_df.shape[0]:
-                print("CH3CH1_hsqc_df.shape[0] == CH3CH1_mol_df.shape[0]")
                 for idx, row in CH3_mol_df.iterrows():
                     # find the closest match in the hsqc dataframe
                     # and update the numProtons column to 3
@@ -1777,7 +1675,6 @@ class NMRsolution:
                     CH3CH1_hsqc_df.drop(closest_match.index, inplace=True)
 
             elif CH3CH1_hsqc_df.shape[0] == CH3CH1_sym_mol_df.shape[0]:
-                print("CH3CH1_hsqc_df.shape[0] == CH3CH1_sym_mol_df.shape[0]")
                 for idx, row in CH3_sym_mol_df.iterrows():
                     # find the closest match in the hsqc dataframe
                     # and update the numProtons column to 3
@@ -1802,7 +1699,6 @@ class NMRsolution:
                 (CH3CH1_mol_df_morethan_67.shape[0]
                 == CH3CH1_hsqc_df_morethan_67.shape[0]) and (CH3CH1_mol_df_morethan_67.shape[0]>0)
             ):
-                print("then match up CH1 and CH3s base on ranking ppm values")
                 # then match up CH1 and CH3s base on ranking ppm values
 
                 # sort the CH3CH1_hsqc_df_lessthan_67 by f1_ppm
@@ -1897,7 +1793,6 @@ class NMRsolution:
         if (num_CH3_in_H1 == self.expected_molecule.num_CH3_carbon_atoms) or (
             num_CH3_in_H1 == self.expected_molecule.num_sym_CH3_carbon_atoms
         ):
-            print("number of CH3 in H1 matches expected number")
             for index, row in h1[h1.numProtons == 3].iterrows():
                 hsqc_rows = hsqc[hsqc.f2_ppm == row.ppm]
                 if hsqc_rows.shape[0] == 1:
@@ -1933,24 +1828,11 @@ class NMRsolution:
         sets the number of protons, and updates related columns for integrals and attached protons.
         """
 
-        print(
-            "====================================\nassign_CH3_CH2_CH1_in_HSQC_using_Assignments\n===================================="
-        )
-        # print(self.hsqc["Annotation"])
-        # print(self.hsqc["Annotation"].str.contains(""))
-
         hsqc = self.hsqc
 
         hsqc["numProtons"] = -1
 
         #  check if all Assignments in the column are "" then just return
-
-        hsqc["CH3"] = False
-        hsqc["CH2"] = False
-        hsqc["CH1"] = False
-        hsqc["CH0"] = False
-        hsqc["quaternary"] = False
-        hsqc["CH3CH1"] = False
 
         # set column CH2 to True if intensity < 0
         hsqc.loc[hsqc.intensity < 0, "CH2"] = True
@@ -2009,7 +1891,6 @@ class NMRsolution:
                 closest_match = hsqc_CH3.iloc[
                     (hsqc_CH3["f1_ppm"] - ppm).abs().argsort()[:1]
                 ]
-                print(f"{ppm} closest_match: {closest_match['f1_ppm']}")
                 ddept_ch3_only_df.loc[idx, "CH3"] = True
                 hsqc.loc[closest_match.index, "CH3"] = True
                 # remove row from hsqc_CH3
@@ -2024,9 +1905,6 @@ class NMRsolution:
         hsqc.loc[hsqc.CH3, "numProtons"] = 3
         hsqc.loc[hsqc.CH2, "numProtons"] = 2
         hsqc.loc[hsqc.CH1, "numProtons"] = 1
-
-        # print("\nhsqc after setting CH3 based on ddept_ch3_only_df\n")
-        # print(hsqc[["f1_ppm", "f2_ppm", "numProtons", "CH3", "CH2", "CH1", "CH3CH1"]])
 
         # set the integral, attached_protons and f2_integral
         hsqc["f2_integral"] = hsqc["numProtons"]
@@ -2064,8 +1942,6 @@ class NMRsolution:
 
         # check what experiments are present
         self.check_what_experiments_are_present()
-
-        print("self.HSQC_data_present:", self.HSQC_data_present)
 
         # check if hsqc is present
         if not self.HSQC_data_present:
@@ -2257,13 +2133,6 @@ class NMRsolution:
         self.C13ppmC13index = dict(zip(self.c13.ppm, self.c13.index))
         self.C13indexC13ppm = dict(zip(self.h1.index, self.c13.ppm))
 
-        print("self.C13indexC13ppm", self.C13indexC13ppm)
-
-        # open and read excel file into datframe and then process it
-        # with open(self.yamlFiles[0], 'r') as fp:
-        #    info = yaml.safe_load(fp)
-        #    self.init_variables_from_dict(info)
-
         # add index columns to hsqc
         for i in self.hsqc.index:
             print(i)
@@ -2276,16 +2145,10 @@ class NMRsolution:
         self.hsqc["f2p_i"] = self.hsqc["f1_i"]
         self.hsqc["f2p_ppm"] = self.hsqc["f1_ppm"]
 
-        print("self.hsqc after adding index columns\n", self.hsqc)
-
         # add lookup dicts for hsqc
         self.hsqcH1ppmC13index = dict(zip(self.hsqc.f2_ppm, self.hsqc.f2p_i))
         self.hsqcH1ppmC13label = dict(zip(self.hsqc.f2_ppm, self.hsqc.f2Cp_i))
         self.hsqcH1ppmC13ppm = dict(zip(self.hsqc.f2_ppm, self.hsqc.f2p_ppm))
-
-        print("\nself.hsqcH1ppmC13ppm\n")
-        for k, v in self.hsqcH1ppmC13ppm.items():
-            print(f"{k}: {v}")
 
         self.hsqcH1indexC13index = dict(zip(self.hsqc.f2_i, self.hsqc.f2p_i))
         self.hsqcH1indexC13ppm = dict(zip(self.hsqc.f2_i, self.hsqc.f2p_ppm))
@@ -2371,28 +2234,14 @@ class NMRsolution:
             ] = self.hsqcH1ppmC13label.get(hppm)
 
         # combine cosy and hsqc_clipcosy dataframes
-        # loguru.logger.debug(f"\ncosy\n{self.cosy}")
         self.cosy = self.process_and_merge_cosy_dfs(self.hsqc_clipcosy, self.cosy)
-        # loguru.logger.debug(f"\ncosy\n{self.cosy}")
 
-        # loguru.logger.debug("Add CH3 to HSQC from DDEPT_CH3_ONLY")
-        # loguru.logger.debug(f"\nhsqc\n{self.hsqc}")
-        # self.init_CH_CH3_HSQC_from_DDEPT_CH3_only()
-        # loguru.logger.debug(f"\nhsqc\n{self.hsqc}")
+        self.init_CH_CH3_HSQC_from_DDEPT_CH3_only()
 
         # add index columns to hmbc
         self.hmbc["f1C_i"] = ""
         self.hmbc["f2H_i"] = ""
         self.hmbc["f2Cp_i"] = ""
-
-        print("\nFilling in hmbc dataframe with index columns\n")
-        print("n\self.hmbc.columns:\n", self.hmbc.columns)
-        print()
-        print(self.hmbc[["f1_ppm", "f2_ppm"]])
-
-        print("self.hsqcH1ppmC13ppm:\n", )
-        for k,v in self.hsqcH1ppmC13ppm.items():
-            print(f"{k}: {v}")
 
         # fill in hmbc dataframe
         for i in self.hmbc.index:
@@ -2422,13 +2271,10 @@ class NMRsolution:
         # add f1p_ppm and f1p_i columns to self.h1 based on hsqc dataframe
         self.h1["f1p_ppm"] = -1e6
         self.h1["f1p_i"] = -1
-        print("Assigning f1p_ppm and f1p_i to h1 dataframe based on hsqc dataframe")
-        print(f"self.h1.:\n {self.h1}")
-        print(f"self.hsqc:\n {self.hsqc}")
+
         for i in self.h1.index:
             f2_ppm = self.h1.loc[i, "ppm"]
             if self.hsqc[self.hsqc.f2_ppm == f2_ppm].empty:
-                print(f"f2_ppm {f2_ppm} not found in hsqc dataframe")
                 self.h1.loc[i, "f1p_ppm"] = -1e6
                 self.h1.loc[i, "f1p_i"] = -1
                 break
@@ -2439,12 +2285,6 @@ class NMRsolution:
             self.h1.loc[i, "f1p_i"] = self.hsqc[self.hsqc.f2_ppm == f2_ppm].f1_i.values[
                 0
             ]
-
-        # if "f2_integral" not in self.hsqc.columns:
-        #     self.define_hsqc_f2integral()
-        # self.check_and_ammend_CH3groups_greater_than_3()
-        # self.check_and_ammend_CH2groups_greater_than_2()
-        # self.check_and_ammend_CH1groups_greater_than_1()
 
         # check if h1 contains any -1e6 values in f1p_ppm and if so return false and error message
         if (self.h1["f1p_ppm"] == -1e6).any():

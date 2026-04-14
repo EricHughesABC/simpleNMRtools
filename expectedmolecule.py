@@ -3,6 +3,7 @@ import os
 import platform
 import subprocess
 from io import StringIO
+from collections import defaultdict
 import numpy as np
 import pandas as pd
 
@@ -35,6 +36,24 @@ def calc_c13_chemical_shifts_using_nmrshift2D(molstr: str) -> pd.DataFrame:
         return mol_df
     else:
         return False
+
+def get_symmetry_classes(mol):
+    # mol = Chem.AddHs(mol)
+    # Generate canonical ranks (same rank = same symmetry class)
+    ranks = list(Chem.CanonicalRankAtoms(mol, breakTies=False))
+
+    print(ranks)
+    
+    classes = defaultdict(list)
+    for idx, rank in enumerate(ranks):
+        classes[rank].append(idx)
+        
+    return classes
+
+# mol = Chem.MolFromSmiles('CC(C)O') # Isopropanol
+# sym_classes = get_symmetry_classes(mol)
+# for rank, atoms in sym_classes.items():
+#     print(f"Symmetry Class {rank}: Atom Indices {atoms}")
 
 
 class expectedMolecule:
@@ -308,26 +327,52 @@ class expectedMolecule:
         self.molprops_df["sym_atom_idx"] = ""
         self.molprops_df["sym_atomNumber"] = ""
 
-        for idx, row in self.molprops_df.iterrows():
-            df = self.molprops_df[self.molprops_df.ppm == row["ppm"]]
+        # mol = Chem.MolFromSmiles('CC(C)O') # Isopropanol
+        sym_classes = get_symmetry_classes(self.mol)
+        for rank, atoms in sym_classes.items():
+            # find the atom symbol in the atoms and create a list
+            if len(atoms) == 1:
+                continue
+            # skip if atom is not carbon
+            atom_symbols = [self.mol.GetAtomWithIdx(idx).GetSymbol() for idx in atoms]
+            if not all(symbol == "C" for symbol in atom_symbols):
+                continue
+            print(f"Symmetry Class {rank}: Atom Indices {atoms}, Atom Symbols {atom_symbols}")
 
-            if len(df) > 1:
-                # remove row from df that has the same index as the current row
-                df = df.drop(idx)
+            atomNumbers = self.molprops_df[self.molprops_df['atom_idx'].isin(atoms)]["atomNumber"].tolist()
+            for i, idx in enumerate(atoms):
+                # creat a new list with the value at index i in th atoms removed
+                other_atoms = atoms[:i] + atoms[i+1:]
+                other_atomNumbers = atomNumbers[:i] + atomNumbers[i+1:]
+                # create a comma separated string of the other atoms
+                other_atoms_str = ", ".join(str(a) for a in other_atoms)
+                other_atomNumbers_str = ", ".join(str(a) for a in other_atomNumbers)
+                print(f"  Atom {idx} is symmetric to atoms {other_atoms_str}")
+                self.molprops_df.at[idx, "sym_atom_idx"] = other_atoms_str
+                self.molprops_df.at[idx, "sym_atomNumber"] = other_atomNumbers_str
 
-                for idx2, row2 in df.iterrows():
-                    if self.molprops_df.at[idx2, "sym_atom_idx"] == "":
-                        self.molprops_df.at[idx2, "sym_atom_idx"] = f"{row['atom_idx']}"
-                        self.molprops_df.at[
-                            idx2, "sym_atomNumber"
-                        ] = f"{row['atomNumber']}"
-                    else:
-                        self.molprops_df.at[
-                            idx2, "sym_atom_idx"
-                        ] = f"{self.molprops_df.at[idx2, 'sym_atom_idx']}, {row['atom_idx']}"
-                        self.molprops_df.at[
-                            idx2, "sym_atomNumber"
-                        ] = f"{self.molprops_df.at[idx2, 'sym_atomNumber']}, {row['atomNumber']}"
+        # for idx, row in self.molprops_df.iterrows():
+        #     df = self.molprops_df[self.molprops_df.ppm == row["ppm"]]
+        #     # keep only the rows where the numProtons is the same as the current row
+        #     df = df[df.numProtons == row["numProtons"]]
+
+        #     if len(df) > 1:
+        #         # remove row from df that has the same index as the current row
+        #         df = df.drop(idx)
+
+        #         for idx2, row2 in df.iterrows():
+        #             if self.molprops_df.at[idx2, "sym_atom_idx"] == "":
+        #                 self.molprops_df.at[idx2, "sym_atom_idx"] = f"{row['atom_idx']}"
+        #                 self.molprops_df.at[
+        #                     idx2, "sym_atomNumber"
+        #                 ] = f"{row['atomNumber']}"
+        #             else:
+        #                 self.molprops_df.at[
+        #                     idx2, "sym_atom_idx"
+        #                 ] = f"{self.molprops_df.at[idx2, 'sym_atom_idx']}, {row['atom_idx']}"
+        #                 self.molprops_df.at[
+        #                     idx2, "sym_atomNumber"
+        #                 ] = f"{self.molprops_df.at[idx2, 'sym_atomNumber']}, {row['atomNumber']}"
 
         # calculate number of carbons without protons attached
         self.num_quaternary_carbons = self.molprops_df[

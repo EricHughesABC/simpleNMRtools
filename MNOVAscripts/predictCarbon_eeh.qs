@@ -83,7 +83,7 @@ function predictCarbon_eeh() {
         c13predictions["data"][i] = {
             "atom_idx": atom_idx-1, // zero based index changed EEH 2025-sep-06
             "atomNumber": atom.number,
-            "numProtons": atom.nH,
+            "numProtons": atom.nHAll,
             // "ppm": predictionResult[i].shift.value
             "ppm": parseFloat(predictionResult[i].shift.value.toFixed(4))
 

@@ -474,43 +474,24 @@ def predict_c13_shifts():
         Response: A JSON object containing the predicted C13 chemical shifts or an error message.
     """
 
-    print("predict_c13_shifts called")
-    print("request\n\t", request)
     if request.method != "POST":
         return "Only POST requests are accepted", 400
 
     
     json_data = request.get_json()
-    print("json_data\t", json_data)
     if json_data is None or "molstring" not in json_data:
         print("No molfile data received")
         return "No molfile data received", 400
 
     molfile = json_data["molstring"]
-    # # Create a temporary NMRProblem instance to use nmrshiftDB prediction
-    # problem = NMRProblem()
-    # problem.molfile = molfile
 
     # Use nmrshiftDB to predict C13 shifts
     predicted_shifts = expectedmolecule.calc_c13_chemical_shifts_using_nmrshift2D(molfile)
 
-    print("predicted_shifts\n\n", predicted_shifts)
-
     # convert pandas dataframe to dictionary include AtomIndex in the output which is the index of the dataframe
-
-
     predicted_shifts_dict = predicted_shifts.to_dict(orient='index')
 
     return {"predicted_c13_shifts": predicted_shifts_dict}
-
-    # except json.JSONDecodeError as e:
-    #     print(f"Invalid JSON: {e}")
-    #     return f"Invalid JSON: {e}", 400
-    # except Exception as e:
-    #     print(f"Error during prediction: {e}")
-    #     return f"Error during prediction: {e}", 500
-    
-
 
 @app.route("/", methods=["GET"])
 def display_front_page():
@@ -681,9 +662,6 @@ def simpleMNOVAfinalHTML():
             with app.app_context():
                 if RUNNINGONPYTHONANYWHERE:
                     # MySQL for PythonAnywhere (production)
-                    print("\n##########################################")
-                    print("Running in production mode with MySQL")
-                    print("##########################################\n")
                     new_result = Result(
                         user_id=user_id,
                         smiles_string=json_data["smilesString"],
@@ -725,25 +703,18 @@ def check_machine_learning():
         Response: A JSON object with registration status and machine learning consent information.
     """
 
-    print("check_machine_learning")
     json_data = request.get_json()
 
-    print("json_data\n", json_data)
-
-    print("request\n", request)
-    print("request.args\n", request.args)
     hostname = json_data.get("hostname")
 
     # Check if device is registered and registration is valid
     if not is_device_registered(hostname):
-        print(f"\nDevice {hostname} is not registered\n")
         return jsonify({
             'status': 'unregistered',
             'registration_url': url_for('registration_page', _external=True) + f"?hostid={hostname}"
         })
 
     if has_device_expired(hostname):
-        print(f"\nDevice {hostname} has expired\n")
         email = get_device_stats(hostname)["email"]
         return jsonify({
             'status': 'registration_expired',
@@ -769,8 +740,6 @@ def register_host():
     email = request.form.get("email")
     license_agreed = request.form.get("agree-license") == "on"
     ml_consent = request.form.get("ml-consent") == "on"
-
-    print(f"Register host ID: {hostid}, email: {email}, license_agreed: {license_agreed}, ml_consent: {ml_consent}")
 
     if not hostid or not email:
         return "Both Host ID and email are required", 400
@@ -827,13 +796,10 @@ def simpleMNOVA_display_molecule():
     # Get JSON data from the request body (for curl POST requests)
     try:
         json_data = request.get_json()
-        print("json_data.keys()\n", json_data.keys())
         if json_data is None:
-            print("No JSON data received")
             return "No JSON data received", 400
 
     except json.JSONDecodeError as e:
-        print(f"Invalid JSON: {e}")
         return f"Invalid JSON: {e}", 400
 
     # check if hostname is already known
@@ -869,26 +835,16 @@ def simpleMNOVA_display_molecule():
 
     problemdata_json = NMRProblem.from_mnova_dict(json_data)
 
-    print("problemdata_json\n", problemdata_json.dataframes.keys())
-
 
     # decide whether we are doing prediction or assignments
     if problemdata_json.is_prediction():
 
         solution = nmrsolution.NMRsolution(problemdata_json)
 
-
-        print("solution.hsqc_df.shape ", solution.hsqc_df.shape[0])
-        print(solution.hsqc_df.columns )
-
-
         if solution.nmrsolution_failed:
             return solution.nmrsolution_error_message, solution.nmrsolution_error_code
 
         if solution.expected_molecule.nmrshiftdb_failed:
-            print("solution.expected_molecule.nmrshiftdb_failed_message\n")
-            print(solution.expected_molecule.nmrshiftdb_failed_message)
-            # return solution.expected_molecule.nmrshiftdb_failed_message, solution.solution_error_code
             return solution.solution_error_message, solution.solution_error_code
 
         ok, msg = solution.init_class_from_json()
@@ -896,54 +852,15 @@ def simpleMNOVA_display_molecule():
         if not ok:
             return msg, 400
 
-        # attempt to assign integrals to the HSQC dataframe
-
-        # solution.assign_CH3_CH2_CH1_in_HSQC_using_Assignments()
-
-        # solution.hsqc["numProtons"] = -1
-
         rtn_msg, rtn_num = solution.assign_CH3_CH2_CH1_overall()
 
-        print("solution.hsqc.shape ", solution.hsqc.shape[0])
-        print(solution.hsqc.columns )
-
-        print("solution.hsqc.CH2 ", solution.hsqc[solution.hsqc.CH2].shape[0])
-        print("solution.hsqc.CH3 ", solution.hsqc[solution.hsqc.CH3].shape[0])
-        print("solution.hsqc.CH1 ", solution.hsqc[solution.hsqc.CH1].shape[0])
-        print("solution.hsqc.CH3CH1 ", solution.hsqc[solution.hsqc.CH3CH1].shape[0])
-
-        # print the mol_props_df
-
         df = solution.expected_molecule.molprops_df
-        print("molprops_df.shape ", df.shape[0])
-
-        print("CH2 count: ", df[df["CH2"]].shape[0])
-        print("CH3 count: ", df[df["CH3"]].shape[0])
-        print("CH1 count: ", df[df["CH1"]].shape[0])
-        print("CH3CH1 count: ", df[df["CH3CH1"]].shape[0])
-
-        # print information on the c13 dataframe
-        print("solution.c13.shape ", solution.c13.shape[0])
-        print(solution.c13.columns )
-        print("solution.c13.CH2 ", solution.c13[solution.c13.CH2].shape[0])
-        print("solution.c13.CH3 ", solution.c13[solution.c13.CH3].shape[0])
-        print("solution.c13.CH1 ", solution.c13[solution.c13.CH1].shape[0])
-        print("solution.c13.CH3CH1 ", solution.c13[solution.c13.CH3CH1].shape[0])
-
-        print("\nrtn_msg\n", rtn_msg)
 
         if rtn_msg != "ok":
             return rtn_msg, rtn_num
 
         solution.transfer_hsqc_info_to_c13()
         solution.transfer_hsqc_info_to_h1()
-
-        print("solution.c13.shape ", solution.c13.shape[0])
-        print(solution.c13.columns )
-        print("solution.c13.CH2 ", solution.c13[solution.c13.CH2].shape[0])
-        print("solution.c13.CH3 ", solution.c13[solution.c13.CH3].shape[0])
-        print("solution.c13.CH1 ", solution.c13[solution.c13.CH1].shape[0])
-        print("solution.c13.CH3CH1 ", solution.c13[solution.c13.CH3CH1].shape[0])
 
         rtn_msg, rtn_num = solution.initialise_prior_to_carbon_assignment()
 
@@ -958,6 +875,7 @@ def simpleMNOVA_display_molecule():
         solution.update_assignments_expt_dataframes()
 
         G2 = nmrsolution.create_network_graph(solution.c13, solution.h1)
+
         G2 = nmrsolution.add_all_cosy_edges_to_graph(
             G2, solution.cosy, solution.hsqc_clipcosy, solution.h1
         )
@@ -965,7 +883,6 @@ def simpleMNOVA_display_molecule():
             G2, solution.hmbc, solution.h1, solution.c13
         )
 
-        # jsonGraphData = json_graph.node_link_data(G2, edges="links") #added edges="links" for future compatibility
         jsonGraphData = json_graph.node_link_data(G2) # reverted back to original as edges="links" was causing problems
         jsonGraphData["moved_nodes"] = jsonGraphData["nodes"]
 
@@ -992,6 +909,8 @@ def simpleMNOVA_display_molecule():
                 "numProtons",
                 "x",
                 "y",
+                'sym_atom_idx',
+                'sym_atomNumber',
             ]
         ].copy()
 
@@ -1016,14 +935,17 @@ def simpleMNOVA_display_molecule():
         else:
             dataFrom = "mnova"
 
+        possible_symmetry = solution.c13_df.shape[0] < solution.expected_molecule.num_carbon_atoms
+
         simAnneal = SimulatedAnnealing2.from_params(
             copy.deepcopy(jsonGraphData["nodes"]),
             copy.deepcopy(jsonGraphData["links"]),
             json_data["molfile"]["data"]["0"],
             json_data,
+            possible_symmetry,
         )
 
-        # setup the run using standaard parameters hardcoded in the class
+        # setup the run using standard parameters hardcoded in the class
         simAnneal.setup_run()
 
         if json_data["simulatedAnnealing"]["data"]["0"] and (simAnneal.predicted_weight > 0):  # True
@@ -1049,8 +971,6 @@ def simpleMNOVA_display_molecule():
         id_x = [x[1] for x in id_atomNumber]
 
         # copy over the optimized nodes to the catoms_df
-
-
         for idx, row in catoms_df.iterrows():
             id = row["id"]
             for node in jsonGraphData["moved_nodes"]:
@@ -1192,13 +1112,8 @@ def simpleMNOVA_display_molecule():
 
             # save the results to the database
 
-                print("json_data.keys()\n", json_data.keys())
                 with app.app_context():
                     if RUNNINGONPYTHONANYWHERE:
-                        # MySQL for PythonAnywhere (production)
-                        print("\n##########################################")
-                        print("Running in production mode with MySQL 2")
-                        print("##########################################\n")
                         new_result = Result(
                             user_id=user_id,
                             smiles_string=solution.smilesstr,
@@ -1219,7 +1134,6 @@ def simpleMNOVA_display_molecule():
                             LAE=best_results["best_lae"],
 
                             # Use JSON type for MySQL, fallback to Text for SQLite
-                            # json_result=json.dumps(json_result, default=convert_numpy),
                             json_result=json_result,
 
                         )
@@ -1227,7 +1141,6 @@ def simpleMNOVA_display_molecule():
                     db.session.commit()
         return rtn_html
     else:
-        print("Error in processing the data\n", msg)
         return msg, 400
 
 
@@ -1235,4 +1148,4 @@ if __name__ == "__main__":
     # reload(sys)
     # sys.setdefaultencoding("utf-8")
     create_database()  # Create tables if they don't exist
-    app.run(debug=True)
+    app.run(debug=False)

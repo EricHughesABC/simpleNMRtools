@@ -3,17 +3,14 @@ import copy
 
 sys.path.append("../")
 
-# import platform
 import math
 import random
 import json
-import numpy as np
 import pandas as pd
 import networkx as nx
 from rdkit import Chem
 from pathlib import Path
 
-# import matplotlib.pyplot as plt
 from rdkit.Chem import Draw
 from rdkit.Chem.rdchem import Mol
 from typing import Dict, List, Optional, Tuple
@@ -22,43 +19,6 @@ from typing import Dict, List, Optional, Tuple
 from globals import SVG_DIMENSIONS as svgDimensions
 from globals import NODE_COLOR_MAP as color_map
 
-
-def compute_total_weight(
-    graph: nx.Graph,
-    mapping: Dict[int, int],
-    shortest_paths: Dict[int, Dict[int, float]],
-) -> float:
-    """
-    Compute the total weight for a given mapping.
-
-    Args:
-        graph (nx.Graph): NetworkX graph of the molecule, with nodes representing atoms and edges representing bonds.
-        mapping (Dict[int, int]): Node mapping between the molecule graph and the NMR graph.
-        shortest_paths (Dict[int, Dict[int, float]]): Shortest paths between all pairs of nodes in the molecule graph.
-
-    Returns:
-        float: Sum of the path lengths of COSY and HMBC edges mapped onto the molecule graph.
-    """
-
-    total_weight = 0
-    for u, v, d in graph.edges(data=True):
-        if d["cosy"] or d["hmbc"]:
-            uu = mapping[u]
-            vv = mapping[v]
-
-            if uu == vv:
-                continue
-
-            if d.get("cosy"):
-                weight = shortest_paths[uu][vv]
-                total_weight += (weight - 1) ** 3
-            if d.get("hmbc"):
-                weight = shortest_paths[uu][vv]
-                if weight < 3:
-                    weight = 2
-                total_weight += (weight - 2) ** 3
-
-    return total_weight
 
 
 def modify_mapping(grouped_nodes, current_mapping, nProtons_to_nodes):
@@ -128,7 +88,6 @@ def compute_total_weight(
                 if weight < 3:
                     weight = 2
                 total_weight += (weight - 2) ** 3
-                # total_weight += weight
 
     return total_weight
 
@@ -256,6 +215,7 @@ class SimulatedAnnealing2:
         self.json_data = json_data
         self.nmr_nodes = json_data["nodes_now"]
         self.nmr_links = json_data["links"]
+        self.possible_symmetry = json_data.get("possible_symmetry", False)
 
         # remove any links where the source equals the target
         self.nmr_links = [
@@ -357,7 +317,7 @@ class SimulatedAnnealing2:
         return cls(json_data)
 
     @classmethod
-    def from_params(cls, nodes_now, links, molfile, oldjson_data):
+    def from_params(cls, nodes_now, links, molfile, oldjson_data, possible_symmetry=False):
         # collect all parameters internally
         # make a list of what is used from the dict
 
@@ -371,6 +331,7 @@ class SimulatedAnnealing2:
             "links": links,
             "molfile": molfile,
             "oldjsondata": oldjson_data,
+            "possible_symmetry": possible_symmetry,
         }
 
         return cls(json_data)
@@ -684,6 +645,45 @@ class SimulatedAnnealing2:
 
             optimized_nodes_dicts[k] = optimized_nodes
 
+
+        # make a deepcopy of optimized_nodes_dicts 
+        optimized_nodes_dicts_bckup = copy.deepcopy(optimized_nodes_dicts)
+
+        print(f"len optimized_nodes_dicts before symmetry check: {len(optimized_nodes_dicts)}")
+
+        if self.possible_symmetry:
+
+            # find rows in catoms_df where sym_atom_idx is not empty
+            sym_catoms_df = catoms_df[catoms_df.sym_atom_idx != ""]
+
+            print(f"\nsym_catoms_df:\n{sym_catoms_df.columns}")
+            print(f"\nsym_catoms_df:\n {sym_catoms_df}")
+            
+
+            datakeystoremove = set()
+            for k in unique_mapping_dict.keys():
+                opt_ids = [node['id'] for node in optimized_nodes_dicts[k]]
+                print(opt_ids)
+                for i, row in sym_catoms_df.iterrows():
+                    id1 = row['id']
+                    id2 = int(row['sym_atom_idx'])
+                                    
+                    # check if id1 and id2 are in opt_ids
+                    if (id1 in opt_ids) and (id2 in opt_ids):
+                        print(f"sym_atom_idx: {row['sym_atom_idx']}, id: {row['id']}, atomNumber: {row['atomNumber']}")
+                        datakeystoremove.add(k)
+
+            for k in datakeystoremove:
+                del optimized_nodes_dicts[k]
+
+            print(f"len optimized_nodes_dicts after symmetry check: {len(optimized_nodes_dicts)}")
+
+            # restore the backup for further processing if needed
+            if len(optimized_nodes_dicts) == 0: 
+                optimized_nodes_dicts = copy.deepcopy(optimized_nodes_dicts_bckup)
+
+        print(f"len optimized_nodes_dicts after symmetry check and backup restore: {len(optimized_nodes_dicts)}")
+
         # calc MAE and LAE for each of the unique nodes_dict
         for k, optimized_nodes in optimized_nodes_dicts.items():
             mae = 0.0
@@ -713,13 +713,17 @@ class SimulatedAnnealing2:
                 lae_biggest,
                 lae_atomNumber,
             ]
+        
 
         # decide which is the best solution based on lowest MAE and LAE
         best_mae = float("inf")
         best_lae = float("inf")
         best_lae_atomNumber = -1
+        # best_nodes = optimized_nodes_dicts[list(optimized_nodes_dicts.keys())[0]][0]  
+        print(f"len optimized_nodes_dicts: {len(optimized_nodes_dicts)}")
         for k, v in optimized_nodes_dicts.items():
             mae, lae, lae_atomNumber = v[1:]
+            # best_nodes, mae, lae, lae_atomNumber = v[0:]
             if (mae <= best_mae) and (lae <= best_lae):
                 best_mae = mae
                 best_lae = lae
