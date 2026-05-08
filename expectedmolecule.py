@@ -37,18 +37,20 @@ def calc_c13_chemical_shifts_using_nmrshift2D(molstr: str) -> pd.DataFrame:
     else:
         return False
 
+
 def get_symmetry_classes(mol):
     # mol = Chem.AddHs(mol)
     # Generate canonical ranks (same rank = same symmetry class)
     ranks = list(Chem.CanonicalRankAtoms(mol, breakTies=False))
 
     print(ranks)
-    
+
     classes = defaultdict(list)
     for idx, rank in enumerate(ranks):
         classes[rank].append(idx)
-        
+
     return classes
+
 
 # mol = Chem.MolFromSmiles('CC(C)O') # Isopropanol
 # sym_classes = get_symmetry_classes(mol)
@@ -73,7 +75,7 @@ class expectedMolecule:
         is_smiles=True,
         mnova_c13predictions=None,
         predict_from_nmrshiftdb=False,
-        JEOL_predict=False
+        JEOL_predict=False,
     ):
         self.nmrshiftdb_failed = False
         self.nmrshiftdb_failed_message = ""
@@ -89,8 +91,6 @@ class expectedMolecule:
             # create smiles string from rdkit mol
 
             self.smiles_str = Chem.MolToSmiles(self.mol)
-
-
 
         self.svg_str, self.xy3, self.xy3_allatoms = self.create_svg_string(
             molWidth=svgDimensions.mol_width,
@@ -141,11 +141,13 @@ class expectedMolecule:
         print("BEFORE ::: self.molprops_df\n", self.molprops_df)
 
         # self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"] + 1
-        if JEOL_predict:    
+        if JEOL_predict:
             self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"]
         else:
             # self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"] + 1
-            self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"] + 0  # EEH 2025-sep-06
+            self.molprops_df["atom_idx"] = (
+                self.molprops_df["atom_idx"] + 0
+            )  # EEH 2025-sep-06
 
         print("AFTER ::: self.molprops_df\n", self.molprops_df)
 
@@ -302,25 +304,25 @@ class expectedMolecule:
             for ppm in ring_df.ppm.unique():
                 ring_df_ppm = ring_df[ring_df.ppm == ppm]
                 if len(ring_df_ppm) == 2:
-                    self.molprops_df.loc[
-                        ring_df_ppm.index[0], "symmetry_idx1"
-                    ] = ring_df_ppm.index[1]
-                    self.molprops_df.loc[
-                        ring_df_ppm.index[1], "symmetry_idx1"
-                    ] = ring_df_ppm.index[0]
+                    self.molprops_df.loc[ring_df_ppm.index[0], "symmetry_idx1"] = (
+                        ring_df_ppm.index[1]
+                    )
+                    self.molprops_df.loc[ring_df_ppm.index[1], "symmetry_idx1"] = (
+                        ring_df_ppm.index[0]
+                    )
                 elif len(ring_df_ppm) == 4 and ring_idx > -1:
-                    self.molprops_df.loc[
-                        ring_df_ppm.index[0], "symmetry_idx1"
-                    ] = ring_df_ppm.index[3]
-                    self.molprops_df.loc[
-                        ring_df_ppm.index[1], "symmetry_idx1"
-                    ] = ring_df_ppm.index[2]
-                    self.molprops_df.loc[
-                        ring_df_ppm.index[2], "symmetry_idx1"
-                    ] = ring_df_ppm.index[1]
-                    self.molprops_df.loc[
-                        ring_df_ppm.index[3], "symmetry_idx1"
-                    ] = ring_df_ppm.index[0]
+                    self.molprops_df.loc[ring_df_ppm.index[0], "symmetry_idx1"] = (
+                        ring_df_ppm.index[3]
+                    )
+                    self.molprops_df.loc[ring_df_ppm.index[1], "symmetry_idx1"] = (
+                        ring_df_ppm.index[2]
+                    )
+                    self.molprops_df.loc[ring_df_ppm.index[2], "symmetry_idx1"] = (
+                        ring_df_ppm.index[1]
+                    )
+                    self.molprops_df.loc[ring_df_ppm.index[3], "symmetry_idx1"] = (
+                        ring_df_ppm.index[0]
+                    )
 
         # update symmetry indices sym_atom_idx and sym_atomNumber
 
@@ -337,13 +339,17 @@ class expectedMolecule:
             atom_symbols = [self.mol.GetAtomWithIdx(idx).GetSymbol() for idx in atoms]
             if not all(symbol == "C" for symbol in atom_symbols):
                 continue
-            print(f"Symmetry Class {rank}: Atom Indices {atoms}, Atom Symbols {atom_symbols}")
+            print(
+                f"Symmetry Class {rank}: Atom Indices {atoms}, Atom Symbols {atom_symbols}"
+            )
 
-            atomNumbers = self.molprops_df[self.molprops_df['atom_idx'].isin(atoms)]["atomNumber"].tolist()
+            atomNumbers = self.molprops_df[self.molprops_df["atom_idx"].isin(atoms)][
+                "atomNumber"
+            ].tolist()
             for i, idx in enumerate(atoms):
                 # creat a new list with the value at index i in th atoms removed
-                other_atoms = atoms[:i] + atoms[i+1:]
-                other_atomNumbers = atomNumbers[:i] + atomNumbers[i+1:]
+                other_atoms = atoms[:i] + atoms[i + 1 :]
+                other_atomNumbers = atomNumbers[:i] + atomNumbers[i + 1 :]
                 # create a comma separated string of the other atoms
                 other_atoms_str = ", ".join(str(a) for a in other_atoms)
                 other_atomNumbers_str = ", ".join(str(a) for a in other_atomNumbers)

@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -15,6 +14,7 @@ from rdkit.Chem import Draw
 from html_from_assignments import NMRProblem
 import expectedmolecule
 
+
 def warning_dialog(return_message, title_message, qstarted=True):
     print(return_message)
 
@@ -28,13 +28,14 @@ class NMRsolution:
     process, and assign group information (CH3, CH2, CH1, etc.) to experimental and predicted
     dataframes, and to synchronize and validate assignments for downstream NMR structure elucidation.
     """
+
     def __init__(self, problemdata_json: NMRProblem):
         """
         Initializes the NMRsolution object with experimental and predicted NMR data.
 
         Sets up internal dataframes and variables for NMR experiment analysis, checks for required experiments,
         and prepares the solution for further assignment and validation steps.
-        
+
         Args:
             problemdata_json (NMRProblem): The NMR problem data containing experimental and predicted spectra.
         """
@@ -92,7 +93,7 @@ class NMRsolution:
             self.carbonAtomsInfo,
             self.c13predictions,
             self.problemdata_json.prediction_from_nmrshiftdb2(),
-            self.problemdata_json.JEOL_prediction_used()
+            self.problemdata_json.JEOL_prediction_used(),
         )
 
         self.solution_error_message = self.expected_molecule.nmrshiftdb_failed_message
@@ -117,17 +118,13 @@ class NMRsolution:
             self.hsqc_df.loc[self.hsqc_df.Annotation == "CH2", "intensity"] = -1.0
             self.hsqc_df.loc[self.hsqc_df.Annotation == "CH2", "integral"] = -1.0
 
-    def initiate_molgraph(
-        self, 
-        json_data: dict, 
-        G2: nx.Graph
-    ) -> None:
+    def initiate_molgraph(self, json_data: dict, G2: nx.Graph) -> None:
         """
         Initializes a molecular graph representation for the current molecule.
 
         Constructs a NetworkX graph with nodes for each atom and edges for each bond,
         assigning atom properties and chemical shift (ppm) values from provided data.
-        
+
         Args:
             json_data (dict): JSON data containing calculation method and related information.
             G2 (networkx.Graph): Reference graph with atom properties and ppm values.
@@ -136,9 +133,9 @@ class NMRsolution:
         molgraph = nx.Graph()
 
         # if rubteralone remove - 1 from the atom numbers
-        if (json_data["MNOVAcalcMethod"]["data"]["0"] == "NMRSHIFTDB2 Predict"):
+        if json_data["MNOVAcalcMethod"]["data"]["0"] == "NMRSHIFTDB2 Predict":
             nodes_offset = 0
-        elif (json_data["MNOVAcalcMethod"]["data"]["0"] == "JEOL Predict"):
+        elif json_data["MNOVAcalcMethod"]["data"]["0"] == "JEOL Predict":
             nodes_offset = 0
         else:
             nodes_offset = 1
@@ -196,7 +193,7 @@ class NMRsolution:
 
         This function attempts to annotate all relevant groups in the HSQC data by applying assignment methods
         in sequence, and returns a status message and code indicating success or failure.
-        
+
         Returns:
             tuple: ("ok", 200) if assignment is successful, or (error_message, 400) if assignment fails.
         """
@@ -474,7 +471,6 @@ class NMRsolution:
         """
         mol = self.expected_molecule
 
-
         # check if mol has CH2 in dataframe then does hsqc have some negative intensities
         if (
             (mol.num_CH2_carbon_atoms > 0)
@@ -510,7 +506,9 @@ class NMRsolution:
                 return
 
             # check if the number of dept rows equals the number of protonated carbons in molprops_df
-            if (len(self.dept_df) > mol.num_carbon_atoms_with_protons) or (len(self.dept_df) < mol.num_sym_carbon_atoms_with_protons):
+            if (len(self.dept_df) > mol.num_carbon_atoms_with_protons) or (
+                len(self.dept_df) < mol.num_sym_carbon_atoms_with_protons
+            ):
                 self.nmrsolution_failed = True
                 self.nmrsolution_error_message = "<p> Please check the number of carbon peaks in the DEPT data as the number does not equal to the number of protonated carbons in the given molecule</p>"
                 self.nmrsolution_error_code = 401
@@ -569,7 +567,9 @@ class NMRsolution:
 
             self.dept135_not_used_to_solve_problem = False
 
-    def find_and_group_CH2s(self, df1: pd.DataFrame) -> tuple[list[list[int]], list[list[float]]]:
+    def find_and_group_CH2s(
+        self, df1: pd.DataFrame
+    ) -> tuple[list[list[int]], list[list[float]]]:
         """
         Groups CH2 resonances in the provided DataFrame based on their chemical shift proximity.
 
@@ -651,13 +651,13 @@ class NMRsolution:
         return unique_idxs, unique_ch2s
 
     def create_svg_string(
-                self,
-                mol,
-                molWidth: int = 1000,
-                molHeight: int = 600,
-                svgWidth: int = 1200,
-                svgHeight: int = 700
-            ) -> tuple[str, dict[int, tuple[float, float]]]:
+        self,
+        mol,
+        molWidth: int = 1000,
+        molHeight: int = 600,
+        svgWidth: int = 1200,
+        svgHeight: int = 700,
+    ) -> tuple[str, dict[int, tuple[float, float]]]:
         """
         Generates an SVG string representation of a molecule and computes normalized coordinates for carbon atoms.
 
@@ -726,9 +726,8 @@ class NMRsolution:
         carbonAtomsInfo: pd.DataFrame,
         df: pd.DataFrame,
         prediction_from_nmrshiftdb: bool,
-        JEOL_predict: bool
+        JEOL_predict: bool,
     ) -> expectedmolecule.expectedMolecule:
-
         """
         Creates an expectedMolecule object from a molfile string and associated carbon atom information.
 
@@ -751,14 +750,14 @@ class NMRsolution:
             carbonAtomsInfo=carbonAtomsInfo,
             mnova_c13predictions=df,
             predict_from_nmrshiftdb=prediction_from_nmrshiftdb,
-            JEOL_predict=JEOL_predict
+            JEOL_predict=JEOL_predict,
         )
 
         return mol
 
     def init_h1_and_pureshift_from_c13_hsqc_hmbc_cosy(
-        self
-    ) ->  Tuple[pd.DataFrame, pd.DataFrame]:
+        self,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Initializes the H1 and pureshift DataFrames from C13, HSQC, HMBC, and COSY experiment data.
 
@@ -1571,12 +1570,14 @@ class NMRsolution:
         if num_CH3CH1_hsqc == 0:
             #  skip if no CH3CH1 groups in HSQC
             return
-        
+
         if self.dept135_not_used_to_solve_problem:
             if num_CH3CH1_hsqc > CH3CH1_mol_df.shape[0]:
                 #  if more CH3CH1 groups in HSQC than expected molecule then we have a problem
                 self.nmrsolution_failed = True
-                self.nmrsolution_error_message = "CH3CH1 HSQC > CH3CH1 expected molecule"
+                self.nmrsolution_error_message = (
+                    "CH3CH1 HSQC > CH3CH1 expected molecule"
+                )
                 self.nmrsolution_error_code = 401
                 return
 
@@ -1599,13 +1600,16 @@ class NMRsolution:
             hsqc.loc[CH3CH1_hsqc_df.index, "CH3"] = True
             hsqc.loc[CH3CH1_hsqc_df.index, "numProtons"] = 3
             return
-        
+
         #  if not all CH3CH1 peaks are picked
 
         #  check if we think we have symmetry in the expected molecule
-        if CH3CH1_sym_mol_df.shape[0] < CH3CH1_mol_df.shape[0] and CH3CH1_hsqc_df.shape[0] < CH3CH1_sym_mol_df.shape[0]:
+        if (
+            CH3CH1_sym_mol_df.shape[0] < CH3CH1_mol_df.shape[0]
+            and CH3CH1_hsqc_df.shape[0] < CH3CH1_sym_mol_df.shape[0]
+        ):
 
-            # loop through the CH3CH1_hsqc_df and try to match with CH3CH1_mol_df 
+            # loop through the CH3CH1_hsqc_df and try to match with CH3CH1_mol_df
             CH3CH1_sym_mol_df = CH3CH1_sym_mol_df[~CH3CH1_sym_mol_df.picked]
             for idx, row in CH3CH1_hsqc_df.iterrows():
                 # find the closest match in the CH3CH1_mol_df
@@ -1614,13 +1618,15 @@ class NMRsolution:
                 ]
                 if not closest_match.empty:
                     # update the hsqc dataframe with the closest match
-                    hsqc.loc[row.name, "numProtons"] = closest_match.totalNumHs.values[0]
+                    hsqc.loc[row.name, "numProtons"] = closest_match.totalNumHs.values[
+                        0
+                    ]
                     hsqc.loc[row.name, "CH3"] = closest_match.CH3.values[0]
                     hsqc.loc[row.name, "CH1"] = closest_match.CH1.values[0]
 
                     CH3CH1_sym_mol_df.loc[closest_match.index, "picked"] = True
                     CH3CH1_sym_mol_df = CH3CH1_sym_mol_df[~CH3CH1_sym_mol_df.picked]
-            
+
         else:
 
             # we have both CH3 and CH1 groups in the expected molecule
@@ -1696,9 +1702,9 @@ class NMRsolution:
                     CH3CH1_hsqc_df.drop(closest_match.index, inplace=True)
 
             elif (
-                (CH3CH1_mol_df_morethan_67.shape[0]
-                == CH3CH1_hsqc_df_morethan_67.shape[0]) and (CH3CH1_mol_df_morethan_67.shape[0]>0)
-            ):
+                CH3CH1_mol_df_morethan_67.shape[0]
+                == CH3CH1_hsqc_df_morethan_67.shape[0]
+            ) and (CH3CH1_mol_df_morethan_67.shape[0] > 0):
                 # then match up CH1 and CH3s base on ranking ppm values
 
                 # sort the CH3CH1_hsqc_df_lessthan_67 by f1_ppm
@@ -1738,7 +1744,7 @@ class NMRsolution:
             #     # attempt to match up CH3 and CH1 based on ppm values
             elif CH3CH1_hsqc_df.shape[0] < CH3CH1_mol_df.shape[0]:
 
-                # loop through the CH3CH1_hsqc_df and try to match with CH3CH1_mol_df 
+                # loop through the CH3CH1_hsqc_df and try to match with CH3CH1_mol_df
                 CH3CH1_mol_df = CH3CH1_mol_df[~CH3CH1_mol_df.picked]
                 for idx, row in CH3CH1_hsqc_df.iterrows():
                     # find the closest match in the CH3CH1_mol_df
@@ -1747,7 +1753,9 @@ class NMRsolution:
                     ]
                     if not closest_match.empty:
                         # update the hsqc dataframe with the closest match
-                        hsqc.loc[row.name, "numProtons"] = closest_match.totalNumHs.values[0]
+                        hsqc.loc[row.name, "numProtons"] = (
+                            closest_match.totalNumHs.values[0]
+                        )
                         hsqc.loc[row.name, "CH3"] = closest_match.CH3.values[0]
                         hsqc.loc[row.name, "CH1"] = closest_match.CH1.values[0]
                         # mark the closest match as picked in the CH3CH1_mol_df
@@ -2095,7 +2103,7 @@ class NMRsolution:
             # because it is likely that proton is not connected directly to carbon
             self.cosy.drop(self.cosy[self.cosy.f1_ppm_prob == 0].index, inplace=True)
             self.cosy.drop(self.cosy[self.cosy.f2_ppm_prob == 0].index, inplace=True)
-        
+
         else:
             print("Exact ppm values only, no tidy up required")
 
@@ -2198,40 +2206,40 @@ class NMRsolution:
         # add index columns to cosy
         # fill in cosy dataframe
         for hppm in self.h1.ppm:
-            self.cosy.loc[
-                self.cosy[self.cosy.f1_ppm == hppm].index, "f1_i"
-            ] = self.H1ppmH1index.get(hppm)
-            self.cosy.loc[
-                self.cosy[self.cosy.f2_ppm == hppm].index, "f2_i"
-            ] = self.H1ppmH1index.get(hppm)
+            self.cosy.loc[self.cosy[self.cosy.f1_ppm == hppm].index, "f1_i"] = (
+                self.H1ppmH1index.get(hppm)
+            )
+            self.cosy.loc[self.cosy[self.cosy.f2_ppm == hppm].index, "f2_i"] = (
+                self.H1ppmH1index.get(hppm)
+            )
 
-            self.cosy.loc[
-                self.cosy[self.cosy.f1_ppm == hppm].index, "f1p_i"
-            ] = self.hsqcH1ppmC13index.get(hppm)
-            self.cosy.loc[
-                self.cosy[self.cosy.f2_ppm == hppm].index, "f2p_i"
-            ] = self.hsqcH1ppmC13index.get(hppm)
+            self.cosy.loc[self.cosy[self.cosy.f1_ppm == hppm].index, "f1p_i"] = (
+                self.hsqcH1ppmC13index.get(hppm)
+            )
+            self.cosy.loc[self.cosy[self.cosy.f2_ppm == hppm].index, "f2p_i"] = (
+                self.hsqcH1ppmC13index.get(hppm)
+            )
 
-            self.cosy.loc[
-                self.cosy[self.cosy.f1_ppm == hppm].index, "f1p_ppm"
-            ] = self.hsqcH1ppmC13ppm.get(hppm)
-            self.cosy.loc[
-                self.cosy[self.cosy.f2_ppm == hppm].index, "f2p_ppm"
-            ] = self.hsqcH1ppmC13ppm.get(hppm)
+            self.cosy.loc[self.cosy[self.cosy.f1_ppm == hppm].index, "f1p_ppm"] = (
+                self.hsqcH1ppmC13ppm.get(hppm)
+            )
+            self.cosy.loc[self.cosy[self.cosy.f2_ppm == hppm].index, "f2p_ppm"] = (
+                self.hsqcH1ppmC13ppm.get(hppm)
+            )
 
-            self.cosy.loc[
-                self.cosy[self.cosy.f1_ppm == hppm].index, "f1H_i"
-            ] = self.H1ppmH1label.get(hppm)
-            self.cosy.loc[
-                self.cosy[self.cosy.f2_ppm == hppm].index, "f2H_i"
-            ] = self.H1ppmH1label.get(hppm)
+            self.cosy.loc[self.cosy[self.cosy.f1_ppm == hppm].index, "f1H_i"] = (
+                self.H1ppmH1label.get(hppm)
+            )
+            self.cosy.loc[self.cosy[self.cosy.f2_ppm == hppm].index, "f2H_i"] = (
+                self.H1ppmH1label.get(hppm)
+            )
 
-            self.cosy.loc[
-                self.cosy[self.cosy.f1_ppm == hppm].index, "f1Cp_i"
-            ] = self.hsqcH1ppmC13label.get(hppm)
-            self.cosy.loc[
-                self.cosy[self.cosy.f2_ppm == hppm].index, "f2Cp_i"
-            ] = self.hsqcH1ppmC13label.get(hppm)
+            self.cosy.loc[self.cosy[self.cosy.f1_ppm == hppm].index, "f1Cp_i"] = (
+                self.hsqcH1ppmC13label.get(hppm)
+            )
+            self.cosy.loc[self.cosy[self.cosy.f2_ppm == hppm].index, "f2Cp_i"] = (
+                self.hsqcH1ppmC13label.get(hppm)
+            )
 
         # combine cosy and hsqc_clipcosy dataframes
         self.cosy = self.process_and_merge_cosy_dfs(self.hsqc_clipcosy, self.cosy)
@@ -2245,13 +2253,17 @@ class NMRsolution:
 
         # fill in hmbc dataframe
         for i in self.hmbc.index:
-            print(i, self.hmbc.loc[i, "f2_ppm"], self.hsqcH1ppmC13ppm.get(self.hmbc.loc[i, "f2_ppm"]))
-            self.hmbc.loc[i, "f2p_ppm"] = float(self.hsqcH1ppmC13ppm.get(
-                self.hmbc.loc[i, "f2_ppm"]
-            ))
-            self.hmbc.loc[i, "f2p_i"] = int(self.hsqcH1ppmC13index.get(
-                self.hmbc.loc[i, "f2_ppm"]
-            ))
+            print(
+                i,
+                self.hmbc.loc[i, "f2_ppm"],
+                self.hsqcH1ppmC13ppm.get(self.hmbc.loc[i, "f2_ppm"]),
+            )
+            self.hmbc.loc[i, "f2p_ppm"] = float(
+                self.hsqcH1ppmC13ppm.get(self.hmbc.loc[i, "f2_ppm"])
+            )
+            self.hmbc.loc[i, "f2p_i"] = int(
+                self.hsqcH1ppmC13index.get(self.hmbc.loc[i, "f2_ppm"])
+            )
 
             self.hmbc.loc[i, "f2_i"] = self.H1ppmH1index.get(self.hmbc.loc[i, "f2_ppm"])
             self.hmbc.loc[i, "f1_i"] = self.C13ppmC13index.get(
@@ -2295,7 +2307,9 @@ class NMRsolution:
 
         return True, "ok"
 
-    def process_and_merge_cosy_dfs(self, df: pd.DataFrame, cosy: pd.DataFrame) -> pd.DataFrame:
+    def process_and_merge_cosy_dfs(
+        self, df: pd.DataFrame, cosy: pd.DataFrame
+    ) -> pd.DataFrame:
         """
         Merges two COSY DataFrames, aligning columns and removing duplicate cross-peaks.
 
@@ -2320,7 +2334,9 @@ class NMRsolution:
 
         return cosy_all
 
-    def process_ddept_ch3_only(self, df: pd.DataFrame, hsqc: pd.DataFrame) -> pd.DataFrame:
+    def process_ddept_ch3_only(
+        self, df: pd.DataFrame, hsqc: pd.DataFrame
+    ) -> pd.DataFrame:
         """
         Adds index and group information to the DDEPT CH3-only DataFrame using corresponding indices from the HSQC DataFrame.
 
@@ -2388,7 +2404,6 @@ class NMRsolution:
         # Filter the dataframe for intensity < 0
         hsqc_clipcosy = hsqc_clipcosy_df[hsqc_clipcosy_df.intensity < 0].copy()
 
-
         if not self.exact_ppm_values:
             # Tidy up ppm values
             hsqc_clipcosy = self.tidyup_ppm_values(
@@ -2409,9 +2424,7 @@ class NMRsolution:
         return hsqc_clipcosy
 
     def process_hsqc_clipcosy(
-        self, 
-        df: pd.DataFrame, 
-        hsqc: pd.DataFrame
+        self, df: pd.DataFrame, hsqc: pd.DataFrame
     ) -> pd.DataFrame:
         """
         Adds index and group information to the HSQC-CLIP-COSY DataFrame using corresponding indices from the HSQC DataFrame.
@@ -2526,7 +2539,6 @@ def copy_over_values_c13_all_to_hetero2D(
     df["f2_x"] = None
     df["f2_y"] = None
 
-
     for idx, row in c13_all.iterrows():
         c13_ppm = row["ppm"]
         f1_idx = df[df["f1_ppm"] == c13_ppm].index
@@ -2544,7 +2556,6 @@ def copy_over_values_c13_all_to_hetero2D(
             df.at[ii, "f2_atomNumber"] = row["atomNumber"]
             df.at[ii, "f2_x"] = row["x"]
             df.at[ii, "f2_y"] = row["y"]
-
 
     return df
 
@@ -2592,10 +2603,7 @@ def copy_over_values_c13_all_to_homo2D(df, c13_all):
     return df
 
 
-def create_network_graph(
-    c13: pd.DataFrame, 
-    h1: pd.DataFrame
-) -> nx.Graph:
+def create_network_graph(c13: pd.DataFrame, h1: pd.DataFrame) -> nx.Graph:
     """
     Creates a molecular network graph from C13 and H1 DataFrames.
 
@@ -2711,10 +2719,7 @@ def assign_jcouplings(df1: pd.DataFrame, df2: pd.DataFrame) -> pd.DataFrame:
     return df1
 
 
-def assign_jcouplings_to_c13(
-    c13: pd.DataFrame, 
-    hsqc: pd.DataFrame
-) -> pd.DataFrame:
+def assign_jcouplings_to_c13(c13: pd.DataFrame, hsqc: pd.DataFrame) -> pd.DataFrame:
     """
     Assigns J-coupling values and classes from the HSQC DataFrame to the C13 DataFrame based on atom indices.
 

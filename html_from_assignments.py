@@ -48,7 +48,6 @@ def find_nearest(true_values: list[float], value: float) -> float:
 
 
 def tidyup_ppm_values(
-
     df: pd.DataFrame, true_values: list, column_name: str, ppm_tolerance=0.005
 ) -> pd.DataFrame:
     """
@@ -125,8 +124,8 @@ def return_nonempty_mnova_datasets(data: dict) -> dict:
 def add_technique(key: str, technique_keys: dict, technique_counts: dict, expt: str):
     """
     Adds a technique to the technique_keys dictionary, ensuring unique keys for duplicate experiment names.
-    If the given experiment name (`expt`) already exists among the values of `technique_keys`, 
-    increments its count in `technique_counts` and appends the count to the experiment name 
+    If the given experiment name (`expt`) already exists among the values of `technique_keys`,
+    increments its count in `technique_counts` and appends the count to the experiment name
     to create a unique key. Otherwise, adds the experiment name as is.
     Args:
         key (str): The key to add or update in the technique_keys dictionary.
@@ -146,7 +145,7 @@ def add_technique(key: str, technique_keys: dict, technique_counts: dict, expt: 
 
 def read_in_mesrenova_json(fn: Path) -> dict:
     """
-    Reads a JSON file exported from MestReNova or accepts a dictionary directly, 
+    Reads a JSON file exported from MestReNova or accepts a dictionary directly,
     and returns the non-empty MestReNova datasets.
     Parameters
     ----------
@@ -196,7 +195,7 @@ def read_in_mesrenova_json_multiple(fn: Path) -> dict:
     If a dictionary is provided, it is used directly.
     The function relies on `return_nonempty_mnova_datasets` to filter and return relevant datasets.
     """
-    
+
     # check the type of fn is a pathlib.Path
     if isinstance(fn, Path):
         with open(fn, "r") as file:
@@ -271,7 +270,7 @@ def get_1d_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
     """
     Extracts 1D NMR data from a JSON dictionary and returns it as a pandas DataFrame.
     The function processes either 'multiplets' or 'peaks' data for the specified NMR technique.
-    If 'multiplets' are present, it extracts chemical shift, integral, number of hydrogens, 
+    If 'multiplets' are present, it extracts chemical shift, integral, number of hydrogens,
     category, and J-coupling values, normalizing the integral by the provided normalization value.
     If only 'peaks' are present, it extracts chemical shift, intensity, and type.
     The resulting DataFrame is sorted by chemical shift (ppm) in descending order and indexed from 1.
@@ -471,12 +470,12 @@ def attach_symmetry_atom_index(nmrAssignments: pd.DataFrame) -> pd.DataFrame:
                     nmrAssignments.at[idx2, "sym_atom_idx"] = f"{row['atom_idx']}"
                     nmrAssignments.at[idx2, "sym_atomNumber"] = f"{row['atomNumber']}"
                 else:
-                    nmrAssignments.at[
-                        idx2, "sym_atom_idx"
-                    ] = f"{nmrAssignments.at[idx2, 'sym_atom_idx']}, {row['atom_idx']}"
-                    nmrAssignments.at[
-                        idx2, "sym_atomNumber"
-                    ] = f"{nmrAssignments.at[idx2, 'sym_atomNumber']}, {row['atomNumber']}"
+                    nmrAssignments.at[idx2, "sym_atom_idx"] = (
+                        f"{nmrAssignments.at[idx2, 'sym_atom_idx']}, {row['atom_idx']}"
+                    )
+                    nmrAssignments.at[idx2, "sym_atomNumber"] = (
+                        f"{nmrAssignments.at[idx2, 'sym_atomNumber']}, {row['atomNumber']}"
+                    )
 
     return nmrAssignments
 
@@ -904,9 +903,6 @@ def create_htmlpage_from_graph(
     webbrowser.open(html_fn.absolute().as_uri())
 
 
-
-
-
 def calc_minimum_ppm_separation(ppm_pks, ppmSeparation):
 
     if len(ppm_pks) < 2:
@@ -936,6 +932,7 @@ def calc_minimum_ppm_separation(ppm_pks, ppmSeparation):
     else:
         return ppmSeparation
 
+
 def combine_multiple_nmrExpt_dataframes(dataframes):
     """
     Combine multiple NMR experiment dataframes into a single dataframe.
@@ -958,9 +955,9 @@ def combine_multiple_nmrExpt_dataframes(dataframes):
             nmrExptsDataframes[k1].append(v)
             if k_number.isdigit():
                 nmrExptsToDelete.append(k)
-    
+
     # combine the dataframes in each group
-    for k, v in nmrExptsDataframes.items(): 
+    for k, v in nmrExptsDataframes.items():
         if len(v) > 1:
             # combine the dataframes in v
             combined_df = pd.concat(v, ignore_index=True)
@@ -971,9 +968,13 @@ def combine_multiple_nmrExpt_dataframes(dataframes):
                 combined_df = combined_df.drop_duplicates(subset=["f1_ppm", "f2_ppm"])
             # sort the dataframe by ppm in descending order
             if "ppm" in combined_df.columns:
-                combined_df = combined_df.sort_values(by=["ppm"], ascending=False).reset_index(drop=True)
+                combined_df = combined_df.sort_values(
+                    by=["ppm"], ascending=False
+                ).reset_index(drop=True)
             elif "f1_ppm" in combined_df.columns:
-                combined_df = combined_df.sort_values(by=["f1_ppm"], ascending=False).reset_index(drop=True)
+                combined_df = combined_df.sort_values(
+                    by=["f1_ppm"], ascending=False
+                ).reset_index(drop=True)
             else:
                 print(f"No ppm column found in {k}, skipping sorting")
             # set the index to start at 1
@@ -983,7 +984,6 @@ def combine_multiple_nmrExpt_dataframes(dataframes):
             dataframes[k] = v[0]
         else:
             print(f"No data for {k}")
-
 
     # remove dataframes that were found in nmrExptsToDelete
     for k in nmrExptsToDelete:
@@ -1027,7 +1027,7 @@ class NMRProblem:
         data = read_in_mesrenova_json(cls.json_data)
         dataframes = create_dataframes_from_mresnova_json(data)
         return cls(dataframes)
-    
+
     @classmethod
     def from_mnova_dict(cls, json_data: dict):
         """
@@ -1038,7 +1038,7 @@ class NMRProblem:
         data = read_in_mesrenova_json(cls.json_data)
         dataframes = create_dataframes_from_mresnova_json(data)
         return cls(dataframes)
-    
+
     @classmethod
     def from_excel_file(cls, fn: Path):
         """
@@ -1047,13 +1047,14 @@ class NMRProblem:
         """
         dataframes = pd.read_excel(fn, sheet_name=None)
         return cls(dataframes)
-    
 
     def exact_ppm_values_only(self):
 
-        expts_with_peaks = self.dataframes["chosenSpectra"][~self.dataframes["chosenSpectra"]["expt"].str.contains("SKIP")].expt.values
+        expts_with_peaks = self.dataframes["chosenSpectra"][
+            ~self.dataframes["chosenSpectra"]["expt"].str.contains("SKIP")
+        ].expt.values
 
-        if 'C13_1D' in expts_with_peaks and 'HSQC' in expts_with_peaks:
+        if "C13_1D" in expts_with_peaks and "HSQC" in expts_with_peaks:
             f1_ppm = set(self.dataframes["C13_1D"]["ppm"].values)
             f2_ppm = set(self.dataframes["HSQC"]["f2_ppm"].values)
 
@@ -1065,7 +1066,7 @@ class NMRProblem:
                     # add f2_ppm values to f2_ppm_expts set
                     f2_ppm_set = set(self.dataframes[expt]["f2_ppm"].values)
                     f2_ppm_expts.update(f2_ppm_set)
-                    
+
                     f1_ppm_set = set(self.dataframes[expt]["f1_ppm"].values)
                     f1_ppm_expts.update(f1_ppm_set)
 
@@ -1077,14 +1078,17 @@ class NMRProblem:
 
             #  check if f1_ppm - f1_ppm_expts is empty
             if len(f1_ppm - f1_ppm_expts) > 0 or len(f2_ppm - f2_ppm_expts) > 0:
-                print("There are extra ppm values in f1_ppm and f2_ppm that are not in the expts_with_peaks.")
+                print(
+                    "There are extra ppm values in f1_ppm and f2_ppm that are not in the expts_with_peaks."
+                )
                 return False
             else:
-                print("All ppm values in f1_ppm and f2_ppm are accounted for in the expts_with_peaks.")
-                return False # always set return to False for now EEH 30/Oct/2025
+                print(
+                    "All ppm values in f1_ppm and f2_ppm are accounted for in the expts_with_peaks."
+                )
+                return False  # always set return to False for now EEH 30/Oct/2025
         else:
             return False
-    
 
     def is_prediction(self):
         """
@@ -1094,12 +1098,11 @@ class NMRProblem:
         if self.dataframes["MNOVAcalcMethod"].loc[0, "MNOVAcalcMethod"] in [
             "MNOVA Predict",
             "NMRSHIFTDB2 Predict",
-            "JEOL Predict"
+            "JEOL Predict",
         ]:
             return True
         else:
             return False
-
 
     def prediction_from_nmrshiftdb2(self):
         """
@@ -1117,8 +1120,8 @@ class NMRProblem:
         ):
             return True
         else:
-            return False  
-              
+            return False
+
     def JEOL_prediction_used(self):
         """
         Check if the data is a prediction from JEOL
@@ -1155,7 +1158,9 @@ class NMRProblem:
                     self.dataframes[k] = pd.DataFrame(columns=excel_orig_df_columns[k])
             else:
                 if k + "_0" not in self.dataframes:
-                    self.dataframes[k+"_0"] = pd.DataFrame(columns=excel_orig_df_columns[k])
+                    self.dataframes[k + "_0"] = pd.DataFrame(
+                        columns=excel_orig_df_columns[k]
+                    )
 
     def get_molfile_string(self):
         molfile_string = self.dataframes["molfile"].loc[0, "molfile"]
@@ -1199,7 +1204,6 @@ class NMRProblem:
             nmrAssignments.at[idx, "x"] = new_xy3_plus1[row["atom_idx"]][0]
             nmrAssignments.at[idx, "y"] = new_xy3_plus1[row["atom_idx"]][1]
 
-
         # add x and y coordinates to catomAtomsInfo
         for idx, row in self.carbonAtomsInfo.iterrows():
             self.carbonAtomsInfo.at[idx, "x"] = new_xy3[row["atom_idx"]][0]
@@ -1235,7 +1239,10 @@ class NMRProblem:
                 hsqc, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
             )
             hsqc = tidyup_ppm_values(
-                hsqc, h1_f1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation
+                hsqc,
+                h1_f1_ppm_unique_list,
+                "f1_ppm",
+                ppm_tolerance=self.carbonSeparation,
             )
 
             h1_1d = tidyup_ppm_values(
@@ -1260,7 +1267,10 @@ class NMRProblem:
             hmbc.drop(hmbc[hmbc.f2_ppm_prob == 0].index, inplace=True)
 
             clipcosy = tidyup_ppm_values(
-                clipcosy, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
+                clipcosy,
+                h1_ppm_unique_list,
+                "f2_ppm",
+                ppm_tolerance=self.protonSeparation,
             )
             clipcosy = tidyup_ppm_values(
                 clipcosy,
@@ -1273,7 +1283,10 @@ class NMRProblem:
                 ddept, h1_ppm_unique_list, "f2_ppm", ppm_tolerance=self.protonSeparation
             )
             ddept = tidyup_ppm_values(
-                ddept, h1_f1_ppm_unique_list, "f1_ppm", ppm_tolerance=self.carbonSeparation
+                ddept,
+                h1_f1_ppm_unique_list,
+                "f1_ppm",
+                ppm_tolerance=self.carbonSeparation,
             )
         else:
             print("Exact ppm values only, no tidy up required")
@@ -1312,7 +1325,9 @@ class NMRProblem:
         self.G2 = G2
 
         # jsonGraphData = json_graph.node_link_data(G2, edges="links")  # added edges='links' for compatibility
-        jsonGraphData = json_graph.node_link_data(G2)  # reverted back to original as pythonanywhere lower version
+        jsonGraphData = json_graph.node_link_data(
+            G2
+        )  # reverted back to original as pythonanywhere lower version
 
         self.jinjadata = {
             "svg_container": svg_str,

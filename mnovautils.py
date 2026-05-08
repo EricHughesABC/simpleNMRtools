@@ -81,9 +81,9 @@ def return_nonempty_mnova_datasets(data: dict) -> dict:
             ):
                 dicts_to_keep[k] = v
         else:
-            dicts_to_keep[
-                k
-            ] = v  # must be smiles string, maybe need to check for this at some point
+            dicts_to_keep[k] = (
+                v  # must be smiles string, maybe need to check for this at some point
+            )
 
     return dicts_to_keep
 

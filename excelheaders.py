@@ -10,7 +10,7 @@ Contains both processed and original column mappings for various NMR experiment 
 EXCEL_DF_COLUMNS = {
     "nmrAssignments": [
         "atom_idx",
-        "atomNumber", 
+        "atomNumber",
         "numProtons",
         "f1_ppm",
         "iupacLabel",
@@ -18,14 +18,7 @@ EXCEL_DF_COLUMNS = {
         "f2_ppm2",
         "f2_ppm3",
     ],
-    
-    "c13predictions": [
-        "atomNumber",
-        "atom_idx", 
-        "numProtons",
-        "ppm"
-    ],
-    
+    "c13predictions": ["atomNumber", "atom_idx", "numProtons", "ppm"],
     "h1": [
         "ppm",
         "integral",
@@ -38,7 +31,6 @@ EXCEL_DF_COLUMNS = {
         "f1_i",
         "f2_i",
     ],
-    
     "c13": [
         "ppm",
         "attached_protons",
@@ -50,7 +42,6 @@ EXCEL_DF_COLUMNS = {
         "f1_i",
         "f2_i",
     ],
-    
     "DEPT135": [
         "ppm",
         "attached_protons",
@@ -62,7 +53,6 @@ EXCEL_DF_COLUMNS = {
         "f1_i",
         "f2_i",
     ],
-    
     "pureshift": [
         "ppm",
         "intensity",
@@ -73,7 +63,6 @@ EXCEL_DF_COLUMNS = {
         "Impurity/Compound",
         "Annotation",
     ],
-    
     # 2D NMR Experiments - Common column structure
     "cosy": [
         "f1_ppm",
@@ -90,7 +79,6 @@ EXCEL_DF_COLUMNS = {
         "f1Cp_i",
         "f2Cp_i",
     ],
-    
     "noesy": [
         "f1_ppm",
         "f2_ppm",
@@ -106,7 +94,6 @@ EXCEL_DF_COLUMNS = {
         "f1Cp_i",
         "f2Cp_i",
     ],
-    
     "hsqc": [
         "f1_ppm",
         "f2_ppm",
@@ -119,7 +106,6 @@ EXCEL_DF_COLUMNS = {
         "f2Cp_i",
         "f2p_ppm",
     ],
-    
     "hsqc_clip_cosy": [
         "f1_ppm",
         "f2_ppm",
@@ -132,7 +118,6 @@ EXCEL_DF_COLUMNS = {
         "f2Cp_i",
         "f2p_ppm",
     ],
-    
     "ddeptch3only": [
         "f1_ppm",
         "f2_ppm",
@@ -145,7 +130,6 @@ EXCEL_DF_COLUMNS = {
         "f2Cp_i",
         "f2p_ppm",
     ],
-    
     "hmbc": [
         "f1_ppm",
         "f2_ppm",
@@ -161,7 +145,7 @@ EXCEL_DF_COLUMNS = {
 }
 
 
-# Original DataFrame Columns  
+# Original DataFrame Columns
 # These represent the raw column names from Excel files before processing
 EXCEL_ORIG_DF_COLUMNS = {
     "nmrAssignments": [
@@ -174,31 +158,10 @@ EXCEL_ORIG_DF_COLUMNS = {
         "f2_ppm2",
         "f2_ppm3",
     ],
-    
-    "c13predictions": [
-        "atomNumber",
-        "atom_idx",
-        "numProtons", 
-        "ppm"
-    ],
-    
-    "molecule": [
-        "molecule",
-        "smiles"
-    ],
-    
+    "c13predictions": ["atomNumber", "atom_idx", "numProtons", "ppm"],
+    "molecule": ["molecule", "smiles"],
     # 1D NMR Experiments
-    "H1_1D": [
-        "Name",
-        "Shift",
-        "Range",
-        "H's",
-        "Integral",
-        "Class",
-        "J's",
-        "Method"
-    ],
-    
+    "H1_1D": ["Name", "Shift", "Range", "H's", "Integral", "Class", "J's", "Method"],
     "C13_1D": [
         "ppm",
         "Intensity",
@@ -209,7 +172,6 @@ EXCEL_ORIG_DF_COLUMNS = {
         "Impurity/Compound",
         "Annotation",
     ],
-    
     "DEPT135": [
         "ppm",
         "Intensity",
@@ -220,7 +182,6 @@ EXCEL_ORIG_DF_COLUMNS = {
         "Impurity/Compound",
         "Annotation",
     ],
-    
     "H1_pureshift": [
         "ppm",
         "Intensity",
@@ -231,7 +192,6 @@ EXCEL_ORIG_DF_COLUMNS = {
         "Impurity/Compound",
         "Annotation",
     ],
-    
     # 2D NMR Experiments - Original Excel format
     "COSY": [
         "f2 (ppm)",
@@ -245,7 +205,6 @@ EXCEL_ORIG_DF_COLUMNS = {
         "Impurity/Compound",
         "Annotation",
     ],
-    
     "HSQC": [
         "f2 (ppm)",
         "f1 (ppm)",
@@ -258,7 +217,6 @@ EXCEL_ORIG_DF_COLUMNS = {
         "Impurity/Compound",
         "Annotation",
     ],
-    
     "HSQC_CLIPCOSY": [
         "f2 (ppm)",
         "f1 (ppm)",
@@ -271,7 +229,6 @@ EXCEL_ORIG_DF_COLUMNS = {
         "Impurity/Compound",
         "Annotation",
     ],
-    
     "DDEPTCH3ONLY": [
         "f2 (ppm)",
         "f1 (ppm)",
@@ -284,7 +241,6 @@ EXCEL_ORIG_DF_COLUMNS = {
         "Impurity/Compound",
         "Annotation",
     ],
-    
     "HMBC": [
         "f2 (ppm)",
         "f1 (ppm)",
@@ -297,7 +253,6 @@ EXCEL_ORIG_DF_COLUMNS = {
         "Impurity/Compound",
         "Annotation",
     ],
-    
     "NOESY": [
         "f2 (ppm)",
         "f1 (ppm)",
@@ -311,4 +266,3 @@ EXCEL_ORIG_DF_COLUMNS = {
         "Annotation",
     ],
 }
-

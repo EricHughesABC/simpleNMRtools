@@ -1088,7 +1088,6 @@ def create_expected_molecule_from_molfilestring(
     df: pd.DataFrame,
     prediction_from_nmrshiftdb: bool,
 ) -> expectedmolecule.expectedMolecule:
-
     """
     Create an RDKit molecule object from a molfile string and a pandas dataframe
     """

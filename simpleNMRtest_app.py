@@ -2,7 +2,16 @@ import os
 import re
 import copy
 from functools import wraps
-from flask import Flask, render_template, request, json, send_from_directory, url_for, jsonify, abort
+from flask import (
+    Flask,
+    render_template,
+    request,
+    json,
+    send_from_directory,
+    url_for,
+    jsonify,
+    abort,
+)
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 import time
@@ -12,6 +21,7 @@ from sqlalchemy.dialects.mysql import JSON
 from datetime import datetime, timedelta
 from pytz import timezone
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import numpy as np
@@ -34,7 +44,7 @@ import nmrsolution
 
 from globals import SVG_DIMENSIONS as svgDimensions
 
-from simulatedAnnealing_v5 import SimulatedAnnealing2
+from simulatedAnnealing_v5a import SimulatedAnnealing2
 
 global RUNNINGONPYTHONANYWHERE
 global REGISTRATIONTIMEOUT
@@ -57,6 +67,7 @@ DOCS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs/build/
 # cross platform if python installed
 # curl -X POST "https://simplenmr.pythonanywhere.com/simpleMNOVA" -H "Content-Type: application/json" -d "@E72507_04164043_propyl_benzoate_assignments_mresnova.json" > test.html && python -m webbrowser test.html
 
+
 # Helper to convert numpy types to native types
 def convert_numpy(obj):
     if isinstance(obj, np.integer):
@@ -68,14 +79,21 @@ def convert_numpy(obj):
     else:
         raise TypeError(f"Type {type(obj)} not serializable")
 
+
 # Determine environment (local or production)
 def is_running_on_pythonanywhere():
     """Check if the application is running on PythonAnywhere"""
     # Check for PythonAnywhere-specific paths or environment variables
-    return (os.path.exists('/var/www') and                # PythonAnywhere has this directory
-            os.path.exists('/home/simpleNMR') or          # Check for your username's home directory
-            'PYTHONANYWHERE_DOMAIN' in os.environ or      # PythonAnywhere sets this environment variable
-            'PYTHONANYWHERE_SITE' in os.environ)
+    return (
+        os.path.exists("/var/www")  # PythonAnywhere has this directory
+        and os.path.exists(
+            "/home/simpleNMR"
+        )  # Check for your username's home directory
+        or "PYTHONANYWHERE_DOMAIN"
+        in os.environ  # PythonAnywhere sets this environment variable
+        or "PYTHONANYWHERE_SITE" in os.environ
+    )
+
 
 app = Flask(__name__)
 
@@ -83,31 +101,43 @@ app = Flask(__name__)
 RUNNINGONPYTHONANYWHERE = is_running_on_pythonanywhere()
 if RUNNINGONPYTHONANYWHERE:
     # MySQL for PythonAnywhere (production)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{username}:{password}@{hostname}/{database}'.format(
-        username=os.environ.get('DB_USERNAME', 'simpleNMR'),
-        password=os.environ.get('DB_PASSWORD', ''),
-        hostname=os.environ.get('DB_HOST', 'simpleNMR.mysql.pythonanywhere-services.com'),
-        database=os.environ.get('DB_NAME', 'simpleNMR$registrations')
+    app.config["SQLALCHEMY_DATABASE_URI"] = (
+        "mysql+pymysql://{username}:{password}@{hostname}/{database}".format(
+            username=os.environ.get("DB_USERNAME", "simpleNMR"),
+            password=os.environ.get("DB_PASSWORD", ""),
+            hostname=os.environ.get(
+                "DB_HOST", "simpleNMR.mysql.pythonanywhere-services.com"
+            ),
+            database=os.environ.get("DB_NAME", "simpleNMR$registrations"),
+        )
     )
 
     # Configure connection pool for MySQL
-    app.config['SQLALCHEMY_POOL_SIZE'] = int(os.environ.get('SQLALCHEMY_POOL_SIZE', 5))
-    app.config['SQLALCHEMY_POOL_TIMEOUT'] = int(os.environ.get('SQLALCHEMY_POOL_TIMEOUT', 30))
-    app.config['SQLALCHEMY_POOL_RECYCLE'] = int(os.environ.get('SQLALCHEMY_POOL_RECYCLE', 1800))
-    app.config['SQLALCHEMY_MAX_OVERFLOW'] = int(os.environ.get('SQLALCHEMY_MAX_OVERFLOW', 2))
+    app.config["SQLALCHEMY_POOL_SIZE"] = int(os.environ.get("SQLALCHEMY_POOL_SIZE", 5))
+    app.config["SQLALCHEMY_POOL_TIMEOUT"] = int(
+        os.environ.get("SQLALCHEMY_POOL_TIMEOUT", 30)
+    )
+    app.config["SQLALCHEMY_POOL_RECYCLE"] = int(
+        os.environ.get("SQLALCHEMY_POOL_RECYCLE", 1800)
+    )
+    app.config["SQLALCHEMY_MAX_OVERFLOW"] = int(
+        os.environ.get("SQLALCHEMY_MAX_OVERFLOW", 2)
+    )
 
     print("Running in production mode with MySQL")
 else:
     # SQLite for local development
     base_dir = os.path.abspath(os.path.dirname(__file__))
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(base_dir, 'registrations.db')
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
+        base_dir, "registrations.db"
+    )
     print("Running in development mode with SQLite")
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-secret-key')
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "default-secret-key")
 
 # Print for debugging (you can remove this in production)
-print("\nline Database URI:", app.config['SQLALCHEMY_DATABASE_URI'])
+print("\nline Database URI:", app.config["SQLALCHEMY_DATABASE_URI"])
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -119,50 +149,56 @@ with app.app_context():
     db.create_all()
     print("Database tables created successfully!")
 
+
 # Database Models
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone('UTC')))
-    results = db.relationship('Result', backref='user', lazy=True)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone("UTC")))
+    results = db.relationship("Result", backref="user", lazy=True)
 
     # Relationship to devices (one-to-many)
-    devices = db.relationship('Device', backref='user', lazy=True)
+    devices = db.relationship("Device", backref="user", lazy=True)
 
     def __repr__(self):
-        return f'<User {self.email}>'
+        return f"<User {self.email}>"
 
     def is_subscription_active(self):
         """Check if the user's subscription is still active"""
         # Example: 365-day subscription from registration date
         expiration_date = self.created_at + timedelta(days=365)
-        return datetime.now(timezone('UTC')) <= expiration_date.astimezone(timezone('UTC'))
+        return datetime.now(timezone("UTC")) <= expiration_date.astimezone(
+            timezone("UTC")
+        )
+
 
 class Device(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     hostid = db.Column(db.String(100), unique=True, nullable=False)
-    registered_at = db.Column(db.DateTime, default=datetime.now(timezone('UTC')))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    registered_at = db.Column(db.DateTime, default=datetime.now(timezone("UTC")))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     usage_count = db.Column(db.Integer, default=0)
-    last_used = db.Column(db.DateTime, default=datetime.now(timezone('UTC')))
+    last_used = db.Column(db.DateTime, default=datetime.now(timezone("UTC")))
     license_agreed = db.Column(db.Boolean, default=False, nullable=False)
     ml_consent = db.Column(db.Boolean, default=False, nullable=False)
 
     def __repr__(self):
-        return f'<Device {self.hostid}>'
+        return f"<Device {self.hostid}>"
 
     def increment_usage(self):
         """Increment the usage count and update last_used timestamp"""
         self.usage_count += 1
-        self.last_used = datetime.now(timezone('UTC'))
+        self.last_used = datetime.now(timezone("UTC"))
         db.session.commit()
+
     # Add any other properties or relationships here
+
 
 # New Results table model
 class Result(db.Model):
-    __tablename__ = 'result'
+    __tablename__ = "result"
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     smiles_string = db.Column(db.Text)
     weight = db.Column(db.Float)
     MAE = db.Column(db.Float)
@@ -170,10 +206,12 @@ class Result(db.Model):
     # Use JSON type for MySQL, fallback to Text for SQLite
     # json_result = db.Column(db.JSON().with_variant(db.Text, 'sqlite'), nullable=True)
     json_result = db.Column(JSON)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone('UTC')), index=True)
+    created_at = db.Column(
+        db.DateTime, default=datetime.now(timezone("UTC")), index=True
+    )
 
     def __repr__(self):
-        return f'<Result {self.id}>'
+        return f"<Result {self.id}>"
 
     @property
     def json_data(self):
@@ -181,6 +219,7 @@ class Result(db.Model):
         if self.json_result:
             return json.loads(self.json_result)
         return {}
+
 
 def with_db_retries(max_retries=3, retry_delay=1):
     def decorator(func):
@@ -193,15 +232,19 @@ def with_db_retries(max_retries=3, retry_delay=1):
                     return func(*args, **kwargs)
                 except SQLAlchemyError as e:
                     # Log the error if you have logging configured
-                    if hasattr(app, 'logger'):
-                        app.logger.warning(f"Database connection error in {func.__name__} (attempt {retries+1}/{max_retries+1}): {str(e)}")
+                    if hasattr(app, "logger"):
+                        app.logger.warning(
+                            f"Database connection error in {func.__name__} (attempt {retries+1}/{max_retries+1}): {str(e)}"
+                        )
 
                     retries += 1
 
                     # If this was the last retry, re-raise the exception
                     if retries > max_retries:
-                        if hasattr(app, 'logger'):
-                            app.logger.error(f"Failed after {max_retries+1} attempts in {func.__name__}: {str(e)}")
+                        if hasattr(app, "logger"):
+                            app.logger.error(
+                                f"Failed after {max_retries+1} attempts in {func.__name__}: {str(e)}"
+                            )
                         raise
 
                     # Wait before retrying
@@ -220,7 +263,9 @@ def create_database():
     with app.app_context():
         db.create_all()
 
+
 # create_database() # removed as it is called in __main__
+
 
 def register_device(email, hostid, license_agreed, ml_consent):
     """Register a new device or update an existing one with consent status"""
@@ -243,7 +288,9 @@ def register_device(email, hostid, license_agreed, ml_consent):
                 # If device exists but belongs to different user, reassign
                 if device.user_id != user.id:
                     device.user_id = user.id
-                device.registered_at = datetime.now(timezone('UTC'))  # Reset registration date
+                device.registered_at = datetime.now(
+                    timezone("UTC")
+                )  # Reset registration date
                 # Always update consent flags when re-registering
                 device.license_agreed = license_agreed
                 device.ml_consent = ml_consent
@@ -254,7 +301,7 @@ def register_device(email, hostid, license_agreed, ml_consent):
                     user_id=user.id,
                     license_agreed=license_agreed,
                     ml_consent=ml_consent,
-                    last_used=datetime.now(timezone('UTC'))  # Set last_used to now
+                    last_used=datetime.now(timezone("UTC")),  # Set last_used to now
                 )
                 db.session.add(device)
 
@@ -263,6 +310,7 @@ def register_device(email, hostid, license_agreed, ml_consent):
     except Exception as e:
         print(f"Error during registration: {e}")
         return False
+
 
 @with_db_retries(max_retries=3, retry_delay=1)
 def is_device_registered(hostid):
@@ -278,6 +326,7 @@ def is_device_registered(hostid):
         # Check if user's subscription is still active
         return device.user.is_subscription_active()
 
+
 def record_usage(hostid):
     """Record usage of the software by this device"""
     with app.app_context():
@@ -286,6 +335,7 @@ def record_usage(hostid):
             device.increment_usage()
             return True
         return False
+
 
 def get_device_stats(hostid):
     """Get statistics for a device"""
@@ -299,16 +349,20 @@ def get_device_stats(hostid):
 
         if user:
             expiration_date = user.created_at + timedelta(days=365)
-            days_remaining = (expiration_date.astimezone(timezone('UTC')) - datetime.now(timezone('UTC'))).days
+            days_remaining = (
+                expiration_date.astimezone(timezone("UTC"))
+                - datetime.now(timezone("UTC"))
+            ).days
 
         return {
-            'email': user.email,
-            'registered_at': device.registered_at,
-            'usage_count': device.usage_count,
-            'last_used': device.last_used,
-            'days_remaining': max(0, days_remaining),
-            'ml_consent': device.ml_consent,
+            "email": user.email,
+            "registered_at": device.registered_at,
+            "usage_count": device.usage_count,
+            "last_used": device.last_used,
+            "days_remaining": max(0, days_remaining),
+            "ml_consent": device.ml_consent,
         }
+
 
 def get_user_id_hostid(hostid):
     """Get user ID for a given host ID"""
@@ -318,28 +372,30 @@ def get_user_id_hostid(hostid):
             return device.user_id
     return None
 
+
 def has_device_expired(hostid):
     """Check if the device has expired"""
     with app.app_context():
         device = Device.query.filter_by(hostid=hostid).first()
         if device:
             user = device.user
-            registered_at_UTC = device.registered_at.astimezone(timezone('UTC'))
+            registered_at_UTC = device.registered_at.astimezone(timezone("UTC"))
             #  print all the attributes of the user
             print(f"User attributes: {user.__dict__}")
             if user:
                 expiration_date_UTC = registered_at_UTC
                 # convert expriation date to UTC
-                now_UTC = (datetime.now()).astimezone(timezone('UTC'))
+                now_UTC = (datetime.now()).astimezone(timezone("UTC"))
 
                 # if (now_UTC-registered_at_UTC).seconds > 100*60*60*24:
-                if (now_UTC-registered_at_UTC).seconds > REGISTRATIONTIMEOUT:
+                if (now_UTC - registered_at_UTC).seconds > REGISTRATIONTIMEOUT:
                     print(f"Device {hostid} has expired")
                     return True
                 else:
                     print(f"Device {hostid} has not expired")
 
     return False
+
 
 def update_ml_consent_for_all_user_devices(hostname, consent_value):
     # First, find the device with the provided hostname
@@ -350,7 +406,9 @@ def update_ml_consent_for_all_user_devices(hostname, consent_value):
         user_id = device.user_id
 
         # Update ml_consent for all devices belonging to this user
-        Device.query.filter_by(user_id=user_id).update({Device.ml_consent: consent_value})
+        Device.query.filter_by(user_id=user_id).update(
+            {Device.ml_consent: consent_value}
+        )
 
         # Commit the changes to the database
         db.session.commit()
@@ -360,6 +418,7 @@ def update_ml_consent_for_all_user_devices(hostname, consent_value):
     else:
         # Return 0 if no device was found with the provided hostname
         return 0
+
 
 @app.shell_context_processor
 def make_shell_context():
@@ -371,9 +430,16 @@ def make_shell_context():
     Returns:
         dict: A dictionary mapping names to objects for the Flask shell context.
     """
-    return {'sa': SQLAlchemy, 'db': db, 'User': User, 'Device': Device, 'Result': Result}
+    return {
+        "sa": SQLAlchemy,
+        "db": db,
+        "User": User,
+        "Device": Device,
+        "Result": Result,
+    }
 
-@app.route('/download')
+
+@app.route("/download")
 def download_file():
     """Serve the MNOVAscripts.zip file for download.
 
@@ -384,8 +450,8 @@ def download_file():
         Response: The file as an attachment if found, otherwise a 404 error.
     """
     # Define the path to the downloads directory using pathlib
-    downloads_dir = Path(app.root_path) / 'downloads'
-    filename = 'MNOVAscripts.zip'
+    downloads_dir = Path(app.root_path) / "downloads"
+    filename = "MNOVAscripts.zip"
     file_path = downloads_dir / filename
 
     # Debug print
@@ -439,6 +505,7 @@ def example1():
     """
     return render_template("example1.html")
 
+
 @app.route("/example2/")
 def example2():
     """Render the second example page.
@@ -449,6 +516,7 @@ def example2():
         Response: The rendered example2.html template.
     """
     return render_template("example2.html")
+
 
 @app.route("/simulatedAnnealingDemo/")
 def example3():
@@ -477,7 +545,6 @@ def predict_c13_shifts():
     if request.method != "POST":
         return "Only POST requests are accepted", 400
 
-    
     json_data = request.get_json()
     if json_data is None or "molstring" not in json_data:
         print("No molfile data received")
@@ -486,12 +553,15 @@ def predict_c13_shifts():
     molfile = json_data["molstring"]
 
     # Use nmrshiftDB to predict C13 shifts
-    predicted_shifts = expectedmolecule.calc_c13_chemical_shifts_using_nmrshift2D(molfile)
+    predicted_shifts = expectedmolecule.calc_c13_chemical_shifts_using_nmrshift2D(
+        molfile
+    )
 
     # convert pandas dataframe to dictionary include AtomIndex in the output which is the index of the dataframe
-    predicted_shifts_dict = predicted_shifts.to_dict(orient='index')
+    predicted_shifts_dict = predicted_shifts.to_dict(orient="index")
 
     return {"predicted_c13_shifts": predicted_shifts_dict}
+
 
 @app.route("/", methods=["GET"])
 def display_front_page():
@@ -589,23 +659,30 @@ def simpleMNOVAfinalHTML():
     rtn_html = rtn_html.replace("True", "true")
     rtn_html = rtn_html.replace("False", "false")
 
+    hostname = jsonUtils.extract_hostname(
+        json_data["oldjsondata"]
+    )  # returns a string or None
 
-    hostname = jsonUtils.extract_hostname(json_data["oldjsondata"]) # returns a string or None
-
-        # Check if device is registered and registration is valid
+    # Check if device is registered and registration is valid
     if not is_device_registered(hostname):
-        return jsonify({
-            'status': 'unregistered',
-            'registration_url': url_for('registration_page', _external=True) + f"?hostid={hostname}"
-        })
+        return jsonify(
+            {
+                "status": "unregistered",
+                "registration_url": url_for("registration_page", _external=True)
+                + f"?hostid={hostname}",
+            }
+        )
 
     if has_device_expired(hostname):
         email = get_device_stats(hostname)["email"]
-        return jsonify({
-            'status': 'registration_expired',
-            'registration_url': url_for('registration_page', _external=True) + f"?hostid={hostname}" + f"&email={email}",
-        })
-
+        return jsonify(
+            {
+                "status": "registration_expired",
+                "registration_url": url_for("registration_page", _external=True)
+                + f"?hostid={hostname}"
+                + f"&email={email}",
+            }
+        )
 
     try:
         machine_learning_opt_in = json_data["oldjsondata"]["ml_consent"]["data"]["0"]
@@ -613,7 +690,9 @@ def simpleMNOVAfinalHTML():
         # If the key doesn't exist, set machine_learning_opt_in to False
         machine_learning_opt_in = False
 
-    updated_count = update_ml_consent_for_all_user_devices(hostname,  machine_learning_opt_in)
+    updated_count = update_ml_consent_for_all_user_devices(
+        hostname, machine_learning_opt_in
+    )
 
     if machine_learning_opt_in:
         # create a jinja2 template from the HTML
@@ -669,7 +748,6 @@ def simpleMNOVAfinalHTML():
                         MAE=json_data["best_results"]["best_mae"],
                         LAE=json_data["best_results"]["best_lae"],
                         json_result=json_result,
-
                         # Use JSON type for MySQL, fallback to Text for SQLite
                     )
                 else:
@@ -681,10 +759,8 @@ def simpleMNOVAfinalHTML():
                         MAE=json_data["best_results"]["best_mae"],
                         LAE=json_data["best_results"]["best_lae"],
                         json_result=json_result,
-
                         # Use JSON type for MySQL, fallback to Text for SQLite
                         # json_result=json.dumps(json_result, default=convert_numpy),
-
                     )
                 db.session.add(new_result)
                 db.session.commit()
@@ -709,17 +785,24 @@ def check_machine_learning():
 
     # Check if device is registered and registration is valid
     if not is_device_registered(hostname):
-        return jsonify({
-            'status': 'unregistered',
-            'registration_url': url_for('registration_page', _external=True) + f"?hostid={hostname}"
-        })
+        return jsonify(
+            {
+                "status": "unregistered",
+                "registration_url": url_for("registration_page", _external=True)
+                + f"?hostid={hostname}",
+            }
+        )
 
     if has_device_expired(hostname):
         email = get_device_stats(hostname)["email"]
-        return jsonify({
-            'status': 'registration_expired',
-            'registration_url': url_for('registration_page', _external=True) + f"?hostid={hostname}" + f"&email={email}",
-        })
+        return jsonify(
+            {
+                "status": "registration_expired",
+                "registration_url": url_for("registration_page", _external=True)
+                + f"?hostid={hostname}"
+                + f"&email={email}",
+            }
+        )
 
     # get machine learning consent status
     ml_consent = get_device_stats(hostname)["ml_consent"]
@@ -751,10 +834,12 @@ def register_host():
     success = register_device(email, hostid, license_agreed, ml_consent)
 
     if success:
-        return render_template("registration_success.html",
-                              hostid=hostid,
-                              email=email,
-                              ml_consent=ml_consent)
+        return render_template(
+            "registration_success.html",
+            hostid=hostid,
+            email=email,
+            ml_consent=ml_consent,
+        )
     else:
         return render_template("registration_error.html")
 
@@ -805,21 +890,28 @@ def simpleMNOVA_display_molecule():
     # check if hostname is already known
     # print out the hostname
 
-    hostname = jsonUtils.extract_hostname(json_data) # returns a string or None
+    hostname = jsonUtils.extract_hostname(json_data)  # returns a string or None
 
     # Check if device is registered and registration is valid
     if not is_device_registered(hostname):
-        return jsonify({
-            'status': 'unregistered',
-            'registration_url': url_for('registration_page', _external=True) + f"?hostid={hostname}"
-        })
+        return jsonify(
+            {
+                "status": "unregistered",
+                "registration_url": url_for("registration_page", _external=True)
+                + f"?hostid={hostname}",
+            }
+        )
 
     if has_device_expired(hostname):
         email = get_device_stats(hostname)["email"]
-        return jsonify({
-            'status': 'registration_expired',
-            'registration_url': url_for('registration_page', _external=True) + f"?hostid={hostname}" + f"&email={email}",
-        })
+        return jsonify(
+            {
+                "status": "registration_expired",
+                "registration_url": url_for("registration_page", _external=True)
+                + f"?hostid={hostname}"
+                + f"&email={email}",
+            }
+        )
 
     # Record this usage
     record_usage(hostname)
@@ -831,10 +923,11 @@ def simpleMNOVA_display_molecule():
         # If the key doesn't exist, set machine_learning_opt_in to False
         machine_learning_opt_in = False
 
-    updated_count = update_ml_consent_for_all_user_devices(hostname,  machine_learning_opt_in)
+    updated_count = update_ml_consent_for_all_user_devices(
+        hostname, machine_learning_opt_in
+    )
 
     problemdata_json = NMRProblem.from_mnova_dict(json_data)
-
 
     # decide whether we are doing prediction or assignments
     if problemdata_json.is_prediction():
@@ -883,15 +976,19 @@ def simpleMNOVA_display_molecule():
             G2, solution.hmbc, solution.h1, solution.c13
         )
 
-        jsonGraphData = json_graph.node_link_data(G2) # reverted back to original as edges="links" was causing problems
+        jsonGraphData = json_graph.node_link_data(
+            G2
+        )  # reverted back to original as edges="links" was causing problems
         jsonGraphData["moved_nodes"] = jsonGraphData["nodes"]
 
         # create a network graph of the expected molecule
 
-        solution.initiate_molgraph( json_data, G2)
+        solution.initiate_molgraph(json_data, G2)
 
         #  convert the molgraph to a json object
-        jsonGraphData_mol = json_graph.node_link_data(solution.molgraph) # reverted back to original as edges="links" was causing problems
+        jsonGraphData_mol = json_graph.node_link_data(
+            solution.molgraph
+        )  # reverted back to original as edges="links" was causing problems
 
         # calculate the shortest paths between all pairs of nodes in the molgraph
         shortest_paths = dict(nx.all_pairs_dijkstra_path_length(solution.molgraph))
@@ -909,8 +1006,8 @@ def simpleMNOVA_display_molecule():
                 "numProtons",
                 "x",
                 "y",
-                'sym_atom_idx',
-                'sym_atomNumber',
+                "sym_atom_idx",
+                "sym_atomNumber",
             ]
         ].copy()
 
@@ -935,7 +1032,9 @@ def simpleMNOVA_display_molecule():
         else:
             dataFrom = "mnova"
 
-        possible_symmetry = solution.c13_df.shape[0] < solution.expected_molecule.num_carbon_atoms
+        possible_symmetry = (
+            solution.c13_df.shape[0] < solution.expected_molecule.num_carbon_atoms
+        )
 
         simAnneal = SimulatedAnnealing2.from_params(
             copy.deepcopy(jsonGraphData["nodes"]),
@@ -946,18 +1045,21 @@ def simpleMNOVA_display_molecule():
         )
 
         # setup the run using standard parameters hardcoded in the class
-        simAnneal.setup_run()
+        simAnneal.setup_run(cooling_rate=0.999)
 
-        if json_data["simulatedAnnealing"]["data"]["0"] and (simAnneal.predicted_weight > 0):  # True
+        if json_data["simulatedAnnealing"]["data"]["0"] and (
+            simAnneal.predicted_weight > 0
+        ):  # True
 
             # simAnneal.setup_run(randomize_mapping=True)
-            simAnneal.run_optimization(50)
+            simAnneal.run_optimization(100)
 
-            jsonGraphData, best_results = simAnneal.process_results(catoms_df, jsonGraphData)
+            jsonGraphData, best_results = simAnneal.process_results(
+                catoms_df, jsonGraphData
+            )
 
         else:
             best_results = simAnneal.process_results_SA_skipped()
-
 
         #  start  to produce the html display
 
@@ -980,7 +1082,6 @@ def simpleMNOVA_display_molecule():
                     catoms_df.loc[idx, "y"] = node["y"]
                     catoms_df.loc[idx, "ppm_calculated"] = node["ppm_calculated"]
                     catoms_df.loc[idx, "atomNumber"] = node["atomNumber"]
-
 
         catoms_str = json.dumps(catoms_df.to_dict(orient="records"), indent=4)
         # catoms_str = json.dumps(jsonGraphData["nodes"], indent=4)
@@ -1078,10 +1179,10 @@ def simpleMNOVA_display_molecule():
         rtn_html = rtn_html.replace("False", "false")
 
         # replace np.float64
-        float_pattern = r'np\.float64\(([\d\.]+)\)'
-        int_pattern = r'np\.int64\(([\d]+)\)'
-        rtn_html =  re.sub(float_pattern, r'\1', rtn_html)
-        rtn_html =  re.sub(int_pattern, r'\1', rtn_html)
+        float_pattern = r"np\.float64\(([\d\.]+)\)"
+        int_pattern = r"np\.int64\(([\d]+)\)"
+        rtn_html = re.sub(float_pattern, r"\1", rtn_html)
+        rtn_html = re.sub(int_pattern, r"\1", rtn_html)
 
         # add redults to database if the user has opted in for machine learning
 
@@ -1110,7 +1211,7 @@ def simpleMNOVA_display_molecule():
             # # check if the user id is valid
             if user_id is not None:
 
-            # save the results to the database
+                # save the results to the database
 
                 with app.app_context():
                     if RUNNINGONPYTHONANYWHERE:
@@ -1121,7 +1222,6 @@ def simpleMNOVA_display_molecule():
                             MAE=best_results["best_mae"],
                             LAE=best_results["best_lae"],
                             json_result=json_result,
-
                             # Use JSON type for MySQL, fallback to Text for SQLite
                         )
                     else:
@@ -1132,10 +1232,8 @@ def simpleMNOVA_display_molecule():
                             weight=best_results["best_weight"],
                             MAE=best_results["best_mae"],
                             LAE=best_results["best_lae"],
-
                             # Use JSON type for MySQL, fallback to Text for SQLite
                             json_result=json_result,
-
                         )
                     db.session.add(new_result)
                     db.session.commit()

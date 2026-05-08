@@ -54,9 +54,11 @@ class NMRShiftDBBridge:
             if os.path.exists(lib_dir):
                 # Add all JAR files in lib directory
                 for file in os.listdir(lib_dir):
-                    if file.endswith('.jar'):
+                    if file.endswith(".jar"):
                         classpath_parts.append(os.path.join(lib_dir, file))
-                print(f"Found {len([f for f in os.listdir(lib_dir) if f.endswith('.jar')])} JAR files in lib/")
+                print(
+                    f"Found {len([f for f in os.listdir(lib_dir) if f.endswith('.jar')])} JAR files in lib/"
+                )
 
             # Add build directory if it exists (for compiled .class files)
             if os.path.exists(build_dir):
@@ -73,7 +75,9 @@ class NMRShiftDBBridge:
                     classpath_parts.append(jar_path)
 
             if not classpath_parts:
-                raise Exception("No JAR files or class directories found. Please check lib/ directory.")
+                raise Exception(
+                    "No JAR files or class directories found. Please check lib/ directory."
+                )
 
             classpath = os.pathsep.join(classpath_parts)
 
@@ -85,7 +89,7 @@ class NMRShiftDBBridge:
                 jpype.getDefaultJVMPath(),
                 f"-Djava.class.path={classpath}",
                 "-Xmx2048m",  # 2GB heap for chemistry calculations
-                convertStrings=False
+                convertStrings=False,
             )
 
             print("JVM started successfully")
@@ -94,6 +98,7 @@ class NMRShiftDBBridge:
         except Exception as e:
             print(f"Failed to initialize JVM: {e}")
             import traceback
+
             traceback.print_exc()
             self.is_ready = False
 
@@ -102,14 +107,18 @@ class NMRShiftDBBridge:
         try:
             # Load the Java class
             print("Attempting to load MolFileParser class...")
-            MolFileParser = jpype.JClass('MolFileParser') # added lib/ prefix to match package structure
+            MolFileParser = jpype.JClass(
+                "MolFileParser"
+            )  # added lib/ prefix to match package structure
             print("MolFileParser class loaded")
 
             self.parser = MolFileParser()
             print("MolFileParser instance created")
 
             # Check if initialization was successful
-            if hasattr(self.parser, 'isInitialized') and callable(self.parser.isInitialized):
+            if hasattr(self.parser, "isInitialized") and callable(
+                self.parser.isInitialized
+            ):
                 self.is_ready = self.parser.isInitialized()
                 print(f"Parser isInitialized: {self.is_ready}")
             else:
@@ -127,6 +136,7 @@ class NMRShiftDBBridge:
         except Exception as e:
             print(f"Failed to load MolFileParser: {e}")
             import traceback
+
             traceback.print_exc()
             self.is_ready = False
             self._initialized = True
@@ -158,6 +168,7 @@ class NMRShiftDBBridge:
         except Exception as e:
             print(f"Error during prediction: {e}")
             import traceback
+
             traceback.print_exc()
             return pd.DataFrame(columns=["min", "mean", "max"])
 
@@ -231,6 +242,7 @@ def shutdown_nmr_bridge():
 
 # Register shutdown hook
 import atexit
+
 atexit.register(shutdown_nmr_bridge)
 
 
@@ -326,5 +338,3 @@ M  END
     print("\n" + "=" * 60)
     print("All tests completed")
     print("=" * 60)
-
-
