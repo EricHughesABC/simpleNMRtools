@@ -195,7 +195,52 @@ The application reads this file automatically via `python-dotenv` at startup.
 
 ---
 
-### Step 6 — Run the application
+### Step 6 — Configure the MestReNova client
+
+The client side of simpleNMRtools runs inside **MestReNova** (Mnova) as a set of
+ECMAScript (`.qs`) scripts. Before using them, you must tell the scripts which server
+to connect to by editing the file `server_address.qs`.
+
+Open `server_address.qs` in a text editor. The file contains a `server_address()`
+function with several return statements, all but one commented out:
+
+```javascript
+function server_address() {
+    // return "http://localhost:8000/";
+    // return "http://localhost:5000/";
+    return "http://simplenmr.pythonanywhere.com/";
+    // return "http://test-simplenmr.pythonanywhere.com/";
+    // return "http://simplenmr.awh.durham.ac.uk/";
+}
+```
+
+Only one line must be active (uncommented) at a time. Comment out the current active
+line and uncomment the one that matches your setup:
+
+| Scenario | Line to uncomment |
+|---|---|
+| Local development (Flask default port) | `return "http://localhost:5000/";` |
+| Local development (alternative port) | `return "http://localhost:8000/";` |
+| Production (PythonAnywhere) | `return "http://simplenmr.pythonanywhere.com/";` |
+| Test server (PythonAnywhere) | `return "http://test-simplenmr.pythonanywhere.com/";` |
+
+For example, to use the local Flask server, the file should look like this:
+
+```javascript
+function server_address() {
+    // return "http://localhost:8000/";
+    return "http://localhost:5000/";
+    // return "http://simplenmr.pythonanywhere.com/";
+    // return "http://test-simplenmr.pythonanywhere.com/";
+    // return "http://simplenmr.awh.durham.ac.uk/";
+}
+```
+
+Save the file and reload the scripts in MestReNova for the change to take effect.
+
+---
+
+### Step 7 — Run the application
 
 Start the Flask development server:
 
