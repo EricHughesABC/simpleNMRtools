@@ -16,13 +16,25 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 import time
 from flask_migrate import Migrate
-from sqlalchemy.dialects.mysql import JSON
+# MODIFIED: removed MySQL-specific JSON import; db.JSON() with SQLite variant is used
+# in the Result model instead, making the column type portable across databases.
 
 from datetime import datetime, timedelta
 from pytz import timezone
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# MODIFIED: load_dotenv() previously used no path argument, relying on the working
+# directory being correct at startup. On PythonAnywhere the WSGI server may start
+# from a different directory, causing .env to be silently missed.
+# Passing an explicit path anchored to this file's location ensures .env is always
+# found in the same folder as simpleNMRtest_app.py (e.g. /home/simpleNMR/mysite/.env)
+# regardless of the working directory.
+# load_dotenv() returns True if the file was found and loaded, False otherwise.
+_env_path = Path(__file__).parent / ".env"
+_env_loaded = load_dotenv(_env_path)
+print(f"[dotenv] loading from: {_env_path}")
+print(f"[dotenv] .env found and loaded: {_env_loaded}")
 
 import numpy as np
 import pandas as pd
@@ -31,7 +43,6 @@ import networkx as nx
 from networkx.readwrite import json_graph
 
 
-from pathlib import Path
 
 
 # from flaskConfig import FlaskConfig
@@ -46,7 +57,8 @@ from globals import SVG_DIMENSIONS as svgDimensions
 
 from simulatedAnnealing_v5a import SimulatedAnnealing2
 
-global RUNNINGONPYTHONANYWHERE
+# MODIFIED: removed global RUNNINGONPYTHONANYWHERE — environment detection is now
+# handled by get_database_uri() via the DATABASE_URL environment variable.
 global REGISTRATIONTIMEOUT
 
 REGISTRATIONTIMEOUT = 1000 * 60 * 60 * 24  # 100 days in seconds
@@ -80,64 +92,73 @@ def convert_numpy(obj):
         raise TypeError(f"Type {type(obj)} not serializable")
 
 
-# Determine environment (local or production)
-def is_running_on_pythonanywhere():
-    """Check if the application is running on PythonAnywhere"""
-    # Check for PythonAnywhere-specific paths or environment variables
-    return (
-        os.path.exists("/var/www")  # PythonAnywhere has this directory
-        and os.path.exists(
-            "/home/simpleNMR"
-        )  # Check for your username's home directory
-        or "PYTHONANYWHERE_DOMAIN"
-        in os.environ  # PythonAnywhere sets this environment variable
-        or "PYTHONANYWHERE_SITE" in os.environ
-    )
+# MODIFIED: replaced is_running_on_pythonanywhere() with get_database_uri().
+#
+# Priority order for database selection:
+#   1. DATABASE_URL environment variable — full URI, works on any server
+#   2. Legacy DB_* variables (DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME) — kept for
+#      backwards compatibility with existing .env files on PythonAnywhere
+#   3. SQLite fallback — used automatically when neither of the above is set,
+#      which is the correct behaviour for local development
+#
+# To migrate from the old variables to DATABASE_URL, replace the four DB_* lines
+# in your .env with a single line:
+#   DATABASE_URL=mysql+pymysql://username:password@host/dbname
+def get_database_uri():
+    """Return the database URI.
+
+    Checks for DATABASE_URL first, then legacy DB_* variables, then falls back
+    to SQLite. Prints a clear startup message so the active database is always
+    visible in the PythonAnywhere error log.
+    """
+    env_file = Path(__file__).parent / ".env"
+    print(f"[db] .env path : {env_file}")
+    print(f"[db] .env exists: {env_file.exists()}")
+
+    # --- Option 1: single DATABASE_URL variable ---
+    database_url = os.environ.get("DATABASE_URL")
+    if database_url:
+        print(f"[db] Using DATABASE_URL — host: {database_url.split('@')[-1]}")
+        return database_url
+
+    # --- Option 2: DB_* variables ---
+    # PythonAnywhere does not use a .env file. Instead it injects environment
+    # variables set via the PythonAnywhere dashboard (Web tab → Environment variables).
+    # These DB_* variables are the correct format to use there and should be left
+    # as-is in the dashboard — do not replace them with DATABASE_URL on PythonAnywhere.
+    # DATABASE_URL is the preferred format for other hosting platforms that do use .env.
+    db_username = os.environ.get("DB_USERNAME")
+    db_password = os.environ.get("DB_PASSWORD")
+    db_host     = os.environ.get("DB_HOST")
+    db_name     = os.environ.get("DB_NAME")
+
+    if all([db_username, db_password, db_host, db_name]):
+        legacy_url = f"mysql+pymysql://{db_username}:{db_password}@{db_host}/{db_name}"
+        print(f"[db] Using DB_* environment variables — host: {db_host}/{db_name}")
+        return legacy_url
+
+    # --- Option 3: SQLite fallback for local development ---
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    sqlite_path = "sqlite:///" + os.path.join(base_dir, "registrations.db")
+    print(f"[db] No DATABASE_URL or DB_* variables found — using SQLite: {sqlite_path}")
+    return sqlite_path
 
 
 app = Flask(__name__)
 
-# Database Configuration
-RUNNINGONPYTHONANYWHERE = is_running_on_pythonanywhere()
-if RUNNINGONPYTHONANYWHERE:
-    # MySQL for PythonAnywhere (production)
-    app.config["SQLALCHEMY_DATABASE_URI"] = (
-        "mysql+pymysql://{username}:{password}@{hostname}/{database}".format(
-            username=os.environ.get("DB_USERNAME", "simpleNMR"),
-            password=os.environ.get("DB_PASSWORD", ""),
-            hostname=os.environ.get(
-                "DB_HOST", "simpleNMR.mysql.pythonanywhere-services.com"
-            ),
-            database=os.environ.get("DB_NAME", "simpleNMR$registrations"),
-        )
-    )
-
-    # Configure connection pool for MySQL
-    app.config["SQLALCHEMY_POOL_SIZE"] = int(os.environ.get("SQLALCHEMY_POOL_SIZE", 5))
-    app.config["SQLALCHEMY_POOL_TIMEOUT"] = int(
-        os.environ.get("SQLALCHEMY_POOL_TIMEOUT", 30)
-    )
-    app.config["SQLALCHEMY_POOL_RECYCLE"] = int(
-        os.environ.get("SQLALCHEMY_POOL_RECYCLE", 1800)
-    )
-    app.config["SQLALCHEMY_MAX_OVERFLOW"] = int(
-        os.environ.get("SQLALCHEMY_MAX_OVERFLOW", 2)
-    )
-
-    print("Running in production mode with MySQL")
-else:
-    # SQLite for local development
-    base_dir = os.path.abspath(os.path.dirname(__file__))
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
-        base_dir, "registrations.db"
-    )
-    print("Running in development mode with SQLite")
-
+# MODIFIED: replaced the RUNNINGONPYTHONANYWHERE if/else config block with a single
+# call to get_database_uri(). Connection pool settings are now read from the environment
+# so they apply to any production database, not just PythonAnywhere.
+app.config["SQLALCHEMY_DATABASE_URI"] = get_database_uri()
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "default-secret-key")
 
-# Print for debugging (you can remove this in production)
-print("\nline Database URI:", app.config["SQLALCHEMY_DATABASE_URI"])
+# Connection pool settings — only meaningful for MySQL/Postgres; ignored by SQLite.
+# Override any of these in the .env file if needed.
+app.config["SQLALCHEMY_POOL_SIZE"] = int(os.environ.get("SQLALCHEMY_POOL_SIZE", 5))
+app.config["SQLALCHEMY_POOL_TIMEOUT"] = int(os.environ.get("SQLALCHEMY_POOL_TIMEOUT", 30))
+app.config["SQLALCHEMY_POOL_RECYCLE"] = int(os.environ.get("SQLALCHEMY_POOL_RECYCLE", 1800))
+app.config["SQLALCHEMY_MAX_OVERFLOW"] = int(os.environ.get("SQLALCHEMY_MAX_OVERFLOW", 2))
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -203,9 +224,10 @@ class Result(db.Model):
     weight = db.Column(db.Float)
     MAE = db.Column(db.Float)
     LAE = db.Column(db.Float)
-    # Use JSON type for MySQL, fallback to Text for SQLite
-    # json_result = db.Column(db.JSON().with_variant(db.Text, 'sqlite'), nullable=True)
-    json_result = db.Column(JSON)
+    # MODIFIED: replaced db.Column(JSON) (MySQL-specific) with db.JSON() using
+    # with_variant() so the column stores native JSON on MySQL/Postgres and falls
+    # back to Text on SQLite, making the model portable across both databases.
+    json_result = db.Column(db.JSON().with_variant(db.Text, "sqlite"), nullable=True)
     created_at = db.Column(
         db.DateTime, default=datetime.now(timezone("UTC")), index=True
     )
@@ -739,29 +761,17 @@ def simpleMNOVAfinalHTML():
 
             # save the results to the database
             with app.app_context():
-                if RUNNINGONPYTHONANYWHERE:
-                    # MySQL for PythonAnywhere (production)
-                    new_result = Result(
-                        user_id=user_id,
-                        smiles_string=json_data["smilesString"],
-                        weight=json_data["best_results"]["best_weight"],
-                        MAE=json_data["best_results"]["best_mae"],
-                        LAE=json_data["best_results"]["best_lae"],
-                        json_result=json_result,
-                        # Use JSON type for MySQL, fallback to Text for SQLite
-                    )
-                else:
-
-                    new_result = Result(
-                        user_id=user_id,  # Replace with actual user ID
-                        smiles_string=json_data["smilesString"],
-                        weight=json_data["best_results"]["best_weight"],
-                        MAE=json_data["best_results"]["best_mae"],
-                        LAE=json_data["best_results"]["best_lae"],
-                        json_result=json_result,
-                        # Use JSON type for MySQL, fallback to Text for SQLite
-                        # json_result=json.dumps(json_result, default=convert_numpy),
-                    )
+                # MODIFIED: removed if RUNNINGONPYTHONANYWHERE branch — both the
+                # MySQL and SQLite branches created an identical Result object, so
+                # the check was doing nothing. A single branch is used now.
+                new_result = Result(
+                    user_id=user_id,
+                    smiles_string=json_data["smilesString"],
+                    weight=json_data["best_results"]["best_weight"],
+                    MAE=json_data["best_results"]["best_mae"],
+                    LAE=json_data["best_results"]["best_lae"],
+                    json_result=json_result,
+                )
                 db.session.add(new_result)
                 db.session.commit()
 
@@ -1212,29 +1222,18 @@ def simpleMNOVA_display_molecule():
             if user_id is not None:
 
                 # save the results to the database
-
                 with app.app_context():
-                    if RUNNINGONPYTHONANYWHERE:
-                        new_result = Result(
-                            user_id=user_id,
-                            smiles_string=solution.smilesstr,
-                            weight=best_results["best_weight"],
-                            MAE=best_results["best_mae"],
-                            LAE=best_results["best_lae"],
-                            json_result=json_result,
-                            # Use JSON type for MySQL, fallback to Text for SQLite
-                        )
-                    else:
-
-                        new_result = Result(
-                            user_id=user_id,  # Replace with actual user ID
-                            smiles_string=solution.smilesstr,
-                            weight=best_results["best_weight"],
-                            MAE=best_results["best_mae"],
-                            LAE=best_results["best_lae"],
-                            # Use JSON type for MySQL, fallback to Text for SQLite
-                            json_result=json_result,
-                        )
+                    # MODIFIED: removed if RUNNINGONPYTHONANYWHERE branch — both the
+                    # MySQL and SQLite branches created an identical Result object, so
+                    # the check was doing nothing. A single branch is used now.
+                    new_result = Result(
+                        user_id=user_id,
+                        smiles_string=solution.smilesstr,
+                        weight=best_results["best_weight"],
+                        MAE=best_results["best_mae"],
+                        LAE=best_results["best_lae"],
+                        json_result=json_result,
+                    )
                     db.session.add(new_result)
                     db.session.commit()
         return rtn_html

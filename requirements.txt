@@ -1,26 +1,47 @@
+# Core scientific packages
 numpy==1.26.4
 scipy==1.14.0
 pandas==2.2.2
+
+# Cheminformatics
 rdkit==2024.3.3
+
+# Graph processing
 networkx==3.3
+
+# Flask web framework and extensions
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.7
 blinker==1.8.2
 click==8.1.7
 colorama==0.4.6
-Flask==3.0.3
 itsdangerous==2.2.0
+Werkzeug==3.0.3
+
+# Templating
 Jinja2==3.1.4
 MarkupSafe==2.1.5
+
+# Database drivers
+PyMySQL==1.1.1
+
+# Environment / configuration
+python-dotenv==1.0.1
+
+# Image processing
 pillow==10.4.0
+
+# Date/time utilities
 python-dateutil==2.9.0.post0
 pytz==2024.1
 six==1.16.0
 tzdata==2024.1
-Werkzeug==3.0.3
+
+# Java bridge (for NMRShiftDB predictions)
 jpype1==1.6.0
+
+# Documentation
 pandoc
 sphinx
 sphinx-rtd-theme
-
-
-
-
