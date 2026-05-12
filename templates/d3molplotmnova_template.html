@@ -399,8 +399,6 @@
      */
     const svg_width_eeh  = 1000;
     const svg_height_eeh = 600;
-    const svg_center_x_eeh = svg_width_eeh  / 2;   // 500 — retained for any legacy references
-    const svg_center_y_eeh = svg_height_eeh / 2;   // 300 — retained for any legacy references
 
     /*
      * Touch / coarse-pointer detection
@@ -468,14 +466,26 @@
   
     // title
     const title = `{{title}}`;
+
+    // catoms
+    var catoms = {{catoms}};
+    // nodes
+    var nodes = {{graph_nodes}};
+    // nodes_orig
+    var nodes_orig = {{orig_nodes}};
+    // links
+    var links = {{graph_edges}};
+    // molgraph
+    var molgraph = {{molgraph}};
+    // shortest_paths
+    var shortest_paths = {{shortest_paths}};
+    // best_results
+    var best_results = {{best_results}};
+
+    const isolatedCarbons = findIsolatedNodes(nodes, links);
+    const isolatedCarbonsCount = isolatedCarbons.length;
+    var svg_bckgrnd_image_str = `{{svg_container}}`;
     {% endautoescape %}
-
-
-    // node offset
-    let node_offset = 0;
-    if(dataFrom == 'mnova'){
-        node_offset = 0;
-    }
 
     /*
      * Coordinate scales — normalised server space → SVG viewBox space
@@ -496,38 +506,35 @@
     const xScale = d3.scaleLinear().domain([0, 1]).range([0, svg_width_eeh]);
     const yScale = d3.scaleLinear().domain([0, 1]).range([0, svg_height_eeh]);
 
-    // define colour blind friendly colours with 50% transparency
+    // Colour-blind-friendly palette
     const orange = 'rgba(255, 165, 0, 1)';
-    const blue = 'rgba(173, 216, 230, 1)';
-    const green = 'rgba(152, 251, 152, 1)';
+    const blue   = 'rgba(173, 216, 230, 1)';
+    const green  = 'rgba(152, 251, 152, 1)';
     const yellow = 'rgba(255, 255, 0, 1)';
-    const purple = 'rgba(128, 0, 128, 1)';
-    const cyan = 'rgba(0, 255, 255, 1)';
-    const grey = 'rgba(128, 128, 128, 1)';
+    const cyan   = 'rgba(0, 255, 255, 1)';
+    const grey   = 'rgba(128, 128, 128, 1)';
+    const black  = 'rgba(0, 0, 0, 1)';
+    const white  = 'rgba(255, 255, 255, 1)';
 
-    const black = 'rgba(0, 0, 0, 1)';
-    const white = 'rgba(255, 255, 255, 1)';
-
-    // assign colours to parts of the molecule
+    // Assign colours to carbon multiplicity types
     const CH3 = cyan;
     const CH2 = yellow;
-    const CH = green;
-    const C = orange;
+    const CH  = green;
+    const C   = orange;
 
+    // Edge colours
     const cosyEdgeColor = blue;
-    const cosyEdgeHoverOpacity = 0.0;
     const hmbcEdgeColor = grey;
 
-    const nodeHoverColor = "lightgrey";
+    // Node hover appearance
+    const nodeHoverColor   = "lightgrey";
     const nodeHoverOpacity = 0.4;
     const textHoverOpacity = 0;
 
     /*
      * Node radii — larger on touch screens for easier tap/drag interaction
      * ─────────────────────────────────────────────────────────────────────────
-     * On a coarse-pointer (touchscreen) device, carbon atom nodes are given
-     * larger radii so they are easier to tap and drag with a finger.
-     * The values are in SVG viewBox units (not screen pixels), so they scale
+     * Values are in SVG viewBox units (not screen pixels), so they scale
      * correctly with the rest of the diagram at any screen size.
      *   nodeRadius      — default resting size of each node circle
      *   nodeRadiusSmall — size applied to non-hovered neighbours on mouseover
@@ -537,26 +544,21 @@
     const nodeRadiusSmall = isTouch ? 20 : 15;
     const nodeRadiusLarge = isTouch ? 32 : 26;
 
-    // define edge widths
+    // Edge widths (SVG viewBox units)
     const cosyEdgeWidth = 8;
     const hmbcEdgeWidth = 8;
-    const noesyEdgeWidth = 8;
 
-    // define font size
-    const fontSizeStr = "12px";
-    const fontSizeInt = 12;
-
+    // Text sizing
+    const fontSizeStr  = "12px";
+    const fontSizeInt  = 12;
     const textOffsetInt = 8;
 
-    // Define color scale for nodes based on numProtons
+    // Colour scale: maps numProtons (0–3) → C / CH / CH2 / CH3 colours
     const colorScale = d3.scaleOrdinal()
-      .domain([0, 1, 2, 3])
-      .range([C, CH, CH2, CH3]); // Blue, Orange, Green, Red
+        .domain([0, 1, 2, 3])
+        .range([C, CH, CH2, CH3]);
 
-
-    // Select the SVG element
-
-    // Initial transformation
+    // Initial D3 zoom/pan transform
     const initialTransform = d3.zoomIdentity.translate(0, 0);
 
     // Track the current transform
@@ -570,35 +572,10 @@
         .scaleExtent([0.5, 5])
         .on("zoom", handleZoom);
 
-
     svg.call(myZoom);
 
-    // const arrow = d3.select("#arrow");
     const molimage = d3.select("#molimage");
 
-    // Define the graph data
-    {% autoescape false %}
-    // catoms
-    var catoms = {{catoms}};
-    // nodes
-    var nodes = {{graph_nodes}};
-    // nodes_orig
-    var nodes_orig = {{orig_nodes}};
-    // nodes_now
-    var nodes_now = {{graph_nodes}};
-    // links
-    var links = {{graph_edges}};
-    // molgraph
-    var molgraph = {{molgraph}};
-    // shortest_paths
-    var shortest_paths = {{shortest_paths}};
-    // best_results
-    var best_results = {{best_results}};
-
-    const isolatedCarbons = findIsolatedNodes(nodes, links);
-    const isolatedCarbonsCount = isolatedCarbons.length;
-    var svg_bckgrnd_image_str = `{{svg_container}}`;
-    {% endautoescape %}
     
     // Modify INFO tooltip to display the best results from the optimization with only 2 decimal places
     // d3.select("#info_tooltip").html(`Correlation Penalty:&nbsp;${best_results.best_weight}<br>Uncorrelated&nbsp;Nodes:&nbsp;${isolatedCarbonsCount}&nbsp;out&nbsp;of&nbsp;${nodes.length}<br>MAE:&nbsp;${best_results.best_mae.toFixed(2)},&nbsp;LAE:&nbsp;${best_results.best_lae.toFixed(2)}&nbsp;(NODE&nbsp;${best_results.best_lae_atomNumber})`);
@@ -729,8 +706,7 @@ function reorderElements() {
     const link = linksGroup.selectAll(".links-group")
         .data(cosyLinks)
         .enter().append("line")
-        .attr("class", "link")
-        .attr("class", "cosy-link")
+        .attr("class", "link cosy-link")
         .attr("stroke", cosyEdgeColor)
         .attr("source", d => d.source)
         .attr("target", d => d.target)
@@ -757,7 +733,7 @@ function reorderElements() {
         .attr("stroke-width", hmbcEdgeWidth);
 
     // Color HMBC links by distance
-    colorHmbcLinksByDistance(mapping, node_offset);
+    colorHmbcLinksByDistance(mapping, 0);
 
 
 
@@ -1144,7 +1120,7 @@ d3.select("body").on("keydown", (event) => {
             d3.select("#hmbcButton").classed("sunken", false);
             hmbclinks_svg.attr("opacity", 0);
             // hmbclinks_svg.attr("stroke", hmbcEdgeColor);
-            colorHmbcLinksByDistance(mapping, node_offset);
+            colorHmbcLinksByDistance(mapping, 0);
 
             // check if the COSY button is not sunken, if it is not, set the opacity of the cosy links to 1
             if (!d3.select("#sunkenButton").classed("sunken")){
@@ -1389,7 +1365,7 @@ d3.select("body").on("keydown", (event) => {
 
 
         // recaclulate correlation penalty
-        var best_weight = computeTotalWeight2D(links, mapping, shortest_paths, node_offset);
+        var best_weight = computeTotalWeight2D(links, mapping, shortest_paths, 0);
 
         // update the best results
         best_results.best_weight = best_weight;
@@ -1403,7 +1379,7 @@ d3.select("body").on("keydown", (event) => {
         var info_tooltip_str = create_tooltip_string(best_results.best_weight, best_results.best_mae, best_results.best_lae, best_results.best_lae_atomNumber, isolatedCarbonsCount, nodes.length, links.length);
         // d3.select("#info_tooltip").html(`Correlation Penalty:&nbsp;${best_results.best_weight}<br>Uncorrelated&nbsp;Nodes:&nbsp;${isolatedCarbonsCount}&nbsp;out&nbsp;of&nbsp;${nodes.length}<br>MAE:&nbsp;${best_results.best_mae.toFixed(2)},&nbsp;LAE:&nbsp;${best_results.best_lae.toFixed(2)}&nbsp;(NODE&nbsp;${best_results.best_lae_atomNumber})`);
         d3.select("#info_tooltip").html(info_tooltip_str);
-        colorHmbcLinksByDistance(mapping, node_offset);
+        colorHmbcLinksByDistance(mapping, 0);
         reorderElements();
     }
 
