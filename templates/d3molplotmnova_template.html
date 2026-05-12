@@ -469,8 +469,9 @@
 
     // catoms
     var catoms = {{catoms}};
-    // nodes
-    var nodes = {{graph_nodes}};
+    // raw graph nodes from the server — used only during initialisation to
+    // populate catoms; replaced by the filtered display set below
+    var rawNodes = {{graph_nodes}};
     // nodes_orig
     var nodes_orig = {{orig_nodes}};
     // links
@@ -482,7 +483,7 @@
     // best_results
     var best_results = {{best_results}};
 
-    const isolatedCarbons = findIsolatedNodes(nodes, links);
+    const isolatedCarbons = findIsolatedNodes(rawNodes, links);
     const isolatedCarbonsCount = isolatedCarbons.length;
     var svg_bckgrnd_image_str = `{{svg_container}}`;
     {% endautoescape %}
@@ -600,7 +601,7 @@
     
     // Modify INFO tooltip to display the best results from the optimization with only 2 decimal places
     // d3.select("#info_tooltip").html(`Correlation Penalty:&nbsp;${best_results.best_weight}<br>Uncorrelated&nbsp;Nodes:&nbsp;${isolatedCarbonsCount}&nbsp;out&nbsp;of&nbsp;${nodes.length}<br>MAE:&nbsp;${best_results.best_mae.toFixed(2)},&nbsp;LAE:&nbsp;${best_results.best_lae.toFixed(2)}&nbsp;(NODE&nbsp;${best_results.best_lae_atomNumber})`);
-    var info_tooltip_str = create_tooltip_string(best_results.best_weight, best_results.best_mae, best_results.best_lae, best_results.best_lae_atomNumber, isolatedCarbonsCount, nodes.length, links.length);
+    var info_tooltip_str = create_tooltip_string(best_results.best_weight, best_results.best_mae, best_results.best_lae, best_results.best_lae_atomNumber, isolatedCarbonsCount, rawNodes.length, links.length);
     d3.select("#info_tooltip").html(info_tooltip_str);
     // Set the visible property of the catoms array to false
     // loop through the nodes
@@ -608,25 +609,23 @@
         node.visible = false;
     });
 
-    // Set the visible property of the catoms array to false
-    // loop through the nodes
-    nodes.forEach(node => {
-        // find the id of the node in the catoms array set  visible property to the catom object to true
+    // Populate catoms with NMR data from the server-rendered node set
+    rawNodes.forEach(node => {
         const catom = catoms.find(catom => catom.id === node.id);
         if (catom) {
-            catom.visible = true;
-            catom.ppm =  node.ppm;
-            catom.iupacLabel = node.iupacLabel;
+            catom.visible      = true;
+            catom.ppm          = node.ppm;
+            catom.iupacLabel   = node.iupacLabel;
             catom.jCouplingVals = node.jCouplingVals;
             catom.jCouplingClass = node.jCouplingClass;
-            catom.H1_ppm = node.H1_ppm;
+            catom.H1_ppm       = node.H1_ppm;
         }
     })
 
     var catoms_orig = JSON.parse(JSON.stringify(catoms));
 
     // Map all node arrays from normalised [0,1] space into SVG viewBox space
-    scaleNodes(nodes);
+    scaleNodes(rawNodes);
     scaleNodes(nodes_orig);
     scaleNodes(catoms);
     scaleNodes(catoms_orig);
@@ -637,7 +636,9 @@
         mapping[catoms_orig[i]["id"]] = catoms_orig[i]["id"];
     }
 
-    nodes = JSON.parse(JSON.stringify(catoms.filter(node => node.visible)));
+    // Display nodes: the filtered, working set used for all D3 rendering.
+    // Distinct from rawNodes (the raw server data used only during init above).
+    var nodes = JSON.parse(JSON.stringify(catoms.filter(node => node.visible)));
     
 
     // Set initial positions of nodes and links
@@ -851,12 +852,19 @@ function reorderElements() {
         screen.orientation.addEventListener('change', onResize); // modern API
     }
 
-// Transform state variables
-let panX = 0, panY = 0;
-let scaleLevel = 1;
-let rotation = 0;
-let lastTransform = d3.zoomIdentity;
-var dragstartedFlag = false;
+/*
+ * viewState — single source of truth for all pan / zoom / rotation / drag state.
+ * Grouping these prevents accidental omission when resetting or inspecting the
+ * current view, and makes the relationship between the variables obvious.
+ */
+const viewState = {
+    panX:          0,
+    panY:          0,
+    scaleLevel:    1,
+    rotation:      0,
+    lastTransform: d3.zoomIdentity,
+    dragStarted:   false
+};
 
 // Drag handlers
 function dragstarted(event, d) {
@@ -865,7 +873,7 @@ function dragstarted(event, d) {
         link.style("opacity", 0);
     }
     d3.select(this).raise().classed("active", true);
-    dragstartedFlag = true;
+    viewState.dragStarted = true;
 }
 
 function dragged(event, d) {
@@ -881,7 +889,7 @@ function dragged(event, d) {
 
 function dragended(event, d) {
     d3.select(this).classed("active", false);
-    dragstartedFlag = false;
+    viewState.dragStarted = false;
     handleMouseOver(event, d);
 }
 
@@ -897,10 +905,10 @@ function dragended(event, d) {
  *    groups (molecule image, link lines, atom nodes) so they stay aligned.
  *    The transform sequence (applied right-to-left per SVG convention):
  *      translate(-cx,-cy)   move viewBox centre to origin
- *      rotate(rotation)     rotate around that origin
- *      scale(scaleLevel)    uniform scale around origin
+ *      rotate(viewState.rotation)     rotate around that origin
+ *      scale(viewState.scaleLevel)    uniform scale around origin
  *      translate(cx,cy)     restore centre
- *      translate(panX,panY) apply accumulated pan
+ *      translate(viewState.panX,viewState.panY) apply accumulated pan
  *    Rotation centre is always the viewBox centre (500,300) — using viewBox
  *    coordinates here is critical so the centre doesn't drift on resize.
  *
@@ -911,10 +919,10 @@ function render() {
     const cx = svg_width_eeh  / 2;
     const cy = svg_height_eeh / 2;
     const transformString =
-        `translate(${panX}, ${panY}) ` +
+        `translate(${viewState.panX}, ${viewState.panY}) ` +
         `translate(${cx}, ${cy}) ` +
-        `scale(${scaleLevel}) ` +
-        `rotate(${rotation}) ` +
+        `scale(${viewState.scaleLevel}) ` +
+        `rotate(${viewState.rotation}) ` +
         `translate(${-cx}, ${-cy})`;
 
     molimage.attr("transform", transformString);
@@ -923,20 +931,20 @@ function render() {
 
     // Counter-scale so nodes and strokes stay visually constant size
     allnodes.selectAll("circle")
-        .attr("r", nodeRadius / scaleLevel);
+        .attr("r", nodeRadius / viewState.scaleLevel);
 
     allnodes.selectAll(".node-text-atomNumber")
-        .attr("font-size", `${fontSizeInt / scaleLevel}px`)
-        .attr("dy", `${-textOffsetInt / scaleLevel}px`);
+        .attr("font-size", `${fontSizeInt / viewState.scaleLevel}px`)
+        .attr("dy", `${-textOffsetInt / viewState.scaleLevel}px`);
 
     allnodes.selectAll(".node-text-ppm")
-        .attr("font-size", `${fontSizeInt / scaleLevel}px`)
-        .attr("dy", `${textOffsetInt / scaleLevel}px`);
+        .attr("font-size", `${fontSizeInt / viewState.scaleLevel}px`)
+        .attr("dy", `${textOffsetInt / viewState.scaleLevel}px`);
 
     linksGroup.selectAll(".cosy-link")
-        .attr("stroke-width", `${cosyEdgeWidth / scaleLevel}px`);
+        .attr("stroke-width", `${cosyEdgeWidth / viewState.scaleLevel}px`);
     linksGroup.selectAll(".hmbc-link")
-        .attr("stroke-width", `${hmbcEdgeWidth / scaleLevel}px`);
+        .attr("stroke-width", `${hmbcEdgeWidth / viewState.scaleLevel}px`);
 }
 
 
@@ -948,16 +956,16 @@ function handleZoom(event) {
     if (event.sourceEvent) {
         if (event.sourceEvent.type === 'mousemove' || event.sourceEvent.type === 'touchmove') {
             // This is a pan/drag - accumulate the delta
-            const dx = x - lastTransform.x;
-            const dy = y - lastTransform.y;
-            panX += dx;
-            panY += dy;
+            const dx = x - viewState.lastTransform.x;
+            const dy = y - viewState.lastTransform.y;
+            viewState.panX += dx;
+            viewState.panY += dy;
         }
     }
 
     // Update scale level
-    scaleLevel = k;
-    lastTransform = event.transform;
+    viewState.scaleLevel = k;
+    viewState.lastTransform = event.transform;
 
     render();
 }
@@ -966,15 +974,15 @@ function handleZoom(event) {
 
 // Function to handle rotation
 function rotateSVG(angle) {
-    rotation = (rotation + angle) % 360;
+    viewState.rotation = (viewState.rotation + angle) % 360;
 
     render();
 
     // Counter-rotate text labels so they stay horizontal after the group rotates
     allnodes.selectAll(".node-text-atomNumber")
-        .attr("transform", `rotate(${-rotation})`);
+        .attr("transform", `rotate(${-viewState.rotation})`);
     allnodes.selectAll(".node-text-ppm")
-        .attr("transform", `rotate(${-rotation})`);
+        .attr("transform", `rotate(${-viewState.rotation})`);
 }
 
 // Add keydown event listener for rotation
@@ -999,25 +1007,25 @@ d3.select("body").on("keydown", (event) => {
  *
  * D3's built-in dblclick zoom is suppressed via the .filter() on myZoom above.
  * This handler replaces it with a full view reset:
- *   - panX/panY/scaleLevel/rotation are set back to their starting values
+ *   - viewState.panX/viewState.panY/viewState.scaleLevel/viewState.rotation are set back to their starting values
  *   - D3's internal zoom transform is synced via myZoom.transform so that the
  *     next wheel or pinch gesture starts from the correct baseline
- *   - Text counter-rotation is removed (rotation is now 0)
+ *   - Text counter-rotation is removed (viewState.rotation is now 0)
  *   - render() redraws all groups with the reset transform
  */
 d3.select("#svg-image").on("dblclick", function(event) {
     event.preventDefault();
 
-    panX      = 0;
-    panY      = 0;
-    scaleLevel = 1;
-    rotation  = 0;
-    lastTransform = d3.zoomIdentity;
+    viewState.panX      = 0;
+    viewState.panY      = 0;
+    viewState.scaleLevel = 1;
+    viewState.rotation  = 0;
+    viewState.lastTransform = d3.zoomIdentity;
 
     // Keep D3's internal zoom state in sync with the manual reset
     svg.call(myZoom.transform, d3.zoomIdentity);
 
-    // Remove text counter-rotation (rotation is now 0)
+    // Remove text counter-rotation (viewState.rotation is now 0)
     allnodes.selectAll(".node-text-atomNumber").attr("transform", "rotate(0)");
     allnodes.selectAll(".node-text-ppm").attr("transform", "rotate(0)");
 
@@ -1166,7 +1174,7 @@ svgDomNode.addEventListener('wheel', (event) => {
         // Increase the radius of the hovered over node using d.id
         circlenodes.forEach(function(circleNode) {
             if (circleNode.__data__.id == d.id) {
-                circleNode.setAttribute("r", nodeRadiusLarge/scaleLevel);
+                circleNode.setAttribute("r", nodeRadiusLarge/viewState.scaleLevel);
             }
         });
     }
@@ -1209,7 +1217,7 @@ svgDomNode.addEventListener('wheel', (event) => {
             circlenodes.forEach(function(circleNode) {
                 if (circleNode.__data__.id == nonNeighborId) {
                     circleNode.style.opacity = nodeHoverOpacity;
-                    circleNode.setAttribute("r", nodeRadiusSmall/scaleLevel);
+                    circleNode.setAttribute("r", nodeRadiusSmall/viewState.scaleLevel);
                 }
             });
         });
@@ -1228,7 +1236,7 @@ svgDomNode.addEventListener('wheel', (event) => {
         nearestNeighborIDs.forEach(i => {
             circlenodes.forEach(function(circleNode) {
                 if (circleNode.__data__.id == i) {
-                    circleNode.setAttribute("r", nodeRadiusLarge/scaleLevel);
+                    circleNode.setAttribute("r", nodeRadiusLarge/viewState.scaleLevel);
                 }
             });
         });
@@ -1249,7 +1257,7 @@ svgDomNode.addEventListener('wheel', (event) => {
     // Function to handle mouseover event
     function handleMouseOver(event, d) {
 
-        if (dragstartedFlag) {
+        if (viewState.dragStarted) {
             return;
         }   
         // Display tooltip
@@ -1264,7 +1272,7 @@ svgDomNode.addEventListener('wheel', (event) => {
 
         var circlenodes = document.querySelectorAll('.node circle');
 
-        if (dragstartedFlag) {
+        if (viewState.dragStarted) {
             return;
         }   
         // change the opacity of the text nodes to 1
@@ -1285,7 +1293,7 @@ svgDomNode.addEventListener('wheel', (event) => {
             circlenodes.forEach( function(circleNode) {
                 if (circleNode.__data__.id == d.id) {
                     circleNode.style.fill = colorScale(d.numProtons);
-                    circleNode.setAttribute("r", nodeRadius/scaleLevel);
+                    circleNode.setAttribute("r", nodeRadius/viewState.scaleLevel);
                 }
             });
         });
@@ -1300,7 +1308,7 @@ svgDomNode.addEventListener('wheel', (event) => {
         d3.select(event.currentTarget).select("circle")
             .transition()
             .duration(100)
-            .attr("r", nodeRadius/scaleLevel);
+            .attr("r", nodeRadius/viewState.scaleLevel);
 
         // Remove hmbc links
         hmbcLinks.forEach(link => link.remove());
@@ -1891,7 +1899,7 @@ svgDomNode.addEventListener('wheel', (event) => {
                 if (show) {
                     circle
                         .style("stroke", "black")
-                        .style("stroke-width", `${3 / scaleLevel}px`);
+                        .style("stroke-width", `${3 / viewState.scaleLevel}px`);
                 } else {
                     circle
                         .style("stroke", null)
