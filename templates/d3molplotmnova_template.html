@@ -506,6 +506,22 @@
     const xScale = d3.scaleLinear().domain([0, 1]).range([0, svg_width_eeh]);
     const yScale = d3.scaleLinear().domain([0, 1]).range([0, svg_height_eeh]);
 
+    // Scale an array of nodes from normalised [0,1] space into viewBox space (in-place)
+    function scaleNodes(arr) {
+        arr.forEach(node => {
+            node.x = xScale(node.x);
+            node.y = yScale(node.y);
+        });
+    }
+
+    // Inverse: convert viewBox coordinates back to normalised [0,1] space (in-place)
+    function unscaleNodes(arr) {
+        arr.forEach(node => {
+            node.x = xScale.invert(node.x);
+            node.y = yScale.invert(node.y);
+        });
+    }
+
     // Colour-blind-friendly palette
     const orange = 'rgba(255, 165, 0, 1)';
     const blue   = 'rgba(173, 216, 230, 1)';
@@ -567,9 +583,14 @@
     // Append a group element to hold the content
     const svg = d3.select("#svg-image").attr("transform", initialTransform);
 
-    // Add zoom and pan functionality
+    // Add zoom and pan functionality.
+    // The filter excludes:
+    //   dblclick   — replaced by the view-reset handler below
+    //   shift+wheel — claimed by the Shift+scroll rotation handler below
     const myZoom = d3.zoom()
         .scaleExtent([0.5, 5])
+        .filter(event => event.type !== 'dblclick' &&
+                         !(event.type === 'wheel' && event.shiftKey))
         .on("zoom", handleZoom);
 
     svg.call(myZoom);
@@ -604,26 +625,11 @@
 
     var catoms_orig = JSON.parse(JSON.stringify(catoms));
 
-    // Set initial positions of nodes and links
-    nodes.forEach(node => {
-        node.x = xScale(node.x);
-        node.y = yScale(node.y);
-    });
-
-    nodes_orig.forEach(node => {
-        node.x = xScale(node.x);
-        node.y = yScale(node.y);
-    });
-
-    catoms.forEach(node => {
-        node.x = xScale(node.x);
-        node.y = yScale(node.y);
-    });
-
-    catoms_orig.forEach(node => {
-        node.x = xScale(node.x);
-        node.y = yScale(node.y);
-    });
+    // Map all node arrays from normalised [0,1] space into SVG viewBox space
+    scaleNodes(nodes);
+    scaleNodes(nodes_orig);
+    scaleNodes(catoms);
+    scaleNodes(catoms_orig);
 
     // define mapping
     var mapping = {};
@@ -756,8 +762,8 @@ function reorderElements() {
       .attr("numProtons", d => d.numProtons)
       .attr("x", d => d.x)
       .attr("y", d => d.y)
-      .on("mouseover", (event, d) => handleMouseOver(event, d)) // Call function when mouseover
-      .on("mouseout", (event, d) => handleMouseOut(event, d))  // Call function when mouseout
+      .on("mouseenter", (event, d) => handleMouseOver(event, d))
+      .on("mouseleave", (event, d) => handleMouseOut(event, d))
       .call(d3.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
@@ -813,18 +819,15 @@ function reorderElements() {
      * window is resized or the device is rotated.  The background molecule
      * image and all D3 nodes/links scale together automatically.
      *
-     * The only actions needed on resize are:
-     *   1. applyTransform() — redraws the current pan/zoom/rotation state.
-     *      The rotation centre is always the viewBox centre (500, 300), so no
-     *      recalculation is needed here either.
-     *   2. updateScaledElements() — re-applies counter-scaling so that node
-     *      circles and text stay visually the same size at any zoom level.
+     * The only actions needed on resize are calling render(), which redraws
+     * the current pan/zoom/rotation state and re-applies counter-scaling so
+     * that node circles and text stay visually the same size at any zoom level.
      *
      * Debounce (150 ms):
      *   Both 'resize' and 'orientationchange' fire many times per second during
      *   a window drag or device rotation animation.  Debouncing ensures
-     *   applyTransform() is called only once, 150 ms after the last event,
-     *   avoiding unnecessary layout thrashing.
+     *   render() is called only once, 150 ms after the last event, avoiding
+     *   unnecessary layout thrashing.
      *
      * Three event listeners for full browser coverage:
      *   'resize'            — window size change on desktop; also fires on
@@ -838,8 +841,7 @@ function reorderElements() {
     function onResize() {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => {
-            applyTransform();
-            updateScaledElements();
+            render();
         }, 150);
     }
 
@@ -886,51 +888,43 @@ function dragended(event, d) {
 
 
 /*
- * applyTransform — apply the current pan / zoom / rotation state
- * ───────────────────────────────────────────────────────────────────────────
- * All three SVG groups (background molecule image, COSY/HMBC link lines, and
- * carbon-atom nodes) receive the *same* transform string so they remain
- * perfectly aligned with each other at any zoom level or rotation angle.
+ * render — apply the current pan/zoom/rotation state and counter-scale elements
+ * ───────────────────────────────────────────────────────────────────────────────
+ * Called after every state change (zoom, pan, rotate, resize). Does two things
+ * in a single pass so call sites can never forget one half:
  *
- * The transform is built as a sequence of SVG operations (applied right-to-
- * left, as is standard for SVG/CSS transforms):
+ * 1. Builds a transform string and applies it identically to all three SVG
+ *    groups (molecule image, link lines, atom nodes) so they stay aligned.
+ *    The transform sequence (applied right-to-left per SVG convention):
+ *      translate(-cx,-cy)   move viewBox centre to origin
+ *      rotate(rotation)     rotate around that origin
+ *      scale(scaleLevel)    uniform scale around origin
+ *      translate(cx,cy)     restore centre
+ *      translate(panX,panY) apply accumulated pan
+ *    Rotation centre is always the viewBox centre (500,300) — using viewBox
+ *    coordinates here is critical so the centre doesn't drift on resize.
  *
- *   translate(-cx, -cy)  — move the viewBox centre to the origin
- *   rotate(rotation)     — rotate around the origin (= around the centre)
- *   scale(scaleLevel)    — scale uniformly around the origin
- *   translate(cx, cy)    — move the origin back to the viewBox centre
- *   translate(panX, panY)— apply accumulated pan offset
- *
- * Rotation centre: cx = 500, cy = 300 (centre of the 1000 × 600 viewBox).
- * Using viewBox-space coordinates here is critical — if screen-pixel
- * coordinates were used instead, the rotation centre would drift as the
- * browser window is resized, causing the molecule to spin off-centre.
+ * 2. Counter-scales nodes, text, and edge strokes so they appear the same
+ *    visual size regardless of the current zoom level.
  */
-function applyTransform() {
-    const cx = svg_width_eeh  / 2;   // 500 — viewBox centre x
-    const cy = svg_height_eeh / 2;   // 300 — viewBox centre y
-    const transformString = 
+function render() {
+    const cx = svg_width_eeh  / 2;
+    const cy = svg_height_eeh / 2;
+    const transformString =
         `translate(${panX}, ${panY}) ` +
         `translate(${cx}, ${cy}) ` +
         `scale(${scaleLevel}) ` +
         `rotate(${rotation}) ` +
         `translate(${-cx}, ${-cy})`;
-    
-    // Apply transform to background image
+
     molimage.attr("transform", transformString);
-    
-    // CRITICAL: Apply the same transform to links and nodes groups
     linksGroup.attr("transform", transformString);
     nodesGroup.attr("transform", transformString);
-}
 
-// Helper function to update size-dependent elements
-function updateScaledElements() {
-    // Keep nodes the same size regardless of zoom level
+    // Counter-scale so nodes and strokes stay visually constant size
     allnodes.selectAll("circle")
         .attr("r", nodeRadius / scaleLevel);
 
-    // Keep text elements adjusted
     allnodes.selectAll(".node-text-atomNumber")
         .attr("font-size", `${fontSizeInt / scaleLevel}px`)
         .attr("dy", `${-textOffsetInt / scaleLevel}px`);
@@ -939,7 +933,6 @@ function updateScaledElements() {
         .attr("font-size", `${fontSizeInt / scaleLevel}px`)
         .attr("dy", `${textOffsetInt / scaleLevel}px`);
 
-    // Keep link stroke widths constant at current zoom level
     linksGroup.selectAll(".cosy-link")
         .attr("stroke-width", `${cosyEdgeWidth / scaleLevel}px`);
     linksGroup.selectAll(".hmbc-link")
@@ -966,8 +959,7 @@ function handleZoom(event) {
     scaleLevel = k;
     lastTransform = event.transform;
 
-    applyTransform();
-    updateScaledElements();
+    render();
 }
 
 
@@ -975,10 +967,10 @@ function handleZoom(event) {
 // Function to handle rotation
 function rotateSVG(angle) {
     rotation = (rotation + angle) % 360;
-    
-    applyTransform();
 
-    // Keep text elements horizontal by applying a counter-rotation
+    render();
+
+    // Counter-rotate text labels so they stay horizontal after the group rotates
     allnodes.selectAll(".node-text-atomNumber")
         .attr("transform", `rotate(${-rotation})`);
     allnodes.selectAll(".node-text-ppm")
@@ -1001,6 +993,81 @@ d3.select("body").on("keydown", (event) => {
         rotateSVG(-10);
     }
 });
+
+/*
+ * Double-click on the SVG — reset pan, zoom and rotation to the initial state.
+ *
+ * D3's built-in dblclick zoom is suppressed via the .filter() on myZoom above.
+ * This handler replaces it with a full view reset:
+ *   - panX/panY/scaleLevel/rotation are set back to their starting values
+ *   - D3's internal zoom transform is synced via myZoom.transform so that the
+ *     next wheel or pinch gesture starts from the correct baseline
+ *   - Text counter-rotation is removed (rotation is now 0)
+ *   - render() redraws all groups with the reset transform
+ */
+d3.select("#svg-image").on("dblclick", function(event) {
+    event.preventDefault();
+
+    panX      = 0;
+    panY      = 0;
+    scaleLevel = 1;
+    rotation  = 0;
+    lastTransform = d3.zoomIdentity;
+
+    // Keep D3's internal zoom state in sync with the manual reset
+    svg.call(myZoom.transform, d3.zoomIdentity);
+
+    // Remove text counter-rotation (rotation is now 0)
+    allnodes.selectAll(".node-text-atomNumber").attr("transform", "rotate(0)");
+    allnodes.selectAll(".node-text-ppm").attr("transform", "rotate(0)");
+
+    render();
+});
+
+/*
+ * Trackpad rotation
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Option A — Two-finger twist gesture (macOS, Chrome + Safari)
+ *   Chrome on macOS fires WebKit GestureEvents when the user performs a
+ *   two-finger twist on the trackpad.  event.rotation is the cumulative angle
+ *   in degrees since gesturestart, so we track the previous value and pass
+ *   the per-frame delta to rotateSVG().
+ *
+ * Option B — Shift + two-finger scroll (universal fallback)
+ *   When Shift is held during a scroll, wheel deltaY drives rotation instead
+ *   of zoom.  The myZoom filter above already excludes these events so D3
+ *   never sees them.  passive:false is required so preventDefault() can stop
+ *   the browser from scrolling the page while Shift is held.
+ *   Multiplier 0.2 converts typical trackpad deltaY values (≈5–50 px per
+ *   event) into a comfortable 1–10° of rotation per scroll tick.
+ */
+const svgDomNode = document.getElementById('svg-image');
+let lastGestureRotation = 0;
+
+// Option A — gesture events
+svgDomNode.addEventListener('gesturestart', (event) => {
+    event.preventDefault();
+    lastGestureRotation = event.rotation;
+});
+
+svgDomNode.addEventListener('gesturechange', (event) => {
+    event.preventDefault();
+    const delta = event.rotation - lastGestureRotation;
+    lastGestureRotation = event.rotation;
+    rotateSVG(delta);
+});
+
+svgDomNode.addEventListener('gestureend', (event) => {
+    event.preventDefault();
+});
+
+// Option B — Shift + scroll
+svgDomNode.addEventListener('wheel', (event) => {
+    if (event.shiftKey) {
+        event.preventDefault();
+        rotateSVG(event.deltaY * 0.2);
+    }
+}, { passive: false });
 
     // Function to find nearest neighbors and non-nearest neighbours of a node with a specific attribute
     function findNearestNeighbors(nodeId, attribute) {
@@ -1081,30 +1148,20 @@ d3.select("body").on("keydown", (event) => {
             }
         }
 
-        tooltip.transition()
-            .duration(200)
+        // Render off-screen first to measure actual dimensions, then reposition.
+        tooltip.html(htmlstr)
+            .style("left", "-9999px")
+            .style("top",  "-9999px")
+            .style("display", "inline-block")
             .style("opacity", 9.75);
-        tooltip.html(htmlstr)    
-            .style("left", (-99999) + "px")
-            .style("top", (-99999) + "px")
-            .style("display", "inline-block");
 
-        var tooltipDiv = d3.select('#tooltip');
+        const tooltipNode = tooltip.node();
+        const pageWidth   = document.documentElement.clientWidth;
+        const tooltipX    = (pageWidth - tooltipNode.clientWidth) / 5;
 
-        // Get the corresponding DOM element
-        var tooltipNode = tooltipDiv.node();
-
-        var pageWidth = document.documentElement.clientWidth;
-
-        // Get the dimensions of the div element
-        var tooltipWidth = tooltipNode.clientWidth;
-        var tooltipHeight = tooltipNode.clientHeight;
-        var tooltipX = (pageWidth - tooltipWidth) / 5;
-
-        tooltip.html(htmlstr) 
-            .style("left", (tooltipX) + "px")
-            .style("top", (25) + "px")
-            .style("display", "inline-block");
+        tooltip
+            .style("left", `${tooltipX}px`)
+            .style("top",  "25px");
 
         // Increase the radius of the hovered over node using d.id
         circlenodes.forEach(function(circleNode) {
@@ -1237,8 +1294,10 @@ d3.select("body").on("keydown", (event) => {
         tooltip.transition()
                 .duration(100)
                 .style("opacity", 0);
-        // Revert the radius
-        d3.select(event.target)
+        // Revert the radius of this node's circle
+        // (event.currentTarget is the <g> node group; event.target would be whichever
+        //  child the pointer was over, which is unreliable with mouseleave)
+        d3.select(event.currentTarget).select("circle")
             .transition()
             .duration(100)
             .attr("r", nodeRadius/scaleLevel);
@@ -1681,25 +1740,11 @@ d3.select("body").on("keydown", (event) => {
 
         var nodes_export = JSON.parse(JSON.stringify(nodes));
 
-        nodes_export.forEach(node => {
-            node.x = xScale.invert(node.x);
-            node.y = yScale.invert(node.y);
-        });
-
-        catoms_orig.forEach(node => {
-            node.x = xScale.invert(node.x);
-            node.y = yScale.invert(node.y);
-        });
-
-        catoms.forEach(node => {
-            node.x = xScale.invert(node.x);
-            node.y = yScale.invert(node.y);
-        });
-
-        nodes_orig.forEach(node => {
-            node.x = xScale.invert(node.x);
-            node.y = yScale.invert(node.y);
-        });
+        // Convert coordinates back to normalised space for the JSON export
+        unscaleNodes(nodes_export);
+        unscaleNodes(catoms_orig);
+        unscaleNodes(catoms);
+        unscaleNodes(nodes_orig);
 
         var nodes_data ={};
         nodes_data['nodes_orig'] = catoms_orig;
@@ -1736,16 +1781,9 @@ d3.select("body").on("keydown", (event) => {
         a.innerHTML = 'download JSON';
         a.click();
 
-        // Scale nodes back again
-        catoms_orig.forEach(node => {
-            node.x = xScale(node.x);
-            node.y = yScale(node.y);
-        });
-
-        catoms.forEach(node => {
-            node.x = xScale(node.x);
-            node.y = yScale(node.y);
-        });
+        // Restore viewBox-space coordinates after export
+        scaleNodes(catoms_orig);
+        scaleNodes(catoms);
     }
 
 
@@ -1805,26 +1843,14 @@ d3.select("body").on("keydown", (event) => {
         laeVisible = !laeVisible;
 
         if (laeVisible) {
-            // select all the nodes where abs(ppm - ppm_calculated) is greater than 10ppm
-            // and set the edge node color to red
-
-
-            // Assuming allnodes is already defined as in your code
+            // Single pass: colour each node by its assignment quality.
+            // Priority: worst-LAE node → red, large ppm error (>10) → pink, else unchanged.
             allnodes.each(function(d) {
-                // 'this' refers to the current DOM element
-                const ppm = d.ppm;
-                const ppm_calculated = d.ppm_calculated;
-                if (Math.abs(ppm - ppm_calculated) > 10) {
-                    d3.select(this).select("circle").style("fill", "pink");
-                }
-            });
-
-            // set the best lae node to red using the atomNumber and lae_best_atomNumber
-
-            allnodes.each(function(d) {
-                const atomNumber = d.atomNumber;
-                if (atomNumber == best_results.best_lae_atomNumber) {
-                    d3.select(this).select("circle").style("fill", "red");
+                const circle = d3.select(this).select("circle");
+                if (d.atomNumber == best_results.best_lae_atomNumber) {
+                    circle.style("fill", "red");
+                } else if (Math.abs(d.ppm - d.ppm_calculated) > 10) {
+                    circle.style("fill", "pink");
                 }
             });
 
