@@ -1850,9 +1850,6 @@ d3.select("body").on("keydown", (event) => {
                 }
             });
 
-            // Highlight isolated nodes (no links) with a black circumference
-            applyIsolatedNodeStrokes(true);
-
         } else {
 
             // Assuming allnodes is already defined as in your code
@@ -1862,54 +1859,8 @@ d3.select("body").on("keydown", (event) => {
                 d3.select(this).select("circle").style("fill", colorScale(numProtons));
             });
 
-            // Remove isolated node stroke highlighting
-            applyIsolatedNodeStrokes(false);
-
         }
         laeVisible = !laeVisible;
-    });
-
-    // Build a Set of isolated node IDs for O(1) lookup
-    const isolatedNodeIds = new Set(isolatedCarbons.map(n => n.id));
-
-    /*
-     * applyIsolatedNodeStrokes — add or remove the black circumference ring
-     * on carbon nodes that have no COSY or HMBC links.
-     *
-     * show = true  → thick black stroke, scaled so it stays visually
-     *                constant regardless of the current zoom level.
-     * show = false → stroke removed (null resets the inline style so the
-     *                CSS default of "none" takes over again).
-     */
-    function applyIsolatedNodeStrokes(show) {
-        allnodes.each(function(d) {
-            if (isolatedNodeIds.has(d.id)) {
-                const circle = d3.select(this).select("circle");
-                if (show) {
-                    circle
-                        .style("stroke", "black")
-                        .style("stroke-width", `${3 / scaleLevel}px`);
-                } else {
-                    circle
-                        .style("stroke", null)
-                        .style("stroke-width", null);
-                }
-            }
-        });
-    }
-
-    // Hover preview: show isolated-node rings while hovering the INFO button
-    // (only when the button is not already in its sunken/active state)
-    infobutton.addEventListener('mouseenter', function() {
-        if (!d3.select("#infoButton").classed("sunken")) {
-            applyIsolatedNodeStrokes(true);
-        }
-    });
-
-    infobutton.addEventListener('mouseleave', function() {
-        if (!d3.select("#infoButton").classed("sunken")) {
-            applyIsolatedNodeStrokes(false);
-        }
     });
 
     function findIsolatedNodes(nodes, links) {

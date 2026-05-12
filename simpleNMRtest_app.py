@@ -344,9 +344,13 @@ def is_device_registered(hostid):
         if not device:
             print("\tdevice is False")
             return False
+        
+        else:
+            print("\tdevice is True")
+            return True
 
         # Check if user's subscription is still active
-        return device.user.is_subscription_active()
+        # return device.user.is_subscription_active()
 
 
 def record_usage(hostid):
