@@ -858,7 +858,10 @@ var dragstartedFlag = false;
 
 // Drag handlers
 function dragstarted(event, d) {
-    link.style("opacity", 0);
+    // Only hide COSY links if they are currently visible (COSY button not toggled off)
+    if (!d3.select("#sunkenButton").classed("sunken")) {
+        link.style("opacity", 0);
+    }
     d3.select(this).raise().classed("active", true);
     dragstartedFlag = true;
 }
@@ -936,8 +939,10 @@ function updateScaledElements() {
         .attr("font-size", `${fontSizeInt / scaleLevel}px`)
         .attr("dy", `${textOffsetInt / scaleLevel}px`);
 
-    // Keep link stroke width constant
-    linksGroup.selectAll("line")
+    // Keep link stroke widths constant at current zoom level
+    linksGroup.selectAll(".cosy-link")
+        .attr("stroke-width", `${cosyEdgeWidth / scaleLevel}px`);
+    linksGroup.selectAll(".hmbc-link")
         .attr("stroke-width", `${hmbcEdgeWidth / scaleLevel}px`);
 }
 
@@ -1250,9 +1255,14 @@ d3.select("body").on("keydown", (event) => {
         hmbclinks_svg.filter(l => l.target === d.id).attr("opacity", 0);
 
         if (d3.select("#infoButton").classed("sunken")){
+            // Forcibly deactivate INFO mode on mouseout — keep laeVisible in sync
             laeVisible = false;
             d3.select("#infoButton").classed("sunken", false);
-
+            // Reset node fill colours and isolated-node strokes
+            allnodes.each(function(d) {
+                d3.select(this).select("circle").style("fill", colorScale(d.numProtons));
+            });
+            applyIsolatedNodeStrokes(false);
         }
     }
 
@@ -1788,19 +1798,11 @@ d3.select("body").on("keydown", (event) => {
     const infobutton = document.getElementById('infoButton');
 
     // Toggle between 'sunken' and 'normal' styles when clicked
-    let laeVisible = true;
+    // Starts false to match the button's initial unsunken visual state.
+    let laeVisible = false;
     infobutton.addEventListener('click', function() {
         infobutton.classList.toggle('sunken');
-
-        if (d3.select("#infoButton").classed("sunken")){
-            laeVisible = true;
-        }
-        else {
-            laeVisible = false;
-        }
-
-        // check if infoButton is sunken
-        
+        laeVisible = !laeVisible;
 
         if (laeVisible) {
             // select all the nodes where abs(ppm - ppm_calculated) is greater than 10ppm
@@ -1842,7 +1844,6 @@ d3.select("body").on("keydown", (event) => {
             applyIsolatedNodeStrokes(false);
 
         }
-        laeVisible = !laeVisible;
     });
 
     // Build a Set of isolated node IDs for O(1) lookup
