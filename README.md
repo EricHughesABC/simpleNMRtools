@@ -15,13 +15,6 @@ If you still prefer to run the simpleNMR server locally, I have written a step-b
 
 ## Local Installation
 
-simpleNMRtools is a Python/Flask web application for analysing small molecule NMR data
-to aid structure validation and elucidation. It uses RDKit for cheminformatics,
-NetworkX for graph processing, JPype to bridge NMR shift predictions from a Java library
-(NMRShiftDB), and Flask with SQLAlchemy for its web server and database backend.
-
----
-
 ### Prerequisites
 
 - [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or
