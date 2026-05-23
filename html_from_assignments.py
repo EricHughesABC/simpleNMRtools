@@ -16,6 +16,7 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 
 import jinja2
+from loguru import logger
 
 from excelheaders import EXCEL_ORIG_DF_COLUMNS as excel_orig_df_columns
 
@@ -426,7 +427,7 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
                 filenames = [s.split()[-1] for s in v["data"].values()]
                 _dataframes[k1]["filename"] = filenames
         else:
-            print(f"Skipping {k1}")
+            logger.debug(f"Skipping dataset: {k1}")
 
     return _dataframes
 
@@ -917,7 +918,7 @@ def calc_minimum_ppm_separation(ppm_pks, ppmSeparation):
     # Get the two closest values
     closest_values = (ppm_pks[i], ppm_pks[j])
 
-    print("The two closest values are:", closest_values)
+    logger.debug(f"Two closest ppm values: {closest_values}")
 
     value1, value2 = closest_values
     scale = 1.0  # Start with an initial scale value
@@ -976,20 +977,20 @@ def combine_multiple_nmrExpt_dataframes(dataframes):
                     by=["f1_ppm"], ascending=False
                 ).reset_index(drop=True)
             else:
-                print(f"No ppm column found in {k}, skipping sorting")
+                logger.debug(f"No ppm column in {k}, skipping sort")
             # set the index to start at 1
             combined_df.index += 1
             dataframes[k] = combined_df
         elif len(v) == 1:
             dataframes[k] = v[0]
         else:
-            print(f"No data for {k}")
+            logger.debug(f"No data for experiment: {k}")
 
     # remove dataframes that were found in nmrExptsToDelete
     for k in nmrExptsToDelete:
         if k in dataframes:
             del dataframes[k]
-            print(f"Removed {k} from dataframes")
+            logger.debug(f"Removed empty experiment: {k}")
 
     return dataframes
 
@@ -1078,14 +1079,10 @@ class NMRProblem:
 
             #  check if f1_ppm - f1_ppm_expts is empty
             if len(f1_ppm - f1_ppm_expts) > 0 or len(f2_ppm - f2_ppm_expts) > 0:
-                print(
-                    "There are extra ppm values in f1_ppm and f2_ppm that are not in the expts_with_peaks."
-                )
+                logger.warning("Extra ppm values in f1_ppm/f2_ppm not accounted for in experiments")
                 return False
             else:
-                print(
-                    "All ppm values in f1_ppm and f2_ppm are accounted for in the expts_with_peaks."
-                )
+                logger.debug("All f1_ppm/f2_ppm values accounted for in experiments")
                 return False  # always set return to False for now EEH 30/Oct/2025
         else:
             return False
@@ -1289,7 +1286,7 @@ class NMRProblem:
                 ppm_tolerance=self.carbonSeparation,
             )
         else:
-            print("Exact ppm values only, no tidy up required")
+            logger.debug("exact_ppm_values mode: skipping tidyup")
 
         # add jCouplingVals and jCouplingClass to h1 from h1_1D
         h1 = add_jCouplingVals_jCouplingClass_to_h1(h1, h1_1d)
@@ -1375,7 +1372,7 @@ if __name__ == "__main__":
     if fn_json.exists():
         problemdata_json = NMRProblem.from_mnova_json_file(fn_json)
     else:
-        print(f"{fn_json.name} not found")
+        logger.error(f"JSON file not found: {fn_json.name}")
 
     problemdata_json.prepare_network_graph()
 

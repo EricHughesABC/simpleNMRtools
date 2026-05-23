@@ -15,8 +15,6 @@ from flask import (
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 import time
-from loguru import logger
-from logging_config import setup_logging
 from flask_migrate import Migrate
 # MODIFIED: removed MySQL-specific JSON import; db.JSON() with SQLite variant is used
 # in the Result model instead, making the column type portable across databases.
@@ -35,8 +33,8 @@ from dotenv import load_dotenv
 # load_dotenv() returns True if the file was found and loaded, False otherwise.
 _env_path = Path(__file__).parent / ".env"
 _env_loaded = load_dotenv(_env_path)
-logger.info(f"[dotenv] loading from: {_env_path}")
-logger.info(f"[dotenv] loaded: {_env_loaded}")
+print(f"[dotenv] loading from: {_env_path}")
+print(f"[dotenv] .env found and loaded: {_env_loaded}")
 
 import numpy as np
 import pandas as pd
@@ -114,13 +112,13 @@ def get_database_uri():
     visible in the PythonAnywhere error log.
     """
     env_file = Path(__file__).parent / ".env"
-    logger.debug(f"[db] .env path: {env_file}")
-    logger.debug(f"[db] .env exists: {env_file.exists()}")
+    print(f"[db] .env path : {env_file}")
+    print(f"[db] .env exists: {env_file.exists()}")
 
     # --- Option 1: single DATABASE_URL variable ---
     database_url = os.environ.get("DATABASE_URL")
     if database_url:
-        logger.info(f"[db] Using DATABASE_URL — host: {database_url.split('@')[-1]}")
+        print(f"[db] Using DATABASE_URL — host: {database_url.split('@')[-1]}")
         return database_url
 
     # --- Option 2: DB_* variables ---
@@ -136,18 +134,17 @@ def get_database_uri():
 
     if all([db_username, db_password, db_host, db_name]):
         legacy_url = f"mysql+pymysql://{db_username}:{db_password}@{db_host}/{db_name}"
-        logger.info(f"[db] Using DB_* variables — host: {db_host}/{db_name}")
+        print(f"[db] Using DB_* environment variables — host: {db_host}/{db_name}")
         return legacy_url
 
     # --- Option 3: SQLite fallback for local development ---
     base_dir = os.path.abspath(os.path.dirname(__file__))
     sqlite_path = "sqlite:///" + os.path.join(base_dir, "registrations.db")
-    logger.info(f"[db] No DATABASE_URL/DB_* found — using SQLite: {sqlite_path}")
+    print(f"[db] No DATABASE_URL or DB_* variables found — using SQLite: {sqlite_path}")
     return sqlite_path
 
 
 app = Flask(__name__)
-setup_logging()
 
 # MODIFIED: replaced the RUNNINGONPYTHONANYWHERE if/else config block with a single
 # call to get_database_uri(). Connection pool settings are now read from the environment
@@ -171,7 +168,7 @@ app.config["JSON_AS_ASCII"] = False  # contribution from Erdem
 # This creates all tables based on your SQLAlchemy models
 with app.app_context():
     db.create_all()
-    logger.info("Database tables created")
+    print("Database tables created successfully!")
 
 
 # Database Models
@@ -333,7 +330,7 @@ def register_device(email, hostid, license_agreed, ml_consent):
             db.session.commit()
             return True
     except Exception as e:
-        logger.error(f"Registration error: {e}")
+        print(f"Error during registration: {e}")
         return False
 
 
@@ -343,13 +340,13 @@ def is_device_registered(hostid):
     with app.app_context():
         device = Device.query.filter_by(hostid=hostid).first()
 
-        logger.debug("is_device_registered called")
+        print("is_device_registered")
         if not device:
-            logger.debug("Device not found")
+            print("\tdevice is False")
             return False
         
         else:
-            logger.debug("Device found")
+            print("\tdevice is True")
             return True
 
         # Check if user's subscription is still active
@@ -410,7 +407,7 @@ def has_device_expired(hostid):
             user = device.user
             registered_at_UTC = device.registered_at.astimezone(timezone("UTC"))
             #  print all the attributes of the user
-            logger.debug(f"User attributes: {user.__dict__}")
+            print(f"User attributes: {user.__dict__}")
             if user:
                 expiration_date_UTC = registered_at_UTC
                 # convert expriation date to UTC
@@ -418,10 +415,10 @@ def has_device_expired(hostid):
 
                 # if (now_UTC-registered_at_UTC).seconds > 100*60*60*24:
                 if (now_UTC - registered_at_UTC).seconds > REGISTRATIONTIMEOUT:
-                    logger.info(f"Device {hostid} has expired")
+                    print(f"Device {hostid} has expired")
                     return True
                 else:
-                    logger.debug(f"Device {hostid} is active")
+                    print(f"Device {hostid} has not expired")
 
     return False
 
@@ -484,11 +481,11 @@ def download_file():
     file_path = downloads_dir / filename
 
     # Debug print
-    logger.debug(f"Looking for file at: {file_path}")
+    print(f"Looking for file at: {file_path}")
 
     # Check if the file exists
     if not file_path.exists():
-        logger.warning(f"File not found: {file_path}")
+        print("File not found!")
         abort(404)
 
     # Serve the file
@@ -576,7 +573,7 @@ def predict_c13_shifts():
 
     json_data = request.get_json()
     if json_data is None or "molstring" not in json_data:
-        logger.warning("No molfile data received")
+        print("No molfile data received")
         return "No molfile data received", 400
 
     molfile = json_data["molstring"]
@@ -621,11 +618,11 @@ def simpleMNOVAfinalHTML():
     try:
         json_data = request.get_json()
         if json_data is None:
-            logger.warning("No JSON data received")
+            print("No JSON data received")
             return "No JSON data received", 400
 
     except json.JSONDecodeError as e:
-        logger.error(f"Invalid JSON: {e}")
+        print(f"Invalid JSON: {e}")
         return f"Invalid JSON: {e}", 400
 
     id_now_mapping_dict = {}
@@ -641,7 +638,7 @@ def simpleMNOVAfinalHTML():
         if atom_number in catoms_orig_lookup:
             id_now_mapping_dict[node["id"]] = catoms_orig_lookup[atom_number]
         else:
-            logger.warning(f"atomNumber {atom_number} not found in catoms_orig_lookup")
+            print(f"atomNumber {atom_number} not found in catoms_orig_lookup")
 
     catoms_orig_dict = {}
 

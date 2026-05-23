@@ -38,6 +38,9 @@ pytz==2024.1
 six==1.16.0
 tzdata==2024.1
 
+# Logging
+loguru==0.7.2
+
 # Java bridge (for NMRShiftDB predictions)
 jpype1==1.6.0
 

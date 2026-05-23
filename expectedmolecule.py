@@ -21,6 +21,7 @@ from rdkit.Chem import Draw
 import javaUtils
 
 from functools import lru_cache
+from loguru import logger
 
 from globals import SVG_DIMENSIONS as svgDimensions
 
@@ -43,7 +44,7 @@ def get_symmetry_classes(mol):
     # Generate canonical ranks (same rank = same symmetry class)
     ranks = list(Chem.CanonicalRankAtoms(mol, breakTies=False))
 
-    print(ranks)
+    logger.debug(f"Symmetry ranks: {ranks}")
 
     classes = defaultdict(list)
     for idx, rank in enumerate(ranks):
@@ -66,7 +67,7 @@ class expectedMolecule:
                 molprops_df.at[idx, "x"] = new_xy3[idx][0]
                 molprops_df.at[idx, "y"] = new_xy3[idx][1]
             else:
-                print(f"idx {idx} not found in new_xy3")
+                logger.warning(f"idx {idx} not found in new_xy3")
 
     def __init__(
         self,
@@ -138,7 +139,7 @@ class expectedMolecule:
 
         #  add 1 to atom_idx
 
-        print("BEFORE ::: self.molprops_df\n", self.molprops_df)
+        logger.debug(f"molprops_df BEFORE merge:\n{self.molprops_df}")
 
         # self.molprops_df["atom_idx"] = self.molprops_df["atom_idx"] + 1
         if JEOL_predict:
@@ -149,7 +150,7 @@ class expectedMolecule:
                 self.molprops_df["atom_idx"] + 0
             )  # EEH 2025-sep-06
 
-        print("AFTER ::: self.molprops_df\n", self.molprops_df)
+        logger.debug(f"molprops_df AFTER merge:\n{self.molprops_df}")
 
         self.molprops_df["numProtons"] = self.molprops_df["totalNumHs"].astype(int)
         self.molprops_df = self.molprops_df.set_index(["idx"])
@@ -179,8 +180,7 @@ class expectedMolecule:
 
         self.molprops_df["picked"] = False
 
-        print("\nmolprops_df\n")
-        print(self.molprops_df)
+        logger.debug(f"molprops_df:\n{self.molprops_df}")
 
         # decide where to calculate C13 NMR chemical shifts from
         # if mnova_c13predictions is not None then use mnova_c13predictions
@@ -189,22 +189,15 @@ class expectedMolecule:
         # if (mnova_c13predictions is not None) and (predict_from_nmrshiftdb == False):
         if (mnova_c13predictions is not None) and JEOL_predict:
 
-            print("=====================================================")
-            print("Using mnova_c13predictions to calculate C13 NMR chemical shifts")
-            print("=====================================================")
-
-            print("\nmnova_c13predictions\n")
-            print(mnova_c13predictions)
-            print("\n")
+            logger.info("Using JEOL predictions for C13 shifts")
+            logger.debug(f"mnova_c13predictions:\n{mnova_c13predictions}")
 
             # self.c13ppm = {}
             # self.c13ppm['mean'] = mnova_c13predictions["ppm"].values
 
             # self.molprops_df["atom_idx"] = self.molprops_df.index
 
-            print("n=====================================================")
-            print("mnova_c13predictions", mnova_c13predictions.columns)
-            print("=====================================================")
+            logger.debug(f"mnova_c13predictions columns: {mnova_c13predictions.columns.tolist()}")
 
             self.molprops_df = pd.merge(
                 mnova_c13predictions, self.molprops_df, on="atom_idx", how="left"
@@ -213,13 +206,13 @@ class expectedMolecule:
             # reset the index to atom index
             self.molprops_df.set_index("idx", inplace=True)
 
-            print("AFTER MERGE ::: self.molprops_df\n", self.molprops_df)
+            logger.debug(f"molprops_df after MNOVA merge:\n{self.molprops_df}")
 
         else:
-            print("Using nmrshift2D to calculate C13 NMR chemical shifts")
+            logger.info("Using nmrshiftDB2 for C13 predictions")
             self.c13ppm = self.calculated_c13_chemical_shifts()
             try:
-                print("self.c13ppm", len(self.c13ppm), len(self.molprops_df))
+                logger.debug(f"c13ppm length: {len(self.c13ppm)}, molprops_df: {len(self.molprops_df)}")
                 if len(self.c13ppm) == len(self.molprops_df):
                     self.molprops_df["ppm"] = self.c13ppm["mean"]
 
@@ -241,9 +234,7 @@ class expectedMolecule:
                     self.nmrshiftdb_failed_code = 401
 
             except:
-                print(
-                    "An error occurred during the calculation of the chemical shifts using nmrshiftDB"
-                )
+                logger.error("Error during nmrshiftDB chemical shift calculation")
                 self.nmrshiftdb_failed_message = "<p> An error occurred during the calculation of the chemical shifts using nmrshiftDB </p>"
                 self.molprops_df["ppm"] = -100000.0
                 self.molprops_df["atom_idx"] = self.molprops_df.index
@@ -294,9 +285,7 @@ class expectedMolecule:
         self.molprops_df["sym_atom_idx"] = ""
         self.molprops_df["sym_atomNumber"] = ""
 
-        print(
-            "\nfind the symmetry atoms in each ring and non ring group and assign the symmetry indices to each\n"
-        )
+        logger.debug("Finding symmetry atoms in rings and non-ring groups")
 
         # find the symmetry atoms in each ring and non ring group and assign the symmetry indices to each
         for ring_idx in self.molprops_df.ring_idx.unique():
@@ -339,9 +328,7 @@ class expectedMolecule:
             atom_symbols = [self.mol.GetAtomWithIdx(idx).GetSymbol() for idx in atoms]
             if not all(symbol == "C" for symbol in atom_symbols):
                 continue
-            print(
-                f"Symmetry Class {rank}: Atom Indices {atoms}, Atom Symbols {atom_symbols}"
-            )
+            logger.debug(f"Symmetry class {rank}: atoms {atoms}, symbols {atom_symbols}")
 
             atomNumbers = self.molprops_df[self.molprops_df["atom_idx"].isin(atoms)][
                 "atomNumber"
@@ -353,7 +340,7 @@ class expectedMolecule:
                 # create a comma separated string of the other atoms
                 other_atoms_str = ", ".join(str(a) for a in other_atoms)
                 other_atomNumbers_str = ", ".join(str(a) for a in other_atomNumbers)
-                print(f"  Atom {idx} is symmetric to atoms {other_atoms_str}")
+                logger.debug(f"  Atom {idx} symmetric to: {other_atoms_str}")
                 self.molprops_df.at[idx, "sym_atom_idx"] = other_atoms_str
                 self.molprops_df.at[idx, "sym_atomNumber"] = other_atomNumbers_str
 
@@ -530,7 +517,7 @@ class expectedMolecule:
                     self.molprops_df.loc[atom_idx, f"ring_idx{i}"] = i
                     self.molprops_df.loc[atom_idx, f"ring_size{i}"] = len(ring)
                 else:
-                    print(f"atom_idx {atom_idx} not in mol.molprops_df.index")
+                    logger.warning(f"atom_idx {atom_idx} not in molprops_df.index")
 
     def _repr_png_(self):
         return self.mol._repr_png_()

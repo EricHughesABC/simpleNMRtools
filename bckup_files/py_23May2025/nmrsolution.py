@@ -5,7 +5,6 @@ from scipy.optimize import linear_sum_assignment
 import networkx as nx
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from typing import Tuple, Union, List, Dict, Any
-from loguru import logger
 
 from flask import render_template
 
@@ -17,7 +16,7 @@ import expectedmolecule
 
 
 def warning_dialog(return_message, title_message, qstarted=True):
-    logger.warning(return_message)
+    print(return_message)
 
 
 class NMRsolution:
@@ -216,14 +215,14 @@ class NMRsolution:
             self.assign_CH3_CH1_in_HSQC_using_expected_molecule()
 
         if self.hsqc[self.hsqc.numProtons == -1].shape[0] > 0:
-            logger.warning("CH3/CH2/CH1 assignment failed: unresolved numProtons remain")
+            print("solution failed")
             self.nmrsolution_failed = True
 
         if self.nmrsolution_failed:
-            logger.error(self.nmrsolution_error_message)
+            print(self.nmrsolution_error_message, 400)
             return self.nmrsolution_error_message, 400
         else:
-            logger.info("CH3/CH2/CH1 assignment complete")
+            print("ok", 200)
             return "ok", 200
 
     def initialise_prior_to_carbon_assignment(self):
@@ -364,7 +363,7 @@ class NMRsolution:
             c13_CHn = c13[c13["numProtons"] == nProtons]
 
             if c13_CHn.empty:
-                logger.debug(f"{CHn}: no experimental peaks, skipping")
+                print(f"{CHn} c13_CHn is empty")
                 continue
 
             if len(c13_CHn) == len(df_CHn):
@@ -449,7 +448,7 @@ class NMRsolution:
 
                 tab_headings = ["CH0", "CH1", "CH2", "CH3"]
 
-                logger.debug(f"C13 mismatch table: {c13_df_list}")
+                print("c13_df_list\n", c13_df_list)
 
                 rtn_html = render_template(
                     "error_table.html",
@@ -769,7 +768,7 @@ class NMRsolution:
         Returns:
             tuple: (h1_df, pureshift_df) where both are pandas DataFrames containing H1 and pureshift data.
         """
-        if "H1_pureshift" in self.available_experiments and "H1_1D" in self.available_experiments:
+        if self.PURESHIFT_data_present and self.H1_data_present:
             return self.h1_df, self.pureshift_df
 
         if (not self.h1_df.empty) and (not self.pureshift_df.empty):
@@ -822,7 +821,7 @@ class NMRsolution:
             pd.DataFrame: The pureshift DataFrame.
         """
 
-        if "H1_pureshift" in self.available_experiments:
+        if self.PURESHIFT_data_present:
             return self.pureshift_df
 
         if not self.h1_df.empty:
@@ -841,9 +840,9 @@ class NMRsolution:
             pd.DataFrame: The H1 DataFrame.
         """
 
-        if "H1_1D" in self.available_experiments:
+        if self.H1_data_present:
             return self.h1_df
-        if "H1_pureshift" not in self.available_experiments:
+        if self.PURESHIFT_data_missing:
             return self.h1_df
 
         h1_df = pd.DataFrame(
@@ -985,16 +984,19 @@ class NMRsolution:
             tuple: (c13_df, created) where c13_df is the resulting C13 DataFrame and created is a boolean indicating if new data was created.
         """
 
-        if "C13_1D" in self.available_experiments:
+        if self.C13_data_present:
             return self.c13_df, False
 
         # replace values for f2_ppm in hmbc starting from f2_ppm hsqc
-        self.hmbc_df = self.snap(
+        if not self.exact_ppm_values:
+            self.hmbc_df = self.tidyup_ppm_values(
                 self.hmbc_df,
                 sorted(self.hsqc.f2_ppm.unique().tolist(), reverse=True),
                 "f2_ppm",
-                self.problemdata_json.protonSeparation,
+                ppm_tolerance=self.problemdata_json.protonSeparation,
             )
+        else:
+            print("Exact ppm values only, no tidy up required")
 
         # if any hmbc f2_ppm_probs == 0 then drop the row
         self.hmbc_df.drop(
@@ -1062,21 +1064,22 @@ class NMRsolution:
         # tidyup f1_ppm values in hmbc that are not in f1_ppm HSQC
         if not self.exact_ppm_values:
 
-            hmbc_1 = self.snap(
+            hmbc_1 = self.tidyup_ppm_values(
                 self.hmbc_df.loc[iii],
                 mean_unique_hmbc_vals,
                 "f1_ppm",
-                self.problemdata_json.carbonSeparation,
+                ppm_tolerance=self.problemdata_json.carbonSeparation,
             )
 
             # tidyup f1_ppm values in hmbc that are in f1_ppm HSQC
-            hmbc_2 = self.snap(
+            hmbc_2 = self.tidyup_ppm_values(
                 self.hmbc_df.drop(iii),
                 self.hsqc.f1_ppm.unique(),
                 "f1_ppm",
-                self.problemdata_json.carbonSeparation,
+                ppm_tolerance=self.problemdata_json.carbonSeparation,
             )
-
+        else:
+            print("Exact ppm values only, no tidy up required")
 
         # rejoin two parts of HMBC data
         self.hmbc_df = pd.concat([hmbc_1, hmbc_2])
@@ -1154,8 +1157,82 @@ class NMRsolution:
         return self.c13_df, True
 
     def check_what_experiments_are_present(self) -> None:
-        """Build the set of available experiments from submitted data."""
-        self.available_experiments = frozenset(self.expts_available)
+        """
+        Checks which NMR experiment data types are present in the available experiments.
+
+        This function sets boolean flags indicating the presence or absence of each expected NMR experiment
+        (e.g., HSQC, H1_pureshift, C13_1D, H1_1D, COSY, HMBC, NOESY, HSQC_CLIPCOSY, DDEPT_CH3_ONLY, DEPT135)
+        based on the contents of the expts_available attribute.
+        """
+        # do basic checks on excels sheets and decide how to proceed
+        if {"HSQC"}.issubset(self.expts_available):
+            self.HSQC_data_present = True
+            self.HSQC_data_missing = False
+        else:
+            self.HSQC_data_present = False
+            self.HSQC_data_missing = True
+        if {"H1_pureshift"}.issubset(self.expts_available):
+            self.PURESHIFT_data_present = True
+            self.PURESHIFT_data_missing = False
+        else:
+            self.PURESHIFT_data_present = False
+            self.PURESHIFT_data_missing = True
+
+        if {"C13_1D"}.issubset(self.expts_available):
+            self.C13_data_present = True
+            self.C13_data_missing = False
+        else:
+            self.C13_data_present = False
+            self.C13_data_missing = True
+
+        if {"H1_1D"}.issubset(self.expts_available):
+            self.H1_data_present = True
+            self.H1_data_missing = False
+        else:
+            self.H1_data_present = False
+            self.H1_data_missing = True
+
+        if {"COSY"}.issubset(self.expts_available):
+            self.COSY_data_present = True
+            self.COSY_data_missing = False
+        else:
+            self.COSY_data_present = False
+            self.COSY_data_missing = True
+
+        if {"HMBC"}.issubset(self.expts_available):
+            self.HMBC_data_present = True
+            self.HMBC_data_missing = False
+        else:
+            self.HMBC_data_present = False
+            self.HMBC_data_missing = True
+
+        if {"NOESY"}.issubset(self.expts_available):
+            self.NOESY_data_present = True
+            self.NOESY_data_missing = False
+        else:
+            self.NOESY_data_present = False
+            self.NOESY_data_missing = True
+
+        if {"HSQC_CLIPCOSY"}.issubset(self.expts_available):
+            self.HSQC_CLIPCOSY_data_present = True
+            self.HSQC_CLIPCOSY_data_missing = False
+        else:
+            self.HSQC_CLIPCOSY_data_present = False
+            self.HSQC_CLIPCOSY_data_missing = True
+
+        if {"DDEPTCH3ONLY"}.issubset(self.expts_available):
+            self.DDEPT_CH3_ONLY_data_present = True
+            self.DDEPT_CH3_ONLY_data_missing = False
+        else:
+            self.DDEPT_CH3_ONLY_data_present = False
+            self.DDEPT_CH3_ONLY_data_missing = True
+
+        if {"DEPT135"}.issubset(self.expts_available):
+            self.DEPT_data_present = True
+            self.DEPT_data_missing = False
+        else:
+            self.DEPT_data_present = False
+            self.DEPT_data_missing = True
 
     def check_h1_pureshift_not_empty(self) -> Tuple[bool, str]:
         """
@@ -1301,7 +1378,7 @@ class NMRsolution:
             self.hsqc["f1C_i"] = "-1"
             self.hsqc["f2H_i"] = "-1"
             self.hsqc["f2Cp_i"] = "-1"
-            self.hsqc["f2p_ppm"] = -1.0
+            self.hsqc["f2p_ppm"] = -1
 
             self.hsqc["CH2"] = False
             self.numtimes_HSQC_CH2_set_to_FALSE += 1
@@ -1317,7 +1394,7 @@ class NMRsolution:
             return True, "hsqc is not empty"
 
     def tidyup_ppm_values(
-        self, df: pd.DataFrame, true_values: list, column_name: str, ppm_tolerance: float = 0.005
+        self, df: pd.DataFrame, true_values: list, column_name: str, ppm_tolerance=0.005
     ) -> pd.DataFrame:
         """
         Adjusts chemical shift values in a DataFrame to their nearest true values within a specified tolerance.
@@ -1339,7 +1416,7 @@ class NMRsolution:
         df[f"{column_name}_orig"] = df[column_name]
 
         # make a probability column to see how far replacement is from original
-        df[f"{column_name}_prob"] = 0.0
+        df[f"{column_name}_prob"] = 0
 
         # create dataframe with ppm values and their nearest true value
         df[column_name] = df[column_name].apply(
@@ -1658,7 +1735,7 @@ class NMRsolution:
                     hsqc.loc[hsqc.numProtons == 3, "CH3"] = True
                     hsqc.loc[hsqc.numProtons == 1, "CH1"] = True
                 else:
-                    logger.warning("No CH3/CH1 assignment found: counts do not match (branch 1)")
+                    print("No solution found")
                     self.nmrsolution_failed = True
                     self.nmrsolution_error_message = "Line 2020 nmrsolution.py CH3CH1 groups in HSQC do not match expected molecule"
                     self.nmrsolution_error_code = 401
@@ -1686,12 +1763,12 @@ class NMRsolution:
                         CH3CH1_mol_df.loc[closest_match.index, "picked"] = True
                         CH3CH1_mol_df = CH3CH1_mol_df[~CH3CH1_mol_df.picked]
             else:
-                logger.warning("No CH3/CH1 assignment found: fallback failed (branch 2)")
+                print("No solution found")
                 self.nmrsolution_failed = True
                 self.nmrsolution_error_message = "Line 2042 nmrsolution.py CH3CH1 groups in HSQC do not match expected molecule"
                 self.nmrsolution_error_code = 401
 
-        logger.debug(f"error_code after CH3/CH1 assign: {self.nmrsolution_error_code}")
+        print("self.error_code", self.nmrsolution_error_code)
 
         if not self.nmrsolution_failed:
             # updated integral and f2_integral columns based on numProtons
@@ -1731,7 +1808,7 @@ class NMRsolution:
                     hsqc.loc[idx, "CH3"] = True
                     hsqc.loc[idx, "numProtons"] = 3
                 else:
-                    logger.error("Unexpected state in CH2 integral assignment")
+                    print("something went wrong")
                     self.nmrsolution_failed = True
                     self.nmrsolution_error_message = "Error attempting to assign HSQC CH3 protons using H1 data source"
                     self.nmrsolution_error_code = 401
@@ -1875,7 +1952,7 @@ class NMRsolution:
         self.check_what_experiments_are_present()
 
         # check if hsqc is present
-        if not "HSQC" in self.available_experiments:
+        if not self.HSQC_data_present:
             self.nmrsolution_failed = True
             self.nmrsolution_error_message = "HSQC data missing"
             self.nmrsolution_error_code = 401
@@ -1935,13 +2012,13 @@ class NMRsolution:
         self.hsqc["f1_i"] = 0
         self.hsqc["f2_i"] = 0
         self.hsqc["f2p_i"] = 0
-        self.hsqc["f1C_i"] = ""
-        self.hsqc["f2H_i"] = ""
-        self.hsqc["f2Cp_i"] = ""
-        self.hsqc["f2p_ppm"] = 0.0
+        self.hsqc["f1C_i"] = 0
+        self.hsqc["f2H_i"] = 0
+        self.hsqc["f2Cp_i"] = 0
+        self.hsqc["f2p_ppm"] = 0
 
         self.hmbc = self.hmbc_df[["f1_ppm", "f2_ppm", "intensity"]].copy()
-        self.hmbc["f2p_ppm"] = 0.0
+        self.hmbc["f2p_ppm"] = 0
         self.hmbc["f1_i"] = 0
         self.hmbc["f2_i"] = 0
         self.hmbc["f2p_i"] = 0
@@ -1974,33 +2051,34 @@ class NMRsolution:
 
         # HMBC
         if not self.exact_ppm_values:
-            self.hmbc = self.snap(
+            self.hmbc = self.tidyup_ppm_values(
                 self.hmbc,
                 self.c13.ppm.tolist(),
                 "f1_ppm",
-                self.problemdata_json.carbonSeparation,
+                ppm_tolerance=self.problemdata_json.carbonSeparation,
             )
-            self.hmbc = self.snap(
+            self.hmbc = self.tidyup_ppm_values(
                 self.hmbc,
                 self.h1.ppm.tolist(),
                 "f2_ppm",
-                self.problemdata_json.protonSeparation,
+                ppm_tolerance=self.problemdata_json.protonSeparation,
             )
 
             self.hmbc.drop(self.hmbc[self.hmbc.f1_ppm_prob == 0].index, inplace=True)
             self.hmbc.drop(self.hmbc[self.hmbc.f2_ppm_prob == 0].index, inplace=True)
 
-
+        else:
+            print("Exact ppm values only, no tidy up required")
 
         # HSQC
         if not self.exact_ppm_values:
-            self.hsqc = self.snap(
+            self.hsqc = self.tidyup_ppm_values(
                 self.hsqc,
                 self.c13.ppm.tolist(),
                 "f1_ppm",
                 self.problemdata_json.carbonSeparation,
             )
-            self.hsqc = self.snap(
+            self.hsqc = self.tidyup_ppm_values(
                 self.hsqc,
                 self.h1.ppm.tolist(),
                 "f2_ppm",
@@ -2008,13 +2086,13 @@ class NMRsolution:
             )
 
             # tidy up cosy H1 shifts
-            self.cosy = self.snap(
+            self.cosy = self.tidyup_ppm_values(
                 self.cosy,
                 self.h1.ppm.tolist(),
                 "f1_ppm",
                 self.problemdata_json.protonSeparation,
             )
-            self.cosy = self.snap(
+            self.cosy = self.tidyup_ppm_values(
                 self.cosy,
                 self.h1.ppm.tolist(),
                 "f2_ppm",
@@ -2026,7 +2104,8 @@ class NMRsolution:
             self.cosy.drop(self.cosy[self.cosy.f1_ppm_prob == 0].index, inplace=True)
             self.cosy.drop(self.cosy[self.cosy.f2_ppm_prob == 0].index, inplace=True)
 
-
+        else:
+            print("Exact ppm values only, no tidy up required")
 
         # add index columns to h1
         self.h1["label"] = ["H" + str(i) for i in self.h1.index]
@@ -2064,7 +2143,7 @@ class NMRsolution:
 
         # add index columns to hsqc
         for i in self.hsqc.index:
-            logger.debug(f"Indexing HSQC row: {i}")
+            print(i)
             self.hsqc.loc[i, "f2_i"] = self.H1ppmH1index[self.hsqc.loc[i, "f2_ppm"]]
             self.hsqc.loc[i, "f2H_i"] = self.H1ppmH1label[self.hsqc.loc[i, "f2_ppm"]]
             self.hsqc.loc[i, "f1_i"] = self.C13ppmC13index[self.hsqc.loc[i, "f1_ppm"]]
@@ -2092,7 +2171,8 @@ class NMRsolution:
             self.hsqc_clipcosy = self.tidyup_hsqc_clipcosy(
                 self.hsqc_clipcosy_df, self.c13, self.h1
             )
-
+        else:
+            print("Exact ppm values only, no tidy up required")
             self.hsqc_clipcosy = self.hsqc_clipcosy_df.copy()
 
         self.hsqc_clipcosy = self.process_hsqc_clipcosy(self.hsqc_clipcosy, self.hsqc)
@@ -2103,19 +2183,20 @@ class NMRsolution:
         self.ddept_ch3_only = self.ddept_ch3_only_df.copy()
 
         if not self.exact_ppm_values:
-            self.ddept_ch3_only = self.snap(
+            self.ddept_ch3_only = self.tidyup_ppm_values(
                 self.ddept_ch3_only,
                 self.c13["ppm"],
                 "f1_ppm",
-                self.problemdata_json.carbonSeparation,
+                ppm_tolerance=self.problemdata_json.carbonSeparation,
             )
-            self.ddept_ch3_only = self.snap(
+            self.ddept_ch3_only = self.tidyup_ppm_values(
                 self.ddept_ch3_only,
                 self.h1["ppm"],
                 "f2_ppm",
-                self.problemdata_json.protonSeparation,
+                ppm_tolerance=self.problemdata_json.protonSeparation,
             )
-
+        else:
+            print("Exact ppm values only, no tidy up required")
 
         self.ddept_ch3_only = self.process_ddept_ch3_only(
             self.ddept_ch3_only, self.hsqc
@@ -2172,9 +2253,10 @@ class NMRsolution:
 
         # fill in hmbc dataframe
         for i in self.hmbc.index:
-            logger.debug(
-                f"HMBC row {i}: f2_ppm={self.hmbc.loc[i, 'f2_ppm']}, "
-                f"hsqc_C13={self.hsqcH1ppmC13ppm.get(self.hmbc.loc[i, 'f2_ppm'])}"
+            print(
+                i,
+                self.hmbc.loc[i, "f2_ppm"],
+                self.hsqcH1ppmC13ppm.get(self.hmbc.loc[i, "f2_ppm"]),
             )
             self.hmbc.loc[i, "f2p_ppm"] = float(
                 self.hsqcH1ppmC13ppm.get(self.hmbc.loc[i, "f2_ppm"])
@@ -2244,12 +2326,8 @@ class NMRsolution:
         # Remove columns in df that are not in the cosy dataframe
         df = df.drop(columns=set(df.columns).difference(set(cosy.columns)))
 
-        # Exclude frames that are entirely empty or all-NA before concat
-        # to avoid a pandas FutureWarning about dtype inference behaviour.
-        frames = [f for f in [cosy, df] if not f.empty and not f.isna().all(axis=None)]
-        if not frames:
-            return cosy.iloc[0:0].copy()  # empty frame with correct columns
-        cosy_all = pd.concat(frames, axis=0, ignore_index=True)
+        # Merge the two dataframes
+        cosy_all = pd.concat([cosy, df], axis=0, ignore_index=True)
 
         # Remove duplicate rows
         cosy_all = cosy_all.drop_duplicates(subset=["f1_ppm", "f2_ppm"], keep="first")
@@ -2276,7 +2354,7 @@ class NMRsolution:
         df["f1_i"] = 0
         df["f2_i"] = 0
         df["f2p_i"] = 0
-        df["f2p_ppm"] = 0.0
+        df["f2p_ppm"] = 0
 
         df["f2H_i"] = ""
 
@@ -2328,19 +2406,20 @@ class NMRsolution:
 
         if not self.exact_ppm_values:
             # Tidy up ppm values
-            hsqc_clipcosy = self.snap(
+            hsqc_clipcosy = self.tidyup_ppm_values(
                 hsqc_clipcosy,
                 c13["ppm"],
                 "f1_ppm",
-                self.problemdata_json.carbonSeparation,
+                ppm_tolerance=self.problemdata_json.carbonSeparation,
             )
-            hsqc_clipcosy = self.snap(
+            hsqc_clipcosy = self.tidyup_ppm_values(
                 hsqc_clipcosy,
                 h1["ppm"],
                 "f2_ppm",
-                self.problemdata_json.protonSeparation,
+                ppm_tolerance=self.problemdata_json.protonSeparation,
             )
-
+        else:
+            print("Exact ppm values only, no tidy up required")
 
         return hsqc_clipcosy
 
@@ -2366,7 +2445,7 @@ class NMRsolution:
         df["f1p_i"] = 0
         df["f2_i"] = 0
         df["f2p_i"] = 0
-        df["f2p_ppm"] = 0.0
+        df["f2p_ppm"] = 0
 
         df["f1H_i"] = ""
         df["f2H_i"] = ""
@@ -2395,48 +2474,6 @@ class NMRsolution:
 
         return df
 
-
-    # ── Tier-1 helpers ────────────────────────────────────────────────────────
-
-    def fail(self, message: str, code: int = 401) -> tuple[str, int]:
-        """Mark the solution as failed, log the error, and return (message, code).
-
-        Callers that return void after failing::
-
-            self.fail("reason")
-            return
-
-        Callers that propagate (message, code) to the Flask route::
-
-            return self.fail("reason")
-        """
-        self.nmrsolution_failed = True
-        self.nmrsolution_error_message = message
-        self.nmrsolution_error_code = code
-        logger.error(f"[{code}] {message}")
-        return message, code
-
-    def snap(
-        self,
-        df: pd.DataFrame,
-        refs,
-        col: str,
-        tol: float,
-    ) -> pd.DataFrame:
-        """Snap a ppm column to the nearest canonical reference values.
-
-        In *exact_ppm_values* mode the DataFrame is returned unchanged, but
-        ``{col}_orig`` and ``{col}_prob`` columns are still added (prob=1.0)
-        so that any downstream ``df.drop(df[df.{col}_prob == 0].index)``
-        calls remain safe no-ops.
-        """
-        if self.exact_ppm_values:
-            df[f"{col}_orig"] = df[col]
-            df[f"{col}_prob"] = 1.0
-            return df
-        return self.tidyup_ppm_values(df, refs, col, ppm_tolerance=tol)
-
-    # ── End Tier-1 helpers ────────────────────────────────────────────────────
     def find_nearest(self, array: list[float], value: float) -> float:
         """
         Finds the value in the array that is closest to the specified target value.
@@ -2939,7 +2976,7 @@ def add_hmbc_edges_to_graph(
         nx.Graph: The updated graph with HMBC edges added.
     """
     # add HMBC edges to G2
-    logger.debug("Building HMBC edges")
+    print("Adding HMBC edges 1")
     count = 0
     for i, row in hmbc.iterrows():
         # find the rows in h1 that have the same ppm vaslue as the f1_ppm value in the row
