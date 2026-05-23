@@ -1389,17 +1389,15 @@ svgDomNode.addEventListener('wheel', (event) => {
             .duration(1000)
             .attr("transform", d => `translate(${d.x},${d.y})`);
 
-        // update the cosy links
-        svg.selectAll(".link")
-            .data(cosyLinks)
+        // Update COSY link endpoints using the typed named selection
+        link
             .attr("x1", d => nodes.find(node => node.id === d.source).x)
             .attr("y1", d => nodes.find(node => node.id === d.source).y)
             .attr("x2", d => nodes.find(node => node.id === d.target).x)
             .attr("y2", d => nodes.find(node => node.id === d.target).y);
 
-        // update the hmbc links
-        svg.selectAll(".link")
-            .data(hmbcLinksData)
+        // Update HMBC link endpoints using the typed named selection
+        hmbclinks_svg
             .attr("x1", d => nodes.find(node => node.id === d.source).x)
             .attr("y1", d => nodes.find(node => node.id === d.source).y)
             .attr("x2", d => nodes.find(node => node.id === d.target).x)
@@ -1423,22 +1421,18 @@ svgDomNode.addEventListener('wheel', (event) => {
         mae = mae/nodes.length;
 
 
-        // define mapping
-        for(var i=0; i<catoms_orig.length; i++) {
-            mapping[catoms_orig[i]["id"]] = catoms_orig[i]["id"];
-        }
-
-        var catoms_orig_dict = {};
-        for(var i=0; i<catoms_orig.length; i++) {
-            catoms_orig_dict[catoms_orig[i]["atomNumber"]] = catoms_orig[i]["id"];
-        }
-
-        for(var i=0; i<nodes.length; i++) {
-            var id1 = nodes[i]["id"];
-            var atomNumber1 = nodes[i]["atomNumber"];
-            var id2 = catoms_orig_dict[atomNumber1];
-            mapping[nodes[i]["id"]] = id2;
-        }
+        // Rebuild mapping: NMR-peak id → the original catom id at the same structural position.
+        // Used by computeTotalWeight2D for HMBC correlation scoring.
+        // Step 1: reset all entries to identity (invisible atoms map to themselves)
+        catoms_orig.forEach(c => { mapping[c.id] = c.id; });
+        // Step 2: build atomNumber → original-id lookup once
+        const atomNumberToOrigId = Object.fromEntries(
+            catoms_orig.map(c => [c.atomNumber, c.id])
+        );
+        // Step 3: update mapping for each currently displayed node
+        nodes.forEach(node => {
+            mapping[node.id] = atomNumberToOrigId[node.atomNumber];
+        });
 
 
         // recaclulate correlation penalty
@@ -1505,91 +1499,126 @@ svgDomNode.addEventListener('wheel', (event) => {
 
 
 
-    function updateMovedAtoms3() {
+    /*
+     * findValidMoves — pure detection + validation, no side effects
+     * ─────────────────────────────────────────────────────────────────────────
+     * Determines which dragged nodes can legitimately be committed to a new
+     * structural position.  Returns an array of move descriptors; an empty
+     * array means nothing should be committed.
+     *
+     * Each returned object has the shape:
+     *   { movedAtomNumber, targetAtomNumber, snapshot }
+     *
+     * where snapshot is a deep copy of the node taken before any mutations,
+     * used later by commitMoves to read original NMR values regardless of order.
+     *
+     * Validation rules (a move is rejected if ANY of these are true):
+     *   1. Source and destination have different numProtons (type mismatch)
+     *   2. Source and destination are the same atom (no-op)
+     *   3. Destination is NOT also moving AND is already visible (occupied)
+     *   4. Destination IS also moving but that move is itself invalid (broken chain)
+     */
+    function findValidMoves(nodes, catoms, catoms_orig) {
 
-        // Find the moved nodes and store them in the moved_nodes array
-        const moved_nodes = [];
-        const removed = [];
-        nodes.forEach((node1, index) => {
-            const node2 =  catoms_orig[index];
-            if (node1.x !== node2.x || node1.y !== node2.y) {
-                moved_nodes.push(JSON.parse(JSON.stringify(node1)));
-                removed.push(false)
+        // --- Step 1: snapshot nodes that have moved from their original positions ---
+        // Use atomNumber (structural identity) not array index for the catoms_orig lookup
+        const movedSnapshots = [];
+        nodes.forEach(node => {
+            const orig = catoms_orig.find(c => c.atomNumber === node.atomNumber);
+            if (orig && (node.x !== orig.x || node.y !== orig.y)) {
+                movedSnapshots.push(JSON.parse(JSON.stringify(node)));
             }
         });
 
-        if(moved_nodes.length == 0){
-            return false;
-        }
+        if (movedSnapshots.length === 0) return [];
 
-
-        // Find the closest nodes to the moved nodes
-        // Store the indices of the moved nodes and the closest nodes in the closest array
-        // keep also the distance between the moved node and the closest node
-        const closest_nodes = [];
-        const closest_catoms = [];
-        moved_nodes.forEach((node1, idx) => {
-            // Calculate Euclidean distance between the moved node and all other nodes
-            const distances_nodes = catoms_orig.map(node2 => 
-                Math.pow(node1.x - node2.x, 2) + Math.pow(node1.y - node2.y, 2)
+        // --- Step 2: find the closest catoms_orig position for each moved node ---
+        const candidates = movedSnapshots.map(snapshot => {
+            const distancesSquared = catoms_orig.map(c =>
+                (snapshot.x - c.x) ** 2 + (snapshot.y - c.y) ** 2
             );
-            
-            // Find the closest node
-            const minValue1 = Math.min(...distances_nodes);  // Gets the minimum value, which is 3
-            const closest_node_idx = distances_nodes.indexOf(minValue1);  // Gets the index, which is 3 (index = 3)
-
-            // Append the index of the moved node and the closest node to the result array
-            closest_nodes.push([node1.atomNumber, catoms_orig[closest_node_idx].atomNumber, minValue1]);
+            const minDist  = Math.min(...distancesSquared);
+            const target   = catoms_orig[distancesSquared.indexOf(minDist)];
+            return {
+                movedAtomNumber:  snapshot.atomNumber,
+                targetAtomNumber: target.atomNumber,
+                distanceSquared:  minDist,
+                snapshot,
+                invalid: false
+            };
         });
 
-        updateNodesEEH3( closest_nodes, moved_nodes, removed);
-            // check if all items in removed are true then return false
+        // --- Step 3: validation pass 1 — type mismatch and no-op ---
+        candidates.forEach(c => {
+            const src = catoms.find(a => a.atomNumber === c.movedAtomNumber);
+            const dst = catoms.find(a => a.atomNumber === c.targetAtomNumber);
+            if (src.numProtons !== dst.numProtons) c.invalid = true;
+            if (src.atomNumber === dst.atomNumber)  c.invalid = true;
+        });
 
-        if(removed.every(Boolean)){
-            return false;
-        }
+        // --- Step 4: validation pass 2 — destination occupancy / chain moves ---
+        // A destination that is itself being moved is valid if that move is valid.
+        // A destination that is not moving must be unoccupied (visible === false).
+        candidates.forEach(c => {
+            if (c.invalid) return;
+            const dst          = catoms.find(a => a.atomNumber === c.targetAtomNumber);
+            const chainIdx     = candidates.findIndex(other => other.movedAtomNumber === c.targetAtomNumber);
+            const destIsMoving = chainIdx !== -1;
 
-        for(var i=0; i<removed.length; i++) {
-            if (removed[i] == true) {
-                continue;
+            if (!destIsMoving) {
+                c.invalid = dst.visible;           // occupied position → reject
+            } else {
+                c.invalid = candidates[chainIdx].invalid;  // inherit chain validity
             }
-            var atomNumber1 = closest_nodes[i][0];
-            var atomNumber2 = closest_nodes[i][1];
+        });
 
-            // find node1 in the catoms array
-            var node1 = moved_nodes.find(node => node.atomNumber === atomNumber1);
-            var node2 = catoms.find(catom => catom.atomNumber === atomNumber2);
+        return candidates.filter(c => !c.invalid);
+    }
 
-            // move over information from node1 to node2
-            node2["ppm"] = node1["ppm"];
-            node2["H1_ppm"] = node1["H1_ppm"];
-            node2["jCouplingVals"] = node1["jCouplingVals"];
-            node2["jCouplingClass"] = node1["jCouplingClass"];
-            node2["id"] = node1["id"];
-        }
+    /*
+     * commitMoves — apply validated moves to catoms (side effects only)
+     * ─────────────────────────────────────────────────────────────────────────
+     * Reads NMR data exclusively from each move's snapshot (the pre-commit state)
+     * so swap and chain moves are order-independent in the data-copy phase.
+     *
+     * Visibility updates are split into two sub-passes:
+     *   pass A: mark all source positions invisible  (clears old occupancy)
+     *   pass B: mark all destination positions visible (sets new occupancy)
+     * This order is required for swaps: without it, a source cleared in pass A
+     * would be immediately re-set visible in pass B before its pair is cleared.
+     */
+    function commitMoves(validMoves) {
 
-        // uddate the visible flags in the catoms array
-        for(var i=0; i<removed.length; i++) {
-            if (removed[i] == true) {
-                continue;
-            }
-            var atomNumber1 = closest_nodes[i][0];
-            // var atomNumber2 = closest_nodes[i][1];
-            // find node with atomNumber1 in the catoms array
-            var node1 = catoms.find(catom => catom.atomNumber === atomNumber1);
-            node1.visible = false;
-        }
+        // Pass 1 — copy NMR data to destination (reads from snapshot, no order issues)
+        validMoves.forEach(move => {
+            const dst = catoms.find(c => c.atomNumber === move.targetAtomNumber);
+            dst.ppm             = move.snapshot.ppm;
+            dst.H1_ppm          = move.snapshot.H1_ppm;
+            dst.jCouplingVals   = move.snapshot.jCouplingVals;
+            dst.jCouplingClass  = move.snapshot.jCouplingClass;
+            dst.id              = move.snapshot.id;
+        });
 
-        for(var i=0; i<removed.length; i++) {
-            if (removed[i] == true) {
-                continue;
-            }
-            // var atomNumber1 = closest_nodes[i][0];
-            var atomNumber2 = closest_nodes[i][1];
-            // find node with atomNumber1 in the catoms array
-            var node1 = catoms.find(catom => catom.atomNumber === atomNumber2);
-            node1.visible = true;
-        }
+        // Pass 2a — clear all source positions
+        validMoves.forEach(move => {
+            catoms.find(c => c.atomNumber === move.movedAtomNumber).visible = false;
+        });
+
+        // Pass 2b — activate all destination positions
+        validMoves.forEach(move => {
+            catoms.find(c => c.atomNumber === move.targetAtomNumber).visible = true;
+        });
+    }
+
+    /*
+     * updateMovedAtoms3 — thin orchestrator
+     * Calls findValidMoves then commitMoves; returns false when there is
+     * nothing to commit so that updateMovedAtoms() can exit early.
+     */
+    function updateMovedAtoms3() {
+        const validMoves = findValidMoves(nodes, catoms, catoms_orig);
+        if (validMoves.length === 0) return false;
+        commitMoves(validMoves);
         return true;
     }
 
@@ -1624,67 +1653,6 @@ svgDomNode.addEventListener('wheel', (event) => {
             }
         });
         return totalWeight;
-    }
-
-    function updateNodesEEH3(closest_nodes, moved_nodes, removed) {
-
-        // first check if the moved node will be going to a position that has the same number of protons
-        // if it is not, then remove the moved node from the moved_nodes array
-        // by setting the removed flag to true
-
-        for(var j=0; j<closest_nodes.length; j++) {
-            var atomNumber1 = closest_nodes[j][0];
-            var atomNumber2 = closest_nodes[j][1];
-            var minValue = closest_nodes[j][2];
-
-            // find node1 in the catoms array
-            var node1 = catoms.find(catom => catom.atomNumber === atomNumber1);
-            var node2 = catoms.find(catom => catom.atomNumber === atomNumber2);
-
-            if (node1.numProtons != node2.numProtons) {
-                removed[j] = true;
-            }
-            if (node1.atomNumber == node2.atomNumber) {
-                removed[j] = true;
-            }
-        }
-        for(var j=0; j<closest_nodes.length; j++) {
-
-            if (removed[j] == true) {
-                continue;
-            }
-            var atomNumber1 = closest_nodes[j][0];
-            var atomNumber2 = closest_nodes[j][1];
-            var minValue = closest_nodes[j][2];
-
-            // find node1 in the catoms array
-            var node1 = catoms.find(catom => catom.atomNumber === atomNumber1);
-            var node2 = catoms.find(catom => catom.atomNumber === atomNumber2);
-
-            // destination in the moved_nodes array
-            dest_found = moved_nodes.find(moved_node => moved_node.atomNumber === atomNumber2) == undefined ? false : true;
-            dest_idx = moved_nodes.findIndex(moved_node => moved_node.atomNumber === atomNumber2);
-
-            if (!dest_found) {
-                // check if the destination node is visible
-                // if it is then that means the node is being moved to a position that is free and that is allowed
-                if (node2.visible) {
-                    removed[j] = true;
-                }
-                else {
-                    removed[j] = false;
-                }
-            }
-            else {
-                // check that if the destination node has been removed or not
-                if (removed[dest_idx] == true) {
-                    removed[j] = true;
-                }
-                else {
-                    removed[j] = false;
-                }
-            }
-        }
     }
 
     function reportAssignments() {
@@ -1737,61 +1705,46 @@ svgDomNode.addEventListener('wheel', (event) => {
 
     function exportToMnova() {
 
-        var workingDirectory = "{{workingDirectory}}";
-        var workingFilename = "{{workingFilename}}";
-
-        // create the json filename
-        var jsonFilename = workingFilename + '_assignments_from_simplemnova.json';
-
-        // add the working directory to the jsonFilename Does not work
-        // var jsonFilename = workingDirectory + '/' + jsonFilename;
+        // jsonFilename uses the module-level workingFilename constant
+        const jsonFilename = workingFilename + '_assignments_from_simplemnova.json';
 
         var nodes_export = JSON.parse(JSON.stringify(nodes));
 
-        // Convert coordinates back to normalised space for the JSON export
+        // Convert all coordinate arrays to normalised [0,1] space for the JSON export
         unscaleNodes(nodes_export);
         unscaleNodes(catoms_orig);
         unscaleNodes(catoms);
         unscaleNodes(nodes_orig);
 
-        var nodes_data ={};
-        nodes_data['nodes_orig'] = catoms_orig;
-        nodes_data['nodes_now'] = nodes_export;
-        nodes_data['links'] = links;
-
-        // add smilesString and molfile to the nodes_data
-        nodes_data['smilesString'] = smilesString;
-        nodes_data['molfile'] = molfile;
-
-        nodes_data['dataFrom'] = dataFrom;
-        nodes_data['oldjsondata'] = oldjsondata;
-
-        nodes_data['molgraph'] = molgraph;
-        nodes_data['shortest_paths'] = shortest_paths;
-        //  get the contents of the svg element convert to string
-        nodes_data['svg'] = svg_bckgrnd_image_str;
-
-
-
-        nodes_data['catoms'] = catoms;
-        nodes_data['catoms_orig'] = catoms_orig;
-        nodes_data['best_results'] = best_results;
+        var nodes_data = {};
+        nodes_data['nodes_orig']       = catoms_orig;
+        nodes_data['nodes_now']        = nodes_export;
+        nodes_data['links']            = links;
+        nodes_data['smilesString']     = smilesString;
+        nodes_data['molfile']          = molfile;
+        nodes_data['dataFrom']         = dataFrom;
+        nodes_data['oldjsondata']      = oldjsondata;
+        nodes_data['molgraph']         = molgraph;
+        nodes_data['shortest_paths']   = shortest_paths;
+        nodes_data['svg']              = svg_bckgrnd_image_str;
+        nodes_data['catoms']           = catoms;
+        nodes_data['catoms_orig']      = catoms_orig;
+        nodes_data['best_results']     = best_results;
         nodes_data['workingDirectory'] = workingDirectory;
-        nodes_data['workingFilename'] = workingFilename;
-        nodes_data['title'] = title;
+        nodes_data['workingFilename']  = workingFilename;
+        nodes_data['title']            = title;
 
-
-        // save the json string to a file
-        var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(nodes_data, null, 2));
-        var a = document.createElement('a');
+        // Trigger download
+        const data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(nodes_data, null, 2));
+        const a = document.createElement('a');
         a.href = 'data:' + data;
         a.download = jsonFilename;
-        a.innerHTML = 'download JSON';
         a.click();
 
-        // Restore viewBox-space coordinates after export
+        // Restore all arrays to viewBox-space coordinates
         scaleNodes(catoms_orig);
         scaleNodes(catoms);
+        scaleNodes(nodes_orig);   // was missing — left nodes_orig in normalised space after export
     }
 
 
