@@ -42,6 +42,22 @@ import numpy as np
 import pandas as pd
 
 import networkx as nx
+
+
+def _node_link_data(G) -> dict:
+    """Version-safe wrapper for json_graph.node_link_data.
+
+    NX < 3.3  — no edges kwarg; default produces {"links": [...]}
+    NX 3.3–3.5 — edges kwarg added; explicit "links" silences FutureWarning
+    NX >= 3.6  — default changed to "edges"; explicit "links" preserves key
+
+    Always produces {"links": [...]} so downstream code is stable across
+    all versions. Revisit when upgrading server beyond NX 3.6.
+    """
+    try:
+        return json_graph.node_link_data(G, edges="links")
+    except TypeError:  # NX < 3.3 — edges kwarg not yet supported
+        return json_graph.node_link_data(G)
 from networkx.readwrite import json_graph
 
 
@@ -993,9 +1009,7 @@ def simpleMNOVA_display_molecule():
             G2, solution.hmbc, solution.h1, solution.c13
         )
 
-        jsonGraphData = json_graph.node_link_data(
-            G2
-        )  # reverted back to original as edges="links" was causing problems
+        jsonGraphData = _node_link_data(G2)
         jsonGraphData["moved_nodes"] = jsonGraphData["nodes"]
 
         # create a network graph of the expected molecule
@@ -1003,9 +1017,7 @@ def simpleMNOVA_display_molecule():
         solution.initiate_molgraph(json_data, G2)
 
         #  convert the molgraph to a json object
-        jsonGraphData_mol = json_graph.node_link_data(
-            solution.molgraph
-        )  # reverted back to original as edges="links" was causing problems
+        jsonGraphData_mol = _node_link_data(solution.molgraph)
 
         # calculate the shortest paths between all pairs of nodes in the molgraph
         shortest_paths = dict(nx.all_pairs_dijkstra_path_length(solution.molgraph))

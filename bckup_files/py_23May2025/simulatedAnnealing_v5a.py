@@ -18,7 +18,6 @@ from pathlib import Path
 from rdkit.Chem import Draw
 from rdkit.Chem.rdchem import Mol
 from typing import Dict, List, Optional, Tuple
-from loguru import logger
 
 from globals import SVG_DIMENSIONS as svgDimensions
 from globals import NODE_COLOR_MAP as color_map
@@ -40,7 +39,7 @@ def get_symmetry_classes(mol):
     
     classes = defaultdict(list)
     for idx, rank in enumerate(ranks):
-        logger.debug(f"symmetry rank: idx={idx}, rank={rank}")
+        print(idx, rank)
         classes[rank].append(idx)
 
     # keep only classes with more than 1 member (symmetry classes)
@@ -814,7 +813,7 @@ class SimulatedAnnealing2:
         # make a deepcopy of optimized_nodes_dicts 
         optimized_nodes_dicts_bckup = copy.deepcopy(optimized_nodes_dicts)
 
-        logger.debug(f"optimized_nodes_dicts before symmetry check: {len(optimized_nodes_dicts)}")
+        print(f"len optimized_nodes_dicts before symmetry check: {len(optimized_nodes_dicts)}")
 
         # if self.possible_symmetry:
 
@@ -847,7 +846,7 @@ class SimulatedAnnealing2:
         #     if len(optimized_nodes_dicts) == 0: 
         #         optimized_nodes_dicts = copy.deepcopy(optimized_nodes_dicts_bckup)
 
-        logger.debug(f"optimized_nodes_dicts after symmetry check/restore: {len(optimized_nodes_dicts)}")
+        print(f"len optimized_nodes_dicts after symmetry check and backup restore: {len(optimized_nodes_dicts)}")
 
         # calc MAE and LAE for each of the unique nodes_dict
         for k, optimized_nodes in optimized_nodes_dicts.items():
@@ -885,7 +884,7 @@ class SimulatedAnnealing2:
         best_lae = float("inf")
         best_lae_atomNumber = -1
         # best_nodes = optimized_nodes_dicts[list(optimized_nodes_dicts.keys())[0]][0]  
-        logger.debug(f"optimized_nodes_dicts for MAE/LAE: {len(optimized_nodes_dicts)}")
+        print(f"len optimized_nodes_dicts: {len(optimized_nodes_dicts)}")
         for k, v in optimized_nodes_dicts.items():
             mae, lae, lae_atomNumber = v[1:]
             # best_nodes, mae, lae, lae_atomNumber = v[0:]
@@ -1084,7 +1083,7 @@ def main() -> None:
         parser.error("--runs must be at least 1.")
 
     # ── Build solver ──────────────────────────────────────────────────────────
-    logger.info(f"Loading NMR data from: {args.json_file}")
+    print(f"\nLoading NMR data from: {args.json_file}")
     solver = SimulatedAnnealing2.from_json_file(args.json_file)
 
     solver.setup_run(
@@ -1095,10 +1094,10 @@ def main() -> None:
         randomize_mapping=False,
     )
 
-    logger.info(
-        f"Predicted (identity) weight: {solver.predicted_weight:.4f} | "
-        f"{args.runs} run(s) × {args.max_iter:,} iterations "
-        f"(T: {args.max_temp}→{args.min_temp}, α={args.cooling_rate})"
+    print(
+        f"Predicted (identity) weight : {solver.predicted_weight:.4f}\n"
+        f"Running SA  —  {args.runs} run(s) × up to {args.max_iter:,} iterations "
+        f"(T: {args.max_temp} → {args.min_temp}, α={args.cooling_rate})\n"
     )
 
     # ── Run optimisation ──────────────────────────────────────────────────────
@@ -1108,27 +1107,28 @@ def main() -> None:
 
     # ── Per-run statistics (verbose) ──────────────────────────────────────────
     if args.verbose:
-        logger.info("Per-weight-bucket results")
+        print("── Per-weight-bucket results " + "─" * 40)
         for weight, bucket in sorted(solver.results.items()):
-            logger.info(f"  weight={weight:.4f}  runs={bucket['num_times']}")
+            print(f"  Weight {weight:.4f}  ×{bucket['num_times']} run(s)")
             for mapping, stats, _ in bucket["results"]:
-                logger.info(
+                print(
                     f"    improvements={stats['improvements']:,}  "
                     f"worsen_accepted={stats['worsen_accepted']:,}  "
                     f"not_swapped={stats['not_swapped']:,}  "
                     f"rejected={stats['move_rejected']:,}"
                 )
+        print()
 
     # ── Final summary ─────────────────────────────────────────────────────────
     improvement = solver.predicted_weight - solver.bestest_weight
-    logger.info("── SA final results ──")
-    logger.info(f"  initial mapping   : {solver.initial_mapping}")
-    logger.info(f"  predicted weight  : {solver.predicted_weight:.4f}")
-    logger.info(f"  best SA weight    : {solver.bestest_weight:.4f}")
-    logger.info(f"  improvement       : {improvement:.4f}")
-    logger.info(f"  distinct solutions: {len(solver.results)}")
-    logger.info(f"  best mapping      : {solver.bestest_mapping}")
-    logger.info(f"  time taken        : {wall:.2f}s")
+    print("── Final results " + "─" * 50)
+    print(f" initial mapping    : {solver.initial_mapping}")
+    print(f"  Predicted weight  : {solver.predicted_weight:.4f}")
+    print(f"  Best SA weight    : {solver.bestest_weight:.4f}")
+    print(f"  Improvement       : {improvement:.4f}")
+    print(f"  Distinct solutions: {len(solver.results)}")
+    print(f"  Best mapping      : {solver.bestest_mapping}")
+    print(f"  Time taken        : {wall:.2f} seconds")
 
 
     # for v in dir(solver):
@@ -1142,15 +1142,13 @@ def main() -> None:
         catoms_df = solver.carbon_df.copy()
         result_json, best_results = solver.process_results(catoms_df, json_graph_data)
 
-        logger.info(f"MAE: {best_results['best_mae']:.4f} ppm")
-        logger.info(
-            f"LAE: {best_results['best_lae']:.4f} ppm  "
-            f"(worst atom #{best_results['best_lae_atomNumber']})"
-        )
+        print(f"\n  MAE  : {best_results['best_mae']:.4f} ppm")
+        print(f"  LAE  : {best_results['best_lae']:.4f} ppm  "
+              f"(worst atom #{best_results['best_lae_atomNumber']})")
 
         with open(args.output, "w") as f:
             json.dump(result_json, f, indent=2)
-        logger.info(f"Output written to: {args.output}")
+        print(f"\n  Output written to: {args.output}")
 
 
 

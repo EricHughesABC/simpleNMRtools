@@ -10,6 +10,23 @@ import json
 from scipy import stats
 import networkx as nx
 from networkx.readwrite import json_graph
+
+
+def _node_link_data(G) -> dict:
+    """Version-safe wrapper for json_graph.node_link_data.
+
+    NX < 3.3  — no edges kwarg; default produces {"links": [...]}
+    NX 3.3–3.5 — edges kwarg added; explicit "links" silences FutureWarning
+    NX >= 3.6  — default changed to "edges"; explicit "links" preserves key
+
+    Always produces {"links": [...]} so downstream code is stable across
+    all versions. Revisit when upgrading server beyond NX 3.6.
+    """
+    try:
+        return json_graph.node_link_data(G, edges="links")
+    except TypeError:  # NX < 3.3 — edges kwarg not yet supported
+        return json_graph.node_link_data(G)
+
 from rdkit import Chem
 
 # from rdkit.Chem import AllChem
@@ -1322,9 +1339,7 @@ class NMRProblem:
         self.G2 = G2
 
         # jsonGraphData = json_graph.node_link_data(G2, edges="links")  # added edges='links' for compatibility
-        jsonGraphData = json_graph.node_link_data(
-            G2
-        )  # reverted back to original as pythonanywhere lower version
+        jsonGraphData = _node_link_data(G2)
 
         self.jinjadata = {
             "svg_container": svg_str,
