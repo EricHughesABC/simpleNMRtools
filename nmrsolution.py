@@ -59,9 +59,7 @@ class NMRsolution:
             self.expts_available.remove("SKIP")
 
         if "HSQC" not in self.expts_available:
-            self.nmrsolution_failed = True
-            self.nmrsolution_error_message = "<p>HSQC experiment not present</p>"
-            self.nmrsolution_error_code = 401
+            self.fail("<p>HSQC experiment not present</p>")
             return
 
         self.hsqc_df = problemdata_json.dataframes["HSQC"]
@@ -78,9 +76,7 @@ class NMRsolution:
 
         # if hsqc_df is empty then return
         if self.hsqc_df.empty:
-            self.nmrsolution_failed = True
-            self.nmrsolution_error_message = "<p>HSQC experiment contains no data</p>"
-            self.nmrsolution_error_code = 401
+            self.fail("<p>HSQC experiment contains no data</p>")
             return
 
         self.molstr = problemdata_json.dataframes["molfile"].loc[0, "molfile"]
@@ -216,8 +212,7 @@ class NMRsolution:
             self.assign_CH3_CH1_in_HSQC_using_expected_molecule()
 
         if self.hsqc[self.hsqc.numProtons == -1].shape[0] > 0:
-            logger.warning("CH3/CH2/CH1 assignment failed: unresolved numProtons remain")
-            self.nmrsolution_failed = True
+            self.fail("CH3/CH2/CH1 assignment failed: unresolved numProtons remain")
 
         if self.nmrsolution_failed:
             logger.error(self.nmrsolution_error_message)
@@ -279,7 +274,9 @@ class NMRsolution:
                     ["ppm", "numProtons", "CH0", "CH1", "CH2", "CH3"]
                 ].copy()
                 # replace True with 1 and False with 0
-                df1_C13 = df1_C13.replace({True: 1, False: 0})
+                df1_C13[["CH0", "CH1", "CH2", "CH3"]] = (
+                    df1_C13[["CH0", "CH1", "CH2", "CH3"]].astype(int)
+                )
                 # set ppm value to a string with 2 decimal places
                 df1_C13["ppm"] = df1_C13["ppm"].map("{:.2f}".format)
                 c13_df_list.append(df1_C13.values.tolist())
@@ -288,7 +285,9 @@ class NMRsolution:
                     ["ppm", "numProtons", "CH0", "CH1", "CH2", "CH3"]
                 ].copy()
                 # replace True with 1 and False with 0
-                self.molprops_df1 = self.molprops_df1.replace({True: 1, False: 0})
+                self.molprops_df1[["CH0", "CH1", "CH2", "CH3"]] = (
+                    self.molprops_df1[["CH0", "CH1", "CH2", "CH3"]].astype(int)
+                )
 
                 c13_df_list.append(self.molprops_df1.values.tolist())
 
@@ -434,7 +433,9 @@ class NMRsolution:
                         ["ppm", "numProtons", "CH0", "CH1", "CH2", "CH3"]
                     ].copy()
                     # replace True with 1 and False with 0
-                    df1_C13 = df1_C13.replace({True: 1, False: 0})
+                    df1_C13[["CH0", "CH1", "CH2", "CH3"]] = (
+                        df1_C13[["CH0", "CH1", "CH2", "CH3"]].astype(int)
+                    )
                     # set ppm value to a string with 2 decimal places
                     df1_C13["ppm"] = df1_C13["ppm"].map("{:.2f}".format)
                     c13_df_list.append(df1_C13.values.tolist())
@@ -443,7 +444,9 @@ class NMRsolution:
                         ["ppm", "numProtons", "CH0", "CH1", "CH2", "CH3"]
                     ].copy()
                     # replace True with 1 and False with 0
-                    self.molprops_df1 = self.molprops_df1.replace({True: 1, False: 0})
+                    self.molprops_df1[["CH0", "CH1", "CH2", "CH3"]] = (
+                        self.molprops_df1[["CH0", "CH1", "CH2", "CH3"]].astype(int)
+                    )
 
                     c13_df_list.append(self.molprops_df1.values.tolist())
 
@@ -485,9 +488,7 @@ class NMRsolution:
         ):
 
             if len(self.dept_df) == 0:
-                self.nmrsolution_failed = True
-                self.nmrsolution_error_message = "<p> hsqc needs to be multiplicity edited experiment as no DEPT data found</p>"
-                self.nmrsolution_error_code = 401
+                self.fail("<p>HSQC needs a multiplicity-edited experiment: no DEPT data found</p>")
                 return
 
             # set intensity of CH2 values in hsqc to negative by using dept values
@@ -495,24 +496,18 @@ class NMRsolution:
             dept_CH3CH1 = self.dept_df[self.dept_df.intensity > 0].copy()
 
             if len(dept_CH2) == 0:
-                self.nmrsolution_failed = True
-                self.nmrsolution_error_message = "<p> hsqc needs to be multiplicity edited experiment as no DEPT CH2 data found</p>"
-                self.nmrsolution_error_code = 401
+                self.fail("<p>HSQC needs a multiplicity-edited experiment: no DEPT CH2 data found</p>")
                 return
 
             if len(dept_CH2) != mol.num_CH2_carbon_atoms:
-                self.nmrsolution_failed = True
-                self.nmrsolution_error_message = "<p> hsqc needs to be multiplicity edited experiment as DEPT CH2 data does not match expected number of CH2 carbon atoms</p>"
-                self.nmrsolution_error_code = 401
+                self.fail("<p>HSQC/DEPT CH2 count does not match expected number of CH2 carbon atoms</p>")
                 return
 
             # check if the number of dept rows equals the number of protonated carbons in molprops_df
             if (len(self.dept_df) > mol.num_carbon_atoms_with_protons) or (
                 len(self.dept_df) < mol.num_sym_carbon_atoms_with_protons
             ):
-                self.nmrsolution_failed = True
-                self.nmrsolution_error_message = "<p> Please check the number of carbon peaks in the DEPT data as the number does not equal to the number of protonated carbons in the given molecule</p>"
-                self.nmrsolution_error_code = 401
+                self.fail("<p>DEPT peak count does not match the number of protonated carbons in the molecule — please check the DEPT data</p>")
                 return
 
             # sort dept_CH2 by ppm in descending order
@@ -1497,11 +1492,7 @@ class NMRsolution:
         if self.dept135_not_used_to_solve_problem:
             if num_CH3CH1_hsqc > CH3CH1_mol_df.shape[0]:
                 #  if more CH3CH1 groups in HSQC than expected molecule then we have a problem
-                self.nmrsolution_failed = True
-                self.nmrsolution_error_message = (
-                    "CH3CH1 HSQC > CH3CH1 expected molecule"
-                )
-                self.nmrsolution_error_code = 401
+                self.fail("CH3CH1 count in HSQC exceeds that of the expected molecule")
                 return
 
         #  check if CH3 groups already assigned and if so assign CH1 groups
@@ -1658,10 +1649,7 @@ class NMRsolution:
                     hsqc.loc[hsqc.numProtons == 3, "CH3"] = True
                     hsqc.loc[hsqc.numProtons == 1, "CH1"] = True
                 else:
-                    logger.warning("No CH3/CH1 assignment found: counts do not match (branch 1)")
-                    self.nmrsolution_failed = True
-                    self.nmrsolution_error_message = "Line 2020 nmrsolution.py CH3CH1 groups in HSQC do not match expected molecule"
-                    self.nmrsolution_error_code = 401
+                    self.fail("CH3/CH1 assignment failed: HSQC counts do not match expected molecule")
 
             # elif num_CH3CH1_hsqc < CH3CH1_mol_df.shape[0]:
             #     # attempt to match up CH3 and CH1 based on ppm values
@@ -1686,10 +1674,7 @@ class NMRsolution:
                         CH3CH1_mol_df.loc[closest_match.index, "picked"] = True
                         CH3CH1_mol_df = CH3CH1_mol_df[~CH3CH1_mol_df.picked]
             else:
-                logger.warning("No CH3/CH1 assignment found: fallback failed (branch 2)")
-                self.nmrsolution_failed = True
-                self.nmrsolution_error_message = "Line 2042 nmrsolution.py CH3CH1 groups in HSQC do not match expected molecule"
-                self.nmrsolution_error_code = 401
+                self.fail("CH3/CH1 assignment failed: closest-match fallback exhausted")
 
         logger.debug(f"error_code after CH3/CH1 assign: {self.nmrsolution_error_code}")
 
@@ -1731,10 +1716,7 @@ class NMRsolution:
                     hsqc.loc[idx, "CH3"] = True
                     hsqc.loc[idx, "numProtons"] = 3
                 else:
-                    logger.error("Unexpected state in CH2 integral assignment")
-                    self.nmrsolution_failed = True
-                    self.nmrsolution_error_message = "Error attempting to assign HSQC CH3 protons using H1 data source"
-                    self.nmrsolution_error_code = 401
+                    self.fail("Unexpected state while assigning HSQC CH3 protons using H1 data source")
 
             # now assign the rest of the -1 numProtons in HSQC to 1 and update CH1 flag in HSQC
             hsqc.loc[hsqc.numProtons == -1, "numProtons"] = 1
@@ -1876,18 +1858,14 @@ class NMRsolution:
 
         # check if hsqc is present
         if not "HSQC" in self.available_experiments:
-            self.nmrsolution_failed = True
-            self.nmrsolution_error_message = "HSQC data missing"
-            self.nmrsolution_error_code = 401
+            self.fail("HSQC data missing")
             return False, self.nmrsolution_error_message, self.nmrsolution_error_code
 
         # create short views of the dataframes
         hsqc_not_empty, return_message = self.check_hsqc_df_not_empty()
 
         if self.hsqc.empty:
-            self.nmrsolution_failed = True
-            self.nmrsolution_error_message = "HSQC data missing"
-            self.nmrsolution_error_code = 401
+            self.fail("HSQC data missing")
             return False, return_message, self.nmrsolution_error_code
 
         # find CH2 groups in hsqc_df
@@ -2218,9 +2196,7 @@ class NMRsolution:
 
         # check if h1 contains any -1e6 values in f1p_ppm and if so return false and error message
         if (self.h1["f1p_ppm"] == -1e6).any():
-            self.nmrsolution_failed = True
-            self.nmrsolution_error_message = f"Misalignment between 1D-proton and HSQC values. Please check the the 1-D proton and hsqc spectra around {f2_ppm:.4} ppm for alignment."
-            self.nmrsolution_error_code = 401
+            self.fail(f"Misalignment between 1D-proton and HSQC values around {f2_ppm:.4f} ppm — please check both spectra for alignment")
             return False, self.nmrsolution_error_message
 
         return True, "ok"
