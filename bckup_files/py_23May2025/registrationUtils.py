@@ -1,4 +1,3 @@
-from loguru import logger
 registered_hosts = ["host1", "host2", "host3", "Z49BR-HKPP041Y-42DHS-ANANTMPB"]
 
 
@@ -22,7 +21,7 @@ def register_host(hostid, email):
     """
     # Placeholder for actual registration logic
     # In a real scenario, this might involve sending a request to a server
-    logger.info(f"Registering host {hostid} with email {email}")
+    print(f"Registering host {hostid} with email {email}")
 
     # append the host ID to the registered hosts list
     registered_hosts.append(hostid)

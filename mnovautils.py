@@ -5,12 +5,13 @@ from shutil import copyfile
 import datetime
 import jinja2
 import webbrowser
+from loguru import logger
 
 # from qtutils import warning_dialog
 
 
 def warning_dialog(warning_message):
-    print(warning_message)
+    logger.warning(warning_message)
     # read in template html file
     with open(r"html/warning_template.html", "r") as f:
         html_template = f.read()
@@ -69,7 +70,7 @@ def return_nonempty_mnova_datasets(data: dict) -> dict:
 
     dicts_to_keep = {}
     for k, v in data.items():
-        print(k)
+        logger.debug(f"Checking dataset: {k}")
         if k == "nmrAssignments":
             dicts_to_keep[k] = v
 
@@ -105,12 +106,12 @@ def read_in_mesrenova_json(fn: pathlib.Path) -> dict:
 
         with open(fn, "r") as file:
             data_orig = json.load(file)
-        print(data_orig.keys())
+        logger.debug(f"Raw JSON keys: {list(data_orig.keys())}")
     elif isinstance(fn, dict):
         data_orig = fn
 
     data = return_nonempty_mnova_datasets(data_orig)
-    print(data.keys())
+    logger.debug(f"Non-empty dataset keys: {list(data.keys())}")
 
     # Identify the technique keys present in the JSON data
     technique_keys = {}
@@ -132,7 +133,7 @@ def read_in_mesrenova_json(fn: pathlib.Path) -> dict:
             pulse_sequence = data[key].get("pulsesequence", "")
 
             if pulse_sequence in pulseSequences_to_experimentType:
-                print("pulse_sequence found: ", pulse_sequence)
+                logger.debug(f"Pulse sequence identified: {pulse_sequence}")
                 add_technique(
                     key,
                     technique_keys,
@@ -190,12 +191,12 @@ def get_2D_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
     """
     Returns a pandas dataframe from the json_data dictionary for the specified technique.
     """
-    print("technique: ", technique, json_data[technique]["peaks"]["count"])
+    logger.debug(f"Building 2D DataFrame: technique={technique}, peaks={json_data[technique]['peaks']['count']}")
     df_data = []
     for i in range(json_data[technique]["peaks"]["count"]):
         # check if the peak exists in the json data
         if str(i) not in json_data[technique]["peaks"]:
-            print(f"{technique} :: Peak {i} not found in json data")
+            logger.warning(f"{technique}: peak {i} not found in JSON data — skipping")
             continue
         df_data.append(
             [
@@ -269,7 +270,7 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
     """
     _dataframes = {}
     for k, v in data.items():
-        print(k)
+        logger.debug(f"Processing key: {k}")
         if k in [
             "H1_1D",
             "C13_1D",
@@ -350,12 +351,12 @@ if __name__ == "__main__":
         r"exampleProblems\2-ethyl-1-indanone_mnova_assign\2-ethyl-1-indanone_assignments_mresnova.json"
     )
     # fn = pathlib.Path( "exampleProblems/EVB_330b/EVB_330b_mresnova.json")
-    print(fn, fn.exists())
+    logger.info(f"Input file: {fn}  exists={fn.exists()}")
     if fn.exists():
         data = read_in_mesrenova_json(fn)
-        print(data.keys())
+        logger.debug(f"Loaded data keys: {list(data.keys())}")
     else:
-        print("File not found: ", fn)
+        logger.error(f"File not found: {fn}")
 
     # print(data["nmrAssignments"])
 
@@ -363,15 +364,15 @@ if __name__ == "__main__":
     # print(df)
 
     dataframes = create_dataframes_from_mresnova_json(data)
-    print(dataframes.keys())
-    print(dataframes["nmrAssignments"])
+    logger.debug(f"DataFrame keys: {list(dataframes.keys())}")
+    logger.debug(f"nmrAssignments:\n{dataframes['nmrAssignments']}")
 
     # drop duplicates based on f1_ppm and f2_ppm1 column in the dataframe dataframes["nmrAssignments"]
 
     dataframes["nmrAssignments"] = dataframes["nmrAssignments"].drop_duplicates(
         subset=["f1_ppm", "f2_ppm1"], keep="first"
     )
-    print(dataframes["nmrAssignments"])
+    logger.debug(f"nmrAssignments (sorted):\n{dataframes['nmrAssignments']}")
 
     # sort the dataframe by f1_ppm, descending order, reset the index and start the index at 1
     # save the index first as mol_idx
@@ -382,12 +383,12 @@ if __name__ == "__main__":
         .reset_index(drop=True)
     )
     dataframes["nmrAssignments"].index += 1
-    print(dataframes["nmrAssignments"])
+    logger.debug(f"nmrAssignments (final):\n{dataframes['nmrAssignments']}")
 
-    print("\nC13_1D\n", dataframes["C13_1D"])
-    print("\nH1_1D\n", dataframes["H1_1D"])
-    print("\nHSQC\n", dataframes["HSQC"])
-    print("\nHMBC\n", dataframes["HMBC"])
+    logger.info(f"C13_1D:\n{dataframes['C13_1D']}")
+    logger.info(f"H1_1D:\n{dataframes['H1_1D']}")
+    logger.info(f"HSQC:\n{dataframes['HSQC']}")
+    logger.info(f"HMBC:\n{dataframes['HMBC']}")
 
     # create pandas dataframe from "v"
     # print(data["H1_1D"]["peaks"]["count"])

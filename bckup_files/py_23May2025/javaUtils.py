@@ -37,7 +37,7 @@ class NMRShiftDBBridge:
     def _initialize_jvm(self):
         """Initialize JVM and load MolFileParser class"""
         if jpype.isJVMStarted():
-            logger.debug("JVM already started — reusing")
+            print("JVM already started")
             self._load_parser()
             return
 
@@ -56,12 +56,14 @@ class NMRShiftDBBridge:
                 for file in os.listdir(lib_dir):
                     if file.endswith(".jar"):
                         classpath_parts.append(os.path.join(lib_dir, file))
-                logger.debug(f"Found {len([f for f in os.listdir(lib_dir) if f.endswith('.jar')])} JAR file(s) in lib/")
+                print(
+                    f"Found {len([f for f in os.listdir(lib_dir) if f.endswith('.jar')])} JAR files in lib/"
+                )
 
             # Add build directory if it exists (for compiled .class files)
             if os.path.exists(build_dir):
                 classpath_parts.append(build_dir)
-                logger.debug(f"Added build directory: {build_dir}")
+                print(f"Added build directory: {build_dir}")
 
             # Add current directory (for .class files in root)
             classpath_parts.append(current_dir)
@@ -79,8 +81,8 @@ class NMRShiftDBBridge:
 
             classpath = os.pathsep.join(classpath_parts)
 
-            logger.debug(f"Platform: {platform.system()}")
-            logger.debug(f"Classpath: {classpath}")
+            print(f"Platform: {platform.system()}")
+            print(f"Classpath: {classpath}")
 
             # Start JVM
             jpype.startJVM(
@@ -90,11 +92,11 @@ class NMRShiftDBBridge:
                 convertStrings=False,
             )
 
-            logger.info("JVM started successfully")
+            print("JVM started successfully")
             self._load_parser()
 
         except Exception as e:
-            logger.error(f"Failed to initialize JVM: {e}")
+            print(f"Failed to initialize JVM: {e}")
             import traceback
 
             traceback.print_exc()
@@ -104,35 +106,35 @@ class NMRShiftDBBridge:
         """Load the MolFileParser class"""
         try:
             # Load the Java class
-            logger.debug("Loading MolFileParser class...")
+            print("Attempting to load MolFileParser class...")
             MolFileParser = jpype.JClass(
                 "MolFileParser"
             )  # added lib/ prefix to match package structure
-            logger.debug("MolFileParser class loaded")
+            print("MolFileParser class loaded")
 
             self.parser = MolFileParser()
-            logger.debug("MolFileParser instance created")
+            print("MolFileParser instance created")
 
             # Check if initialization was successful
             if hasattr(self.parser, "isInitialized") and callable(
                 self.parser.isInitialized
             ):
                 self.is_ready = self.parser.isInitialized()
-                logger.debug(f"Parser isInitialized: {self.is_ready}")
+                print(f"Parser isInitialized: {self.is_ready}")
             else:
                 # Older version without isInitialized method
                 self.is_ready = True
-                logger.debug("Parser ready (no isInitialized method)")
+                print("Parser ready (no isInitialized method)")
 
             if self.is_ready:
-                logger.info("MolFileParser initialized successfully")
+                print("✓ MolFileParser initialized successfully")
             else:
-                logger.warning("MolFileParser failed to initialize (PredictionTool error)")
+                print("✗ MolFileParser failed to initialize (PredictionTool error)")
 
             self._initialized = True
 
         except Exception as e:
-            logger.error(f"Failed to load MolFileParser: {e}")
+            print(f"Failed to load MolFileParser: {e}")
             import traceback
 
             traceback.print_exc()
@@ -145,7 +147,7 @@ class NMRShiftDBBridge:
         Returns pandas DataFrame with columns: min, mean, max
         """
         if not self.is_ready:
-            logger.warning("Prediction requested but parser is not ready")
+            print("Parser not ready")
             return pd.DataFrame(columns=["min", "mean", "max"])
 
         try:
@@ -164,7 +166,7 @@ class NMRShiftDBBridge:
             return mol_df
 
         except Exception as e:
-            logger.error(f"Error during NMR shift prediction: {e}")
+            print(f"Error during prediction: {e}")
             import traceback
 
             traceback.print_exc()
@@ -178,14 +180,14 @@ class NMRShiftDBBridge:
         try:
             return self.parser.getCarbonCount(molfile_string)
         except Exception as e:
-            logger.error(f"Error getting carbon count: {e}")
+            print(f"Error getting carbon count: {e}")
             return 0
 
     def shutdown(self):
         """Shutdown JVM (call this when application exits)"""
         if jpype.isJVMStarted():
             jpype.shutdownJVM()
-            logger.info("JVM shut down")
+            print("JVM shut down")
 
 
 # Global bridge instance
@@ -240,7 +242,6 @@ def shutdown_nmr_bridge():
 
 # Register shutdown hook
 import atexit
-from loguru import logger
 
 atexit.register(shutdown_nmr_bridge)
 
@@ -300,32 +301,40 @@ M  END
 
     molstr5 = "\nMnova   09232416552D\n\n 10 11  0  0  0  0  0  0  0  0999 V2000\n   33.5340   16.7670    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   48.0542    8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   48.0542   -8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   62.5761  -16.7670    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   77.0963   -8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   77.0963    8.3835    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   62.5761   16.7670    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   91.6165    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n  100.0000   14.5202    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n  100.0000  -14.5202    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n  1  2  1  0  0  0  0\n  2  3  2  0  0  0  0\n  3  4  1  0  0  0  0\n  5  4  1  6  0  0  0\n  5  6  1  0  0  0  0\n  6  7  1  6  0  0  0\n  7  2  1  0  0  0  0\n  6  8  1  0  0  0  0\n  8  5  1  0  0  0  0\n  8  9  1  0  0  0  0\n  8 10  1  0  0  0  0\nM  ZZC   1 10\nM  ZZC   2 6\nM  ZZC   3 5\nM  ZZC   4 4\nM  ZZC   5 3\nM  ZZC   6 2\nM  ZZC   7 7\nM  ZZC   8 1\nM  ZZC   9 8\nM  ZZC  10 9\nM  END\n"
 
-    logger.info("Testing NMR Predictions via JPype")
+    print("=" * 60)
+    print("Testing NMR Predictions via JPype")
+    print("=" * 60)
 
-    logger.info("Test 1: molstr1")
+    print("\nTest 1: molstr1")
+    print("-" * 60)
     start = time.time()
     result1 = calculate_nmrpredictions_nmrshiftdb(molstr1)
     end = time.time()
-    logger.info(f"Result 1:\n{result1}")
-    logger.info(f"Test 1 time: {(end-start)*1000:.2f} ms")
+    print(result1)
+    print(f"Cached call took: {(end-start)*1000:.2f} ms")
 
-    logger.info("Test 2: molstr5")
+    print("\nTest 2: molstr5")
+    print("-" * 60)
     start = time.time()
     result3 = calculate_nmrpredictions_nmrshiftdb(molstr5)
     end = time.time()
-    logger.info(f"Result 2:\n{result3}")
-    logger.info(f"Test 2 time: {(end-start)*1000:.2f} ms")
+    print(result3)
+    print(f"Cached call took: {(end-start)*1000:.2f} ms")
 
-    logger.info("Test 3: Carbon count for molstr5")
+    print("\nTest 3: Carbon count for molstr5")
+    print("-" * 60)
     carbon_count = get_carbon_count(molstr5)
-    logger.info(f"Carbon atoms: {carbon_count}")
+    print(f"Carbon atoms: {carbon_count}")
 
-    logger.info("Test 4: Cache test (molstr1 again — should be instant)")
+    print("\nTest 4: Cache test (calling molstr1 again - should be instant)")
+    print("-" * 60)
 
     start = time.time()
     result1_cached = calculate_nmrpredictions_nmrshiftdb(molstr1)
     end = time.time()
-    logger.info(f"Cached call: {(end-start)*1000:.2f} ms")
-    logger.info(f"Cached result:\n{result1_cached}")
+    print(f"Cached call took: {(end-start)*1000:.2f} ms")
+    print(result1_cached)
 
-    logger.info("All tests completed")
+    print("\n" + "=" * 60)
+    print("All tests completed")
+    print("=" * 60)
