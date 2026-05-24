@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -6,13 +7,14 @@ import networkx as nx
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from typing import Tuple, Union, List, Dict, Any
 from loguru import logger
+from globals import CH1_CH3_PPM_BOUNDARY
 
 from flask import render_template
 
 
 from rdkit.Chem import Draw
 
-from html_from_assignments import NMRProblem
+from html_from_assignments import NMRProblem, do_intersect
 import expectedmolecule
 
 
@@ -754,22 +756,24 @@ class NMRsolution:
     def init_h1_and_pureshift_from_c13_hsqc_hmbc_cosy(
         self,
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        """
-        Initializes the H1 and pureshift DataFrames from C13, HSQC, HMBC, and COSY experiment data.
+        """Build H1 and pureshift DataFrames with HSQC as the primary source.
 
-        This function creates the H1 and pureshift DataFrames using information from the HSQC DataFrame,
-        ensuring the correct columns and ordering for downstream NMR analysis. If the data is already present,
-        it returns the existing DataFrames.
+        HSQC f2_ppm values are always used for chemical shifts and intensity.
+        If 1D proton data is already present in self.h1_df (populated earlier in
+        the pipeline), J-coupling values are merged in by nearest-ppm matching
+        within protonSeparation tolerance.  This preserves J-coupling information
+        while ensuring shift assignments are anchored to the 2D HSQC grid.
 
         Returns:
-            tuple: (h1_df, pureshift_df) where both are pandas DataFrames containing H1 and pureshift data.
+            tuple: (h1_df, pureshift_df) — both derived from HSQC, h1_df
+            supplemented with J-coupling from 1D proton where available.
         """
-        if "H1_pureshift" in self.available_experiments and "H1_1D" in self.available_experiments:
-            return self.h1_df, self.pureshift_df
+        # Capture any pre-existing 1D proton data before overwriting.
+        # J-coupling values (jCouplingVals, jCouplingClass) will be merged
+        # back in after HSQC construction if actual coupling data is present.
+        h1_1d_source = self.h1_df.copy() if not self.h1_df.empty else None
 
-        if (not self.h1_df.empty) and (not self.pureshift_df.empty):
-            return self.h1_df, self.pureshift_df
-
+        # ── Primary: build H1 from HSQC ──────────────────────────────────────
         self.h1_df = pd.DataFrame(
             columns=[
                 "ppm",
@@ -785,7 +789,7 @@ class NMRsolution:
         self.h1_df["ppm"] = self.hsqc_df["f2_ppm"].copy()
         self.h1_df["signaltype"] = self.hsqc_df["signaltype"].copy()
 
-        # keep only rows where type is 'Compound' or  "" (empty)
+        # keep only rows where signaltype is 'Compound' or "" (empty)
         self.h1_df = self.h1_df[
             (self.h1_df["signaltype"] == "Compound") | (self.h1_df["signaltype"] == 0)
         ]
@@ -797,11 +801,31 @@ class NMRsolution:
         self.h1_df["intensity"] = self.hsqc_df["intensity"].copy()
         self.h1_df["range"] = 0.0
 
-        # order h1_df by ppm in place highest to lowest, reset index to 1,2,3,4,5...
         self.h1_df = self.h1_df.sort_values("ppm", ascending=False, ignore_index=True)
         self.h1_df.index = self.h1_df.index + 1
 
-        # create pureshift_df from h1_df
+        # ── Supplement: merge J-coupling from 1D proton ──────────────────────
+        # Only attempted when the saved source actually contains coupling data
+        # (pureshift and HSQC-derived sources have empty jCouplingVals).
+        if (
+            h1_1d_source is not None
+            and "jCouplingVals" in h1_1d_source.columns
+            and not h1_1d_source["jCouplingVals"].eq("").all()
+        ):
+            logger.debug("Supplementing HSQC-derived H1 with J-coupling from 1D proton")
+            tol = self.problemdata_json.protonSeparation
+            for idx, row in self.h1_df.iterrows():
+                nearest = h1_1d_source.iloc[
+                    (h1_1d_source["ppm"] - row["ppm"]).abs().argsort()[:1]
+                ]
+                if (
+                    not nearest.empty
+                    and abs(nearest.iloc[0]["ppm"] - row["ppm"]) <= tol
+                ):
+                    self.h1_df.at[idx, "jCouplingVals"] = nearest.iloc[0]["jCouplingVals"]
+                    self.h1_df.at[idx, "jCouplingClass"] = nearest.iloc[0]["jCouplingClass"]
+
+        # pureshift is a copy of the HSQC-derived H1 (no J-coupling by design)
         self.pureshift_df = self.h1_df.copy()
 
         return self.h1_df, self.pureshift_df
@@ -1478,8 +1502,8 @@ class NMRsolution:
         CH1_sym_mol_df = expected_molecule.sym_molprops_df[
             expected_molecule.sym_molprops_df.CH1
         ]
-        CH1_sym_mol_gt_67_df = CH1_sym_mol_df[CH1_sym_mol_df.ppm >= 67]
-        CH1_sym_mol_lt_67_df = CH1_sym_mol_df[CH1_sym_mol_df.ppm < 67]
+        CH1_sym_mol_gt_67_df = CH1_sym_mol_df[CH1_sym_mol_df.ppm >= CH1_CH3_PPM_BOUNDARY]
+        CH1_sym_mol_lt_67_df = CH1_sym_mol_df[CH1_sym_mol_df.ppm < CH1_CH3_PPM_BOUNDARY]
 
         CH3CH1_hsqc_df = hsqc[hsqc.CH3CH1].copy()
 
@@ -1548,8 +1572,8 @@ class NMRsolution:
             # split the CH3CH1 based on ppm value above and below 67 ppm
             # CH3 groups expected to be below 67 ppm
 
-            CH3CH1_hsqc_df_lessthan_67 = CH3CH1_hsqc_df[CH3CH1_hsqc_df.f1_ppm < 67]
-            CH3CH1_hsqc_df_morethan_67 = CH3CH1_hsqc_df[CH3CH1_hsqc_df.f1_ppm >= 67]
+            CH3CH1_hsqc_df_lessthan_67 = CH3CH1_hsqc_df[CH3CH1_hsqc_df.f1_ppm < CH1_CH3_PPM_BOUNDARY]
+            CH3CH1_hsqc_df_morethan_67 = CH3CH1_hsqc_df[CH3CH1_hsqc_df.f1_ppm >= CH1_CH3_PPM_BOUNDARY]
 
             #  label the CH3CH1 groups above 67 ppm as CH1
             hsqc.loc[CH3CH1_hsqc_df_morethan_67.index, "CH1"] = True
@@ -1557,8 +1581,8 @@ class NMRsolution:
 
             # split the expected molecule CH3CH1 groups based on 67 ppm
             # CH3 groups expected to be below 67 ppm
-            CH3CH1_mol_df_lessthan_67 = CH3CH1_mol_df[CH3CH1_mol_df.ppm < 67]
-            CH3CH1_mol_df_morethan_67 = CH3CH1_mol_df[CH3CH1_mol_df.ppm >= 67]
+            CH3CH1_mol_df_lessthan_67 = CH3CH1_mol_df[CH3CH1_mol_df.ppm < CH1_CH3_PPM_BOUNDARY]
+            CH3CH1_mol_df_morethan_67 = CH3CH1_mol_df[CH3CH1_mol_df.ppm >= CH1_CH3_PPM_BOUNDARY]
 
             CH3_mol_df_lessthan_67 = CH3CH1_mol_df_lessthan_67[
                 CH3CH1_mol_df_lessthan_67.CH3
@@ -1629,7 +1653,7 @@ class NMRsolution:
                     by=["ppm"]
                 )
                 CH3CH1_sym_mol_df_lessthan_67 = CH3CH1_sym_mol_df[
-                    CH3CH1_sym_mol_df.ppm < 67
+                    CH3CH1_sym_mol_df.ppm < CH1_CH3_PPM_BOUNDARY
                 ].sort_values(by=["ppm"])
 
                 mol_idx = CH3CH1_mol_df_lessthan_67.index
@@ -2066,11 +2090,12 @@ class NMRsolution:
         self.hsqcH1labelC13ppm = dict(zip(self.hsqc.f2H_i, self.hsqc.f1_ppm))
 
         if not self.exact_ppm_values:
-            # add index columns to hsqc_clipcosy
+            # Snap ppm values and add index columns for downstream edge building
             self.hsqc_clipcosy = self.tidyup_hsqc_clipcosy(
                 self.hsqc_clipcosy_df, self.c13, self.h1
             )
-
+        else:
+            # Exact mode: ppm values are already canonical, no snapping needed
             self.hsqc_clipcosy = self.hsqc_clipcosy_df.copy()
 
         self.hsqc_clipcosy = self.process_hsqc_clipcosy(self.hsqc_clipcosy, self.hsqc)

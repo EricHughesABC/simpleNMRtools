@@ -50,6 +50,13 @@ SVG_DIMENSIONS = SVGDimensions(
 CARBONSEPARATION = 0.0025
 PROTONSEPARATION = 0.005
 
+# CH3/CH1 split heuristic boundary (ppm)
+# CH1 groups (e.g. C-O, C-N) typically resonate at or above this value;
+# CH3 groups typically fall below it.  Reliable for >99% of encountered
+# molecules.  Adjust here if a specific compound class requires a different
+# boundary — do not hard-code 67 elsewhere.
+CH1_CH3_PPM_BOUNDARY: int = 67
+
 # NMR experiment types
 NMREXPERIMENTS = types.MappingProxyType(
     {
