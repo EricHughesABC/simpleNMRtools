@@ -6,7 +6,7 @@ Local development entry point.
 Do NOT use this for PythonAnywhere — use wsgi.py there.
 """
 
-from logging_config import setup_logging
+from log_setup import setup_logging
 
 setup_logging(log_level="DEBUG")
 

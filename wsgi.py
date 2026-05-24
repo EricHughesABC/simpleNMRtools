@@ -12,7 +12,7 @@ Only switch PythonAnywhere to use this file after Phase 3 is complete
 (routes extracted into app/routes.py and registered in app/__init__.py).
 """
 
-from logging_config import setup_logging
+from log_setup import setup_logging
 from app import create_app
 
 setup_logging(log_level="INFO")

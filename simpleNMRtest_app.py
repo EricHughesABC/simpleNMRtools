@@ -16,7 +16,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 import time
 from loguru import logger
-from logging_config import setup_logging
+from log_setup import setup_logging
 from flask_migrate import Migrate
 # MODIFIED: removed MySQL-specific JSON import; db.JSON() with SQLite variant is used
 # in the Result model instead, making the column type portable across databases.
@@ -66,7 +66,7 @@ from networkx.readwrite import json_graph
 # from flaskConfig import FlaskConfig
 
 from core.html_from_assignments import NMRProblem
-import jsonUtils
+import utils.json_utils as jsonUtils
 
 import core.expectedmolecule as expectedmolecule
 import core.nmrsolution as nmrsolution
