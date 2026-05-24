@@ -1,4 +1,3 @@
-import itertools
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -7,15 +6,15 @@ import networkx as nx
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from typing import Tuple, Union, List, Dict, Any
 from loguru import logger
-from globals import CH1_CH3_PPM_BOUNDARY
+from config.globals import CH1_CH3_PPM_BOUNDARY
 
 from flask import render_template
 
 
 from rdkit.Chem import Draw
 
-from html_from_assignments import NMRProblem, do_intersect
-import expectedmolecule
+from core.html_from_assignments import NMRProblem, do_intersect
+import core.expectedmolecule as expectedmolecule
 
 
 def warning_dialog(return_message, title_message, qstarted=True):

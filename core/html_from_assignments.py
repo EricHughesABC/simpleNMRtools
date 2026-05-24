@@ -35,14 +35,14 @@ from rdkit.Chem import Draw
 import jinja2
 from loguru import logger
 
-from excelheaders import EXCEL_ORIG_DF_COLUMNS as excel_orig_df_columns
+from config.excel_headers import EXCEL_ORIG_DF_COLUMNS as excel_orig_df_columns
 
-from globals import SVG_DIMENSIONS as svgDimensions
+from config.globals import SVG_DIMENSIONS as svgDimensions
 
-from globals import CARBONSEPARATION
-from globals import PROTONSEPARATION
-from globals import NMREXPERIMENTS
-from globals import NMREXPERIMENTS_COLUMN_RENAME_MAP
+from config.globals import CARBONSEPARATION
+from config.globals import PROTONSEPARATION
+from config.globals import NMREXPERIMENTS
+from config.globals import NMREXPERIMENTS_COLUMN_RENAME_MAP
 
 
 def find_nearest(true_values: list[float], value: float) -> float:

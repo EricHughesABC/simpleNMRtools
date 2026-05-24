@@ -18,12 +18,12 @@ from rdkit.Chem import Draw
 
 
 # import java
-import javaUtils
+import utils.java_utils as javaUtils
 
 from functools import lru_cache
 from loguru import logger
 
-from globals import SVG_DIMENSIONS as svgDimensions
+from config.globals import SVG_DIMENSIONS as svgDimensions
 
 XYDIM = 800
 

@@ -5,11 +5,12 @@ import pandas as pd
 from io import StringIO
 from functools import lru_cache
 import os
+from pathlib import Path
 import platform
 import threading
 
-# Change to script directory
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
+# Project root is two levels up from utils/java_utils.py
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 class NMRShiftDBBridge:
@@ -43,9 +44,10 @@ class NMRShiftDBBridge:
 
         try:
             # Build classpath based on platform
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            lib_dir = os.path.join(current_dir, "lib")
-            build_dir = os.path.join(current_dir, "build")
+            # lib/ and build/ live at the project root, not inside utils/
+            current_dir = str(_PROJECT_ROOT)
+            lib_dir = str(_PROJECT_ROOT / "lib")
+            build_dir = str(_PROJECT_ROOT / "build")
 
             # Collect all paths that might contain classes
             classpath_parts = []

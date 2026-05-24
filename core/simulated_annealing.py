@@ -20,8 +20,8 @@ from rdkit.Chem.rdchem import Mol
 from typing import Dict, List, Optional, Tuple
 from loguru import logger
 
-from globals import SVG_DIMENSIONS as svgDimensions
-from globals import NODE_COLOR_MAP as color_map
+from config.globals import SVG_DIMENSIONS as svgDimensions
+from config.globals import NODE_COLOR_MAP as color_map
 
 
 # from plotResults import fix_svg_string, plot_mapping, svgDimensions, color_map
