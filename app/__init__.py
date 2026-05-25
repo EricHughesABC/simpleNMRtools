@@ -41,21 +41,20 @@ def create_app(config_class: type = Config) -> Flask:
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # Import models so Flask-Migrate picks them up
+    # Import models so Flask-Migrate picks them up for schema tracking
     from app.models import User, Device, Result  # noqa: F401
 
     with app.app_context():
         db.create_all()
         logger.info("Database tables ready")
 
-    # Register routes
-    # Phase 3: replace this block with blueprint registration once
-    # app/routes.py exists.
-    #
-    #   from app.routes import bp as main_bp
-    #   app.register_blueprint(main_bp)
-    #
-    # For now, routes are still in simpleNMRtest_app.py.
-    # During Phase 2/3 they will be moved here.
+    # Register routes blueprint
+    from app.routes import bp as main_bp
+    app.register_blueprint(main_bp)
+
+    # Shell context — makes db and models available in `flask shell`
+    @app.shell_context_processor
+    def make_shell_context() -> dict:
+        return {"db": db, "User": User, "Device": Device, "Result": Result}
 
     return app

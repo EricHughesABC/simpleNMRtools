@@ -1,15 +1,15 @@
 """
 WSGI entry point for PythonAnywhere.
 
-Update your PythonAnywhere WSGI configuration file to point at this file::
+Update your PythonAnywhere WSGI configuration file to replace:
+
+    from simpleNMRtest_app import app as application
+
+with:
 
     import sys
     sys.path.insert(0, '/home/<username>/simpleNMRtools')
     from wsgi import application
-
-This replaces the previous direct import of simpleNMRtest_app.
-Only switch PythonAnywhere to use this file after Phase 3 is complete
-(routes extracted into app/routes.py and registered in app/__init__.py).
 """
 
 from log_setup import setup_logging
