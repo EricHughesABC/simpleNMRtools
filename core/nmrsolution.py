@@ -185,42 +185,71 @@ class NMRsolution:
 
         self.molgraph = molgraph
 
+    def _has_unresolved(self) -> bool:
+        """Return True if any HSQC row still has numProtons == -1 (unassigned)."""
+        return self.hsqc[self.hsqc.numProtons == -1].shape[0] > 0
+
     def assign_CH3_CH2_CH1_overall(self):
+        """Assign CH3, CH2, and CH1 groups in the HSQC DataFrame.
+
+        Runs a chain of assignment strategies in priority order, stopping as
+        soon as all rows are resolved.  Each step is only executed when there
+        are still unassigned rows remaining, and conditional steps are skipped
+        when the required experiment data is absent.
+
+        Chain order
+        -----------
+        1. Annotations       — explicit MNova labels; highest confidence.
+        2. DoubleDept        — instrument-measured CH3 flags; skipped when no
+                               DoubleDEPT data was submitted.
+        3. H1                — 1D proton multiplicities.
+        4. ExpectedMolecule  — calculated chemical shift heuristics; last resort.
+
+        Returns
+        -------
+        tuple
+            ("ok", 200) on success or (error_message, 400) on failure.
         """
-        Assigns CH3, CH2, and CH1 group information to the HSQC dataframe using multiple strategies.
+        chain = [
+            (
+                "Annotations",
+                None,
+                self.assign_CH3_CH2_CH1_in_HSQC_using_Assignments,
+            ),
+            (
+                "DoubleDept",
+                lambda: not self.ddept_ch3_only_df.empty,
+                self.assign_CH3_CH2_CH1_in_HSQC_using_DoubleDept,
+            ),
+            (
+                "H1",
+                None,
+                self.assign_CH3_CH1_in_HSQC_using_H1,
+            ),
+            (
+                "ExpectedMolecule",
+                None,
+                self.assign_CH3_CH1_in_HSQC_using_expected_molecule,
+            ),
+        ]
 
-        This function attempts to annotate all relevant groups in the HSQC data by applying assignment methods
-        in sequence, and returns a status message and code indicating success or failure.
+        for name, guard, method in chain:
+            if not self._has_unresolved():
+                logger.info(f"CH3/CH2/CH1 assignment complete after \'{name}\' step")
+                return "ok", 200
+            if guard is None or guard():
+                logger.debug(f"CH3/CH2/CH1 chain: running \'{name}\'")
+                method()
 
-        Returns:
-            tuple: ("ok", 200) if assignment is successful, or (error_message, 400) if assignment fails.
-        """
-
-        self.assign_CH3_CH2_CH1_in_HSQC_using_Assignments()
-
-        # check if everything has been assigned, no negative values left in numProtons
-
-        if self.hsqc[self.hsqc.numProtons == -1].empty:
-            # return True, "ok"
-            return "ok", 200
-
-        #  attempt ro remove assign CH3 CH2 CH1 from hsqc using different methods
-
-        if self.hsqc[self.hsqc.numProtons == -1].shape[0] > 0:
-            self.assign_CH3_CH1_in_HSQC_using_H1()
-
-        if self.hsqc[self.hsqc.numProtons == -1].shape[0] > 0:
-            self.assign_CH3_CH1_in_HSQC_using_expected_molecule()
-
-        if self.hsqc[self.hsqc.numProtons == -1].shape[0] > 0:
+        if self._has_unresolved():
             self.fail("CH3/CH2/CH1 assignment failed: unresolved numProtons remain")
 
         if self.nmrsolution_failed:
             logger.error(self.nmrsolution_error_message)
             return self.nmrsolution_error_message, 400
-        else:
-            logger.info("CH3/CH2/CH1 assignment complete")
-            return "ok", 200
+
+        logger.info("CH3/CH2/CH1 assignment complete")
+        return "ok", 200
 
     def initialise_prior_to_carbon_assignment(self):
         """
@@ -1834,7 +1863,7 @@ class NMRsolution:
 
             # set CH1 based on CH3 values and CH3CH1 values
             CH3CH1_hsqc_df = hsqc[hsqc.CH3CH1]
-            CH1_hsqc_df = CH3CH1_hsqc_df[hsqc.CH3 == False]
+            CH1_hsqc_df = CH3CH1_hsqc_df[~CH3CH1_hsqc_df.CH3]
             hsqc.loc[CH1_hsqc_df.index, "CH1"] = True
 
         # set the numprotons for CH3 CH2 and CH1 of self.hsqc
