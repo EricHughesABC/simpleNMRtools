@@ -5,9 +5,7 @@ All route handlers and database helper functions extracted from
 simpleNMRtest_app.py as a Flask Blueprint.
 """
 
-import os
 import re
-import copy
 import json
 import time
 from datetime import datetime, timedelta
@@ -15,9 +13,6 @@ from functools import wraps
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
-import networkx as nx
-from networkx.readwrite import json_graph
 from sqlalchemy.exc import SQLAlchemyError
 from pytz import timezone
 from loguru import logger
@@ -39,9 +34,8 @@ from app.models import User, Device, Result
 from core.html_from_assignments import NMRProblem
 import utils.json_utils as jsonUtils
 import core.expectedmolecule as expectedmolecule
-import core.nmrsolution as nmrsolution
-from config.globals import SVG_DIMENSIONS as svgDimensions
-from core.simulated_annealing import SimulatedAnnealing2
+from app.pipelines import PipelineError
+from app.pipelines import prediction_pipeline, sync_pipeline
 
 bp = Blueprint("main", __name__)
 
@@ -54,21 +48,6 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = str(_PROJECT_ROOT / "docs" / "build" / "html")
 
 # ── Utilities ────────────────────────────────────────────────────────────────
-def _node_link_data(G) -> dict:
-    """Version-safe wrapper for json_graph.node_link_data.
-
-    NX < 3.3  — no edges kwarg; default produces {"links": [...]}
-    NX 3.3–3.5 — edges kwarg added; explicit "links" silences FutureWarning
-    NX >= 3.6  — default changed to "edges"; explicit "links" preserves key
-
-    Always produces {"links": [...]} so downstream code is stable across
-    all versions. Revisit when upgrading server beyond NX 3.6.
-    """
-    try:
-        return json_graph.node_link_data(G, edges="links")
-    except TypeError:  # NX < 3.3 — edges kwarg not yet supported
-        return json_graph.node_link_data(G)
-from networkx.readwrite import json_graph
 
 def convert_numpy(obj):
     if isinstance(obj, np.integer):
@@ -94,8 +73,7 @@ def with_db_retries(max_retries=3, retry_delay=1):
                 try:
                     return func(*args, **kwargs)
                 except SQLAlchemyError as e:
-                    # Log the error if you have logging configured
-                    if hasattr(app, "logger"):
+                    if hasattr(current_app, "logger"):
                         logger.warning(
                             f"Database connection error in {func.__name__} (attempt {retries+1}/{max_retries+1}): {str(e)}"
                         )
@@ -104,7 +82,7 @@ def with_db_retries(max_retries=3, retry_delay=1):
 
                     # If this was the last retry, re-raise the exception
                     if retries > max_retries:
-                        if hasattr(app, "logger"):
+                        if hasattr(current_app, "logger"):
                             logger.error(
                                 f"Failed after {max_retries+1} attempts in {func.__name__}: {str(e)}"
                             )
@@ -706,30 +684,28 @@ def registration_page():
 def simpleMNOVA_display_molecule():
     """Process and render the HTML visualization for a simpleMNOVA molecule.
 
-    This endpoint receives JSON data, processes NMR molecular graph information, and renders an HTML template for visualization.
-    It manages device registration, machine learning consent, and optionally stores results in the database.
+    Receives JSON data from the MNova plugin, dispatches to either the
+    prediction pipeline (full NMR assignment + simulated annealing) or the
+    sync pipeline (rebuild from previous assignments), then renders and
+    optionally saves the result.
 
     Returns:
-        Response: The rendered HTML template or a JSON response indicating registration status or errors.
+        Response: The rendered HTML template or a JSON response indicating
+                  registration status or errors.
     """
     if request.method != "POST":
         return "Only POST requests are accepted", 400
 
-    # Get JSON data from the request body (for curl POST requests)
     try:
         json_data = request.get_json()
         if json_data is None:
             return "No JSON data received", 400
-
     except json.JSONDecodeError as e:
         return f"Invalid JSON: {e}", 400
 
-    # check if hostname is already known
-    # print out the hostname
-
     hostname = jsonUtils.extract_hostname(json_data)  # returns a string or None
 
-    # Check if device is registered and registration is valid
+    # ── Auth checks ───────────────────────────────────────────────────────────
     if not is_device_registered(hostname):
         return jsonify(
             {
@@ -750,315 +726,120 @@ def simpleMNOVA_display_molecule():
             }
         )
 
-    # Record this usage
     record_usage(hostname)
 
-    # check if the user has agreed to the machine learning consent
     try:
         machine_learning_opt_in = json_data["ml_consent"]["data"]["0"]
     except KeyError:
-        # If the key doesn't exist, set machine_learning_opt_in to False
         machine_learning_opt_in = False
 
-    updated_count = update_ml_consent_for_all_user_devices(
-        hostname, machine_learning_opt_in
-    )
+    update_ml_consent_for_all_user_devices(hostname, machine_learning_opt_in)
 
+    # ── Pipeline dispatch ─────────────────────────────────────────────────────
     problemdata_json = NMRProblem.from_mnova_dict(json_data)
 
-    # decide whether we are doing prediction or assignments
-    if problemdata_json.is_prediction():
-
-        solution = nmrsolution.NMRsolution(problemdata_json)
-
-        if solution.nmrsolution_failed:
-            return solution.nmrsolution_error_message, solution.nmrsolution_error_code
-
-        if solution.expected_molecule.nmrshiftdb_failed:
-            return solution.solution_error_message, solution.solution_error_code
-
-        ok, msg = solution.init_class_from_json()
-
-        if not ok:
-            return msg, 400
-
-        rtn_msg, rtn_num = solution.assign_CH3_CH2_CH1_overall()
-
-        df = solution.expected_molecule.molprops_df
-
-        if rtn_msg != "ok":
-            return rtn_msg, rtn_num
-
-        solution.transfer_hsqc_info_to_c13()
-        solution.transfer_hsqc_info_to_h1()
-
-        rtn_msg, rtn_num = solution.initialise_prior_to_carbon_assignment()
-
-        if rtn_msg != "ok":
-            return rtn_msg, rtn_num
-
-        rtn_msg, rtn_num = solution.attempt_assignment_CH3_CH2_CH1_to_C13_table()
-
-        if rtn_msg != "ok":
-            return rtn_msg, rtn_num
-
-        solution.update_assignments_expt_dataframes()
-
-        G2 = nmrsolution.create_network_graph(solution.c13, solution.h1)
-
-        G2 = nmrsolution.add_all_cosy_edges_to_graph(
-            G2, solution.cosy, solution.hsqc_clipcosy, solution.h1
-        )
-        G2 = nmrsolution.add_all_hmbc_edges_to_graph(
-            G2, solution.hmbc, solution.h1, solution.c13
-        )
-
-        jsonGraphData = _node_link_data(G2)
-        jsonGraphData["moved_nodes"] = jsonGraphData["nodes"]
-
-        # create a network graph of the expected molecule
-
-        solution.initiate_molgraph(json_data, G2)
-
-        #  convert the molgraph to a json object
-        jsonGraphData_mol = _node_link_data(solution.molgraph)
-
-        # calculate the shortest paths between all pairs of nodes in the molgraph
-        shortest_paths = dict(nx.all_pairs_dijkstra_path_length(solution.molgraph))
-
-        svgWidth = svgDimensions.svg_width
-        svgHeight = svgDimensions.svg_height
-        molWidth = svgDimensions.mol_width
-        molHeight = svgDimensions.mol_height
-
-        catoms_df = solution.expected_molecule.molprops_df[
-            [
-                "ppm",
-                "atom_idx",
-                "atomNumber",
-                "numProtons",
-                "x",
-                "y",
-                "sym_atom_idx",
-                "sym_atomNumber",
-            ]
-        ].copy()
-
-        # rename ppm to ppm_calculated
-        catoms_df.rename(columns={"ppm": "ppm_calculated"}, inplace=True)
-        # renam atom_idx to id
-        catoms_df.rename(columns={"atom_idx": "id"}, inplace=True)
-
-        # add columns ppm, jCouplingVals, jCouplingClass, visible, H1_ppm
-        catoms_df["ppm"] = -1000000.0
-        catoms_df["jCouplingVals"] = ""
-        catoms_df["jCouplingClass"] = ""
-        catoms_df["visible"] = "false"
-        catoms_df["symbol"] = "C"
-        catoms_df["iupacLabel"] = ""
-
-        # catoms_str = json.dumps(catoms_df.to_dict(orient="records"), indent=4)
-        json_data_str = json.dumps(json_data, indent=4)
-
-        if problemdata_json.prediction_from_nmrshiftdb2():
-            dataFrom = "nmrshiftdb2"
+    try:
+        if problemdata_json.is_prediction():
+            jinja_template = prediction_pipeline.run(problemdata_json, json_data)
         else:
-            dataFrom = "mnova"
+            jinja_template = sync_pipeline.run(problemdata_json, json_data)
+    except PipelineError as e:
+        return e.message, e.code
 
-        possible_symmetry = (
-            solution.c13_df.shape[0] < solution.expected_molecule.num_carbon_atoms
+    return _render_and_save(jinja_template, hostname, machine_learning_opt_in)
+
+
+# ── Rendering and persistence helpers ────────────────────────────────────────
+
+def _render_and_save(
+    jinja_template: dict,
+    hostname: str,
+    machine_learning_opt_in: bool,
+) -> str:
+    """Render the Jinja2 template and optionally persist the result.
+
+    Parameters
+    ----------
+    jinja_template:
+        Context dict produced by either pipeline's ``run()`` function.
+    hostname:
+        Host ID string used to look up the user for DB writes.
+    machine_learning_opt_in:
+        When True the result is saved to the ``result`` table.
+
+    Returns
+    -------
+    str
+        Rendered HTML string with Python-style booleans and numpy repr
+        replaced by their JavaScript equivalents.
+    """
+    rtn_html = render_template(
+        "d3molplotmnova_template.html",
+        graph_edges=jinja_template["graph_edges"],
+        graph_nodes=jinja_template["graph_nodes"],
+        orig_nodes=jinja_template["graph_nodes"],
+        molgraph=jinja_template.get("molgraph", "'dummy'"),
+        shortest_paths=jinja_template.get("shortest_paths", "'dummy'"),
+        svg_container=jinja_template["svg_container"],
+        title=jinja_template["title"],
+        smilesString=jinja_template["smilesString"],
+        molFile=jinja_template["molFile"],
+        workingDirectory=jinja_template["workingDirectory"],
+        workingFilename=jinja_template["workingFilename"],
+        dataFrom=jinja_template["dataFrom"],
+        catoms=jinja_template["catoms"],
+        oldjsondata=jinja_template["oldjsondata"],
+        best_results=jinja_template["best_results"],
+    )
+
+    rtn_html = rtn_html.replace("True", "true").replace("False", "false")
+    rtn_html = re.sub(r"np\.float64\(([\d\.]+)\)", r"\1", rtn_html)
+    rtn_html = re.sub(r"np\.int64\(([\d]+)\)", r"\1", rtn_html)
+
+    if machine_learning_opt_in:
+        _save_result_to_db(jinja_template, hostname)
+
+    return rtn_html
+
+
+def _save_result_to_db(jinja_template: dict, hostname: str) -> None:
+    """Persist the pipeline result to the ``result`` table.
+
+    Silently skips if the user cannot be resolved or if the JSON
+    serialisation fails.
+
+    Parameters
+    ----------
+    jinja_template:
+        Context dict produced by either pipeline's ``run()`` function.
+    hostname:
+        Host ID string used to look up the owning user.
+    """
+    user_id = get_user_id_hostid(hostname)
+    if user_id is None:
+        return
+
+    json_result = json.loads(json.dumps(jinja_template, default=convert_numpy))
+    if not json_result:
+        return
+
+    # Normalise: if we somehow ended up with a string, parse it back to dict
+    if not isinstance(json_result, dict):
+        try:
+            json_result = json.loads(json_result)
+        except json.JSONDecodeError:
+            logger.warning("_save_result_to_db: skipped — json_result is not valid JSON")
+            return
+
+    best = json_result.get("best_results", {})
+    with current_app.app_context():
+        new_result = Result(
+            user_id=user_id,
+            smiles_string=json_result.get("smilesString"),
+            weight=best.get("best_weight"),
+            MAE=best.get("best_mae"),
+            LAE=best.get("best_lae"),
+            json_result=json_result,
         )
-
-        simAnneal = SimulatedAnnealing2.from_params(
-            copy.deepcopy(jsonGraphData["nodes"]),
-            copy.deepcopy(jsonGraphData["links"]),
-            json_data["molfile"]["data"]["0"],
-            json_data,
-            possible_symmetry,
-        )
-
-        # setup the run using standard parameters hardcoded in the class
-        simAnneal.setup_run(cooling_rate=0.999)
-
-        if json_data["simulatedAnnealing"]["data"]["0"] and (
-            simAnneal.predicted_weight > 0
-        ):  # True
-
-            # simAnneal.setup_run(randomize_mapping=True)
-            simAnneal.run_optimization(100)
-
-            jsonGraphData, best_results = simAnneal.process_results(
-                catoms_df, jsonGraphData
-            )
-
-        else:
-            best_results = simAnneal.process_results_SA_skipped()
-
-        #  start  to produce the html display
-
-        id_atomNumber = []
-
-        for node in jsonGraphData["moved_nodes"]:
-            id_atomNumber.append([node["id"], node["atomNumber"]])
-
-        # sort id_atomNumber
-        id_atomNumber.sort(key=lambda x: x[0])
-        id_x = [x[1] for x in id_atomNumber]
-
-        # copy over the optimized nodes to the catoms_df
-        for idx, row in catoms_df.iterrows():
-            id = row["id"]
-            for node in jsonGraphData["moved_nodes"]:
-                if node["id"] == id:
-                    catoms_df.loc[idx, "ppm"] = node["ppm"]
-                    catoms_df.loc[idx, "x"] = node["x"]
-                    catoms_df.loc[idx, "y"] = node["y"]
-                    catoms_df.loc[idx, "ppm_calculated"] = node["ppm_calculated"]
-                    catoms_df.loc[idx, "atomNumber"] = node["atomNumber"]
-
-        catoms_str = json.dumps(catoms_df.to_dict(orient="records"), indent=4)
-        # catoms_str = json.dumps(jsonGraphData["nodes"], indent=4)
-
-        jinja_template = {
-            "svg_container": solution.expected_molecule.svg_str,
-            "graph_edges": jsonGraphData["links"],
-            "graph_nodes": jsonGraphData["moved_nodes"],
-            "orig_nodes": jsonGraphData["nodes"],
-            "molgraph": jsonGraphData_mol,
-            "shortest_paths": json.dumps(shortest_paths),
-            "catoms": catoms_str,
-            "title": "dummy_title",
-            "smilesString": solution.smilesstr,
-            "molFile": solution.molstr,
-            "workingDirectory": problemdata_json.dataframes["workingDirectory"]
-            .loc[0, "workingDirectory"]
-            .strip(),
-            "workingFilename": problemdata_json.dataframes["workingFilename"]
-            .loc[0, "workingFilename"]
-            .strip(),
-            "dataFrom": dataFrom,
-            "oldjsondata": json_data_str,
-            "best_results": best_results,
-        }
-        msg = "ok"
-
-    else:
-        problemdata_json.prepare_network_graph()
-
-        json_data_str = json.dumps(json_data, indent=4)
-
-        jinja_template = problemdata_json.jinjadata
-        jinja_template["smilesString"] = problemdata_json.dataframes["smiles"].loc[
-            0, "smiles"
-        ]
-        jinja_template["molFile"] = problemdata_json.dataframes["molfile"].loc[
-            0, "molfile"
-        ]
-        jinja_template["workingDirectory"] = (
-            problemdata_json.dataframes["workingDirectory"]
-            .loc[0, "workingDirectory"]
-            .strip()
-        )
-        jinja_template["workingFilename"] = (
-            problemdata_json.dataframes["workingFilename"]
-            .loc[0, "workingFilename"]
-            .strip()
-        )
-        jinja_template["oldjsondata"] = json_data_str
-
-        if problemdata_json.prediction_from_nmrshiftdb2():
-            dataFrom = "nmrshiftdb2"
-        else:
-            dataFrom = "mnova"
-
-        jinja_template["dataFrom"] = dataFrom
-
-        jinja_template["best_results"] = {
-            "best_weight": 0,
-            "best_mae": 0.0,
-            "best_lae": 0.0,
-        }
-
-        # add molgaph to jinja_template
-
-        msg = "ok"
-
-    # self.problemdata_json.prediction_from_nmrshiftdb2()
-    if msg == "ok":
-
-        # check if machine learning opt in is true and if so save the data to the database
-        # check if the user has opted in for machine learning
-
-        rtn_html = render_template(
-            "d3molplotmnova_template.html",
-            graph_edges=jinja_template["graph_edges"],
-            graph_nodes=jinja_template["graph_nodes"],
-            orig_nodes=jinja_template["graph_nodes"],
-            molgraph=jinja_template.get("molgraph", "'dummy'"),
-            shortest_paths=jinja_template.get("shortest_paths", "'dummy'"),
-            svg_container=jinja_template["svg_container"],
-            title=jinja_template["title"],
-            smilesString=jinja_template["smilesString"],
-            molFile=jinja_template["molFile"],
-            workingDirectory=jinja_template["workingDirectory"],
-            workingFilename=jinja_template["workingFilename"],
-            dataFrom=jinja_template["dataFrom"],
-            catoms=jinja_template["catoms"],
-            oldjsondata=jinja_template["oldjsondata"],
-            best_results=jinja_template["best_results"],
-        )
-
-        rtn_html = rtn_html.replace("True", "true")
-        rtn_html = rtn_html.replace("False", "false")
-
-        # replace np.float64
-        float_pattern = r"np\.float64\(([\d\.]+)\)"
-        int_pattern = r"np\.int64\(([\d]+)\)"
-        rtn_html = re.sub(float_pattern, r"\1", rtn_html)
-        rtn_html = re.sub(int_pattern, r"\1", rtn_html)
-
-        # add redults to database if the user has opted in for machine learning
-
-        if machine_learning_opt_in:
-            # check if the user has opted in for machine learning
-
-            user_id = get_user_id_hostid(hostname)
-
-            # Get the complete JSON result
-            json_result = json.loads(json.dumps(jinja_template, default=convert_numpy))
-            if not json_result:
-                return rtn_html
-
-            # Convert to string if it's already a dict
-            if isinstance(json_result, dict):
-
-                json_result_str = json.dumps(json_result, default=convert_numpy)
-            else:
-                json_result_str = json_result
-                # Validate it's proper JSON
-                try:
-                    json_data = json.loads(json_result_str)
-                except json.JSONDecodeError:
-                    return rtn_html
-
-            # # check if the user id is valid
-            if user_id is not None:
-
-                # save the results to the database
-                with current_app.app_context():
-                    # MODIFIED: removed if RUNNINGONPYTHONANYWHERE branch — both the
-                    # MySQL and SQLite branches created an identical Result object, so
-                    # the check was doing nothing. A single branch is used now.
-                    new_result = Result(
-                        user_id=user_id,
-                        smiles_string=solution.smilesstr,
-                        weight=best_results["best_weight"],
-                        MAE=best_results["best_mae"],
-                        LAE=best_results["best_lae"],
-                        json_result=json_result,
-                    )
-                    db.session.add(new_result)
-                    db.session.commit()
-        return rtn_html
-    else:
-        return msg, 400
+        db.session.add(new_result)
+        db.session.commit()

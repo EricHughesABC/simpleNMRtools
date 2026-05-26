@@ -57,4 +57,21 @@ def create_app(config_class: type = Config) -> Flask:
     def make_shell_context() -> dict:
         return {"db": db, "User": User, "Device": Device, "Result": Result}
 
+    # Backward-compatibility shim: templates use url_for('endpoint') but
+    # routes now live in the 'main' blueprint, so endpoints are
+    # 'main.endpoint'.  Override url_for in the Jinja2 globals to try
+    # the blueprint-prefixed name automatically so no template changes
+    # are needed.
+    _original_url_for = app.jinja_env.globals["url_for"]
+
+    def _compat_url_for(endpoint: str, **values):
+        if "." not in endpoint and endpoint != "static":
+            try:
+                return _original_url_for(f"main.{endpoint}", **values)
+            except Exception:
+                pass
+        return _original_url_for(endpoint, **values)
+
+    app.jinja_env.globals["url_for"] = _compat_url_for
+
     return app
