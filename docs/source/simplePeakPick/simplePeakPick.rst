@@ -27,22 +27,22 @@ signal, TMS, or any impurities. Check that the number of carbon peaks
 you have picked is the same as the number of carbon signals you expect
 for your structure.
 
-.. figure:: ./media/image1.png
+.. image:: ./media/image1.png
    :alt: Manual thresholding in MNOVA
    :width: 6.26806in
    :height: 1.16319in
 
-   Figure 1 Manual Threshold being chosen for peak picking
+Figure 1 Manual Threshold being chosen for peak picking
 
 Figure 2 shows the manual threshold tool in action on a proton pureshift
 1D spectrum.
 
-.. figure:: ./media/image2.png
+.. image:: ./media/image2.png
    :alt: Pureshift manual thresholding
    :width: 4.42016in
    :height: 3.11214in
 
-   Figure 2 Manual Threshold being used on a pureshift spectrum
+Figure 2 Manual Threshold being used on a pureshift spectrum
 
 HSQC spectrum alternative
 -------------------------
@@ -78,24 +78,24 @@ the noise. Click the simplePeakPick tool and if the 2-D peaks occur at a
 carbon/pureshift intersection then the peak will be picked at the
 coordinates of the intersection.
 
-.. figure:: ./media/image3.png
+.. image:: ./media/image3.png
    :alt: simplePeakPick tool in use
    :width: 6.26806in
    :height: 4.87986in
 
-   Figure 3 Peak picking of 2-D dataset using simplePeakPick Took.
+Figure 3 Peak picking of 2-D dataset using simplePeakPick Took.
 
 If the 2-D peak is an even multiplet (such as a doublet) then the
 position of the picked peak will be in the centre of the multiplet,
 which will not correspond to a peak maximum in the 2D spectrum.
 
-.. figure:: ./media/image4.png
+.. image:: ./media/image4.png
    :alt: simplePeakPick tool choosing centre of doublet
    :width: 6.26806in
    :height: 3.51944in
 
-   Figure 4 Peak picked at centre of doublet using simplePeakPick tool,
-   not at a 2D peak maximum.
+Figure 4 Peak picked at centre of doublet using simplePeakPick tool, not
+at a 2D peak maximum.
 
 If the peak position is offset or misaligned, then this corresponds to
 an incorrect peak and should be deleted before moving on to a new area

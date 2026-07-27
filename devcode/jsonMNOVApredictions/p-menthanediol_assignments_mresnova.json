@@ -1,0 +1,1277 @@
+{
+    "smiles": {
+        "datatype": "smiles",
+        "count": 1,
+        "data": {
+            "0": "CC1CCC(C(C)(C)O)C(O)C1"
+        }
+    },
+    "molfile": {
+        "datatype": "molfile",
+        "count": 1,
+        "data": {
+            "0": "\r\n  Mnova   12182416532D\r\n\r\n 12 12  0  0  0  0  0  0  0  0999 V2000\r\n    0.0000    0.0000    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n    1.5400    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    1.5400   -1.5400    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    2.8737   -2.3101    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    2.8737   -3.8501    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    1.5399   -4.6201    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    0.2062   -3.8501    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    0.2062   -2.3101    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   -1.1275   -1.5400    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n    1.5399   -6.1601    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    3.0801    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    1.5400    1.5400    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n  1  2  1  0  0  0  0\r\n  2  3  1  0  0  0  0\r\n  3  4  1  0  0  0  0\r\n  4  5  1  0  0  0  0\r\n  5  6  1  0  0  0  0\r\n  6  7  1  0  0  0  0\r\n  7  8  1  0  0  0  0\r\n  8  3  1  0  0  0  0\r\n  8  9  1  0  0  0  0\r\n  6 10  1  0  0  0  0\r\n  2 11  1  0  0  0  0\r\n  2 12  1  0  0  0  0\r\nM  ZZC   1 8\r\nM  ZZC   2 7\r\nM  ZZC   3 1\r\nM  ZZC   4 6\r\nM  ZZC   5 5\r\nM  ZZC   6 4\r\nM  ZZC   7 3\r\nM  ZZC   8 2\r\nM  ZZC   9 9\r\nM  ZZC  10 10\r\nM  ZZC  11 11\r\nM  ZZC  12 12\r\nM  END\r\n"
+        }
+    },
+    "hostname": {
+        "datatype": "hostname",
+        "count": 1,
+        "data": {
+            "0": "Z49BR-HKPP041Y-42DHS-ANANTMPA"
+        }
+    },
+    "allAtomsInfo": {
+        "datatype": "allAtomsInfo",
+        "data": {
+            "0": {
+                "atom_idx": 0,
+                "id": 0,
+                "atomNumber": "8",
+                "symbol": "O",
+                "numProtons": 1
+            },
+            "1": {
+                "atom_idx": 1,
+                "id": 1,
+                "atomNumber": "7",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "2": {
+                "atom_idx": 2,
+                "id": 2,
+                "atomNumber": "1",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "3": {
+                "atom_idx": 3,
+                "id": 3,
+                "atomNumber": "6",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "4": {
+                "atom_idx": 4,
+                "id": 4,
+                "atomNumber": "5",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "5": {
+                "atom_idx": 5,
+                "id": 5,
+                "atomNumber": "4",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "6": {
+                "atom_idx": 6,
+                "id": 6,
+                "atomNumber": "3",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "7": {
+                "atom_idx": 7,
+                "id": 7,
+                "atomNumber": "2",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "8": {
+                "atom_idx": 8,
+                "id": 8,
+                "atomNumber": "9",
+                "symbol": "O",
+                "numProtons": 1
+            },
+            "9": {
+                "atom_idx": 9,
+                "id": 9,
+                "atomNumber": "10",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "10": {
+                "atom_idx": 10,
+                "id": 10,
+                "atomNumber": "11",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "11": {
+                "atom_idx": 11,
+                "id": 11,
+                "atomNumber": "12",
+                "symbol": "C",
+                "numProtons": 3
+            }
+        },
+        "count": 12
+    },
+    "carbonAtomsInfo": {
+        "datatype": "carbonAtomsInfo",
+        "data": {
+            "1": {
+                "atom_idx": 1,
+                "id": 1,
+                "atomNumber": "7",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "2": {
+                "atom_idx": 2,
+                "id": 2,
+                "atomNumber": "1",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "3": {
+                "atom_idx": 3,
+                "id": 3,
+                "atomNumber": "6",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "4": {
+                "atom_idx": 4,
+                "id": 4,
+                "atomNumber": "5",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "5": {
+                "atom_idx": 5,
+                "id": 5,
+                "atomNumber": "4",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "6": {
+                "atom_idx": 6,
+                "id": 6,
+                "atomNumber": "3",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "7": {
+                "atom_idx": 7,
+                "id": 7,
+                "atomNumber": "2",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "9": {
+                "atom_idx": 9,
+                "id": 9,
+                "atomNumber": "10",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "10": {
+                "atom_idx": 10,
+                "id": 10,
+                "atomNumber": "11",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "11": {
+                "atom_idx": 11,
+                "id": 11,
+                "atomNumber": "12",
+                "symbol": "C",
+                "numProtons": 3
+            }
+        },
+        "count": 10
+    },
+    "nmrAssignments": {
+        "datatype": "nmrAssignments",
+        "count": 0,
+        "data": {}
+    },
+    "c13predictions": {
+        "datatype": "c13predictions",
+        "count": 10,
+        "data": {
+            "0": {
+                "atomNumber": 7,
+                "atom_idx": 2,
+                "numProtons": 0,
+                "ppm": 73.338
+            },
+            "1": {
+                "atomNumber": 1,
+                "atom_idx": 3,
+                "numProtons": 1,
+                "ppm": 48.645
+            },
+            "2": {
+                "atomNumber": 6,
+                "atom_idx": 4,
+                "numProtons": 2,
+                "ppm": 23.091
+            },
+            "3": {
+                "atomNumber": 5,
+                "atom_idx": 5,
+                "numProtons": 2,
+                "ppm": 34.303
+            },
+            "4": {
+                "atomNumber": 4,
+                "atom_idx": 6,
+                "numProtons": 1,
+                "ppm": 30.001
+            },
+            "5": {
+                "atomNumber": 3,
+                "atom_idx": 7,
+                "numProtons": 2,
+                "ppm": 42.182
+            },
+            "6": {
+                "atomNumber": 2,
+                "atom_idx": 8,
+                "numProtons": 1,
+                "ppm": 68.965
+            },
+            "7": {
+                "atomNumber": 10,
+                "atom_idx": 10,
+                "numProtons": 3,
+                "ppm": 21.895
+            },
+            "8": {
+                "atomNumber": 11,
+                "atom_idx": 11,
+                "numProtons": 3,
+                "ppm": 27.807
+            },
+            "9": {
+                "atomNumber": 12,
+                "atom_idx": 12,
+                "numProtons": 3,
+                "ppm": 27.807
+            }
+        }
+    },
+    "Predicted_13C_NMR_Spectrum_0": {
+        "datatype": "nmrspectrum",
+        "origin": "Predictor",
+        "type": "1D",
+        "subtype": "predicted, 13C",
+        "experimenttype": "1D",
+        "experiment": "1D",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "",
+        "intrument": "",
+        "probe": "",
+        "datafilename": "",
+        "nucleus": "13C",
+        "specfrequency": 175,
+        "solvent": "Chloroform-d",
+        "temperature": "",
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {},
+            "count": 0
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        }
+    },
+    "17150330.10.fid_1": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "1D",
+        "subtype": "1H",
+        "experimenttype": "1D",
+        "experiment": "1D",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "zg",
+        "intrument": "Avance",
+        "probe": "Z168774_0002 (CPP1.1 BBO 700S3 BB-H&F-05 Z XT)",
+        "datafilename": "/Users/dch1amk/Desktop/NOAH_tests/p-menthanediol/17150330/10/fid",
+        "nucleus": "1H",
+        "specfrequency": 699.744320894,
+        "solvent": "CDCl3",
+        "temperature": 298.1005,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {},
+            "count": 0
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        }
+    },
+    "17150330.11.1.1r_2": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "1D",
+        "subtype": "1H",
+        "experimenttype": "1D",
+        "experiment": "1D",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "reset_psychetse.ptg",
+        "intrument": "Avance",
+        "probe": "Z168774_0002 (CPP1.1 BBO 700S3 BB-H&F-05 Z XT)",
+        "datafilename": "/Users/dch1amk/Desktop/NOAH_tests/p-menthanediol/17150330/11/pdata/1/1r",
+        "nucleus": "1H",
+        "specfrequency": 699.743148827593,
+        "solvent": "CDCl3",
+        "temperature": 298.1003,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {},
+            "count": 0
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        }
+    },
+    "chosenSpectra": {
+        "datatype": "chosenSpectra",
+        "count": 5,
+        "data": {
+            "0": "13C 1D zgpg30 17150330.20.fid_3 SKIP",
+            "1": "[13C, 1H] Unknown gns_noah3-BSScc.eeh 17150330.15002.ser_4 HSQC",
+            "2": "[13C, 1H] Unknown gns_noah3-BSScc.eeh 17150330.15001.ser_5 HMBC",
+            "3": "[13C, 1H] Unknown gns_noah3-BSScc.eeh 17150330.15003.ser_6 HSQC_CLIPCOSY",
+            "4": "[13C, 1H] Unknown hcdeptedetgpzf 17150330.19.ser_7 DDEPT_CH3_ONLY"
+        }
+    },
+    "SKIP": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "1D",
+        "subtype": "13C",
+        "experimenttype": "1D",
+        "experiment": "1D",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "zgpg30",
+        "intrument": "Avance",
+        "probe": "Z168774_0002 (CPP1.1 BBO 700S3 BB-H&F-05 Z XT)",
+        "datafilename": "/Users/dch1amk/Desktop/NOAH_tests/p-menthanediol/17150330/20/fid",
+        "nucleus": "13C",
+        "specfrequency": 175.967357925,
+        "solvent": "CDCl3",
+        "temperature": 298.0998,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 73.31063021659563,
+                    "delta2": 0,
+                    "intensity": 7.592165213636578,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "1": {
+                    "delta1": 68.10875425792078,
+                    "delta2": 0,
+                    "intensity": 11.558807399326332,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "2": {
+                    "delta1": 48.345394992656885,
+                    "delta2": 0,
+                    "intensity": 11.103928362360278,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "3": {
+                    "delta1": 42.532035973445225,
+                    "delta2": 0,
+                    "intensity": 11.281573490886467,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "4": {
+                    "delta1": 34.87033196744781,
+                    "delta2": 0,
+                    "intensity": 11.241291938257483,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "5": {
+                    "delta1": 28.897869252122913,
+                    "delta2": 0,
+                    "intensity": 15.796390727593,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "6": {
+                    "delta1": 28.904583710535988,
+                    "delta2": 0,
+                    "intensity": 7.203330585754019,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "7": {
+                    "delta1": 25.631372899674986,
+                    "delta2": 0,
+                    "intensity": 11.379157115354307,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "8": {
+                    "delta1": 22.21026498109558,
+                    "delta2": 0,
+                    "intensity": 11.11091961632768,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "9": {
+                    "delta1": 20.253879972354586,
+                    "delta2": 0,
+                    "intensity": 11.064889988776047,
+                    "type": 0,
+                    "annotation": ""
+                }
+            },
+            "count": 10
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "17150330.20.fid_3"
+    },
+    "HSQC": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H13C, Unknown",
+        "experimenttype": "Unknown",
+        "experiment": "Unknown",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "gns_noah3-BSScc.eeh",
+        "intrument": "Avance",
+        "probe": "Z168774_0002 (CPP1.1 BBO 700S3 BB-H&F-05 Z XT)",
+        "datafilename": "/Users/dch1amk/Desktop/NOAH_tests/p-menthanediol/17150330/15002/ser",
+        "nucleus": "[13C, 1H]",
+        "specfrequency": "[175.967357924, 699.743288778]",
+        "solvent": "CDCl3",
+        "temperature": 298.0981,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 68.10875425792078,
+                    "delta2": 4.423335582933296,
+                    "intensity": 256.00917825475335,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "1": {
+                    "delta1": 48.345394992656885,
+                    "delta2": 1.184562327131069,
+                    "intensity": 153.56207896629348,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "2": {
+                    "delta1": 42.532035973445225,
+                    "delta2": 1.8450021589207177,
+                    "intensity": -184.84707805514336,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "3": {
+                    "delta1": 42.532035973445225,
+                    "delta2": 1.0796283329512506,
+                    "intensity": -132.87456053495407,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "4": {
+                    "delta1": 34.87033196744781,
+                    "delta2": 1.8095639240441992,
+                    "intensity": -165.337322473526,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "5": {
+                    "delta1": 34.87033196744781,
+                    "delta2": 0.9309718411965077,
+                    "intensity": -118.50382971763611,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "6": {
+                    "delta1": 28.912842204367113,
+                    "delta2": 1.380586277457962,
+                    "intensity": 394.80358707904816,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "7": {
+                    "delta1": 28.897869252122913,
+                    "delta2": 1.2433013893407545,
+                    "intensity": 381.19443583488464,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "8": {
+                    "delta1": 25.631372899674986,
+                    "delta2": 1.8242915021747002,
+                    "intensity": 96.89690944552422,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "9": {
+                    "delta1": 22.21026498109558,
+                    "delta2": 0.8946131326868341,
+                    "intensity": 597.8131510019302,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "10": {
+                    "delta1": 20.253879972354586,
+                    "delta2": 1.7000275616985991,
+                    "intensity": -322.11739802360535,
+                    "type": 0,
+                    "annotation": ""
+                }
+            },
+            "count": 11
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 11,
+            "normValue": 1,
+            "data": {
+                "0": {
+                    "intensity": 256.00917825475335,
+                    "rangeMin1": 68.35875425792078,
+                    "rangeMin2": 4.398335582933296,
+                    "rangeMax1": 67.85875425792078,
+                    "rangeMax2": 4.4483355829332965,
+                    "delta1": 68.10875425792078,
+                    "delta2": 4.423335582933296,
+                    "type": 0
+                },
+                "1": {
+                    "intensity": 153.56207896629348,
+                    "rangeMin1": 48.595394992656885,
+                    "rangeMin2": 1.159562327131069,
+                    "rangeMax1": 48.095394992656885,
+                    "rangeMax2": 1.209562327131069,
+                    "delta1": 48.345394992656885,
+                    "delta2": 1.184562327131069,
+                    "type": 0
+                },
+                "2": {
+                    "intensity": -184.84707805514336,
+                    "rangeMin1": 42.782035973445225,
+                    "rangeMin2": 1.8200021589207178,
+                    "rangeMax1": 42.282035973445225,
+                    "rangeMax2": 1.8700021589207176,
+                    "delta1": 42.532035973445225,
+                    "delta2": 1.8450021589207177,
+                    "type": 0
+                },
+                "3": {
+                    "intensity": -132.87456053495407,
+                    "rangeMin1": 42.782035973445225,
+                    "rangeMin2": 1.0546283329512507,
+                    "rangeMax1": 42.282035973445225,
+                    "rangeMax2": 1.1046283329512505,
+                    "delta1": 42.532035973445225,
+                    "delta2": 1.0796283329512506,
+                    "type": 0
+                },
+                "4": {
+                    "intensity": -165.337322473526,
+                    "rangeMin1": 35.12033196744781,
+                    "rangeMin2": 1.7845639240441993,
+                    "rangeMax1": 34.62033196744781,
+                    "rangeMax2": 1.834563924044199,
+                    "delta1": 34.87033196744781,
+                    "delta2": 1.8095639240441992,
+                    "type": 0
+                },
+                "5": {
+                    "intensity": -118.50382971763611,
+                    "rangeMin1": 35.12033196744781,
+                    "rangeMin2": 0.9059718411965076,
+                    "rangeMax1": 34.62033196744781,
+                    "rangeMax2": 0.9559718411965077,
+                    "delta1": 34.87033196744781,
+                    "delta2": 0.9309718411965077,
+                    "type": 0
+                },
+                "6": {
+                    "intensity": 394.80358707904816,
+                    "rangeMin1": 29.147869252122913,
+                    "rangeMin2": 1.3551651160895533,
+                    "rangeMax1": 28.647869252122913,
+                    "rangeMax2": 1.405165116089553,
+                    "delta1": 28.897869252122913,
+                    "delta2": 1.3801651160895532,
+                    "type": 0
+                },
+                "7": {
+                    "intensity": 381.19443583488464,
+                    "rangeMin1": 29.147869252122913,
+                    "rangeMin2": 1.2183013893407546,
+                    "rangeMax1": 28.647869252122913,
+                    "rangeMax2": 1.2683013893407544,
+                    "delta1": 28.897869252122913,
+                    "delta2": 1.2433013893407545,
+                    "type": 0
+                },
+                "8": {
+                    "intensity": 96.89690944552422,
+                    "rangeMin1": 25.881372899674986,
+                    "rangeMin2": 1.7992915021747002,
+                    "rangeMax1": 25.381372899674986,
+                    "rangeMax2": 1.8492915021747,
+                    "delta1": 25.631372899674986,
+                    "delta2": 1.8242915021747002,
+                    "type": 0
+                },
+                "9": {
+                    "intensity": 597.8131510019302,
+                    "rangeMin1": 22.46026498109558,
+                    "rangeMin2": 0.869613132686834,
+                    "rangeMax1": 21.96026498109558,
+                    "rangeMax2": 0.9196131326868341,
+                    "delta1": 22.21026498109558,
+                    "delta2": 0.8946131326868341,
+                    "type": 0
+                },
+                "10": {
+                    "intensity": -322.11739802360535,
+                    "rangeMin1": 20.503879972354586,
+                    "rangeMin2": 1.6750275616985992,
+                    "rangeMax1": 20.003879972354586,
+                    "rangeMax2": 1.725027561698599,
+                    "delta1": 20.253879972354586,
+                    "delta2": 1.7000275616985991,
+                    "type": 0
+                }
+            }
+        },
+        "filename": "17150330.15002.ser_4"
+    },
+    "HMBC": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H13C, Unknown",
+        "experimenttype": "Unknown",
+        "experiment": "Unknown",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "gns_noah3-BSScc.eeh",
+        "intrument": "Avance",
+        "probe": "Z168774_0002 (CPP1.1 BBO 700S3 BB-H&F-05 Z XT)",
+        "datafilename": "/Users/dch1amk/Desktop/NOAH_tests/p-menthanediol/17150330/15001/ser",
+        "nucleus": "[13C, 1H]",
+        "specfrequency": "[175.967357924, 699.743288778]",
+        "solvent": "CDCl3",
+        "temperature": 298.0981,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 73.27932782242725,
+                    "delta2": 1.3802724871012173,
+                    "intensity": 58.258792877197266,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "1": {
+                    "delta1": 73.20653851453982,
+                    "delta2": 1.2436661808750906,
+                    "intensity": 34.66237258911133,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "2": {
+                    "delta1": 48.312595217043345,
+                    "delta2": 1.8233520716433493,
+                    "intensity": 0.24698135256767273,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "3": {
+                    "delta1": 48.312595217043345,
+                    "delta2": 1.7087215625057735,
+                    "intensity": 0.3143649101257324,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "4": {
+                    "delta1": 48.312595217043345,
+                    "delta2": 1.3802724871012173,
+                    "intensity": 37.158416748046875,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "5": {
+                    "delta1": 48.312595217043345,
+                    "delta2": 1.2436661808750906,
+                    "intensity": 32.91835403442383,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "6": {
+                    "delta1": 42.48945058605,
+                    "delta2": 0.8950231297675421,
+                    "intensity": 35.88475799560547,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "7": {
+                    "delta1": 34.95575721970239,
+                    "delta2": 0.8950231297675421,
+                    "intensity": 37.032020568847656,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "8": {
+                    "delta1": 34.81017860392755,
+                    "delta2": 1.7099094434294788,
+                    "intensity": 0.9493129253387451,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "9": {
+                    "delta1": 28.914244665046787,
+                    "delta2": 1.3802724871012173,
+                    "intensity": 58.83348846435547,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "10": {
+                    "delta1": 28.914244665046787,
+                    "delta2": 1.2424782999513841,
+                    "intensity": 45.39836120605469,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "11": {
+                    "delta1": 25.638725810113066,
+                    "delta2": 1.7099094434294788,
+                    "intensity": 0.16490204632282257,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "12": {
+                    "delta1": 25.638725810113066,
+                    "delta2": 1.0791446729418859,
+                    "intensity": 1.1054306030273438,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "13": {
+                    "delta1": 25.636094679208767,
+                    "delta2": 4.423391232526334,
+                    "intensity": 2.097045421600342,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "14": {
+                    "delta1": 25.631372899674986,
+                    "delta2": 0.8946131326868341,
+                    "intensity": 34.10013961791992,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "15": {
+                    "delta1": 20.223995551579684,
+                    "delta2": 4.423826432144027,
+                    "intensity": 2.485769033432007,
+                    "type": 0,
+                    "annotation": ""
+                }
+            },
+            "count": 16
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 15,
+            "normValue": 1,
+            "data": {
+                "0": {
+                    "intensity": 760.1351692676544,
+                    "rangeMin1": 73.52932782242725,
+                    "rangeMin2": 1.3552724871012174,
+                    "rangeMax1": 73.02932782242725,
+                    "rangeMax2": 1.4052724871012172,
+                    "delta1": 73.27932782242725,
+                    "delta2": 1.3802724871012173,
+                    "type": 0
+                },
+                "1": {
+                    "intensity": 631.1324402093887,
+                    "rangeMin1": 73.45653851453982,
+                    "rangeMin2": 1.2186661808750907,
+                    "rangeMax1": 72.95653851453982,
+                    "rangeMax2": 1.2686661808750905,
+                    "delta1": 73.20653851453982,
+                    "delta2": 1.2436661808750906,
+                    "type": 0
+                },
+                "2": {
+                    "intensity": 11.837538465857506,
+                    "rangeMin1": 48.562595217043345,
+                    "rangeMin2": 1.7983520716433494,
+                    "rangeMax1": 48.062595217043345,
+                    "rangeMax2": 1.8483520716433492,
+                    "delta1": 48.312595217043345,
+                    "delta2": 1.8233520716433493,
+                    "type": 0
+                },
+                "3": {
+                    "intensity": 10.72766363620758,
+                    "rangeMin1": 48.562595217043345,
+                    "rangeMin2": 1.6837215625057735,
+                    "rangeMax1": 48.062595217043345,
+                    "rangeMax2": 1.7337215625057734,
+                    "delta1": 48.312595217043345,
+                    "delta2": 1.7087215625057735,
+                    "type": 0
+                },
+                "4": {
+                    "intensity": 470.2211924493313,
+                    "rangeMin1": 48.562595217043345,
+                    "rangeMin2": 1.3552724871012174,
+                    "rangeMax1": 48.062595217043345,
+                    "rangeMax2": 1.4052724871012172,
+                    "delta1": 48.312595217043345,
+                    "delta2": 1.3802724871012173,
+                    "type": 0
+                },
+                "5": {
+                    "intensity": 413.30103355646133,
+                    "rangeMin1": 48.562595217043345,
+                    "rangeMin2": 1.2186661808750907,
+                    "rangeMax1": 48.062595217043345,
+                    "rangeMax2": 1.2686661808750905,
+                    "delta1": 48.312595217043345,
+                    "delta2": 1.2436661808750906,
+                    "type": 0
+                },
+                "6": {
+                    "intensity": 533.8882155716419,
+                    "rangeMin1": 42.73945058605,
+                    "rangeMin2": 0.870023129767542,
+                    "rangeMax1": 42.23945058605,
+                    "rangeMax2": 0.9200231297675421,
+                    "delta1": 42.48945058605,
+                    "delta2": 0.8950231297675421,
+                    "type": 0
+                },
+                "7": {
+                    "intensity": 476.201336145401,
+                    "rangeMin1": 35.20575721970239,
+                    "rangeMin2": 0.870023129767542,
+                    "rangeMax1": 34.70575721970239,
+                    "rangeMax2": 0.9200231297675421,
+                    "delta1": 34.95575721970239,
+                    "delta2": 0.8950231297675421,
+                    "type": 0
+                },
+                "8": {
+                    "intensity": 28.198094718158245,
+                    "rangeMin1": 35.06017860392755,
+                    "rangeMin2": 1.684909443429479,
+                    "rangeMax1": 34.56017860392755,
+                    "rangeMax2": 1.7349094434294787,
+                    "delta1": 34.81017860392755,
+                    "delta2": 1.7099094434294788,
+                    "type": 0
+                },
+                "9": {
+                    "intensity": 862.1468425989151,
+                    "rangeMin1": 29.164244665046787,
+                    "rangeMin2": 1.3552724871012174,
+                    "rangeMax1": 28.664244665046787,
+                    "rangeMax2": 1.4052724871012172,
+                    "delta1": 28.914244665046787,
+                    "delta2": 1.3802724871012173,
+                    "type": 0
+                },
+                "10": {
+                    "intensity": 653.819363027811,
+                    "rangeMin1": 29.164244665046787,
+                    "rangeMin2": 1.2174782999513842,
+                    "rangeMax1": 28.664244665046787,
+                    "rangeMax2": 1.267478299951384,
+                    "delta1": 28.914244665046787,
+                    "delta2": 1.2424782999513841,
+                    "type": 0
+                },
+                "11": {
+                    "intensity": 7.779251238331199,
+                    "rangeMin1": 25.888725810113066,
+                    "rangeMin2": 1.684909443429479,
+                    "rangeMax1": 25.388725810113066,
+                    "rangeMax2": 1.7349094434294787,
+                    "delta1": 25.638725810113066,
+                    "delta2": 1.7099094434294788,
+                    "type": 0
+                },
+                "12": {
+                    "intensity": 23.400124792009592,
+                    "rangeMin1": 25.888725810113066,
+                    "rangeMin2": 1.054144672941886,
+                    "rangeMax1": 25.388725810113066,
+                    "rangeMax2": 1.1041446729418858,
+                    "delta1": 25.638725810113066,
+                    "delta2": 1.0791446729418859,
+                    "type": 0
+                },
+                "13": {
+                    "intensity": 44.32164388149977,
+                    "rangeMin1": 25.886094679208767,
+                    "rangeMin2": 4.3983912325263335,
+                    "rangeMax1": 25.386094679208767,
+                    "rangeMax2": 4.448391232526334,
+                    "delta1": 25.636094679208767,
+                    "delta2": 4.423391232526334,
+                    "type": 0
+                },
+                "14": {
+                    "intensity": 39.66118551045656,
+                    "rangeMin1": 20.473995551579684,
+                    "rangeMin2": 4.398826432144027,
+                    "rangeMax1": 19.973995551579684,
+                    "rangeMax2": 4.448826432144028,
+                    "delta1": 20.223995551579684,
+                    "delta2": 4.423826432144027,
+                    "type": 0
+                }
+            }
+        },
+        "filename": "17150330.15001.ser_5"
+    },
+    "HSQC_CLIPCOSY": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H13C, Unknown",
+        "experimenttype": "Unknown",
+        "experiment": "Unknown",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "gns_noah3-BSScc.eeh",
+        "intrument": "Avance",
+        "probe": "Z168774_0002 (CPP1.1 BBO 700S3 BB-H&F-05 Z XT)",
+        "datafilename": "/Users/dch1amk/Desktop/NOAH_tests/p-menthanediol/17150330/15003/ser",
+        "nucleus": "[13C, 1H]",
+        "specfrequency": "[175.967357924, 699.743288778]",
+        "solvent": "CDCl3",
+        "temperature": 298.0981,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 48.32392891594314,
+                    "delta2": 1.7093194313482702,
+                    "intensity": -0.566608190536499,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "1": {
+                    "delta1": 34.824679056710245,
+                    "delta2": 1.7093194313482702,
+                    "intensity": -0.3681259751319885,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "2": {
+                    "delta1": 22.188307384502195,
+                    "delta2": 1.823052412919075,
+                    "intensity": -0.5941106081008911,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "3": {
+                    "delta1": 20.251625231402027,
+                    "delta2": 1.1841697512256835,
+                    "intensity": -0.5039506554603577,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "4": {
+                    "delta1": 20.251625231402027,
+                    "delta2": 0.9309902444245866,
+                    "intensity": -0.26744091510772705,
+                    "type": 0,
+                    "annotation": ""
+                }
+            },
+            "count": 5
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 5,
+            "normValue": 1,
+            "data": {
+                "0": {
+                    "intensity": -12.889332670718431,
+                    "rangeMin1": 48.57392891594314,
+                    "rangeMin2": 1.6843194313482703,
+                    "rangeMax1": 48.07392891594314,
+                    "rangeMax2": 1.7343194313482702,
+                    "delta1": 48.32392891594314,
+                    "delta2": 1.7093194313482702,
+                    "type": 0
+                },
+                "1": {
+                    "intensity": -9.359952669357881,
+                    "rangeMin1": 35.074679056710245,
+                    "rangeMin2": 1.6843194313482703,
+                    "rangeMax1": 34.574679056710245,
+                    "rangeMax2": 1.7343194313482702,
+                    "delta1": 34.824679056710245,
+                    "delta2": 1.7093194313482702,
+                    "type": 0
+                },
+                "2": {
+                    "intensity": -13.457523204386234,
+                    "rangeMin1": 22.438307384502195,
+                    "rangeMin2": 1.7980524129190751,
+                    "rangeMax1": 21.938307384502195,
+                    "rangeMax2": 1.848052412919075,
+                    "delta1": 22.188307384502195,
+                    "delta2": 1.823052412919075,
+                    "type": 0
+                },
+                "3": {
+                    "intensity": -21.105210316367447,
+                    "rangeMin1": 20.501625231402027,
+                    "rangeMin2": 1.1591697512256836,
+                    "rangeMax1": 20.001625231402027,
+                    "rangeMax2": 1.2091697512256834,
+                    "delta1": 20.251625231402027,
+                    "delta2": 1.1841697512256835,
+                    "type": 0
+                },
+                "4": {
+                    "intensity": -11.493982471525669,
+                    "rangeMin1": 20.501625231402027,
+                    "rangeMin2": 0.9059902444245865,
+                    "rangeMax1": 20.001625231402027,
+                    "rangeMax2": 0.9559902444245866,
+                    "delta1": 20.251625231402027,
+                    "delta2": 0.9309902444245866,
+                    "type": 0
+                }
+            }
+        },
+        "filename": "17150330.15003.ser_6"
+    },
+    "DDEPT_CH3_ONLY": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H13C, Unknown",
+        "experimenttype": "Unknown",
+        "experiment": "Unknown",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "hcdeptedetgpzf",
+        "intrument": "Avance",
+        "probe": "Z168774_0002 (CPP1.1 BBO 700S3 BB-H&F-05 Z XT)",
+        "datafilename": "/Users/dch1amk/Desktop/NOAH_tests/p-menthanediol/17150330/19/ser",
+        "nucleus": "[13C, 1H]",
+        "specfrequency": "[175.956800938518, 699.74209922]",
+        "solvent": "CDCl3",
+        "temperature": 298.1024,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 28.903567524429945,
+                    "delta2": 1.380550262396036,
+                    "intensity": 47.08809280395508,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "1": {
+                    "delta1": 28.895954197491992,
+                    "delta2": 1.243704255919456,
+                    "intensity": 39.73215866088867,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "2": {
+                    "delta1": 22.20220592269849,
+                    "delta2": 0.8953349956292083,
+                    "intensity": 12.23772144317627,
+                    "type": 0,
+                    "annotation": ""
+                }
+            },
+            "count": 3
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 3,
+            "normValue": 1,
+            "data": {
+                "0": {
+                    "intensity": 384.75217772711767,
+                    "rangeMin1": 29.153567524429945,
+                    "rangeMin2": 1.355550262396036,
+                    "rangeMax1": 28.653567524429945,
+                    "rangeMax2": 1.4055502623960359,
+                    "delta1": 28.903567524429945,
+                    "delta2": 1.380550262396036,
+                    "type": 0
+                },
+                "1": {
+                    "intensity": 362.85921497206436,
+                    "rangeMin1": 29.145954197491992,
+                    "rangeMin2": 1.218704255919456,
+                    "rangeMax1": 28.645954197491992,
+                    "rangeMax2": 1.268704255919456,
+                    "delta1": 28.895954197491992,
+                    "delta2": 1.243704255919456,
+                    "type": 0
+                },
+                "2": {
+                    "intensity": 352.4251560069679,
+                    "rangeMin1": 22.45220592269849,
+                    "rangeMin2": 0.8703349956292082,
+                    "rangeMax1": 21.95220592269849,
+                    "rangeMax2": 0.9203349956292083,
+                    "delta1": 22.20220592269849,
+                    "delta2": 0.8953349956292083,
+                    "type": 0
+                }
+            }
+        },
+        "filename": "17150330.19.ser_7"
+    },
+    "MNOVAcalcMethod": {
+        "datatype": "MNOVAcalcMethod",
+        "count": 1,
+        "data": {
+            "0": "MNOVA Predict"
+        }
+    },
+    "exptIdentifiers": {
+        "count": 5,
+        "datatype": "exptIdentifiers",
+        "data": {
+            "0": "SKIP",
+            "1": "HSQC",
+            "2": "HMBC",
+            "3": "HSQC_CLIPCOSY",
+            "4": "DDEPT_CH3_ONLY"
+        }
+    },
+    "workingDirectory": {
+        "datatype": "workingDirectory",
+        "count": 1,
+        "data": {
+            "0": "/Users/vsmw51/Library/CloudStorage/Dropbox/Mac/Downloads/4Eric/p-menthanediol"
+        }
+    },
+    "workingFilename": {
+        "datatype": "workingFilename",
+        "count": 1,
+        "data": {
+            "0": "p-menthanediol"
+        }
+    },
+    "simulatedAnnealing": {
+        "datatype": "simulatedAnnealing",
+        "count": 1,
+        "data": {
+            "0": true
+        }
+    },
+    "ml_consent": {
+        "datatype": "ml_consent",
+        "count": 1,
+        "data": {
+            "0": true
+        }
+    },
+    "spectraWithPeaks": {
+        "datatype": "spectraWithPeaks",
+        "count": 5,
+        "data": {
+            "0": "13C 1D zgpg30 17150330.20.fid_3",
+            "1": "[13C, 1H] Unknown gns_noah3-BSScc.eeh 17150330.15002.ser_4",
+            "2": "[13C, 1H] Unknown gns_noah3-BSScc.eeh 17150330.15001.ser_5",
+            "3": "[13C, 1H] Unknown gns_noah3-BSScc.eeh 17150330.15003.ser_6",
+            "4": "[13C, 1H] Unknown hcdeptedetgpzf 17150330.19.ser_7"
+        }
+    }
+}

@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -15,6 +16,7 @@ from rdkit.Chem import Draw
 
 from core.html_from_assignments import NMRProblem, do_intersect
 import core.expectedmolecule as expectedmolecule
+from core.symmetry_unique_carbons import reconcile_symmetry_with_experimental_counts
 
 
 def warning_dialog(return_message, title_message, qstarted=True):
@@ -130,14 +132,18 @@ class NMRsolution:
         # Create a new NetworkX graph
         molgraph = nx.Graph()
 
-        # if rubteralone remove - 1 from the atom numbers
-        if json_data["MNOVAcalcMethod"]["data"]["0"] == "NMRSHIFTDB2 Predict":
-            nodes_offset = 0
-        elif json_data["MNOVAcalcMethod"]["data"]["0"] == "JEOL Predict":
-            nodes_offset = 0
-        else:
-            nodes_offset = 1
-            nodes_offset = 0  # EEH 2025-sep-06
+        # We have now set the offset to 0 for all cases, as the previous logic for determining the offset based on the calculation method has been commented out. 
+        # This means that the atom indices in G2 will directly correspond to the atom indices in molgraph without any adjustment.
+        nodes_offset = 0
+
+        # # if rubteralone remove - 1 from the atom numbers
+        # if json_data["MNOVAcalcMethod"]["data"]["0"] == "NMRSHIFTDB2 Predict":
+        #     nodes_offset = 0
+        # elif json_data["MNOVAcalcMethod"]["data"]["0"] == "JEOL Predict":
+        #     nodes_offset = 0
+        # else:
+        #     nodes_offset = 1
+        #     nodes_offset = 0  # EEH 2025-sep-06
 
         # Add nodes for each atom in the molecule
         for atom in self.expected_molecule.GetAtoms():
@@ -233,10 +239,21 @@ class NMRsolution:
             ),
         ]
 
+        # Tracks whether CH3/CH1 was fully resolved by genuine evidence
+        # (Annotations and/or DoubleDept) alone, with no reliance on the
+        # non-evidence-based H1/ExpectedMolecule shift-heuristic fallbacks.
+        # Used by reconcile_symmetry_with_experimental_counts (called later,
+        # in initialise_prior_to_carbon_assignment) to decide whether CH3 and
+        # CH1 symmetry classes must be pooled together rather than treated
+        # independently -- see that method's pool_ch3_ch1 parameter.
+        self.ch3_ch1_evidence_based = True
+
         for name, guard, method in chain:
             if not self._has_unresolved():
                 logger.info(f"CH3/CH2/CH1 assignment complete after \'{name}\' step")
                 return "ok", 200
+            if name == "ExpectedMolecule":  # NOTE: see question about the "H1" step
+                self.ch3_ch1_evidence_based = False
             if guard is None or guard():
                 logger.debug(f"CH3/CH2/CH1 chain: running \'{name}\'")
                 method()
@@ -251,6 +268,54 @@ class NMRsolution:
         logger.info("CH3/CH2/CH1 assignment complete")
         return "ok", 200
 
+    def _reconcile_molecule_symmetry(self):
+        """
+        Compare predicted (topological) carbon symmetry classes against real
+        experimental per-type peak counts -- read from self.c13's already
+        finalized CH0/CH1/CH2/CH3 flags (set earlier by
+        assign_CH3_CH2_CH1_overall / transfer_hsqc_info_to_c13, i.e. by HSQC/
+        DEPT sign and/or a genuine CH3-only experiment or user annotation --
+        never inferred from ppm values here). Loosens (fully un-merges) any
+        carbon type where experimental shows more distinct peaks than the
+        topology-only prediction allows for.
+
+        CH3 and CH1 are compared and loosened as ONE pooled group whenever
+        CH3/CH1 wasn't resolved by genuine evidence (Annotations/DoubleDept)
+        -- see self.ch3_ch1_evidence_based, set in assign_CH3_CH2_CH1_overall.
+        Pooling defaults to True (the conservative choice) if that attribute
+        is missing for any reason.
+
+        If any loosening occurs, expected_molecule.sym_molprops_df (and every
+        derived num_sym_* attribute) is refreshed in place, so all existing
+        code elsewhere that reads them automatically sees the reconciled
+        counts -- nothing else needs to change. If a type's experimental
+        count still exceeds what full desymmetrization can provide, that is
+        a genuine mismatch and is left for the existing downstream
+        count-mismatch handling (the error-table path) to catch, unchanged.
+        """
+        c13 = self.c13
+        experimental_counts = {
+            "C (quaternary)": c13[c13.CH0].shape[0],
+            "CH2": c13[c13.CH2].shape[0],
+            "CH": c13[c13.CH1].shape[0],
+            "CH3": c13[c13.CH3].shape[0],
+        }
+        pool_ch3_ch1 = not getattr(self, "ch3_ch1_evidence_based", False)
+
+        new_classes, log = reconcile_symmetry_with_experimental_counts(
+            self.expected_molecule.mol,
+            self.expected_molecule.carbon_classes,
+            experimental_counts,
+            pool_ch3_ch1=pool_ch3_ch1,
+        )
+
+        if log:
+            logger.info(f"Symmetry reconciliation loosened classes: {log}")
+            self.expected_molecule.refresh_sym_molprops_df(new_classes)
+            self.expected_molecule.carbon_classes = new_classes
+        else:
+            logger.debug("Symmetry reconciliation: no loosening needed")
+
     def initialise_prior_to_carbon_assignment(self):
         """
         Prepares and aligns carbon-13 (C13) and molecular property dataframes for assignment.
@@ -261,6 +326,7 @@ class NMRsolution:
         Returns:
             tuple: ("ok", 200) if assignment is successful, or (rendered_html, 400) if an error occurs.
         """
+        self._reconcile_molecule_symmetry()
 
         self.c13 = self.c13.sort_values("ppm", ascending=False, ignore_index=True)
         c13 = self.c13
@@ -277,8 +343,17 @@ class NMRsolution:
             error_msg = "<p>c13 and all_molprops_df are the same length</p>"
             self.molprops_df = self.all_molprops_df
 
-        elif len(c13) == len(self.sym_molprops_df):
-            error_msg = error_msg + "<p>c13 and sym_molprops_df are the same length</p>"
+        elif len(c13) <= len(self.sym_molprops_df):
+            # NOTE: was `==`. Reconciliation (self._reconcile_molecule_symmetry,
+            # called above) intentionally opens a class-group all the way to
+            # its full physical atom count once ANY deficit is found for that
+            # type, rather than the exact minimal count needed -- so
+            # sym_molprops_df can legitimately end up larger than len(c13)
+            # even when reconciliation worked correctly. `<=` accepts this;
+            # the old `==` would send every over-provisioned case straight to
+            # all_molprops_df below instead, silently discarding the reconciled
+            # (block-consistent) representative selection entirely.
+            error_msg = error_msg + "<p>c13 fits within sym_molprops_df</p>"
             self.molprops_df = self.sym_molprops_df
 
         elif (len(c13) < len(self.all_molprops_df)) and (
@@ -387,10 +462,37 @@ class NMRsolution:
 
         c13 = self.c13
 
-        for CHn, nProtons in zip(["CH3", "CH2", "CH1", "CH0"], [3, 2, 1, 0]):
+        # Group definitions are normally four independent CHn buckets. But if
+        # CH3/CH1 needed pooling during symmetry reconciliation (no genuine
+        # evidence -- Annotations/DoubleDept -- to tell them apart; see
+        # self.ch3_ch1_evidence_based / _reconcile_molecule_symmetry), the
+        # *experimental* CH3-vs-CH1 split itself is only as reliable as the
+        # earlier best-guess heuristic that produced it. Matching CH3 and CH1
+        # as two separate buckets in that case can silently strand real,
+        # correctly-opened molprops_df positions on "the wrong side" of that
+        # guess, with no experimental row available to fill them. Pooling
+        # them into one combined group here -- matched together via the same
+        # Hungarian/nearest-match logic below -- avoids that.
+        pool_ch3_ch1 = not getattr(self, "ch3_ch1_evidence_based", False)
 
-            df_CHn = self.molprops_df[self.molprops_df[CHn]]
-            c13_CHn = c13[c13["numProtons"] == nProtons]
+        if pool_ch3_ch1:
+            groups = [
+                ("CH3+CH1", lambda df: df["CH3"] | df["CH1"], [3, 1]),
+                ("CH2", lambda df: df["CH2"], [2]),
+                ("CH0", lambda df: df["CH0"], [0]),
+            ]
+        else:
+            groups = [
+                ("CH3", lambda df: df["CH3"], [3]),
+                ("CH2", lambda df: df["CH2"], [2]),
+                ("CH1", lambda df: df["CH1"], [1]),
+                ("CH0", lambda df: df["CH0"], [0]),
+            ]
+
+        for CHn, mask_fn, nProtons_list in groups:
+
+            df_CHn = self.molprops_df[mask_fn(self.molprops_df)]
+            c13_CHn = c13[c13["numProtons"].isin(nProtons_list)]
 
             if c13_CHn.empty:
                 logger.debug(f"{CHn}: no experimental peaks, skipping")

@@ -36,7 +36,7 @@ share/python-wheels/
 MANIFEST
 
 # files that are deprecated or completely changed
-deprecate/d
+deprecated/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -88,8 +88,7 @@ docs/_build/
 target/
 
 # Jupyter Notebook
-*.ipynb
-*.ipynb_checkpoints
+.ipynb_checkpoints/
 
 # IPython
 profile_default/

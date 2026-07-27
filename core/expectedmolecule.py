@@ -25,6 +25,15 @@ from loguru import logger
 
 from config.globals import SVG_DIMENSIONS as svgDimensions
 
+# NOTE: assumed module location -- adjust the import path to wherever
+# symmetry_unique_carbons.py actually lives in your package layout.
+from core.symmetry_unique_carbons import (
+    get_carbon_symmetry_classes,
+    carbon_type,
+    build_molgraph,
+    choose_best_representatives,
+)
+
 XYDIM = 800
 
 
@@ -40,23 +49,16 @@ def calc_c13_chemical_shifts_using_nmrshift2D(molstr: str) -> pd.DataFrame:
 
 
 def get_symmetry_classes(mol):
-    # mol = Chem.AddHs(mol)
-    # Generate canonical ranks (same rank = same symmetry class)
+    # DEPRECATED -- superseded by core.symmetry_unique_carbons.get_carbon_symmetry_classes,
+    # which is carbon-only and includes singleton classes. Kept only in case other
+    # code outside this file still imports get_symmetry_classes from here; remove
+    # once confirmed unused elsewhere.
     ranks = list(Chem.CanonicalRankAtoms(mol, breakTies=False))
-
     logger.debug(f"Symmetry ranks: {ranks}")
-
     classes = defaultdict(list)
     for idx, rank in enumerate(ranks):
         classes[rank].append(idx)
-
     return classes
-
-
-# mol = Chem.MolFromSmiles('CC(C)O') # Isopropanol
-# sym_classes = get_symmetry_classes(mol)
-# for rank, atoms in sym_classes.items():
-#     print(f"Symmetry Class {rank}: Atom Indices {atoms}")
 
 
 class expectedMolecule:
@@ -211,6 +213,7 @@ class expectedMolecule:
         else:
             logger.info("Using nmrshiftDB2 for C13 predictions")
             self.c13ppm = self.calculated_c13_chemical_shifts()
+            logger.debug(f"c13ppm:\n{self.c13ppm}")
             try:
                 logger.debug(f"c13ppm length: {len(self.c13ppm)}, molprops_df: {len(self.molprops_df)}")
                 if len(self.c13ppm) == len(self.molprops_df):
@@ -246,8 +249,6 @@ class expectedMolecule:
         self.molprops_df["ring_idx"] = -1
         self.molprops_df["ring_size"] = 0
         ring_atoms = self.GetRingSystems()
-
-        # print(f"self.molprops_df.index {self.molprops_df.index}")
 
         # create sets of carbon atoms in rings store them in molprops_df column aromatic_rings
         for ring_idx, ring in enumerate(ring_atoms):
@@ -318,17 +319,15 @@ class expectedMolecule:
         self.molprops_df["sym_atom_idx"] = ""
         self.molprops_df["sym_atomNumber"] = ""
 
-        # mol = Chem.MolFromSmiles('CC(C)O') # Isopropanol
-        sym_classes = get_symmetry_classes(self.mol)
-        for rank, atoms in sym_classes.items():
-            # find the atom symbol in the atoms and create a list
+        # Topological symmetry classes (carbon-only, singleton classes included).
+        # Stored raw (self.carbon_classes) so nmrsolution.py can later refine this
+        # via reconcile_symmetry_with_experimental_counts once real experimental
+        # per-type peak counts are known -- see refresh_sym_molprops_df() below.
+        self.carbon_classes = get_carbon_symmetry_classes(self.mol)
+        for atoms in self.carbon_classes:
             if len(atoms) == 1:
                 continue
-            # skip if atom is not carbon
-            atom_symbols = [self.mol.GetAtomWithIdx(idx).GetSymbol() for idx in atoms]
-            if not all(symbol == "C" for symbol in atom_symbols):
-                continue
-            logger.debug(f"Symmetry class {rank}: atoms {atoms}, symbols {atom_symbols}")
+            logger.debug(f"Symmetry class: atoms {atoms}")
 
             atomNumbers = self.molprops_df[self.molprops_df["atom_idx"].isin(atoms)][
                 "atomNumber"
@@ -398,57 +397,16 @@ class expectedMolecule:
             self.molprops_df
         )
 
-        # create reduced  molprops_df based on symmetry of NMR ppm values
-        self.sym_molprops_df = self.molprops_df.drop_duplicates(
-            subset=["ppm", "aromatic", "numProtons"], inplace=False
-        )
-
-        # self.copy_xy3_to_molecule(self.xy3, self.molprops_df)
-
-        # molecule has hose-code symmetry if there are less rows in sym_molprops_df than in molprops_df
-        self.has_hose_code_symmetry = (
-            self.sym_molprops_df.shape[0] < self.molprops_df.shape[0]
-        )
-
-        # calculate number of aromatic carbon atoms in sym_molprops_df
-        self.num_sym_aromatic_carbon_atoms = self.sym_molprops_df[
-            self.sym_molprops_df.aromatic
-        ].shape[0]
-        self.num_sym_CH0_carbon_atoms = self.sym_molprops_df[
-            self.sym_molprops_df.CH0
-        ].shape[0]
-
-        # calculate the number of quaternary carbon atoms in sym_molprops_df
-        self.num_sym_quaternary_carbons = self.sym_molprops_df[
-            self.sym_molprops_df.quaternary
-        ].shape[0]
-
-        # calculate the number of carbon atoms with two protons attached in sym_molprops_df
-        self.num_sym_CH2_carbon_atoms = self.sym_molprops_df[
-            self.sym_molprops_df.CH2
-        ].shape[0]
-
-        # calculate the number of carbon atoms with three protons attached in sym_molprops_df
-        self.num_sym_CH3_carbon_atoms = self.sym_molprops_df[
-            self.sym_molprops_df.CH3
-        ].shape[0]
-
-        # calculate the number of carbon atoms with one proton attached in sym_molprops_df
-        self.num_sym_CH1_carbon_atoms = self.sym_molprops_df[
-            self.sym_molprops_df.CH1
-        ].shape[0]
-
-        # calculate the number of carbon atoms with protons attached in sym_molprops_df
-        self.num_sym_carbon_atoms_with_protons = (
-            self.num_sym_CH2_carbon_atoms
-            + self.num_sym_CH3_carbon_atoms
-            + self.num_sym_CH1_carbon_atoms
-        )
-
-        self.num_sym_hsqc_carbon_atoms = self.num_sym_carbon_atoms_with_protons
-
-        # calculate number of carbon atoms in sym_molprops_df
-        self.num_sym_carbon_atoms = self.sym_molprops_df.shape[0]
+        # Build sym_molprops_df (one representative row per topological symmetry
+        # class) and all derived num_sym_* counts. Refactored into a reusable
+        # method -- see refresh_sym_molprops_df() below -- because nmrsolution.py
+        # later calls it again with a *reconciled* class list (after comparing
+        # against real experimental per-type peak counts via
+        # reconcile_symmetry_with_experimental_counts), once that data is known.
+        # Every downstream consumer of sym_molprops_df / num_sym_* is unaffected
+        # by this change: same attribute names, same DataFrame columns, just
+        # correctly-selected rows instead of shift-coincidence-based ones.
+        self.refresh_sym_molprops_df(self.carbon_classes)
 
         # calculate number of aromatic rings
         self.num_aromatic_rings = rdkit.Chem.rdMolDescriptors.CalcNumAromaticRings(
@@ -468,6 +426,68 @@ class expectedMolecule:
                 # add pair to list if it is not already in the list
                 if pair not in self.symmetry_pairs:
                     self.symmetry_pairs.append(pair)
+
+    def refresh_sym_molprops_df(self, carbon_classes, molgraph=None):
+        """
+        (Re)build sym_molprops_df -- one representative row per carbon
+        symmetry class -- and every derived num_sym_* count, from the given
+        `carbon_classes` (list of lists of RDKit atom idx, e.g. from
+        get_carbon_symmetry_classes or reconcile_symmetry_with_experimental_counts).
+
+        Called once at __init__ time with the raw topological classes, and
+        again later (by nmrsolution.py) with a reconciled class list once
+        real experimental per-type peak counts are known. Every attribute
+        this method sets keeps its original name/shape, so all existing
+        code that reads sym_molprops_df / num_sym_* elsewhere is unaffected.
+
+        Representative selection uses choose_best_representatives (Group
+        Steiner Tree baseline + automorphism enumeration + side-consistency
+        scoring) rather than an arbitrary per-class choice such as lowest
+        atom index -- the latter can scatter representatives across
+        different physical copies of a symmetric block/arm rather than
+        keeping them on one consistent side, even though each individual
+        choice is valid on its own.
+        """
+        if molgraph is None:
+            molgraph = build_molgraph(self.mol)
+        chosen_reps = choose_best_representatives(self.mol, molgraph, carbon_classes)
+        representative_atoms = [chosen_reps[i] for i in range(len(carbon_classes))]
+        print(f"Representative atoms for sym_molprops_df:\n {representative_atoms}")
+        self.sym_molprops_df = self.molprops_df.loc[representative_atoms]
+        print(f"self.sym_molprops_df AFTER refresh:\n{self.sym_molprops_df[['atom_idx', 'atomNumber', 'ppm']]}")
+
+
+        # molecule has hose-code symmetry if there are fewer rows in
+        # sym_molprops_df than in molprops_df
+        self.has_hose_code_symmetry = (
+            self.sym_molprops_df.shape[0] < self.molprops_df.shape[0]
+        )
+
+        self.num_sym_aromatic_carbon_atoms = self.sym_molprops_df[
+            self.sym_molprops_df.aromatic
+        ].shape[0]
+        self.num_sym_CH0_carbon_atoms = self.sym_molprops_df[
+            self.sym_molprops_df.CH0
+        ].shape[0]
+        self.num_sym_quaternary_carbons = self.sym_molprops_df[
+            self.sym_molprops_df.quaternary
+        ].shape[0]
+        self.num_sym_CH2_carbon_atoms = self.sym_molprops_df[
+            self.sym_molprops_df.CH2
+        ].shape[0]
+        self.num_sym_CH3_carbon_atoms = self.sym_molprops_df[
+            self.sym_molprops_df.CH3
+        ].shape[0]
+        self.num_sym_CH1_carbon_atoms = self.sym_molprops_df[
+            self.sym_molprops_df.CH1
+        ].shape[0]
+        self.num_sym_carbon_atoms_with_protons = (
+            self.num_sym_CH2_carbon_atoms
+            + self.num_sym_CH3_carbon_atoms
+            + self.num_sym_CH1_carbon_atoms
+        )
+        self.num_sym_hsqc_carbon_atoms = self.num_sym_carbon_atoms_with_protons
+        self.num_sym_carbon_atoms = self.sym_molprops_df.shape[0]
 
     def map_symmetric_aromatic_rings(self, df):
         # if there are no aromatic rings then return an empty list

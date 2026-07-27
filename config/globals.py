@@ -101,6 +101,10 @@ NMREXPERIMENTS_COLUMN_RENAME_MAP = types.MappingProxyType(
     }
 )
 
+# Simulated annealing parameters
+SIMULATED_ANNEALING_RUNS = 50
+SIMULATED_ANNEALING_COOLING_RATE = 0.995
+
 # Example usage (remove in production)
 if __name__ == "__main__":
     print(

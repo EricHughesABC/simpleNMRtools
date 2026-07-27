@@ -1,0 +1,2824 @@
+{
+    "smiles": {
+        "datatype": "smiles",
+        "count": 1,
+        "data": {
+            "0": "COc1c(OC)ccc(C(=O)OCCCCN(CC)C(C)Cc2ccc(OC)cc2)c1"
+        }
+    },
+    "molfile": {
+        "datatype": "molfile",
+        "count": 1,
+        "data": {
+            "0": "\r\n  Mnova   09232419242D\r\n\r\n 31 32  0  0  0  0  0  0  0  0999 V2000\r\n   31.8210  -19.8977    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n   39.3271  -24.2314    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   46.8331  -19.8977    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n   46.8331  -11.2302    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   54.3392   -6.8964    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   54.3392    1.7711    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   61.8462    6.1049    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   61.8462   14.7724    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0\r\n   69.3522   19.1062    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   76.8583   14.7724    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   69.3522   27.7737    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   76.8583   32.1074    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   76.8583   40.7750    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   84.3652   45.1087    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   91.8713   40.7750    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   99.6154   45.5914    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n  100.0000   53.8937    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   91.8713   32.1074    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   84.3652   27.7737    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   54.3401   19.1062    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   54.3401   27.7737    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   39.3271  -32.8990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   31.8210  -37.2327    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   31.8210  -45.9003    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   24.3141  -50.2340    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n   16.8080  -45.9003    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   39.3271  -50.2340    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   39.3271  -58.9015    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n   46.8331  -63.2353    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   46.8331  -45.9003    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   46.8331  -37.2327    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n  1  2  2  0  0  0  0\r\n  2  3  1  0  0  0  0\r\n  3  4  1  0  0  0  0\r\n  4  5  1  0  0  0  0\r\n  5  6  1  0  0  0  0\r\n  6  7  1  0  0  0  0\r\n  7  8  1  0  0  0  0\r\n  8  9  1  0  0  0  0\r\n  9 10  1  0  0  0  0\r\n  9 11  1  0  0  0  0\r\n 11 12  1  0  0  0  0\r\n 12 13  2  0  0  0  0\r\n 13 14  1  0  0  0  0\r\n 14 15  2  0  0  0  0\r\n 15 16  1  0  0  0  0\r\n 16 17  1  0  0  0  0\r\n 15 18  1  0  0  0  0\r\n 18 19  2  0  0  0  0\r\n 19 12  1  0  0  0  0\r\n  8 20  1  0  0  0  0\r\n 20 21  1  0  0  0  0\r\n  2 22  1  0  0  0  0\r\n 22 23  2  0  0  0  0\r\n 23 24  1  0  0  0  0\r\n 24 25  1  0  0  0  0\r\n 25 26  1  0  0  0  0\r\n 24 27  2  0  0  0  0\r\n 27 28  1  0  0  0  0\r\n 28 29  1  0  0  0  0\r\n 27 30  1  0  0  0  0\r\n 30 31  2  0  0  0  0\r\n 31 22  1  0  0  0  0\r\nM  ZZC   1 26\r\nM  ZZC   2 7\r\nM  ZZC   3 8\r\nM  ZZC   4 9\r\nM  ZZC   5 10\r\nM  ZZC   6 11\r\nM  ZZC   7 12\r\nM  ZZC   8 13\r\nM  ZZC   9 14\r\nM  ZZC  10 29\r\nM  ZZC  11 15\r\nM  ZZC  12 16\r\nM  ZZC  13 17\r\nM  ZZC  14 18\r\nM  ZZC  15 19\r\nM  ZZC  16 30\r\nM  ZZC  17 31\r\nM  ZZC  18 20\r\nM  ZZC  19 21\r\nM  ZZC  20 27\r\nM  ZZC  21 28\r\nM  ZZC  22 1\r\nM  ZZC  23 2\r\nM  ZZC  24 3\r\nM  ZZC  25 22\r\nM  ZZC  26 23\r\nM  ZZC  27 4\r\nM  ZZC  28 24\r\nM  ZZC  29 25\r\nM  ZZC  30 5\r\nM  ZZC  31 6\r\nM  END\r\n"
+        }
+    },
+    "allAtomsInfo": {
+        "datatype": "allAtomsInfo",
+        "data": {
+            "0": {
+                "atom_idx": 0,
+                "id": 0,
+                "atomNumber": "26",
+                "symbol": "O",
+                "numProtons": 0
+            },
+            "1": {
+                "atom_idx": 1,
+                "id": 1,
+                "atomNumber": "7",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "2": {
+                "atom_idx": 2,
+                "id": 2,
+                "atomNumber": "8",
+                "symbol": "O",
+                "numProtons": 0
+            },
+            "3": {
+                "atom_idx": 3,
+                "id": 3,
+                "atomNumber": "9",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "4": {
+                "atom_idx": 4,
+                "id": 4,
+                "atomNumber": "10",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "5": {
+                "atom_idx": 5,
+                "id": 5,
+                "atomNumber": "11",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "6": {
+                "atom_idx": 6,
+                "id": 6,
+                "atomNumber": "12",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "7": {
+                "atom_idx": 7,
+                "id": 7,
+                "atomNumber": "13",
+                "symbol": "N",
+                "numProtons": 0
+            },
+            "8": {
+                "atom_idx": 8,
+                "id": 8,
+                "atomNumber": "14",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "9": {
+                "atom_idx": 9,
+                "id": 9,
+                "atomNumber": "29",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "10": {
+                "atom_idx": 10,
+                "id": 10,
+                "atomNumber": "15",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "11": {
+                "atom_idx": 11,
+                "id": 11,
+                "atomNumber": "16",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "12": {
+                "atom_idx": 12,
+                "id": 12,
+                "atomNumber": "17",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "13": {
+                "atom_idx": 13,
+                "id": 13,
+                "atomNumber": "18",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "14": {
+                "atom_idx": 14,
+                "id": 14,
+                "atomNumber": "19",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "15": {
+                "atom_idx": 15,
+                "id": 15,
+                "atomNumber": "30",
+                "symbol": "O",
+                "numProtons": 0
+            },
+            "16": {
+                "atom_idx": 16,
+                "id": 16,
+                "atomNumber": "31",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "17": {
+                "atom_idx": 17,
+                "id": 17,
+                "atomNumber": "20",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "18": {
+                "atom_idx": 18,
+                "id": 18,
+                "atomNumber": "21",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "19": {
+                "atom_idx": 19,
+                "id": 19,
+                "atomNumber": "27",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "20": {
+                "atom_idx": 20,
+                "id": 20,
+                "atomNumber": "28",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "21": {
+                "atom_idx": 21,
+                "id": 21,
+                "atomNumber": "1",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "22": {
+                "atom_idx": 22,
+                "id": 22,
+                "atomNumber": "2",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "23": {
+                "atom_idx": 23,
+                "id": 23,
+                "atomNumber": "3",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "24": {
+                "atom_idx": 24,
+                "id": 24,
+                "atomNumber": "22",
+                "symbol": "O",
+                "numProtons": 0
+            },
+            "25": {
+                "atom_idx": 25,
+                "id": 25,
+                "atomNumber": "23",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "26": {
+                "atom_idx": 26,
+                "id": 26,
+                "atomNumber": "4",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "27": {
+                "atom_idx": 27,
+                "id": 27,
+                "atomNumber": "24",
+                "symbol": "O",
+                "numProtons": 0
+            },
+            "28": {
+                "atom_idx": 28,
+                "id": 28,
+                "atomNumber": "25",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "29": {
+                "atom_idx": 29,
+                "id": 29,
+                "atomNumber": "5",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "30": {
+                "atom_idx": 30,
+                "id": 30,
+                "atomNumber": "6",
+                "symbol": "C",
+                "numProtons": 1
+            }
+        },
+        "count": 31
+    },
+    "carbonAtomsInfo": {
+        "datatype": "carbonAtomsInfo",
+        "data": {
+            "2": {
+                "atom_idx": 2,
+                "atomNumber": "7",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "4": {
+                "atom_idx": 4,
+                "atomNumber": "9",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "5": {
+                "atom_idx": 5,
+                "atomNumber": "10",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "6": {
+                "atom_idx": 6,
+                "atomNumber": "11",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "7": {
+                "atom_idx": 7,
+                "atomNumber": "12",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "9": {
+                "atom_idx": 9,
+                "atomNumber": "14",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "10": {
+                "atom_idx": 10,
+                "atomNumber": "29",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "11": {
+                "atom_idx": 11,
+                "atomNumber": "15",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "12": {
+                "atom_idx": 12,
+                "atomNumber": "16",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "13": {
+                "atom_idx": 13,
+                "atomNumber": "17",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "14": {
+                "atom_idx": 14,
+                "atomNumber": "18",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "15": {
+                "atom_idx": 15,
+                "atomNumber": "19",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "17": {
+                "atom_idx": 17,
+                "atomNumber": "31",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "18": {
+                "atom_idx": 18,
+                "atomNumber": "20",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "19": {
+                "atom_idx": 19,
+                "atomNumber": "21",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "20": {
+                "atom_idx": 20,
+                "atomNumber": "27",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "21": {
+                "atom_idx": 21,
+                "atomNumber": "28",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "22": {
+                "atom_idx": 22,
+                "atomNumber": "1",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "23": {
+                "atom_idx": 23,
+                "atomNumber": "2",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "24": {
+                "atom_idx": 24,
+                "atomNumber": "3",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "26": {
+                "atom_idx": 26,
+                "atomNumber": "23",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "27": {
+                "atom_idx": 27,
+                "atomNumber": "4",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "29": {
+                "atom_idx": 29,
+                "atomNumber": "25",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "30": {
+                "atom_idx": 30,
+                "atomNumber": "5",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "31": {
+                "atom_idx": 31,
+                "atomNumber": "6",
+                "symbol": "C",
+                "numProtons": 1
+            }
+        },
+        "count": 25
+    },
+    "nmrAssignments": {
+        "datatype": "nmrAssignments",
+        "count": 0,
+        "data": {}
+    },
+    "c13predictions": {
+        "datatype": "c13predictions",
+        "count": 25,
+        "data": {
+            "0": {
+                "atomNumber": 7,
+                "atom_idx": 2,
+                "numProtons": 0,
+                "ppm": 166.23595937098284
+            },
+            "1": {
+                "atomNumber": 9,
+                "atom_idx": 4,
+                "numProtons": 2,
+                "ppm": 65.11209898519397
+            },
+            "2": {
+                "atomNumber": 10,
+                "atom_idx": 5,
+                "numProtons": 2,
+                "ppm": 27.280239694496956
+            },
+            "3": {
+                "atomNumber": 11,
+                "atom_idx": 6,
+                "numProtons": 2,
+                "ppm": 24.698230702514103
+            },
+            "4": {
+                "atomNumber": 12,
+                "atom_idx": 7,
+                "numProtons": 2,
+                "ppm": 52.97098321452873
+            },
+            "5": {
+                "atomNumber": 14,
+                "atom_idx": 9,
+                "numProtons": 1,
+                "ppm": 58.32424351847482
+            },
+            "6": {
+                "atomNumber": 29,
+                "atom_idx": 10,
+                "numProtons": 3,
+                "ppm": 18.18455724313631
+            },
+            "7": {
+                "atomNumber": 15,
+                "atom_idx": 11,
+                "numProtons": 2,
+                "ppm": 41.20774257457164
+            },
+            "8": {
+                "atomNumber": 16,
+                "atom_idx": 12,
+                "numProtons": 0,
+                "ppm": 132.3936551964415
+            },
+            "9": {
+                "atomNumber": 17,
+                "atom_idx": 13,
+                "numProtons": 1,
+                "ppm": 129.5659290901177
+            },
+            "10": {
+                "atomNumber": 18,
+                "atom_idx": 14,
+                "numProtons": 1,
+                "ppm": 113.71596458614951
+            },
+            "11": {
+                "atomNumber": 19,
+                "atom_idx": 15,
+                "numProtons": 0,
+                "ppm": 158.36608845412974
+            },
+            "12": {
+                "atomNumber": 31,
+                "atom_idx": 17,
+                "numProtons": 3,
+                "ppm": 55.332099733861945
+            },
+            "13": {
+                "atomNumber": 20,
+                "atom_idx": 18,
+                "numProtons": 1,
+                "ppm": 113.71596458614951
+            },
+            "14": {
+                "atomNumber": 21,
+                "atom_idx": 19,
+                "numProtons": 1,
+                "ppm": 129.5659290901177
+            },
+            "15": {
+                "atomNumber": 27,
+                "atom_idx": 20,
+                "numProtons": 2,
+                "ppm": 46.10551211737112
+            },
+            "16": {
+                "atomNumber": 28,
+                "atom_idx": 21,
+                "numProtons": 3,
+                "ppm": 14.118941120265836
+            },
+            "17": {
+                "atomNumber": 1,
+                "atom_idx": 22,
+                "numProtons": 0,
+                "ppm": 124.2950724515415
+            },
+            "18": {
+                "atomNumber": 2,
+                "atom_idx": 23,
+                "numProtons": 1,
+                "ppm": 112.83986117595671
+            },
+            "19": {
+                "atomNumber": 3,
+                "atom_idx": 24,
+                "numProtons": 0,
+                "ppm": 149.2439885508776
+            },
+            "20": {
+                "atomNumber": 23,
+                "atom_idx": 26,
+                "numProtons": 3,
+                "ppm": 55.954544776633426
+            },
+            "21": {
+                "atomNumber": 4,
+                "atom_idx": 27,
+                "numProtons": 0,
+                "ppm": 153.25731713067782
+            },
+            "22": {
+                "atomNumber": 25,
+                "atom_idx": 29,
+                "numProtons": 3,
+                "ppm": 55.92406239172275
+            },
+            "23": {
+                "atomNumber": 5,
+                "atom_idx": 30,
+                "numProtons": 1,
+                "ppm": 112.35660217485209
+            },
+            "24": {
+                "atomNumber": 6,
+                "atom_idx": 31,
+                "numProtons": 1,
+                "ppm": 125.18905940021898
+            }
+        }
+    },
+    "Predicted_13C_NMR_Spectrum_0": {
+        "datatype": "nmrspectrum",
+        "origin": "Predictor",
+        "type": "1D",
+        "subtype": "predicted, 13C",
+        "experimenttype": "1D",
+        "experiment": "1D",
+        "pulsesequence": "",
+        "intrument": "",
+        "probe": "",
+        "datafilename": "",
+        "nucleus": "13C",
+        "specfrequency": 175,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {},
+            "count": 0
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        }
+    },
+    "dj_mebeverin.10.fid_1": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "1D",
+        "subtype": "1H",
+        "experimenttype": "1D",
+        "experiment": "1D",
+        "pulsesequence": "zg30",
+        "intrument": "spect",
+        "probe": "Z119248_0001 (DCH 500S2 C/H-D-05 Z LT)",
+        "datafilename": "/Users/dch1amk/Downloads/Mebeverin/mebeverine/10/fid",
+        "nucleus": "1H",
+        "specfrequency": 500.133088507,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 83416.20927429199,
+            "data": {
+                "0": {
+                    "delta1": 7.707652468188838,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 83415.6811876297,
+                    "category": "dd",
+                    "type": 0,
+                    "jlistcount": 2,
+                    "jvals": [
+                        2.082763671875,
+                        8.418212890625
+                    ]
+                },
+                "1": {
+                    "delta1": 7.566465929815648,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 83522.07537555695,
+                    "category": "d",
+                    "type": 0,
+                    "jlistcount": 1,
+                    "jvals": [
+                        2.17236328125
+                    ]
+                },
+                "2": {
+                    "delta1": 7.190939684919954,
+                    "nH": 2,
+                    "realH": 2,
+                    "integralValue": 168010.26243782043,
+                    "category": "m",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "3": {
+                    "delta1": 7.032817668465408,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 86508.26941871643,
+                    "category": "d",
+                    "type": 0,
+                    "jlistcount": 1,
+                    "jvals": [
+                        8.487548828125
+                    ]
+                },
+                "4": {
+                    "delta1": 6.885428525236378,
+                    "nH": 2,
+                    "realH": 2,
+                    "integralValue": 167526.0099811554,
+                    "category": "m",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "5": {
+                    "delta1": 4.414570883177857,
+                    "nH": 2,
+                    "realH": 2,
+                    "integralValue": 169142.95447063446,
+                    "category": "td",
+                    "type": 0,
+                    "jlistcount": 2,
+                    "jvals": [
+                        1.915771484375,
+                        5.9619140625
+                    ]
+                },
+                "6": {
+                    "delta1": 3.905019186701718,
+                    "nH": 3,
+                    "realH": 3,
+                    "integralValue": 248218.90980529785,
+                    "category": "s",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "7": {
+                    "delta1": 3.8655533701171514,
+                    "nH": 3,
+                    "realH": 3,
+                    "integralValue": 248919.488571167,
+                    "category": "s",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "8": {
+                    "delta1": 3.7828501555671568,
+                    "nH": 3,
+                    "realH": 3,
+                    "integralValue": 245542.8789215088,
+                    "category": "s",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "9": {
+                    "delta1": 3.69508845512714,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 99928.9529876709,
+                    "category": "ddd",
+                    "type": 0,
+                    "jlistcount": 3,
+                    "jvals": [
+                        3.82684326171875,
+                        6.70819091796875,
+                        10.6998291015625
+                    ]
+                },
+                "10": {
+                    "delta1": 3.3307442971361323,
+                    "nH": 5,
+                    "realH": 5,
+                    "integralValue": 405643.45698547363,
+                    "category": "dtq",
+                    "type": 0,
+                    "jlistcount": 3,
+                    "jvals": [
+                        7.45953369140625,
+                        13.8076171875,
+                        28.5086669921875
+                    ]
+                },
+                "11": {
+                    "delta1": 3.2021227317465955,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 88493.94399642944,
+                    "category": "dd",
+                    "type": 0,
+                    "jlistcount": 2,
+                    "jvals": [
+                        3.74517822265625,
+                        13.05670166015625
+                    ]
+                },
+                "12": {
+                    "delta1": 2.762343363280248,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 83502.60824203491,
+                    "category": "dd",
+                    "type": 0,
+                    "jlistcount": 2,
+                    "jvals": [
+                        10.7470703125,
+                        13.016845703125
+                    ]
+                },
+                "13": {
+                    "delta1": 1.4364306403873937,
+                    "nH": 3,
+                    "realH": 3,
+                    "integralValue": 253133.92456054688,
+                    "category": "t",
+                    "type": 0,
+                    "jlistcount": 1,
+                    "jvals": [
+                        7.27923583984375
+                    ]
+                },
+                "14": {
+                    "delta1": 1.2470728543608098,
+                    "nH": 3,
+                    "realH": 3,
+                    "integralValue": 280442.54483032227,
+                    "category": "d",
+                    "type": 0,
+                    "jlistcount": 1,
+                    "jvals": [
+                        6.655517578125
+                    ]
+                },
+                "15": {
+                    "delta1": 1.2981364500192054,
+                    "nH": 3,
+                    "realH": 3,
+                    "integralValue": 214356.4263305664,
+                    "category": "s",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "16": {
+                    "delta1": 1.9876551206037723,
+                    "nH": 2,
+                    "realH": 2,
+                    "integralValue": 167919.4426422119,
+                    "category": "m",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "17": {
+                    "delta1": 1.9398669574393754,
+                    "nH": 2,
+                    "realH": 2,
+                    "integralValue": 182051.75239562988,
+                    "category": "m",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                }
+            },
+            "count": 18
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "5": {
+                    "delta1": 7.718228559662782,
+                    "delta2": 0,
+                    "intensity": 1913.4174375475966,
+                    "type": 0
+                },
+                "6": {
+                    "delta1": 7.713908612466828,
+                    "delta2": 0,
+                    "intensity": 2272.2232165436144,
+                    "type": 0
+                },
+                "7": {
+                    "delta1": 7.701240774087369,
+                    "delta2": 0,
+                    "intensity": 2149.491176081441,
+                    "type": 0
+                },
+                "8": {
+                    "delta1": 7.697231926538375,
+                    "delta2": 0,
+                    "intensity": 2319.681176054563,
+                    "type": 0
+                },
+                "10": {
+                    "delta1": 7.568637855479288,
+                    "delta2": 0,
+                    "intensity": 3696.1312628542814,
+                    "type": 0
+                },
+                "11": {
+                    "delta1": 7.564294004152008,
+                    "delta2": 0,
+                    "intensity": 4353.513912162205,
+                    "type": 0
+                },
+                "19": {
+                    "delta1": 7.198145910995058,
+                    "delta2": 0,
+                    "intensity": 5303.533955596269,
+                    "type": 0
+                },
+                "20": {
+                    "delta1": 7.193766573419521,
+                    "delta2": 0,
+                    "intensity": 1130.1070388065934,
+                    "type": 0
+                },
+                "21": {
+                    "delta1": 7.185307000001602,
+                    "delta2": 0,
+                    "intensity": 1108.606112630481,
+                    "type": 0
+                },
+                "22": {
+                    "delta1": 7.180906570345284,
+                    "delta2": 0,
+                    "intensity": 5853.442893346151,
+                    "type": 0
+                },
+                "23": {
+                    "delta1": 7.174384783177698,
+                    "delta2": 0,
+                    "intensity": 297.34120660590617,
+                    "type": 0
+                },
+                "25": {
+                    "delta1": 7.041302935677741,
+                    "delta2": 0,
+                    "intensity": 4327.409549558147,
+                    "type": 0
+                },
+                "27": {
+                    "delta1": 7.0243324012530755,
+                    "delta2": 0,
+                    "intensity": 4150.8434372330175,
+                    "type": 0
+                },
+                "29": {
+                    "delta1": 6.898641700937147,
+                    "delta2": 0,
+                    "intensity": 463.0352782367462,
+                    "type": 0
+                },
+                "30": {
+                    "delta1": 6.892569619773472,
+                    "delta2": 0,
+                    "intensity": 5753.746889684943,
+                    "type": 0
+                },
+                "31": {
+                    "delta1": 6.888674211482843,
+                    "delta2": 0,
+                    "intensity": 1703.5915666305157,
+                    "type": 0
+                },
+                "32": {
+                    "delta1": 6.879469454508945,
+                    "delta2": 0,
+                    "intensity": 1156.1902309015709,
+                    "type": 0
+                },
+                "33": {
+                    "delta1": 6.875041744452821,
+                    "delta2": 0,
+                    "intensity": 5584.875709552541,
+                    "type": 0
+                },
+                "51": {
+                    "delta1": 4.438439877371709,
+                    "delta2": 0,
+                    "intensity": 222.0875847230697,
+                    "type": 0
+                },
+                "52": {
+                    "delta1": 4.428399026810541,
+                    "delta2": 0,
+                    "intensity": 1322.126512236144,
+                    "type": 0
+                },
+                "53": {
+                    "delta1": 4.424763804261398,
+                    "delta2": 0,
+                    "intensity": 1547.490154599455,
+                    "type": 0
+                },
+                "54": {
+                    "delta1": 4.416336638763366,
+                    "delta2": 0,
+                    "intensity": 2421.731907026305,
+                    "type": 0
+                },
+                "55": {
+                    "delta1": 4.412486262814087,
+                    "delta2": 0,
+                    "intensity": 3107.625921895146,
+                    "type": 0
+                },
+                "56": {
+                    "delta1": 4.404732674681916,
+                    "delta2": 0,
+                    "intensity": 1264.8870626638586,
+                    "type": 0
+                },
+                "57": {
+                    "delta1": 4.400706891735835,
+                    "delta2": 0,
+                    "intensity": 1333.1131921348453,
+                    "type": 0
+                },
+                "58": {
+                    "delta1": 4.390130484394599,
+                    "delta2": 0,
+                    "intensity": 220.39954981685352,
+                    "type": 0
+                },
+                "85": {
+                    "delta1": 3.905019186701718,
+                    "delta2": 0,
+                    "intensity": 25366.425528853353,
+                    "type": 0
+                },
+                "86": {
+                    "delta1": 3.8655533701171514,
+                    "delta2": 0,
+                    "intensity": 24042.13081462285,
+                    "type": 0
+                },
+                "92": {
+                    "delta1": 3.7828501555671568,
+                    "delta2": 0,
+                    "intensity": 22723.370231272744,
+                    "type": 0
+                },
+                "97": {
+                    "delta1": 3.7207928621007227,
+                    "delta2": 0,
+                    "intensity": 160.42580724047824,
+                    "type": 0
+                },
+                "98": {
+                    "delta1": 3.716317538226524,
+                    "delta2": 0,
+                    "intensity": 516.7175704706201,
+                    "type": 0
+                },
+                "99": {
+                    "delta1": 3.708668389156818,
+                    "delta2": 0,
+                    "intensity": 652.974283474611,
+                    "type": 0
+                },
+                "100": {
+                    "delta1": 3.702916980732775,
+                    "delta2": 0,
+                    "intensity": 582.82352585545,
+                    "type": 0
+                },
+                "101": {
+                    "delta1": 3.6952048099638986,
+                    "delta2": 0,
+                    "intensity": 1137.4711329331217,
+                    "type": 0
+                },
+                "102": {
+                    "delta1": 3.6872358839719164,
+                    "delta2": 0,
+                    "intensity": 626.7661171246787,
+                    "type": 0
+                },
+                "103": {
+                    "delta1": 3.6814648861582238,
+                    "delta2": 0,
+                    "intensity": 690.9582064668554,
+                    "type": 0
+                },
+                "104": {
+                    "delta1": 3.673810697679826,
+                    "delta2": 0,
+                    "intensity": 570.1328994020799,
+                    "type": 0
+                },
+                "106": {
+                    "delta1": 3.660498847248125,
+                    "delta2": 0,
+                    "intensity": 228.70478355064142,
+                    "type": 0
+                },
+                "107": {
+                    "delta1": 3.652839283814962,
+                    "delta2": 0,
+                    "intensity": 617.7080494942868,
+                    "type": 0
+                },
+                "121": {
+                    "delta1": 3.4156837808862623,
+                    "delta2": 0,
+                    "intensity": 112.7186186813108,
+                    "type": 0
+                },
+                "122": {
+                    "delta1": 3.402314933180068,
+                    "delta2": 0,
+                    "intensity": 221.5534823722453,
+                    "type": 0
+                },
+                "123": {
+                    "delta1": 3.3882327296385504,
+                    "delta2": 0,
+                    "intensity": 369.83998584214896,
+                    "type": 0
+                },
+                "124": {
+                    "delta1": 3.375809244130162,
+                    "delta2": 0,
+                    "intensity": 687.4761516611991,
+                    "type": 0
+                },
+                "125": {
+                    "delta1": 3.3615264421251,
+                    "delta2": 0,
+                    "intensity": 931.6300828613802,
+                    "type": 0
+                },
+                "126": {
+                    "delta1": 3.3427747081993235,
+                    "delta2": 0,
+                    "intensity": 794.0321708670389,
+                    "type": 0
+                },
+                "132": {
+                    "delta1": 3.3146203563427523,
+                    "delta2": 0,
+                    "intensity": 888.9617987633015,
+                    "type": 0
+                },
+                "133": {
+                    "delta1": 3.3018217113066943,
+                    "delta2": 0,
+                    "intensity": 793.6940096568027,
+                    "type": 0
+                },
+                "134": {
+                    "delta1": 3.2876202687565725,
+                    "delta2": 0,
+                    "intensity": 961.4069834422843,
+                    "type": 0
+                },
+                "135": {
+                    "delta1": 3.2724273144681844,
+                    "delta2": 0,
+                    "intensity": 483.6791977389402,
+                    "type": 0
+                },
+                "136": {
+                    "delta1": 3.261280790078462,
+                    "delta2": 0,
+                    "intensity": 233.36267095280172,
+                    "type": 0
+                },
+                "137": {
+                    "delta1": 3.2448192865214587,
+                    "delta2": 0,
+                    "intensity": 134.2024743196607,
+                    "type": 0
+                },
+                "138": {
+                    "delta1": 3.218911394134524,
+                    "delta2": 0,
+                    "intensity": 1199.9482482499427,
+                    "type": 0
+                },
+                "139": {
+                    "delta1": 3.2114407489070067,
+                    "delta2": 0,
+                    "intensity": 1174.1089378683957,
+                    "type": 0
+                },
+                "140": {
+                    "delta1": 3.1928223415365062,
+                    "delta2": 0,
+                    "intensity": 1337.0280130126812,
+                    "type": 0
+                },
+                "141": {
+                    "delta1": 3.185316442408345,
+                    "delta2": 0,
+                    "intensity": 1311.9023568753057,
+                    "type": 0
+                },
+                "147": {
+                    "delta1": 2.786188246435107,
+                    "delta2": 0,
+                    "intensity": 1613.5351574803146,
+                    "type": 0
+                },
+                "148": {
+                    "delta1": 2.7645253565229155,
+                    "delta2": 0,
+                    "intensity": 1659.9579178527006,
+                    "type": 0
+                },
+                "149": {
+                    "delta1": 2.7599870178709227,
+                    "delta2": 0,
+                    "intensity": 1396.5856108940168,
+                    "type": 0
+                },
+                "150": {
+                    "delta1": 2.7386728322920466,
+                    "delta2": 0,
+                    "intensity": 1350.6613451269202,
+                    "type": 0
+                },
+                "154": {
+                    "delta1": 2.34887969811688,
+                    "delta2": 0,
+                    "intensity": 41.75657855970041,
+                    "type": 0
+                },
+                "155": {
+                    "delta1": 2.2889009502154947,
+                    "delta2": 0,
+                    "intensity": 287.1433994492433,
+                    "type": 0
+                },
+                "156": {
+                    "delta1": 2.2740040438684916,
+                    "delta2": 0,
+                    "intensity": 570.9956164333346,
+                    "type": 0
+                },
+                "157": {
+                    "delta1": 2.2591545527369963,
+                    "delta2": 0,
+                    "intensity": 320.76649625523703,
+                    "type": 0
+                },
+                "160": {
+                    "delta1": 2.118510009716353,
+                    "delta2": 0,
+                    "intensity": 25.941203737318357,
+                    "type": 0
+                },
+                "162": {
+                    "delta1": 2.07737181891065,
+                    "delta2": 0,
+                    "intensity": 350.5813125593914,
+                    "type": 0
+                },
+                "163": {
+                    "delta1": 2.0702945763893474,
+                    "delta2": 0,
+                    "intensity": 502.2426320414065,
+                    "type": 0
+                },
+                "164": {
+                    "delta1": 2.0609595649304615,
+                    "delta2": 0,
+                    "intensity": 954.6143218553825,
+                    "type": 0
+                },
+                "167": {
+                    "delta1": 2.023438814553289,
+                    "delta2": 0,
+                    "intensity": 185.34967302954894,
+                    "type": 0
+                },
+                "168": {
+                    "delta1": 2.0199783333967583,
+                    "delta2": 0,
+                    "intensity": 187.77624694613172,
+                    "type": 0
+                },
+                "169": {
+                    "delta1": 2.0082015093432224,
+                    "delta2": 0,
+                    "intensity": 807.0534587612703,
+                    "type": 0
+                },
+                "170": {
+                    "delta1": 2.001050811151705,
+                    "delta2": 0,
+                    "intensity": 639.8509841952892,
+                    "type": 0
+                },
+                "171": {
+                    "delta1": 1.9922471311040284,
+                    "delta2": 0,
+                    "intensity": 1306.2950633172532,
+                    "type": 0
+                },
+                "172": {
+                    "delta1": 1.9881636010054164,
+                    "delta2": 0,
+                    "intensity": 711.6242025060436,
+                    "type": 0
+                },
+                "173": {
+                    "delta1": 1.9844071635089566,
+                    "delta2": 0,
+                    "intensity": 323.6910882972933,
+                    "type": 0
+                },
+                "174": {
+                    "delta1": 1.9755763454547972,
+                    "delta2": 0,
+                    "intensity": 1794.1549950574167,
+                    "type": 0
+                },
+                "175": {
+                    "delta1": 1.960691325563463,
+                    "delta2": 0,
+                    "intensity": 1038.506847425345,
+                    "type": 0
+                },
+                "176": {
+                    "delta1": 1.9567039755004276,
+                    "delta2": 0,
+                    "intensity": 827.0213310939349,
+                    "type": 0
+                },
+                "177": {
+                    "delta1": 1.9473191824729026,
+                    "delta2": 0,
+                    "intensity": 1104.1286957211937,
+                    "type": 0
+                },
+                "178": {
+                    "delta1": 1.9443952793266088,
+                    "delta2": 0,
+                    "intensity": 1164.4164098081167,
+                    "type": 0
+                },
+                "179": {
+                    "delta1": 1.9323735948011993,
+                    "delta2": 0,
+                    "intensity": 2378.5913717164594,
+                    "type": 0
+                },
+                "180": {
+                    "delta1": 1.9185427550957388,
+                    "delta2": 0,
+                    "intensity": 798.0555503036131,
+                    "type": 0
+                },
+                "181": {
+                    "delta1": 1.9144873210477056,
+                    "delta2": 0,
+                    "intensity": 288.74099516309366,
+                    "type": 0
+                },
+                "183": {
+                    "delta1": 1.9025664317387596,
+                    "delta2": 0,
+                    "intensity": 177.69791773959327,
+                    "type": 0
+                },
+                "187": {
+                    "delta1": 1.6985212722798286,
+                    "delta2": 0,
+                    "intensity": 52.58658755869308,
+                    "type": 0
+                },
+                "189": {
+                    "delta1": 1.6215107411415686,
+                    "delta2": 0,
+                    "intensity": 106.19499647692494,
+                    "type": 0
+                },
+                "190": {
+                    "delta1": 1.6070136748370665,
+                    "delta2": 0,
+                    "intensity": 211.52513726155476,
+                    "type": 0
+                },
+                "191": {
+                    "delta1": 1.5923609068211517,
+                    "delta2": 0,
+                    "intensity": 122.98021072528636,
+                    "type": 0
+                },
+                "195": {
+                    "delta1": 1.4509537183809875,
+                    "delta2": 0,
+                    "intensity": 4889.130311466817,
+                    "type": 0
+                },
+                "196": {
+                    "delta1": 1.4364939451423728,
+                    "delta2": 0,
+                    "intensity": 10343.655714878589,
+                    "type": 0
+                },
+                "197": {
+                    "delta1": 1.4218442576388208,
+                    "delta2": 0,
+                    "intensity": 4846.712367879413,
+                    "type": 0
+                },
+                "202": {
+                    "delta1": 1.3257252198383336,
+                    "delta2": 0,
+                    "intensity": 448.4543270380211,
+                    "type": 0
+                },
+                "203": {
+                    "delta1": 1.3248890359196488,
+                    "delta2": 0,
+                    "intensity": 246.1242921944263,
+                    "type": 0
+                },
+                "204": {
+                    "delta1": 1.3209699816005993,
+                    "delta2": 0,
+                    "intensity": 197.3728878752511,
+                    "type": 0
+                },
+                "205": {
+                    "delta1": 1.2981364500192054,
+                    "delta2": 0,
+                    "intensity": 8173.318405861688,
+                    "type": 0
+                },
+                "206": {
+                    "delta1": 1.2761272520615525,
+                    "delta2": 0,
+                    "intensity": 334.3547008719662,
+                    "type": 0
+                },
+                "207": {
+                    "delta1": 1.2537266652186978,
+                    "delta2": 0,
+                    "intensity": 9969.183822443862,
+                    "type": 0
+                },
+                "208": {
+                    "delta1": 1.2404190435029219,
+                    "delta2": 0,
+                    "intensity": 9758.295182700887,
+                    "type": 0
+                },
+                "218": {
+                    "delta1": 0.9288089948165446,
+                    "delta2": 0,
+                    "intensity": 343.71231453831695,
+                    "type": 0
+                },
+                "219": {
+                    "delta1": 0.9153356469611009,
+                    "delta2": 0,
+                    "intensity": 896.2919723385933,
+                    "type": 0
+                },
+                "220": {
+                    "delta1": 0.9011286757605658,
+                    "delta2": 0,
+                    "intensity": 414.2340703257566,
+                    "type": 0
+                }
+            },
+            "count": 100
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 18,
+            "normValue": 83416.20927429199,
+            "data": {
+                "0": {
+                    "intensity": 83415.6811876297,
+                    "rangeMin1": 7.6484754611294985,
+                    "rangeMin2": 0,
+                    "rangeMax1": 7.76537149703255,
+                    "rangeMax2": 0,
+                    "delta1": 7.706923479081024,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "1": {
+                    "intensity": 83522.07537555695,
+                    "rangeMin1": 7.510108724754454,
+                    "rangeMin2": 0,
+                    "rangeMax1": 7.622233493885956,
+                    "rangeMax2": 0,
+                    "delta1": 7.566171109320205,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "2": {
+                    "intensity": 168010.26243782043,
+                    "rangeMin1": 7.118864849487089,
+                    "rangeMin2": 0,
+                    "rangeMax1": 7.245303418933251,
+                    "rangeMax2": 0,
+                    "delta1": 7.18208413421017,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "3": {
+                    "intensity": 86508.26941871643,
+                    "rangeMin1": 6.9804981131120485,
+                    "rangeMin2": 0,
+                    "rangeMax1": 7.090237248857771,
+                    "rangeMax2": 0,
+                    "delta1": 7.03536768098491,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "4": {
+                    "intensity": 167526.0099811554,
+                    "rangeMin1": 6.825431943036566,
+                    "rangeMin2": 0,
+                    "rangeMax1": 6.951870512482727,
+                    "rangeMax2": 0,
+                    "delta1": 6.888651227759647,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "5": {
+                    "intensity": 169142.95447063446,
+                    "rangeMin1": 4.33721632167156,
+                    "rangeMin2": 0,
+                    "rangeMax1": 4.506596292061701,
+                    "rangeMax2": 0,
+                    "delta1": 4.421906306866631,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "6": {
+                    "intensity": 248218.90980529785,
+                    "rangeMin1": 3.886168875227731,
+                    "rangeMin2": 0,
+                    "rangeMax1": 3.9361823008101715,
+                    "rangeMax2": 0,
+                    "delta1": 3.911175588018951,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "7": {
+                    "intensity": 248919.488571167,
+                    "rangeMin1": 3.835348781490738,
+                    "rangeMin2": 0,
+                    "rangeMax1": 3.8837488707640664,
+                    "rangeMax2": 0,
+                    "delta1": 3.8595488261274022,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "8": {
+                    "intensity": 245542.8789215088,
+                    "rangeMin1": 3.761941979426193,
+                    "rangeMin2": 0,
+                    "rangeMax1": 3.8119554050086295,
+                    "rangeMax2": 0,
+                    "delta1": 3.786948692217411,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "9": {
+                    "intensity": 99928.9529876709,
+                    "rangeMin1": 3.657881787488537,
+                    "rangeMin2": 0,
+                    "rangeMax1": 3.7458086163350828,
+                    "rangeMax2": 0,
+                    "delta1": 3.70184520191181,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "10": {
+                    "intensity": 405643.45698547363,
+                    "rangeMin1": 3.2351876745014794,
+                    "rangeMin2": 0,
+                    "rangeMax1": 3.444114726531343,
+                    "rangeMax2": 0,
+                    "delta1": 3.3396512005164114,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "11": {
+                    "intensity": 88493.94399642944,
+                    "rangeMin1": 3.161780872436933,
+                    "rangeMin2": 0,
+                    "rangeMax1": 3.2351876745014794,
+                    "rangeMax2": 0,
+                    "delta1": 3.198484273469206,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "12": {
+                    "intensity": 83502.60824203491,
+                    "rangeMin1": 2.708433369576767,
+                    "rangeMin2": 0,
+                    "rangeMax1": 2.818140238596308,
+                    "rangeMax2": 0,
+                    "delta1": 2.7632868040865377,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "13": {
+                    "intensity": 253133.92456054688,
+                    "rangeMin1": 1.4011015381198877,
+                    "rangeMin2": 0,
+                    "rangeMax1": 1.4713538445847731,
+                    "rangeMax2": 0,
+                    "delta1": 1.4362276913523304,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "14": {
+                    "intensity": 280442.54483032227,
+                    "rangeMin1": 1.2052801484461149,
+                    "rangeMin2": 0,
+                    "rangeMax1": 1.2744261193761188,
+                    "rangeMax2": 0,
+                    "delta1": 1.239853133911117,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "15": {
+                    "intensity": 214356.4263305664,
+                    "rangeMin1": 1.2716602805389188,
+                    "rangeMin2": 0,
+                    "rangeMax1": 1.3236580506782818,
+                    "rangeMax2": 0,
+                    "delta1": 1.2976591656086003,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "16": {
+                    "intensity": 167919.4426422119,
+                    "rangeMin1": 1.9604113657268984,
+                    "rangeMin2": 0,
+                    "rangeMax1": 2.0389152988999815,
+                    "rangeMax2": 0,
+                    "delta1": 1.9996633323134398,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "17": {
+                    "intensity": 182051.75239562988,
+                    "rangeMin1": 1.8916996779178998,
+                    "rangeMin2": 0,
+                    "rangeMax1": 1.9604113657268984,
+                    "rangeMax2": 0,
+                    "delta1": 1.9260555218223991,
+                    "delta2": 0,
+                    "type": 0
+                }
+            }
+        }
+    },
+    "chosenSpectra": {
+        "datatype": "chosenSpectra",
+        "count": 7,
+        "data": {
+            "0": "1H 1D zg30 dj_mebeverin.10.fid_1 SKIP",
+            "1": "13C 1D zgdc dj_mebeverin.11.fid_2 C13_1D",
+            "2": "13C DEPT-135 dept135 dj_mebeverin.12.fid_3 DEPT",
+            "3": "[1H, 1H] COSY cosygpppqf dj_mebeverin.13.ser_4 COSY",
+            "4": "[13C, 1H] HSQC hsqcetgpsisp2.2 dj_mebeverin.14.ser_5 HSQC",
+            "5": "[13C, 1H] HMBC hmbcetgpl3nd dj_mebeverin.15.ser_6 HMBC",
+            "6": "[13C, 1H] HSQC hsqcetgpsisp2.2 dj_mebeverin.16.ser_7 SKIP"
+        }
+    },
+    "SKIP": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H13C, HSQC",
+        "experimenttype": "2D-HSQC",
+        "experiment": "HSQC",
+        "pulsesequence": "hsqcetgpsisp2.2",
+        "intrument": "spect",
+        "probe": "Z119248_0001 (DCH 500S2 C/H-D-05 Z LT)",
+        "datafilename": "/Users/dch1amk/Downloads/Mebeverin/mebeverine/16/ser",
+        "nucleus": "[13C, 1H]",
+        "specfrequency": "[125.767216746, 500.133050793]",
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 79.52237270146698,
+                    "delta2": 1.4364795199412055,
+                    "intensity": 8.952675819396973,
+                    "type": 0
+                },
+                "1": {
+                    "delta1": 75.78557832497292,
+                    "delta2": 1.9311768426112306,
+                    "intensity": 4.730961322784424,
+                    "type": 0
+                },
+                "2": {
+                    "delta1": 75.57415144522885,
+                    "delta2": 3.202038203446976,
+                    "intensity": 0.6268854737281799,
+                    "type": 0
+                },
+                "3": {
+                    "delta1": 75.56851339510234,
+                    "delta2": 2.762286507396196,
+                    "intensity": 3.8051507472991943,
+                    "type": 0
+                },
+                "4": {
+                    "delta1": 75.14002158548769,
+                    "delta2": 3.8658738977245886,
+                    "intensity": 21.782203674316406,
+                    "type": 0
+                },
+                "5": {
+                    "delta1": 75.11183133485514,
+                    "delta2": 3.9037472495375756,
+                    "intensity": 22.234088897705078,
+                    "type": 0
+                },
+                "6": {
+                    "delta1": 74.32532334220718,
+                    "delta2": 3.781710893695733,
+                    "intensity": 20.245298385620117,
+                    "type": 0
+                },
+                "7": {
+                    "delta1": 73.95622086058108,
+                    "delta2": 6.883660906547542,
+                    "intensity": 9.359405517578125,
+                    "type": 0
+                },
+                "8": {
+                    "delta1": 73.50973427431266,
+                    "delta2": 7.707770488152476,
+                    "intensity": 4.379073143005371,
+                    "type": 0
+                },
+                "9": {
+                    "delta1": 72.00933167627107,
+                    "delta2": 7.566324757078937,
+                    "intensity": 12.83358383178711,
+                    "type": 0
+                },
+                "10": {
+                    "delta1": 71.98817061430431,
+                    "delta2": 1.982826399915374,
+                    "intensity": 3.5606887340545654,
+                    "type": 0
+                },
+                "11": {
+                    "delta1": 71.79421288049909,
+                    "delta2": 1.2451951734382598,
+                    "intensity": 10.505762100219727,
+                    "type": 0
+                },
+                "12": {
+                    "delta1": 70.57922684286831,
+                    "delta2": 7.032814165902599,
+                    "intensity": 4.557023525238037,
+                    "type": 0
+                },
+                "13": {
+                    "delta1": 70.38016348041077,
+                    "delta2": 3.6903876421034405,
+                    "intensity": 3.415144205093384,
+                    "type": 0
+                },
+                "14": {
+                    "delta1": 70.06768000829237,
+                    "delta2": 7.189673719922132,
+                    "intensity": 9.69583797454834,
+                    "type": 0
+                }
+            },
+            "count": 15
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "dj_mebeverin.16.ser_7"
+    },
+    "C13_1D": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "1D",
+        "subtype": "13C",
+        "experimenttype": "1D",
+        "experiment": "1D",
+        "pulsesequence": "zgdc",
+        "intrument": "spect",
+        "probe": "Z119248_0001 (DCH 500S2 C/H-D-05 Z LT)",
+        "datafilename": "/Users/dch1amk/Downloads/Mebeverin/mebeverine/11/fid",
+        "nucleus": "13C",
+        "specfrequency": 125.770363831,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 166.43999135170935,
+                    "delta2": 0,
+                    "intensity": 840.804694614955,
+                    "type": 0
+                },
+                "1": {
+                    "delta1": 159.05351596103674,
+                    "delta2": 0,
+                    "intensity": 974.9374042710773,
+                    "type": 0
+                },
+                "2": {
+                    "delta1": 153.60753313678822,
+                    "delta2": 0,
+                    "intensity": 646.0471797386492,
+                    "type": 0
+                },
+                "3": {
+                    "delta1": 148.865668976135,
+                    "delta2": 0,
+                    "intensity": 578.0634898862701,
+                    "type": 0
+                },
+                "4": {
+                    "delta1": 130.06591966740552,
+                    "delta2": 0,
+                    "intensity": 7653.240654749361,
+                    "type": 0
+                },
+                "5": {
+                    "delta1": 127.72001030113314,
+                    "delta2": 0,
+                    "intensity": 1510.44339669982,
+                    "type": 0
+                },
+                "6": {
+                    "delta1": 123.51563921218153,
+                    "delta2": 0,
+                    "intensity": 3755.7711158804573,
+                    "type": 0
+                },
+                "7": {
+                    "delta1": 122.25204009719516,
+                    "delta2": 0,
+                    "intensity": 879.0835741649432,
+                    "type": 0
+                },
+                "8": {
+                    "delta1": 113.9637645665628,
+                    "delta2": 0,
+                    "intensity": 7309.4595790628055,
+                    "type": 0
+                },
+                "9": {
+                    "delta1": 112.01709384742252,
+                    "delta2": 0,
+                    "intensity": 2807.23135937819,
+                    "type": 0
+                },
+                "10": {
+                    "delta1": 110.58556631115,
+                    "delta2": 0,
+                    "intensity": 3308.088216616309,
+                    "type": 0
+                },
+                "11": {
+                    "delta1": 63.458559468137835,
+                    "delta2": 0,
+                    "intensity": 3773.1736310031897,
+                    "type": 0
+                },
+                "12": {
+                    "delta1": 60.38690037439183,
+                    "delta2": 0,
+                    "intensity": 2561.6857383689094,
+                    "type": 0
+                },
+                "13": {
+                    "delta1": 55.14907582358484,
+                    "delta2": 0,
+                    "intensity": 2823.707868369897,
+                    "type": 0
+                },
+                "14": {
+                    "delta1": 55.11855441735509,
+                    "delta2": 0,
+                    "intensity": 2869.3452450876352,
+                    "type": 0
+                },
+                "15": {
+                    "delta1": 54.330021790579494,
+                    "delta2": 0,
+                    "intensity": 2656.495878965761,
+                    "type": 0
+                },
+                "16": {
+                    "delta1": 49.91844876558584,
+                    "delta2": 0,
+                    "intensity": 1032.3488653015286,
+                    "type": 0
+                },
+                "17": {
+                    "delta1": 46.16465512660582,
+                    "delta2": 0,
+                    "intensity": 943.6157936693544,
+                    "type": 0
+                },
+                "18": {
+                    "delta1": 35.573417869852555,
+                    "delta2": 0,
+                    "intensity": 3588.2373269466357,
+                    "type": 0
+                },
+                "19": {
+                    "delta1": 25.789047852263582,
+                    "delta2": 0,
+                    "intensity": 4029.025789559575,
+                    "type": 0
+                },
+                "20": {
+                    "delta1": 21.990026263187698,
+                    "delta2": 0,
+                    "intensity": 3266.481597142688,
+                    "type": 0
+                },
+                "21": {
+                    "delta1": 11.801864344480384,
+                    "delta2": 0,
+                    "intensity": 2811.5005238449207,
+                    "type": 0
+                },
+                "22": {
+                    "delta1": 9.526799617680132,
+                    "delta2": 0,
+                    "intensity": 3056.3903113878664,
+                    "type": 0
+                }
+            },
+            "count": 23
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "dj_mebeverin.11.fid_2"
+    },
+    "DEPT": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "1D",
+        "subtype": "13C",
+        "experimenttype": "1D-DEPT-135",
+        "experiment": "DEPT-135",
+        "pulsesequence": "dept135",
+        "intrument": "spect",
+        "probe": "Z119248_0001 (DCH 500S2 C/H-D-05 Z LT)",
+        "datafilename": "/Users/dch1amk/Downloads/Mebeverin/mebeverine/12/fid",
+        "nucleus": "13C",
+        "specfrequency": 125.770363831,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 130.068686983554,
+                    "delta2": 0,
+                    "intensity": 8287.019834936053,
+                    "type": 0
+                },
+                "1": {
+                    "delta1": 123.5140153919056,
+                    "delta2": 0,
+                    "intensity": 4127.708488038485,
+                    "type": 0
+                },
+                "2": {
+                    "delta1": 113.96322064187252,
+                    "delta2": 0,
+                    "intensity": 8916.08223581825,
+                    "type": 0
+                },
+                "3": {
+                    "delta1": 112.01277586760473,
+                    "delta2": 0,
+                    "intensity": 3479.6539102691213,
+                    "type": 0
+                },
+                "4": {
+                    "delta1": 110.58305383188477,
+                    "delta2": 0,
+                    "intensity": 4539.4793895631,
+                    "type": 0
+                },
+                "5": {
+                    "delta1": 63.45840165041896,
+                    "delta2": 0,
+                    "intensity": -5393.621474491458,
+                    "type": 0
+                },
+                "6": {
+                    "delta1": 60.38215489606603,
+                    "delta2": 0,
+                    "intensity": 3208.0865422500783,
+                    "type": 0
+                },
+                "7": {
+                    "delta1": 55.14599324399766,
+                    "delta2": 0,
+                    "intensity": 4092.9338839356424,
+                    "type": 0
+                },
+                "8": {
+                    "delta1": 55.116891922166886,
+                    "delta2": 0,
+                    "intensity": 4320.748905055889,
+                    "type": 0
+                },
+                "9": {
+                    "delta1": 54.329610332663954,
+                    "delta2": 0,
+                    "intensity": 3449.240084575836,
+                    "type": 0
+                },
+                "10": {
+                    "delta1": 49.91419883360429,
+                    "delta2": 0,
+                    "intensity": -1303.8857213300314,
+                    "type": 0
+                },
+                "11": {
+                    "delta1": 46.162051526153945,
+                    "delta2": 0,
+                    "intensity": -1052.774299107143,
+                    "type": 0
+                },
+                "12": {
+                    "delta1": 35.57192864599828,
+                    "delta2": 0,
+                    "intensity": -3540.8121846187328,
+                    "type": 0
+                },
+                "13": {
+                    "delta1": 25.787851005389275,
+                    "delta2": 0,
+                    "intensity": -4437.977169329483,
+                    "type": 0
+                },
+                "14": {
+                    "delta1": 21.987713078509994,
+                    "delta2": 0,
+                    "intensity": -3035.9996056022856,
+                    "type": 0
+                },
+                "15": {
+                    "delta1": 11.800135979988553,
+                    "delta2": 0,
+                    "intensity": 2061.9448053832466,
+                    "type": 0
+                },
+                "16": {
+                    "delta1": 9.529624764760415,
+                    "delta2": 0,
+                    "intensity": 2122.5047043381173,
+                    "type": 0
+                }
+            },
+            "count": 17
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "dj_mebeverin.12.fid_3"
+    },
+    "COSY": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H1H, COSY",
+        "experimenttype": "2D-COSY",
+        "experiment": "COSY",
+        "pulsesequence": "cosygpppqf",
+        "intrument": "spect",
+        "probe": "Z119248_0001 (DCH 500S2 C/H-D-05 Z LT)",
+        "datafilename": "/Users/dch1amk/Downloads/Mebeverin/mebeverine/13/ser",
+        "nucleus": "[1H, 1H]",
+        "specfrequency": "[500.132234593534, 500.132234593534]",
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 7.56676770728856,
+                    "delta2": 7.707444630947101,
+                    "intensity": 2.9537875652313232,
+                    "type": 0
+                },
+                "1": {
+                    "delta1": 7.034713395689286,
+                    "delta2": 7.709421095537065,
+                    "intensity": 5.850650787353516,
+                    "type": 0
+                },
+                "2": {
+                    "delta1": 6.884460677406817,
+                    "delta2": 7.189610908376332,
+                    "intensity": 4.745999813079834,
+                    "type": 0
+                },
+                "3": {
+                    "delta1": 4.420858668153672,
+                    "delta2": 1.9306354660187086,
+                    "intensity": 2.396057605743408,
+                    "type": 0
+                },
+                "4": {
+                    "delta1": 3.3440498321140533,
+                    "delta2": 1.4367519245237896,
+                    "intensity": 0.3763924837112427,
+                    "type": 0
+                },
+                "5": {
+                    "delta1": 3.2032656380028666,
+                    "delta2": 3.689104766847528,
+                    "intensity": 0.5261707305908203,
+                    "type": 0
+                },
+                "6": {
+                    "delta1": 2.7637906536828103,
+                    "delta2": 3.691543697916639,
+                    "intensity": 1.0304086208343506,
+                    "type": 0
+                },
+                "7": {
+                    "delta1": 2.7637906536828103,
+                    "delta2": 3.204976949629053,
+                    "intensity": 0.4973170757293701,
+                    "type": 0
+                },
+                "8": {
+                    "delta1": 1.2471625595119749,
+                    "delta2": 3.6946160402015216,
+                    "intensity": 0.14304666221141815,
+                    "type": 0
+                }
+            },
+            "count": 9
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "dj_mebeverin.13.ser_4"
+    },
+    "HSQC": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H13C, HSQC",
+        "experimenttype": "2D-HSQC",
+        "experiment": "HSQC",
+        "pulsesequence": "hsqcetgpsisp2.2",
+        "intrument": "spect",
+        "probe": "Z119248_0001 (DCH 500S2 C/H-D-05 Z LT)",
+        "datafilename": "/Users/dch1amk/Downloads/Mebeverin/mebeverine/14/ser",
+        "nucleus": "[13C, 1H]",
+        "specfrequency": "[125.767849149, 500.13300078]",
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 130.08462109665533,
+                    "delta2": 7.189404776493045,
+                    "intensity": 803.2681561112404,
+                    "type": 0
+                },
+                "1": {
+                    "delta1": 123.52878208827741,
+                    "delta2": 7.707294722383537,
+                    "intensity": 350.95358419418335,
+                    "type": 0
+                },
+                "2": {
+                    "delta1": 113.96871394207973,
+                    "delta2": 6.884194011982788,
+                    "intensity": 710.0084199905396,
+                    "type": 0
+                },
+                "3": {
+                    "delta1": 112.03378670077208,
+                    "delta2": 7.566704099953431,
+                    "intensity": 415.02749997377396,
+                    "type": 0
+                },
+                "4": {
+                    "delta1": 110.59532105427364,
+                    "delta2": 7.0330335739942536,
+                    "intensity": 405.6696144938469,
+                    "type": 0
+                },
+                "5": {
+                    "delta1": 63.46802336869319,
+                    "delta2": 4.413595933582508,
+                    "intensity": 713.0622209906578,
+                    "type": 0
+                },
+                "6": {
+                    "delta1": 60.40916963013292,
+                    "delta2": 3.6956857627640036,
+                    "intensity": 304.27089625597,
+                    "type": 0
+                },
+                "7": {
+                    "delta1": 55.15352732508113,
+                    "delta2": 3.8652921758233765,
+                    "intensity": 609.5047754049301,
+                    "type": 0
+                },
+                "8": {
+                    "delta1": 55.11853085859769,
+                    "delta2": 3.9046707831605905,
+                    "intensity": 613.7606924772263,
+                    "type": 0
+                },
+                "9": {
+                    "delta1": 54.3518342662734,
+                    "delta2": 3.7828394666288,
+                    "intensity": 536.4866101741791,
+                    "type": 0
+                },
+                "10": {
+                    "delta1": 49.92454596046246,
+                    "delta2": 3.3042326860831324,
+                    "intensity": 400.438820540905,
+                    "type": 0
+                },
+                "11": {
+                    "delta1": 46.20159897603053,
+                    "delta2": 3.335253495933314,
+                    "intensity": 442.55647999048233,
+                    "type": 0
+                },
+                "12": {
+                    "delta1": 35.616355117591645,
+                    "delta2": 3.2023071680039625,
+                    "intensity": 236.47320926189423,
+                    "type": 0
+                },
+                "13": {
+                    "delta1": 35.616355117591645,
+                    "delta2": 2.7628456951263822,
+                    "intensity": 253.55549347400665,
+                    "type": 0
+                },
+                "14": {
+                    "delta1": 25.799837693607607,
+                    "delta2": 1.937133736531467,
+                    "intensity": 501.1202182173729,
+                    "type": 0
+                },
+                "15": {
+                    "delta1": 21.998334132258606,
+                    "delta2": 1.9823981429081752,
+                    "intensity": 494.5094284415245,
+                    "type": 0
+                },
+                "16": {
+                    "delta1": 11.814912470947991,
+                    "delta2": 1.2463595348695162,
+                    "intensity": 739.7003262639046,
+                    "type": 0
+                },
+                "17": {
+                    "delta1": 9.522490626376928,
+                    "delta2": 1.4366012428295978,
+                    "intensity": 571.9172899723053,
+                    "type": 0
+                }
+            },
+            "count": 18
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 18,
+            "normValue": 803.2681561112404,
+            "data": {
+                "0": {
+                    "intensity": 803.2681561112404,
+                    "rangeMin1": 130.73229089419928,
+                    "rangeMin2": 7.161670558348726,
+                    "rangeMax1": 129.35787191922012,
+                    "rangeMax2": 7.215080300525563,
+                    "delta1": 130.0450814067097,
+                    "delta2": 7.188375429437144,
+                    "type": 0
+                },
+                "1": {
+                    "intensity": 350.95358419418335,
+                    "rangeMin1": 124.13248657095032,
+                    "rangeMin2": 7.681355827466191,
+                    "rangeMax1": 122.84883111318678,
+                    "rangeMax2": 7.733070022272333,
+                    "delta1": 123.49065884206854,
+                    "delta2": 7.707212924869262,
+                    "type": 0
+                },
+                "2": {
+                    "intensity": 415.02749997377396,
+                    "rangeMin1": 112.6444185348038,
+                    "rangeMin2": 7.546983698338755,
+                    "rangeMax1": 111.30889821005991,
+                    "rangeMax2": 7.584285740494005,
+                    "delta1": 111.97665837243186,
+                    "delta2": 7.56563471941638,
+                    "type": 0
+                },
+                "3": {
+                    "intensity": 405.6696144938469,
+                    "rangeMin1": 111.1273711756287,
+                    "rangeMin2": 7.006104087087627,
+                    "rangeMax1": 109.93447923508076,
+                    "rangeMax2": 7.055698847680403,
+                    "delta1": 110.53092520535472,
+                    "delta2": 7.030901467384015,
+                    "type": 0
+                },
+                "4": {
+                    "intensity": 710.0084199905396,
+                    "rangeMin1": 114.53748617958641,
+                    "rangeMin2": 6.854776484253259,
+                    "rangeMax1": 113.3186618055483,
+                    "rangeMax2": 6.908186226430096,
+                    "delta1": 113.92807399256736,
+                    "delta2": 6.881481355341677,
+                    "type": 0
+                },
+                "5": {
+                    "intensity": 713.0622209906578,
+                    "rangeMin1": 64.13989380847472,
+                    "rangeMin2": 4.383577192496228,
+                    "rangeMax1": 62.76653090544767,
+                    "rangeMax2": 4.446196839709326,
+                    "delta1": 63.453212356961195,
+                    "delta2": 4.414887016102776,
+                    "type": 0
+                },
+                "6": {
+                    "intensity": 304.27089625597,
+                    "rangeMin1": 60.939467757670556,
+                    "rangeMin2": 3.6631836442155965,
+                    "rangeMax1": 59.83587256773812,
+                    "rangeMax2": 3.7247328701088147,
+                    "delta1": 60.38767016270434,
+                    "delta2": 3.6939582571622056,
+                    "type": 0
+                },
+                "7": {
+                    "intensity": 613.7606924772263,
+                    "rangeMin1": 55.752570364988,
+                    "rangeMin2": 3.891183385350475,
+                    "rangeMax1": 54.51409131850826,
+                    "rangeMax2": 3.921155182307173,
+                    "delta1": 55.13333084174813,
+                    "delta2": 3.906169283828824,
+                    "type": 0
+                },
+                "8": {
+                    "intensity": 609.5047754049301,
+                    "rangeMin1": 55.752570364988,
+                    "rangeMin2": 3.848901743215135,
+                    "rangeMax1": 54.48956698095418,
+                    "rangeMax2": 3.878873540171833,
+                    "delta1": 55.12106867297109,
+                    "delta2": 3.863887641693484,
+                    "type": 0
+                },
+                "9": {
+                    "intensity": 536.4866101741791,
+                    "rangeMin1": 54.93100505692717,
+                    "rangeMin2": 3.7643384589444504,
+                    "rangeMax1": 53.65573950411634,
+                    "rangeMax2": 3.8018032051403234,
+                    "delta1": 54.29337228052175,
+                    "delta2": 3.783070832042387,
+                    "type": 0
+                },
+                "10": {
+                    "intensity": 442.55647999048233,
+                    "rangeMin1": 46.62951679487962,
+                    "rangeMin2": 3.2863953396171084,
+                    "rangeMax1": 45.59949461760934,
+                    "rangeMax2": 3.403606474144196,
+                    "delta1": 46.11450570624448,
+                    "delta2": 3.345000906880652,
+                    "type": 0
+                },
+                "11": {
+                    "intensity": 400.438820540905,
+                    "rangeMin1": 50.32042959676488,
+                    "rangeMin2": 3.2516066467209415,
+                    "rangeMax1": 49.302669588271584,
+                    "rangeMax2": 3.3698882025679096,
+                    "delta1": 49.81154959251823,
+                    "delta2": 3.3107474246444255,
+                    "type": 0
+                },
+                "12": {
+                    "intensity": 236.47320926189423,
+                    "rangeMin1": 35.94800229456561,
+                    "rangeMin2": 3.1766128184504434,
+                    "rangeMax1": 35.00822386847772,
+                    "rangeMax2": 3.2319768013301133,
+                    "delta1": 35.47811308152167,
+                    "delta2": 3.2042948098902784,
+                    "type": 0
+                },
+                "13": {
+                    "intensity": 253.55549347400665,
+                    "rangeMin1": 36.08896905847878,
+                    "rangeMin2": 2.727873167741527,
+                    "rangeMax1": 35.00822386847772,
+                    "rangeMax2": 2.79780661980006,
+                    "delta1": 35.54859646347825,
+                    "delta2": 2.762839893770794,
+                    "type": 0
+                },
+                "14": {
+                    "intensity": 501.1202182173729,
+                    "rangeMin1": 26.299610453396504,
+                    "rangeMin2": 1.9003273183822318,
+                    "rangeMax1": 25.109224447018512,
+                    "rangeMax2": 1.970260770440763,
+                    "delta1": 25.704417450207508,
+                    "delta2": 1.9352940444114974,
+                    "type": 0
+                },
+                "15": {
+                    "intensity": 494.5094284415245,
+                    "rangeMin1": 22.493507827740512,
+                    "rangeMin2": 1.9374794647883258,
+                    "rangeMax1": 21.36577371643503,
+                    "rangeMax2": 2.0197969656488897,
+                    "delta1": 21.929640772087772,
+                    "delta2": 1.9786382152186077,
+                    "type": 0
+                },
+                "16": {
+                    "intensity": 739.7003262639046,
+                    "rangeMin1": 12.453541642368132,
+                    "rangeMin2": 1.2213900546473155,
+                    "rangeMax1": 11.012548055700002,
+                    "rangeMax2": 1.2774825109859285,
+                    "delta1": 11.733044849034066,
+                    "delta2": 1.249436282816622,
+                    "type": 0
+                },
+                "17": {
+                    "intensity": 571.9172899723053,
+                    "rangeMin1": 10.166747472220909,
+                    "rangeMin2": 1.4100646805135642,
+                    "rangeMax1": 8.819731728161576,
+                    "rangeMax2": 1.4639717164753487,
+                    "delta1": 9.493239600191242,
+                    "delta2": 1.4370181984944566,
+                    "type": 0
+                }
+            }
+        },
+        "filename": "dj_mebeverin.14.ser_5"
+    },
+    "HMBC": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H13C, HMBC",
+        "experimenttype": "2D-HMBC",
+        "experiment": "HMBC",
+        "pulsesequence": "hmbcetgpl3nd",
+        "intrument": "spect",
+        "probe": "Z119248_0001 (DCH 500S2 C/H-D-05 Z LT)",
+        "datafilename": "/Users/dch1amk/Downloads/Mebeverin/mebeverine/15/ser",
+        "nucleus": "[13C, 1H]",
+        "specfrequency": "[125.771621883, 500.13300078]",
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 166.4657731092869,
+                    "delta2": 4.414251711091973,
+                    "intensity": 7.860105991363525,
+                    "type": 0
+                },
+                "1": {
+                    "delta1": 166.46181979934826,
+                    "delta2": 7.707521097078909,
+                    "intensity": 2.3155603408813477,
+                    "type": 0
+                },
+                "2": {
+                    "delta1": 166.46181979934826,
+                    "delta2": 7.566405542704001,
+                    "intensity": 9.433257102966309,
+                    "type": 0
+                },
+                "3": {
+                    "delta1": 159.07575969080352,
+                    "delta2": 7.188724921048085,
+                    "intensity": 20.079126358032227,
+                    "type": 0
+                },
+                "4": {
+                    "delta1": 159.07575969080352,
+                    "delta2": 6.884783727009824,
+                    "intensity": 0.5692850351333618,
+                    "type": 0
+                },
+                "5": {
+                    "delta1": 159.05970905410697,
+                    "delta2": 3.7826002631470685,
+                    "intensity": 82.00338745117188,
+                    "type": 0
+                },
+                "6": {
+                    "delta1": 153.6298167536277,
+                    "delta2": 7.708269720709544,
+                    "intensity": 7.186158657073975,
+                    "type": 0
+                },
+                "7": {
+                    "delta1": 153.6298167536277,
+                    "delta2": 7.566405542704001,
+                    "intensity": 10.62216567993164,
+                    "type": 0
+                },
+                "8": {
+                    "delta1": 153.6298167536277,
+                    "delta2": 7.03188827042982,
+                    "intensity": 1.2983440160751343,
+                    "type": 0
+                },
+                "9": {
+                    "delta1": 153.59332844195038,
+                    "delta2": 3.905463253618451,
+                    "intensity": 93.80957794189453,
+                    "type": 0
+                },
+                "10": {
+                    "delta1": 148.93269097031353,
+                    "delta2": 7.030765334983865,
+                    "intensity": 13.23898696899414,
+                    "type": 0
+                },
+                "11": {
+                    "delta1": 148.88266865175086,
+                    "delta2": 3.8670214590537864,
+                    "intensity": 92.93473815917969,
+                    "type": 0
+                },
+                "12": {
+                    "delta1": 148.86461668359883,
+                    "delta2": 7.566405542704001,
+                    "intensity": 6.16879940032959,
+                    "type": 0
+                },
+                "13": {
+                    "delta1": 130.11015069369955,
+                    "delta2": 7.190222168309357,
+                    "intensity": 9.770574569702148,
+                    "type": 0
+                },
+                "14": {
+                    "delta1": 130.09041087908338,
+                    "delta2": 3.202958301966126,
+                    "intensity": 0.9720697402954102,
+                    "type": 0
+                },
+                "15": {
+                    "delta1": 130.09041087908338,
+                    "delta2": 2.763515826844553,
+                    "intensity": 12.717761039733887,
+                    "type": 0
+                },
+                "16": {
+                    "delta1": 127.82966208875716,
+                    "delta2": 6.884783727009824,
+                    "intensity": 16.927562713623047,
+                    "type": 0
+                },
+                "17": {
+                    "delta1": 127.72248563695103,
+                    "delta2": 3.2014507806106502,
+                    "intensity": 1.270750641822815,
+                    "type": 0
+                },
+                "18": {
+                    "delta1": 127.72248563695103,
+                    "delta2": 2.763515826844553,
+                    "intensity": 6.508866310119629,
+                    "type": 0
+                },
+                "19": {
+                    "delta1": 123.60905631244587,
+                    "delta2": 7.5656569190733665,
+                    "intensity": 8.287395477294922,
+                    "type": 0
+                },
+                "20": {
+                    "delta1": 122.31564486486663,
+                    "delta2": 7.03188827042982,
+                    "intensity": 21.67717742919922,
+                    "type": 0
+                },
+                "21": {
+                    "delta1": 113.9765447423161,
+                    "delta2": 6.884035103379189,
+                    "intensity": 7.319638729095459,
+                    "type": 0
+                },
+                "22": {
+                    "delta1": 112.07046471430453,
+                    "delta2": 7.707521097078909,
+                    "intensity": 6.151000499725342,
+                    "type": 0
+                },
+                "23": {
+                    "delta1": 63.48261531636163,
+                    "delta2": 1.9399634061237132,
+                    "intensity": 3.4720137119293213,
+                    "type": 0
+                },
+                "24": {
+                    "delta1": 60.37736695018495,
+                    "delta2": 3.1984824913485537,
+                    "intensity": 1.9510269165039062,
+                    "type": 0
+                },
+                "25": {
+                    "delta1": 60.37736695018495,
+                    "delta2": 2.759125670849451,
+                    "intensity": 5.784133434295654,
+                    "type": 0
+                },
+                "26": {
+                    "delta1": 60.37736695018495,
+                    "delta2": 1.2465207135287455,
+                    "intensity": 56.2528076171875,
+                    "type": 0
+                },
+                "27": {
+                    "delta1": 49.94778276378716,
+                    "delta2": 1.9399634061237132,
+                    "intensity": 2.676720142364502,
+                    "type": 0
+                },
+                "28": {
+                    "delta1": 46.167480404963364,
+                    "delta2": 1.435761753683479,
+                    "intensity": 33.33805847167969,
+                    "type": 0
+                },
+                "29": {
+                    "delta1": 35.589645840433604,
+                    "delta2": 7.189896583288837,
+                    "intensity": 3.378833532333374,
+                    "type": 0
+                },
+                "30": {
+                    "delta1": 35.56913272040382,
+                    "delta2": 1.2465207135287455,
+                    "intensity": 45.44420623779297,
+                    "type": 0
+                },
+                "31": {
+                    "delta1": 25.882107925917854,
+                    "delta2": 4.414653931224081,
+                    "intensity": 3.558051824569702,
+                    "type": 0
+                },
+                "32": {
+                    "delta1": 25.78084982702078,
+                    "delta2": 1.99025123497602,
+                    "intensity": 4.838574409484863,
+                    "type": 0
+                },
+                "33": {
+                    "delta1": 22.034300167829354,
+                    "delta2": 4.414653931224081,
+                    "intensity": 14.082595825195312,
+                    "type": 0
+                },
+                "34": {
+                    "delta1": 22.034300167829354,
+                    "delta2": 1.9373166782893823,
+                    "intensity": 6.692558288574219,
+                    "type": 0
+                },
+                "35": {
+                    "delta1": 11.80723217922572,
+                    "delta2": 3.1984824913485537,
+                    "intensity": 1.6985639333724976,
+                    "type": 0
+                },
+                "36": {
+                    "delta1": 11.80723217922572,
+                    "delta2": 2.763095762600949,
+                    "intensity": 3.758805274963379,
+                    "type": 0
+                },
+                "37": {
+                    "delta1": 9.545801303857909,
+                    "delta2": 3.346699250071143,
+                    "intensity": 0.7799347639083862,
+                    "type": 0
+                }
+            },
+            "count": 38
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "dj_mebeverin.15.ser_6"
+    },
+    "carbonCalcPositionsMethod": {
+        "datatype": "carbonCalcPositionsMethod",
+        "count": 1,
+        "data": {
+            "0": "Calculated Positions"
+        }
+    },
+    "MNOVAcalcMethod": {
+        "datatype": "MNOVAcalcMethod",
+        "count": 1,
+        "data": {
+            "0": "NMRSHIFTDB2 Predict"
+        }
+    },
+    "exptIdentifiers": {
+        "count": 7,
+        "datatype": "exptIdentifiers",
+        "data": {
+            "0": "SKIP",
+            "1": "C13_1D",
+            "2": "DEPT",
+            "3": "COSY",
+            "4": "HSQC",
+            "5": "HMBC",
+            "6": "SKIP"
+        }
+    },
+    "workingDirectory": {
+        "datatype": "workingDirectory",
+        "count": 1,
+        "data": {
+            "0": "/Users/vsmw51/Library/CloudStorage/Dropbox/Mac/Downloads/4Eric/mebeverine"
+        }
+    },
+    "workingFilename": {
+        "datatype": "workingFilename",
+        "count": 1,
+        "data": {
+            "0": "mebeverine"
+        }
+    },
+    "simulatedAnnealing": {
+        "datatype": "simulatedAnnealing",
+        "count": 1,
+        "data": {
+            "0": true
+        }
+    },
+    "randomizeStart": {
+        "datatype": "randomizeStart",
+        "count": 1,
+        "data": {
+            "0": true
+        }
+    },
+    "startingTemperature": {
+        "datatype": "startingTemperature",
+        "count": 1,
+        "data": {
+            "0": 1000
+        }
+    },
+    "endingTemperature": {
+        "datatype": "endingTemperature",
+        "count": 1,
+        "data": {
+            "0": 0.001
+        }
+    },
+    "coolingRate": {
+        "datatype": "coolingRate",
+        "count": 1,
+        "data": {
+            "0": 0.995
+        }
+    },
+    "numberOfSteps": {
+        "datatype": "numberOfSteps",
+        "count": 1,
+        "data": {
+            "0": 50000
+        }
+    },
+    "ppmGroupSeparation": {
+        "datatype": "ppmGroupSeparation",
+        "count": 1,
+        "data": {
+            "0": 2
+        }
+    },
+    "spectraWithPeaks": {
+        "datatype": "spectraWithPeaks",
+        "count": 7,
+        "data": {
+            "0": "1H 1D zg30 dj_mebeverin.10.fid_1",
+            "1": "13C 1D zgdc dj_mebeverin.11.fid_2",
+            "2": "13C DEPT-135 dept135 dj_mebeverin.12.fid_3",
+            "3": "[1H, 1H] COSY cosygpppqf dj_mebeverin.13.ser_4",
+            "4": "[13C, 1H] HSQC hsqcetgpsisp2.2 dj_mebeverin.14.ser_5",
+            "5": "[13C, 1H] HMBC hmbcetgpl3nd dj_mebeverin.15.ser_6",
+            "6": "[13C, 1H] HSQC hsqcetgpsisp2.2 dj_mebeverin.16.ser_7"
+        }
+    }
+}

@@ -6,10 +6,10 @@ Introduction
 
 This document outlines the best way to process a set of NMR spectra
 using Mnova and extract the information necessary for use with the
-simplePredict tool. It also discusses how tave and name your data so
-that the simpleNMR suite of tools can find your data.
+simpleVerify tool. It also discusses how tave and name your data so that
+the simpleNMR suite of tools can find your data.
 
-Since simplePredict can cope with various amounts of input (presence or
+Since simpleVerify can cope with various amounts of input (presence or
 absence of certain spectra), the information below is in the form of
 general guidance but, in this document, we assume that we are working on
 a data set containing the most commonly encountered set of experiments,
@@ -26,18 +26,18 @@ Directory Structure and File Naming
 
 For each new molecule that is being assigned using simpleNMR create a
 unique directory based on the sample name of the molecule. If a student
-had made aspirin as part of a project then the student should save the
+had made aspirin as part of a project, then the student should save the
 data in a directory called aspirin_1 for example.
 
-The MNOVA file corresponding to this file should should be saved in this
+The MNOVA file corresponding to this file should be saved in this
 directory under the same name.
 
-.. image:: media/image1.png
+.. image:: ./media/image1.png
    :alt: Directory structure and naming convention
    :width: 6.26806in
    :height: 1.98125in
 
-Figure 1 Directory structure and naming convention dorm nova files used
+Figure Directory structure and naming convention dorm nova files used
 with simpleNMR tools.
 
 Processing Steps
@@ -46,14 +46,14 @@ Processing Steps
 The following bullet points are general rules and advice when processing
 the NMR data for use with the simpleNMR tool set.
 
--  Process the data so as to facilitate the accurate extraction of the
+-  Process the data to facilitate the accurate extraction of the
    required data. For all spectra, ensure the use of zero filling before
    FT (at least a factor of two). In the case of 2D spectra, the
    acquired data will typically be severely truncated in both
-   dimensions. So, assuming that we have a reasonable S/N ratio, it is a
-   good idea to double the number of data points acquired using forward
-   linear prediction and then double the size of that using zero filling
-   (in both dimensions). This helps considerably with the accurate
+   dimensions. So, if we have a reasonable S/N ratio, it is a good idea
+   to double the number of data points acquired using forward linear
+   prediction and then double the size of that using zero filling (in
+   both dimensions). This helps considerably with the accurate
    positioning of correlations. Note, however, that large 2D datasets
    will considerably slow down the response of the processing software
    (how large depends to some extent on how much memory is present in
@@ -107,7 +107,7 @@ the NMR data for use with the simpleNMR tool set.
    the corresponding proton multiplet in the 1D-:sup:`1`\ H spectrum.
    Note that this may not actually be on a local maximum in the 2D
    spectrum. See the example in the figure below. Click on the left
-   mouse button to “peak pick” (ie define) that position. Repeat the
+   mouse button to “peak pick” (i.e. define) that position. Repeat the
    procedure for other correlations until you have picked all the
    required correlations.
 
@@ -115,7 +115,7 @@ the NMR data for use with the simpleNMR tool set.
    simplePeakPick tool or “by hand”), there are a couple of caveats.
    First you do not need to “pick” correlations to proton signals that
    did not show a correlation in the HSQC experiment. It is not a
-   disaster if you do, but the simplePredict tool makes no use of them
+   disaster if you do, but the simpleVerify tool makes no use of them,
    so you are just wasting your time and it is potentially unhelpful.
    Second, you need to set the threshold sensibly and may need to adjust
    it during the “picking” process. Given the sensitivity of modern
@@ -132,28 +132,28 @@ the NMR data for use with the simpleNMR tool set.
    highly-coupled CH multiplets elsewhere in the spectrum. And if you
    set the threshold to suit the lowest intensity CH multiplet, you may
    well see correlations over 4, 5, or even six bonds from a methyl
-   singlet. So you may need to pick a sensible number of correlations
+   singlet. So, you may need to pick a sensible number of correlations
    from the methyl signals first, then turn up the intensity so that you
    can see correlations from other signals.
 
-.. image:: media/image2.png
+.. image:: ./media/image2.png
    :alt: Peak picking 2D data
    :width: 6.26806in
    :height: 4.42917in
 
-Figure 2 2-D peak picking showing peak position between centre of proton
+Figure 2-D peak picking showing peak position between centre of proton
 doublets.
 
 If you get to the point where you are seeing significant amounts of
 1-bond breakthrough you have almost certainly turned the intensity up
 too far. Err on the side of fewer rather than more and if you don’t have
-enough information when you come to use the simplePredict tool you can
+enough information when you come to use the simpleVerify tool you can
 always go back and pick a few more correlations. Finally, if you look at
 a correlation in the HMBC and you can’t tell for sure which two signals
 in the respective 1D spectra are correlated, don’t pick it. The
 redundant information in the HMBC means you are unlikely to need it.
 Conversely, a false correlation in your data will be highly confusing
-when you run it through the simplePredict tool. This is usually only a
+when you run it through the simpleVerify tool. This is usually only a
 problem where you have near degeneracy of signals in either the
 1D-:sup:`1`\ H or 1D-:sup:`13`\ C spectra.
 
@@ -166,16 +166,16 @@ problem where you have near degeneracy of signals in either the
    peak overlap). You do not need to pick peaks that lie on the diagonal
    (they contain no information) and if you pick a correlation on one
    side of the diagonal you do not need to pick the symmetric peak on
-   the other side of the diagonal. So the number of peaks you pick will
+   the other side of the diagonal. So, the number of peaks you pick will
    be only a fraction of the peaks visible in the spectrum – see the
    example in the figure below. Note that, as shown in the inset
    expansion, the “picked” position does not necessarily correspond to a
    local maximum in the 2D spectrum.
 
-.. image:: media/image3.png
+.. image:: ./media/image3.png
    :alt: peak picking cosy data
    :width: 6.26806in
    :height: 4.42917in
 
-Figure 3 COSY 2D peak picking showing that position of pick peak does
-not necessarily correspond to a peak maximum.
+Figure COSY 2D peak picking showing that position of pick peak does not
+necessarily correspond to a peak maximum.

@@ -28,8 +28,9 @@ from loguru import logger
 
 import core.nmrsolution as nmrsolution
 from config.globals import SVG_DIMENSIONS as svgDimensions
-from core.simulated_annealing import SimulatedAnnealing2
+from core.simulated_annealing_claude import SimulatedAnnealing2
 from app.pipelines import PipelineError
+from config.globals import SIMULATED_ANNEALING_RUNS, SIMULATED_ANNEALING_COOLING_RATE
 
 
 # ── Internal utilities ────────────────────────────────────────────────────────
@@ -209,17 +210,27 @@ def _run_simulated_annealing(solution, json_data, jsonGraphData, catoms_df) -> t
         solution.c13_df.shape[0] < solution.expected_molecule.num_carbon_atoms
     )
 
+    # Same source of truth as the rest of the pipeline: sym_molprops_df was
+    # already rebuilt by _reconcile_molecule_symmetry (inside
+    # initialise_prior_to_carbon_assignment, called by _assign_carbons above),
+    # and ch3_ch1_evidence_based was set by _assign_proton_types -- neither
+    # is recomputed here.
+    orig_nodes_displayed = solution.expected_molecule.sym_molprops_df["atom_idx"].tolist()
+    pool_ch3_ch1 = not getattr(solution, "ch3_ch1_evidence_based", False)
+
     simAnneal = SimulatedAnnealing2.from_params(
         copy.deepcopy(jsonGraphData["nodes"]),
         copy.deepcopy(jsonGraphData["links"]),
         json_data["molfile"]["data"]["0"],
         json_data,
         possible_symmetry,
+        orig_nodes_displayed,
+        pool_ch3_ch1,
     )
-    simAnneal.setup_run(cooling_rate=0.999)
+    simAnneal.setup_run(cooling_rate=SIMULATED_ANNEALING_COOLING_RATE)
 
     if json_data["simulatedAnnealing"]["data"]["0"] and simAnneal.predicted_weight > 0:
-        simAnneal.run_optimization(100)
+        simAnneal.run_optimization(SIMULATED_ANNEALING_RUNS)
         jsonGraphData, best_results = simAnneal.process_results(catoms_df, jsonGraphData)
     else:
         best_results = simAnneal.process_results_SA_skipped()

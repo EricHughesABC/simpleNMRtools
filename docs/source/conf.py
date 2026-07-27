@@ -43,8 +43,13 @@ source_suffix = {
 myst_enable_extensions = [
 "colon_fence", # ::: fenced blocks
 "deflist", # Definition lists
-"footnotes", # Footnotes
 ]
+
+# Auto-generate GitHub-style anchor slugs for headings up to this depth, so
+# in-page links like [smiles](#11-smiles) resolve to headings such as
+# "#### 1.1 smiles". The deepest heading level used across the docs is
+# #### (level 4), so 4 covers every internal "back to list/top" link.
+myst_heading_anchors = 4
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

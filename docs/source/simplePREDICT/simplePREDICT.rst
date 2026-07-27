@@ -1,5 +1,5 @@
-simplePREDICT
-=============
+simpleVERIFY
+============
 
 Introduction
 ------------
@@ -19,8 +19,8 @@ The key aims behind the simpleNMR suite of utilities are:
 
 -  Facilitate the assignment and generate a report in an easy way.
 
-simplePREDICT is the main tool in the simpleNMR suite of utilities. The
-tool takes the peak-picked data sets, and uses predicted :sup:`13`\ C
+simpleVERIFY is the main tool in the simpleNMR suite of utilities. The
+tool takes the peak-picked data sets and uses predicted :sup:`13`\ C
 chemical shifts for the molecule to map the NMR data onto the molecular
 structure using information from chemical shifts, CH(n) groups (from
 HSQC), and correlations (from HMBC and COSY) in an attempt to interpret
@@ -32,7 +32,7 @@ Step Through Guide
 NMR Data Sets
 ~~~~~~~~~~~~~
 
-The tool simplePREDICT requires a set of NMR experiments and a molecular
+The tool simpleVERIFY requires a set of NMR experiments and a molecular
 structure to be present in the Mnova document. Below is a list of the
 datasets that can be used, with an indication of which are required and
 which are optional.
@@ -48,7 +48,7 @@ which are optional.
    -  CH\ :sub:`3` set in the annotations field of the peak table
       (MNOVA)
 
-   -  If the HSQC experiment is not multiplicity edited then a DEPT-135
+   -  If the HSQC experiment is not multiplicity edited, then a DEPT-135
       dataset is also needed.
 
 -  **Molecular structure** diagram present in the file. (required)
@@ -79,7 +79,7 @@ which are optional.
    -  Used to find quarternary carbons if no 1-D carbon is present.
 
    -  Used in automatic simulated annealing algorithm to refine the
-      prediction.
+      assignment.
 
 -  **COSY** (optional)
 
@@ -87,7 +87,7 @@ which are optional.
       CH(n) groups. Helps to check if assignments are correct.
 
    -  Used in automatic simulated annealing algorithm to refine the
-      prediction.
+      assignment.
 
 -  **HSQC-CLIP-COSY** (optional)
 
@@ -106,10 +106,8 @@ which are optional.
       multiplicity-edited HSQC data, in order to differentiate between
       CH\ :sub:`2` resonances and CH\ :sub:`1`/ CH\ :sub:`3` resonances.
 
--  .. rubric:: The “Ideal” data set
-      :name: the-ideal-data-set
-
-..
+The “Ideal” data set
+--------------------
 
    In view of the number of “optional” datasets listed above, a
    reasonable question would be “so which experiments should I be
@@ -132,17 +130,17 @@ which are optional.
    favoured, but it may be that in cases where there is near accidental
    degeneracy in the carbon spectrum, but not in the proton, the classic
    :sup:`1`\ H-:sup:`1`\ H COSY gives better results. So, the user can
-   select whichever experiment seems more appropriate. Finally among the
-   2D data sets, if the molecule contains a significant number of methyl
-   groups that are overlapped with other signals so that it is not
-   immediately apparent to the user which HSQC correlations are due to
-   methyl groups (in some steroids, for example) the tool can make use
-   of the DDEPT-CH3-Only experiment to identify the methyl groups, but
-   note that this is often not needed.
+   select whichever experiment seems more appropriate. Finally, among
+   the 2D data sets, if the molecule contains a significant number of
+   methyl groups that are overlapped with other signals so that it is
+   not immediately apparent to the user which HSQC correlations are due
+   to methyl groups (in some steroids, for example) the tool can make
+   use of the DDEPT-CH3-Only experiment to identify the methyl groups,
+   but note that this is often not needed.
 
    Turning to the 1-D experiments, it makes no sense not to acquire a
    standard 1-D proton spectrum as part of the dataset. It is not
-   generally used by the simplePREDICT tool, but is a useful reference
+   generally used by the simpleVERIFY tool, but is a useful reference
    point and takes less than a minute to acquire. It is generally good
    policy to acquire the whole suite of NMR experiments on a particular
    sample at the same time if possible. In addition, both a 1-D carbon
@@ -151,8 +149,8 @@ which are optional.
    the 2-D spectra (see the documentation for simplePeakPick) and
    facilitate the correct identification of **all** quaternary carbon
    atoms. If you are collecting NMR data with the intention of reporting
-   the characterisation of your molecule in the literature you will most
-   likely require a 1-D carbon spectrum anyway so it makes sense to
+   the characterisation of your molecule in the literature, you will
+   most likely require a 1-D carbon spectrum anyway so it makes sense to
    include it in this dataset.
 
    So, the “ideal” data set might consist of the following spectra: 1-D
@@ -161,38 +159,38 @@ which are optional.
    :sup:`1`\ H-:sup:`13`\ C HSQC-Clip_COSY. But note that the tool has
    been successfully used with a range of other datasets.
 
-The simplePREDICT Dialog
-~~~~~~~~~~~~~~~~~~~~~~~~
+The simpleVERIFY Dialog
+~~~~~~~~~~~~~~~~~~~~~~~
 
-After clicking on the simplePREDICT icon, the simplePREDICT dialog
-window will appear.
+After clicking on the simpleVERIFY icon, the simpleVERIFY dialog window
+will appear.
 
-.. image:: media\\image1.png
-   :alt: highlighted simplePREDICT icon
+.. image:: ./media/image1.png
    :width: 6.26806in
-   :height: 0.85833in
+   :height: 1.47986in
 
-Figure 1 The simplePREDICT icon under the simpleNMRTools.
+Figure 1 The simpleVERIFY icon under the simpleNMRTools.
 
-The simplePREDICT dialog controls how the tool operates. There are three
+The simpleVERIFY dialog controls how the tool operates. There are three
 main parts to the dialog.
 
-1. NMR datasets to use in the prediction
+1. NMR datasets to use in the verification
 
 2. Which carbon chemical shift prediction source to use
 
 3. Optimization of the results using simulated annealing on COSY and
    HMBC correlations
 
-.. image:: media\\image2.png
-   :alt: A screenshot of a computer AI-generated content may be incorrect.
+.. image:: ./media/image2.png
+   :alt: A screenshot of a computer AI-generated content may be
+   incorrect.
    :width: 6.26806in
    :height: 4.54722in
 
-Figure 2 simplePREDICT dialog
+Figure 2 simpleVERIFY dialog
 
-1. NMR data sets to use in the prediction
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1. NMR data sets to use in the verification
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All the NMR experiments present in the MNOVA file which have been
 “peak-picked” will show up in this section. Initially the drop-down
@@ -205,7 +203,7 @@ possible equipment manufacturers (past and present!). Therefore, we have
 gone with a simple manual solution. Once the datasets have been
 identified, the information is stored so that the user does not have to
 perform the action again unless new data files have been peak picked and
-the simplePREDICT tool is run again.
+the simpleVERIFY tool is run again.
 
 Note that an HSQC dataset **must** be present in the list.
 
@@ -213,19 +211,19 @@ Note that an HSQC dataset **must** be present in the list.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In this part of the dialog the user has two options on how the
-simplePREDICT tool calculates the carbon ppm values.
+simpleVERIFY tool calculates the carbon ppm values.
 
 The first option is to use the prediction tool from MNOVA if the user
 has a license.
 
-The second option uses the NMRSHIFTDB hose code to predict the chemical
+The second option uses the NMRSHIFTDB HOSE code to predict the chemical
 shifts. This code is free to use, but the predictions are generally less
 accurate than those from the Mnova software.
 
-3. Optimization of Prediction Results using Simulated Annealing.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3. Optimization of Verification Results using Simulated Annealing.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Originally, the simplePREDICT tool matched the predicted carbon chemical
+Originally, the simpleVERIFY tool matched the predicted carbon chemical
 shifts to the experimental data by grouping the carbon ppm values into
 categories based on the number of protons attached to the carbon. Then
 matching the calculated chemical shifts to the experimental chemical
@@ -256,10 +254,10 @@ increase the execution time.
 Errors and Problems
 -------------------
 
-The error reporting with simplePREDICT is not very informative at
-present and we are working to improve this. The tool catches a number of
-simple errors and reports them via MNOVA warning dialogs or via html
-output if the tool has reached that stage.
+The error reporting with simpleVERIFY is not very informative at present
+and we are working to improve this. The tool catches several simple
+errors and reports them via MNOVA warning dialogs or via html output if
+the tool has reached that stage.
 
 The simple errors include the following:
 
@@ -267,7 +265,7 @@ The simple errors include the following:
 
 -  Missing HSQC dataset.
 
-The simplePREDICT program attempts to match up the number of carbon
+The simpleVERIFY program attempts to match up the number of carbon
 groups in the molecule (CH3, CH2, CH1, C) with those found in the
 experimental NMR data via the HSQC information, proton integrals (if
 used) and CH\ :sub:`3` only NMR data if present.
@@ -283,9 +281,9 @@ Typically, the error message will be something like len(CH0) > len(CH0)
 6>5. This means there are more experimental quaternary carbons present
 than expected in the molecule structure provided.
 
-In such cases, the user then has to resort to looking at the HSQC and
-1-D carbon experimental data to see if a peak has been picked
-erroneously or is missing.
+In such cases, the user then must resort to looking at the HSQC and 1-D
+carbon experimental data to see if a peak has been picked erroneously or
+is missing.
 
 These types of errors may occur if the carbon chemical shift separation
 is very small for a couple of carbon resonances. This type of error is

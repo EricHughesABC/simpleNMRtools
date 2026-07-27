@@ -3,7 +3,7 @@
     <actions>
 	    <!-- Actions will be identified by its name. Valid properties are text, checkable, tooltip, icon -->
 		<action name="simpleNMRtools_simplePREDICT_eeh">
-		    <text>predict</text>
+		    <text>verify</text>
 			<icon>ricares:predict.png</icon>
 		</action>
 		<action name="simpleNMRtools_simpleASSIGN_eeh">
@@ -15,11 +15,11 @@
 			<icon>ricares:PeakPick2.png</icon>
 		</action>
 		<action name="simpleNMRtools_snapToCarbonHSQC_eeh">
-		    <text>Snap to Carbon</text>
+		    <text>snap to carbon</text>
 			<icon>ricares:snap.png</icon>
 		</action>
 		<action name="simpleNMRtools_simpleIntegrate">
-		    <text>Integrate 2D</text>
+		    <text>integrate 2D</text>
 			<icon>ricares:integrate2D.png</icon>
 		</action>
         <action name="simpleNMRtools_simpleREPORT_eeh">
@@ -46,7 +46,7 @@
 	</menus>
 	    <ribbon>
 		<page id="simpleNMRTools" title="_simpleNMRTools">
-			<group id="simplePredict_eeh" name="Simple Predict">
+			<group id="simplePredict_eeh" name="Simple Verify">
 			    <icon>ricares:predict.png</icon>
 				<addaction name="simpleNMRtools_simplePREDICT_eeh"/>
 			</group>

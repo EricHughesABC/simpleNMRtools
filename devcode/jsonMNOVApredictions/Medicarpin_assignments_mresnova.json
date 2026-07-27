@@ -1,0 +1,1813 @@
+{
+    "smiles": {
+        "datatype": "smiles",
+        "count": 1,
+        "data": {
+            "0": "COc1ccc2c(c1)O[C@H]1c3ccc(O)cc3OC[C@@H]21"
+        }
+    },
+    "molfile": {
+        "datatype": "molfile",
+        "count": 1,
+        "data": {
+            "0": "\r\n  Mrv2011 09172419562D\r\n\r\n 20 23  0  0  0  0  0  0  0  0999 V2000\r\n    1.5879   -1.8888    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    2.2820   -2.3348    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n    3.0152   -1.9568    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    3.7093   -2.4027    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    4.4426   -2.0247    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    4.4818   -1.2006    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    3.7877   -0.7546    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    3.0545   -1.1327    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    5.2776   -0.9832    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    5.6486   -0.2464    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    6.4723   -0.1992    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n    6.9249   -0.8889    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    7.7486   -0.8418    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    8.2012   -1.5315    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    9.0249   -1.4844    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n    7.8302   -2.2684    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    7.0066   -2.3156    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    6.5539   -1.6258    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    5.7303   -1.6730    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    5.2142   -2.3166    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n  1  2  1  0  0  0  0\r\n  2  3  1  0  0  0  0\r\n  3  4  2  0  0  0  0\r\n  4  5  1  0  0  0  0\r\n  5  6  2  0  0  0  0\r\n  6  7  1  0  0  0  0\r\n  7  8  2  0  0  0  0\r\n  3  8  1  0  0  0  0\r\n  9  6  1  6  0  0  0\r\n  9 10  1  0  0  0  0\r\n 10 11  1  0  0  0  0\r\n 11 12  1  0  0  0  0\r\n 12 13  2  0  0  0  0\r\n 13 14  1  0  0  0  0\r\n 14 15  1  0  0  0  0\r\n 14 16  2  0  0  0  0\r\n 16 17  1  0  0  0  0\r\n 17 18  2  0  0  0  0\r\n 12 18  1  0  0  0  0\r\n 19 18  1  0  0  0  0\r\n  9 19  1  0  0  0  0\r\n 19 20  1  6  0  0  0\r\n  5 20  1  0  0  0  0\r\nM  END\r\n"
+        }
+    },
+    "allAtomsInfo": {
+        "datatype": "allAtomsInfo",
+        "data": {
+            "0": {
+                "atom_idx": 0,
+                "id": 0,
+                "atomNumber": "1",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "1": {
+                "atom_idx": 1,
+                "id": 1,
+                "atomNumber": "2",
+                "symbol": "O",
+                "numProtons": 0
+            },
+            "2": {
+                "atom_idx": 2,
+                "id": 2,
+                "atomNumber": "3",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "3": {
+                "atom_idx": 3,
+                "id": 3,
+                "atomNumber": "4",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "4": {
+                "atom_idx": 4,
+                "id": 4,
+                "atomNumber": "5",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "5": {
+                "atom_idx": 5,
+                "id": 5,
+                "atomNumber": "6",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "6": {
+                "atom_idx": 6,
+                "id": 6,
+                "atomNumber": "7",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "7": {
+                "atom_idx": 7,
+                "id": 7,
+                "atomNumber": "8",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "8": {
+                "atom_idx": 8,
+                "id": 8,
+                "atomNumber": "9",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "9": {
+                "atom_idx": 9,
+                "id": 9,
+                "atomNumber": "10",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "10": {
+                "atom_idx": 10,
+                "id": 10,
+                "atomNumber": "11",
+                "symbol": "O",
+                "numProtons": 0
+            },
+            "11": {
+                "atom_idx": 11,
+                "id": 11,
+                "atomNumber": "12",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "12": {
+                "atom_idx": 12,
+                "id": 12,
+                "atomNumber": "13",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "13": {
+                "atom_idx": 13,
+                "id": 13,
+                "atomNumber": "14",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "14": {
+                "atom_idx": 14,
+                "id": 14,
+                "atomNumber": "15",
+                "symbol": "O",
+                "numProtons": 1
+            },
+            "15": {
+                "atom_idx": 15,
+                "id": 15,
+                "atomNumber": "16",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "16": {
+                "atom_idx": 16,
+                "id": 16,
+                "atomNumber": "17",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "17": {
+                "atom_idx": 17,
+                "id": 17,
+                "atomNumber": "18",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "18": {
+                "atom_idx": 18,
+                "id": 18,
+                "atomNumber": "19",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "19": {
+                "atom_idx": 19,
+                "id": 19,
+                "atomNumber": "20",
+                "symbol": "O",
+                "numProtons": 0
+            }
+        },
+        "count": 20
+    },
+    "carbonAtomsInfo": {
+        "datatype": "carbonAtomsInfo",
+        "data": {
+            "1": {
+                "atom_idx": 1,
+                "atomNumber": "1",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "3": {
+                "atom_idx": 3,
+                "atomNumber": "3",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "4": {
+                "atom_idx": 4,
+                "atomNumber": "4",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "5": {
+                "atom_idx": 5,
+                "atomNumber": "5",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "6": {
+                "atom_idx": 6,
+                "atomNumber": "6",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "7": {
+                "atom_idx": 7,
+                "atomNumber": "7",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "8": {
+                "atom_idx": 8,
+                "atomNumber": "8",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "9": {
+                "atom_idx": 9,
+                "atomNumber": "9",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "10": {
+                "atom_idx": 10,
+                "atomNumber": "10",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "12": {
+                "atom_idx": 12,
+                "atomNumber": "12",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "13": {
+                "atom_idx": 13,
+                "atomNumber": "13",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "14": {
+                "atom_idx": 14,
+                "atomNumber": "14",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "16": {
+                "atom_idx": 16,
+                "atomNumber": "16",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "17": {
+                "atom_idx": 17,
+                "atomNumber": "17",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "18": {
+                "atom_idx": 18,
+                "atomNumber": "18",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "19": {
+                "atom_idx": 19,
+                "atomNumber": "19",
+                "symbol": "C",
+                "numProtons": 1
+            }
+        },
+        "count": 16
+    },
+    "nmrAssignments": {
+        "datatype": "nmrAssignments",
+        "count": 0,
+        "data": {}
+    },
+    "c13predictions": {
+        "datatype": "c13predictions",
+        "count": 16,
+        "data": {
+            "0": {
+                "atomNumber": 1,
+                "atom_idx": 1,
+                "numProtons": 3,
+                "ppm": 55.627711431555575
+            },
+            "1": {
+                "atomNumber": 3,
+                "atom_idx": 3,
+                "numProtons": 0,
+                "ppm": 161.18462357824882
+            },
+            "2": {
+                "atomNumber": 4,
+                "atom_idx": 4,
+                "numProtons": 1,
+                "ppm": 97.19120586598852
+            },
+            "3": {
+                "atomNumber": 5,
+                "atom_idx": 5,
+                "numProtons": 0,
+                "ppm": 161.02667512162395
+            },
+            "4": {
+                "atomNumber": 6,
+                "atom_idx": 6,
+                "numProtons": 0,
+                "ppm": 119.85092534206618
+            },
+            "5": {
+                "atomNumber": 7,
+                "atom_idx": 7,
+                "numProtons": 1,
+                "ppm": 125.05061405159074
+            },
+            "6": {
+                "atomNumber": 8,
+                "atom_idx": 8,
+                "numProtons": 1,
+                "ppm": 107.65795740891826
+            },
+            "7": {
+                "atomNumber": 9,
+                "atom_idx": 9,
+                "numProtons": 1,
+                "ppm": 40.78203980790424
+            },
+            "8": {
+                "atomNumber": 10,
+                "atom_idx": 10,
+                "numProtons": 2,
+                "ppm": 67.14505405660589
+            },
+            "9": {
+                "atomNumber": 12,
+                "atom_idx": 12,
+                "numProtons": 0,
+                "ppm": 157.44113297551672
+            },
+            "10": {
+                "atomNumber": 13,
+                "atom_idx": 13,
+                "numProtons": 1,
+                "ppm": 103.59905245544162
+            },
+            "11": {
+                "atomNumber": 14,
+                "atom_idx": 14,
+                "numProtons": 0,
+                "ppm": 159.07735480346608
+            },
+            "12": {
+                "atomNumber": 16,
+                "atom_idx": 16,
+                "numProtons": 1,
+                "ppm": 110.37039203813937
+            },
+            "13": {
+                "atomNumber": 17,
+                "atom_idx": 17,
+                "numProtons": 1,
+                "ppm": 132.02540492645545
+            },
+            "14": {
+                "atomNumber": 18,
+                "atom_idx": 18,
+                "numProtons": 0,
+                "ppm": 113.46035323133349
+            },
+            "15": {
+                "atomNumber": 19,
+                "atom_idx": 19,
+                "numProtons": 1,
+                "ppm": 79.00776631977799
+            }
+        }
+    },
+    "Predicted_13C_NMR_Spectrum_0": {
+        "datatype": "nmrspectrum",
+        "origin": "Predictor",
+        "type": "1D",
+        "subtype": "predicted, 13C",
+        "experimenttype": "1D",
+        "experiment": "1D",
+        "pulsesequence": "",
+        "intrument": "",
+        "probe": "",
+        "datafilename": "",
+        "nucleus": "13C",
+        "specfrequency": 175,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {},
+            "count": 0
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        }
+    },
+    "chosenSpectra": {
+        "datatype": "chosenSpectra",
+        "count": 6,
+        "data": {
+            "0": "1H 1D zgcppr Medicarpin.1.fid_1 H1_1D",
+            "1": "13C 1D zgpg30 Medicarpin.3.fid_2 C13_1D",
+            "2": "13C DEPT-135 deptsp135 Medicarpin.5.fid_3 DEPT",
+            "3": "[13C, 1H] HSQC hsqcetgp Medicarpin.7.ser_4 HSQC",
+            "4": "[13C, 1H] HMBC hmbcetgpl3nd Medicarpin.8.ser_5 HMBC",
+            "5": "[1H, 1H] COSY cosyqf45 Medicarpin.9.ser_6 COSY"
+        }
+    },
+    "H1_1D": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "1D",
+        "subtype": "1H",
+        "experimenttype": "1D",
+        "experiment": "1D",
+        "pulsesequence": "zgcppr",
+        "intrument": "spect",
+        "probe": "Z108641_0002 (CP TXO 500S2 C/N-H-D-05 Z)",
+        "datafilename": "/Users/dch1amk/Downloads/bmse001290/nmr/Medicarpin/1/fid",
+        "nucleus": "1H",
+        "specfrequency": 499.842349248,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 194919.76363110542,
+            "data": {
+                "0": {
+                    "delta1": 7.38994871120943,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 194919.76363110542,
+                    "category": "m",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "1": {
+                    "delta1": 7.1339487383798454,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 194602.2917213142,
+                    "category": "m",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "2": {
+                    "delta1": 6.553507970446176,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 195256.78542137146,
+                    "category": "dd",
+                    "type": 0,
+                    "jlistcount": 2,
+                    "jvals": [
+                        2.512939453125,
+                        8.3701171875
+                    ]
+                },
+                "3": {
+                    "delta1": 6.418067150114182,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 153547.04115772247,
+                    "category": "d",
+                    "type": 0,
+                    "jlistcount": 1,
+                    "jvals": [
+                        2.52197265625
+                    ]
+                },
+                "4": {
+                    "delta1": 6.461785488766,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 176835.93026733398,
+                    "category": "m",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "5": {
+                    "delta1": 6.450291325340486,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 167461.43411254883,
+                    "category": "s",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "6": {
+                    "delta1": 5.497841136407221,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 181176.98143465817,
+                    "category": "d",
+                    "type": 0,
+                    "jlistcount": 1,
+                    "jvals": [
+                        6.767578125
+                    ]
+                },
+                "7": {
+                    "delta1": 4.240465335582903,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 211682.0284922719,
+                    "category": "ddd",
+                    "type": 0,
+                    "jlistcount": 3,
+                    "jvals": [
+                        0.77099609375,
+                        4.9552001953125,
+                        10.981201171875
+                    ]
+                },
+                "8": {
+                    "delta1": 3.770236659374214,
+                    "nH": 3,
+                    "realH": 3,
+                    "integralValue": 650044.1818628311,
+                    "category": "s",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "9": {
+                    "delta1": 3.6214322831132733,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 227324.12495994568,
+                    "category": "t",
+                    "type": 0,
+                    "jlistcount": 1,
+                    "jvals": [
+                        10.95989990234375
+                    ]
+                },
+                "10": {
+                    "delta1": 3.5327368397898304,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 197792.58794045448,
+                    "category": "ddd",
+                    "type": 0,
+                    "jlistcount": 3,
+                    "jvals": [
+                        4.9537353515625,
+                        6.73822021484375,
+                        11.2464599609375
+                    ]
+                }
+            },
+            "count": 11
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 7.401278584443355,
+                    "delta2": 0,
+                    "intensity": 5500.882237112664,
+                    "type": 0
+                },
+                "1": {
+                    "delta1": 7.389413879829606,
+                    "delta2": 0,
+                    "intensity": 163.80586552255392,
+                    "type": 0
+                },
+                "2": {
+                    "delta1": 7.384902742322108,
+                    "delta2": 0,
+                    "intensity": 4036.0397227653602,
+                    "type": 0
+                },
+                "3": {
+                    "delta1": 7.38366480686283,
+                    "delta2": 0,
+                    "intensity": 3658.399057461346,
+                    "type": 0
+                },
+                "4": {
+                    "delta1": 7.3655718944627,
+                    "delta2": 0,
+                    "intensity": 559.997533691009,
+                    "type": 0
+                },
+                "5": {
+                    "delta1": 7.143902257812765,
+                    "delta2": 0,
+                    "intensity": 3364.0248946517763,
+                    "type": 0
+                },
+                "6": {
+                    "delta1": 7.142620240712491,
+                    "delta2": 0,
+                    "intensity": 2157.3349300600166,
+                    "type": 0
+                },
+                "7": {
+                    "delta1": 7.1389785221019215,
+                    "delta2": 0,
+                    "intensity": 610.052620262635,
+                    "type": 0
+                },
+                "8": {
+                    "delta1": 7.136808563747506,
+                    "delta2": 0,
+                    "intensity": 593.3174497884229,
+                    "type": 0
+                },
+                "9": {
+                    "delta1": 7.13124078708458,
+                    "delta2": 0,
+                    "intensity": 1286.7820016351857,
+                    "type": 0
+                },
+                "10": {
+                    "delta1": 7.126729650278729,
+                    "delta2": 0,
+                    "intensity": 2319.7791566725214,
+                    "type": 0
+                },
+                "11": {
+                    "delta1": 7.125250756010668,
+                    "delta2": 0,
+                    "intensity": 4029.12783765992,
+                    "type": 0
+                },
+                "12": {
+                    "delta1": 6.564420835723227,
+                    "delta2": 0,
+                    "intensity": 4121.380638733352,
+                    "type": 0
+                },
+                "13": {
+                    "delta1": 6.55934080436282,
+                    "delta2": 0,
+                    "intensity": 4454.528016911677,
+                    "type": 0
+                },
+                "14": {
+                    "delta1": 6.547622638273752,
+                    "delta2": 0,
+                    "intensity": 4107.632404734197,
+                    "type": 0
+                },
+                "15": {
+                    "delta1": 6.542647603424906,
+                    "delta2": 0,
+                    "intensity": 4286.143920614108,
+                    "type": 0
+                },
+                "16": {
+                    "delta1": 6.467555220211426,
+                    "delta2": 0,
+                    "intensity": 2608.931723882628,
+                    "type": 0
+                },
+                "17": {
+                    "delta1": 6.462925892586174,
+                    "delta2": 0,
+                    "intensity": 5242.994760716148,
+                    "type": 0
+                },
+                "18": {
+                    "delta1": 6.454875353500399,
+                    "delta2": 0,
+                    "intensity": 4833.269601530227,
+                    "type": 0
+                },
+                "19": {
+                    "delta1": 6.450291325340486,
+                    "delta2": 0,
+                    "intensity": 9898.684974748963,
+                    "type": 0
+                },
+                "20": {
+                    "delta1": 6.445107086065791,
+                    "delta2": 0,
+                    "intensity": 886.4480210590461,
+                    "type": 0
+                },
+                "21": {
+                    "delta1": 6.420590073296614,
+                    "delta2": 0,
+                    "intensity": 5772.056049891483,
+                    "type": 0
+                },
+                "22": {
+                    "delta1": 6.41554422693175,
+                    "delta2": 0,
+                    "intensity": 5171.6689219321215,
+                    "type": 0
+                },
+                "23": {
+                    "delta1": 5.504610732206829,
+                    "delta2": 0,
+                    "intensity": 4442.962314086477,
+                    "type": 0
+                },
+                "24": {
+                    "delta1": 5.491071540607612,
+                    "delta2": 0,
+                    "intensity": 4361.460390207304,
+                    "type": 0
+                },
+                "25": {
+                    "delta1": 4.257013383392872,
+                    "delta2": 0,
+                    "intensity": 2042.51491218834,
+                    "type": 0
+                },
+                "26": {
+                    "delta1": 4.25559761989798,
+                    "delta2": 0,
+                    "intensity": 2150.1040466353134,
+                    "type": 0
+                },
+                "27": {
+                    "delta1": 4.247215432203335,
+                    "delta2": 0,
+                    "intensity": 1943.8399052442005,
+                    "type": 0
+                },
+                "28": {
+                    "delta1": 4.245715771009841,
+                    "delta2": 0,
+                    "intensity": 2152.767981827969,
+                    "type": 0
+                },
+                "29": {
+                    "delta1": 4.235243080916734,
+                    "delta2": 0,
+                    "intensity": 2302.256666501759,
+                    "type": 0
+                },
+                "30": {
+                    "delta1": 4.233775420075647,
+                    "delta2": 0,
+                    "intensity": 2095.9992506796425,
+                    "type": 0
+                },
+                "31": {
+                    "delta1": 4.2254155728386,
+                    "delta2": 0,
+                    "intensity": 2274.7134021115535,
+                    "type": 0
+                },
+                "32": {
+                    "delta1": 4.223746404328213,
+                    "delta2": 0,
+                    "intensity": 2114.649099343039,
+                    "type": 0
+                },
+                "33": {
+                    "delta1": 3.770236659374214,
+                    "delta2": 0,
+                    "intensity": 54066.883852929124,
+                    "type": 0
+                },
+                "34": {
+                    "delta1": 3.643354900835182,
+                    "delta2": 0,
+                    "intensity": 3362.079720854836,
+                    "type": 0
+                },
+                "35": {
+                    "delta1": 3.6214406219191426,
+                    "delta2": 0,
+                    "intensity": 7732.9394667095185,
+                    "type": 0
+                },
+                "36": {
+                    "delta1": 3.5995013265854947,
+                    "delta2": 0,
+                    "intensity": 5328.326341231936,
+                    "type": 0
+                },
+                "37": {
+                    "delta1": 3.5554715013528573,
+                    "delta2": 0,
+                    "intensity": 1712.3132521700713,
+                    "type": 0
+                },
+                "38": {
+                    "delta1": 3.5456663047595227,
+                    "delta2": 0,
+                    "intensity": 1545.9989842251905,
+                    "type": 0
+                },
+                "39": {
+                    "delta1": 3.542082291407823,
+                    "delta2": 0,
+                    "intensity": 1610.0016117421062,
+                    "type": 0
+                },
+                "40": {
+                    "delta1": 3.5324624986800295,
+                    "delta2": 0,
+                    "intensity": 2155.243809908747,
+                    "type": 0
+                },
+                "41": {
+                    "delta1": 3.523534719225992,
+                    "delta2": 0,
+                    "intensity": 928.6341923777775,
+                    "type": 0
+                },
+                "42": {
+                    "delta1": 3.519978295667875,
+                    "delta2": 0,
+                    "intensity": 921.7517015373885,
+                    "type": 0
+                },
+                "43": {
+                    "delta1": 3.5099622674347137,
+                    "delta2": 0,
+                    "intensity": 963.9512218157945,
+                    "type": 0
+                },
+                "44": {
+                    "delta1": 0.011878268309926193,
+                    "delta2": 0,
+                    "intensity": 112.64523052676554,
+                    "type": 0
+                },
+                "45": {
+                    "delta1": 0.006594037220180253,
+                    "delta2": 0,
+                    "intensity": 503.63025338804584,
+                    "type": 0
+                },
+                "46": {
+                    "delta1": 0.00007878249052526057,
+                    "delta2": 0,
+                    "intensity": 15482.822261054233,
+                    "type": 0
+                },
+                "47": {
+                    "delta1": -0.006640620955085152,
+                    "delta2": 0,
+                    "intensity": 376.71619663633936,
+                    "type": 0
+                }
+            },
+            "count": 48
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 11,
+            "normValue": 194919.76363110542,
+            "data": {
+                "0": {
+                    "intensity": 194919.76363110542,
+                    "rangeMin1": 7.360509027044324,
+                    "rangeMin2": 0,
+                    "rangeMax1": 7.433815426230502,
+                    "rangeMax2": 0,
+                    "delta1": 7.397162226637413,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "1": {
+                    "intensity": 194602.2917213142,
+                    "rangeMin1": 7.095273146352519,
+                    "rangeMin2": 0,
+                    "rangeMax1": 7.181907981754364,
+                    "rangeMax2": 0,
+                    "delta1": 7.138590564053441,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "2": {
+                    "intensity": 195256.78542137146,
+                    "rangeMin1": 6.52215038907877,
+                    "rangeMin2": 0,
+                    "rangeMax1": 6.5874597265355455,
+                    "rangeMax2": 0,
+                    "delta1": 6.554805057807158,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "3": {
+                    "intensity": 153547.04115772247,
+                    "rangeMin1": 6.405230493580645,
+                    "rangeMin2": 0,
+                    "rangeMax1": 6.433505902959077,
+                    "rangeMax2": 0,
+                    "delta1": 6.419368198269861,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "4": {
+                    "intensity": 176835.93026733398,
+                    "rangeMin1": 6.4532986895239794,
+                    "rangeMin2": 0,
+                    "rangeMax1": 6.4789640611136345,
+                    "rangeMax2": 0,
+                    "delta1": 6.466131375318807,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "5": {
+                    "intensity": 167461.43411254883,
+                    "rangeMin1": 6.440248500580088,
+                    "rangeMin2": 0,
+                    "rangeMax1": 6.452863683225851,
+                    "rangeMax2": 0,
+                    "delta1": 6.44655609190297,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "6": {
+                    "intensity": 181176.98143465817,
+                    "rangeMin1": 5.458736704201601,
+                    "rangeMin2": 0,
+                    "rangeMax1": 5.547479184613537,
+                    "rangeMax2": 0,
+                    "delta1": 5.503107944407569,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "7": {
+                    "intensity": 211682.0284922719,
+                    "rangeMin1": 4.20257159354299,
+                    "rangeMin2": 0,
+                    "rangeMax1": 4.291314073954927,
+                    "rangeMax2": 0,
+                    "delta1": 4.2469428337489585,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "8": {
+                    "intensity": 650044.1818628311,
+                    "rangeMin1": 3.7374385927631897,
+                    "rangeMin2": 0,
+                    "rangeMax1": 3.819295880729371,
+                    "rangeMax2": 0,
+                    "delta1": 3.7783672367462806,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "9": {
+                    "intensity": 227324.12495994568,
+                    "rangeMin1": 3.5867293803394706,
+                    "rangeMin2": 0,
+                    "rangeMax1": 3.668586668305653,
+                    "rangeMax2": 0,
+                    "delta1": 3.627658024322562,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "10": {
+                    "intensity": 197792.58794045448,
+                    "rangeMin1": 3.4895716647160584,
+                    "rangeMin2": 0,
+                    "rangeMax1": 3.5752540595965465,
+                    "rangeMax2": 0,
+                    "delta1": 3.5324128621563027,
+                    "delta2": 0,
+                    "type": 0
+                }
+            }
+        },
+        "filename": "Medicarpin.1.fid_1"
+    },
+    "C13_1D": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "1D",
+        "subtype": "13C",
+        "experimenttype": "1D",
+        "experiment": "1D",
+        "pulsesequence": "zgpg30",
+        "intrument": "spect",
+        "probe": "Z108641_0002 (CP TXO 500S2 C/N-H-D-05 Z)",
+        "datafilename": "/Users/dch1amk/Downloads/bmse001290/nmr/Medicarpin/3/fid",
+        "nucleus": "13C",
+        "specfrequency": 125.699237558299,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 161.09016382326564,
+                    "delta2": 0,
+                    "intensity": 2544.6409267096446,
+                    "type": 0
+                },
+                "1": {
+                    "delta1": 160.63055374126432,
+                    "delta2": 0,
+                    "intensity": 2131.9222359521204,
+                    "type": 0
+                },
+                "2": {
+                    "delta1": 156.95096931518327,
+                    "delta2": 0,
+                    "intensity": 2787.748623125261,
+                    "type": 0
+                },
+                "3": {
+                    "delta1": 156.64533565308156,
+                    "delta2": 0,
+                    "intensity": 2533.6317189030237,
+                    "type": 0
+                },
+                "4": {
+                    "delta1": 132.21234964283184,
+                    "delta2": 0,
+                    "intensity": 4676.118359395616,
+                    "type": 0
+                },
+                "5": {
+                    "delta1": 124.7675500295559,
+                    "delta2": 0,
+                    "intensity": 4849.363860475865,
+                    "type": 0
+                },
+                "6": {
+                    "delta1": 119.08558703421495,
+                    "delta2": 0,
+                    "intensity": 2584.859135520185,
+                    "type": 0
+                },
+                "7": {
+                    "delta1": 112.63825791282099,
+                    "delta2": 0,
+                    "intensity": 2493.567625209379,
+                    "type": 0
+                },
+                "8": {
+                    "delta1": 109.73995028585587,
+                    "delta2": 0,
+                    "intensity": 4641.746959349808,
+                    "type": 0
+                },
+                "9": {
+                    "delta1": 106.37379978415356,
+                    "delta2": 0,
+                    "intensity": 4885.9140992999455,
+                    "type": 0
+                },
+                "10": {
+                    "delta1": 103.65593930621483,
+                    "delta2": 0,
+                    "intensity": 4879.894923993272,
+                    "type": 0
+                },
+                "11": {
+                    "delta1": 96.89830542398583,
+                    "delta2": 0,
+                    "intensity": 5114.148860681317,
+                    "type": 0
+                },
+                "12": {
+                    "delta1": 78.51005258517948,
+                    "delta2": 0,
+                    "intensity": 5112.285520047752,
+                    "type": 0
+                },
+                "13": {
+                    "delta1": 66.52602344658871,
+                    "delta2": 0,
+                    "intensity": 4837.041484750078,
+                    "type": 0
+                },
+                "14": {
+                    "delta1": 55.5137510875682,
+                    "delta2": 0,
+                    "intensity": 5525.753006462263,
+                    "type": 0
+                },
+                "15": {
+                    "delta1": 39.443322792333554,
+                    "delta2": 0,
+                    "intensity": 5354.698938693403,
+                    "type": 0
+                }
+            },
+            "count": 16
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "Medicarpin.3.fid_2"
+    },
+    "DEPT": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "1D",
+        "subtype": "13C",
+        "experimenttype": "1D-DEPT-135",
+        "experiment": "DEPT-135",
+        "pulsesequence": "deptsp135",
+        "intrument": "spect",
+        "probe": "Z108641_0002 (CP TXO 500S2 C/N-H-D-05 Z)",
+        "datafilename": "/Users/dch1amk/Downloads/bmse001290/nmr/Medicarpin/5/fid",
+        "nucleus": "13C",
+        "specfrequency": 125.6974364868,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 132.2113311860955,
+                    "delta2": 0,
+                    "intensity": 1923.0663680241237,
+                    "type": 0
+                },
+                "1": {
+                    "delta1": 124.76736180674688,
+                    "delta2": 0,
+                    "intensity": 1973.2378737435315,
+                    "type": 0
+                },
+                "2": {
+                    "delta1": 109.73963396199186,
+                    "delta2": 0,
+                    "intensity": 1901.1715830662351,
+                    "type": 0
+                },
+                "3": {
+                    "delta1": 106.3737553350978,
+                    "delta2": 0,
+                    "intensity": 1950.3618061053553,
+                    "type": 0
+                },
+                "4": {
+                    "delta1": 103.65613697606861,
+                    "delta2": 0,
+                    "intensity": 1782.2242640901081,
+                    "type": 0
+                },
+                "5": {
+                    "delta1": 78.51019307493199,
+                    "delta2": 0,
+                    "intensity": 2061.9553440430227,
+                    "type": 0
+                },
+                "6": {
+                    "delta1": 96.89801238794185,
+                    "delta2": 0,
+                    "intensity": 1960.2259457024516,
+                    "type": 0
+                },
+                "7": {
+                    "delta1": 66.52585352487068,
+                    "delta2": 0,
+                    "intensity": -2889.7130673107845,
+                    "type": 0
+                },
+                "8": {
+                    "delta1": 55.51390409612151,
+                    "delta2": 0,
+                    "intensity": 3742.032200274539,
+                    "type": 0
+                },
+                "9": {
+                    "delta1": 39.44375518688668,
+                    "delta2": 0,
+                    "intensity": 1976.334410253267,
+                    "type": 0
+                }
+            },
+            "count": 10
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "Medicarpin.5.fid_3"
+    },
+    "HSQC": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H13C, HSQC",
+        "experimenttype": "2D-HSQC",
+        "experiment": "HSQC",
+        "pulsesequence": "hsqcetgp",
+        "intrument": "spect",
+        "probe": "Z108641_0002 (CP TXO 500S2 C/N-H-D-05 Z)",
+        "datafilename": "/Users/dch1amk/Downloads/bmse001290/nmr/Medicarpin/7/ser",
+        "nucleus": "[13C, 1H]",
+        "specfrequency": "[125.69747588214, 499.842349248]",
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 132.2618889843127,
+                    "delta2": 7.392947209387909,
+                    "intensity": 298.1301066875458,
+                    "type": 0
+                },
+                "1": {
+                    "delta1": 124.83074946411546,
+                    "delta2": 7.133325898979153,
+                    "intensity": 331.534414768219,
+                    "type": 0
+                },
+                "2": {
+                    "delta1": 109.76762881506701,
+                    "delta2": 6.553960448382769,
+                    "intensity": 355.0974578857422,
+                    "type": 0
+                },
+                "3": {
+                    "delta1": 106.40353187011286,
+                    "delta2": 6.458857063096193,
+                    "intensity": 351.64516746997833,
+                    "type": 0
+                },
+                "4": {
+                    "delta1": 103.6670649522024,
+                    "delta2": 6.418410795790409,
+                    "intensity": 347.8863739967346,
+                    "type": 0
+                },
+                "5": {
+                    "delta1": 96.91376586121233,
+                    "delta2": 6.451751637758691,
+                    "intensity": 364.8397521972656,
+                    "type": 0
+                },
+                "6": {
+                    "delta1": 78.51654147818157,
+                    "delta2": 5.497920078100227,
+                    "intensity": 312.1905199289322,
+                    "type": 0
+                },
+                "7": {
+                    "delta1": 66.54080483468178,
+                    "delta2": 4.240578766699177,
+                    "intensity": 311.30083894729614,
+                    "type": 0
+                },
+                "8": {
+                    "delta1": 66.54080483468178,
+                    "delta2": 3.6212969796364476,
+                    "intensity": 280.1957907676697,
+                    "type": 0
+                },
+                "9": {
+                    "delta1": 55.538150668143146,
+                    "delta2": 3.7706491545516867,
+                    "intensity": 743.2950695753098,
+                    "type": 0
+                },
+                "10": {
+                    "delta1": 39.455967742827276,
+                    "delta2": 3.5320957950760876,
+                    "intensity": 165.5223640203476,
+                    "type": 0
+                }
+            },
+            "count": 11
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 11,
+            "normValue": 298.1301066875458,
+            "data": {
+                "0": {
+                    "intensity": 298.1301066875458,
+                    "rangeMin1": 132.56459819572365,
+                    "rangeMin2": 7.373376614250825,
+                    "rangeMax1": 131.6208441568619,
+                    "rangeMax2": 7.413866324409632,
+                    "delta1": 132.09272117629277,
+                    "delta2": 7.3936214693302285,
+                    "type": 0
+                },
+                "1": {
+                    "intensity": 331.534414768219,
+                    "rangeMin1": 125.16137206865257,
+                    "rangeMin2": 7.11256451728193,
+                    "rangeMax1": 124.2595626537402,
+                    "rangeMax2": 7.1585258098946305,
+                    "delta1": 124.71046736119638,
+                    "delta2": 7.13554516358828,
+                    "type": 0
+                },
+                "2": {
+                    "intensity": 355.0974578857422,
+                    "rangeMin1": 110.18714131871272,
+                    "rangeMin2": 6.532576777169284,
+                    "rangeMax1": 109.20144265590154,
+                    "rangeMax2": 6.579267614109171,
+                    "delta1": 109.69429198730714,
+                    "delta2": 6.555922195639228,
+                    "type": 0
+                },
+                "3": {
+                    "intensity": 351.64516746997833,
+                    "rangeMin1": 106.89448833868393,
+                    "rangeMin2": 6.438830331125919,
+                    "rangeMax1": 105.90878967587275,
+                    "rangeMax2": 6.477496180466762,
+                    "delta1": 106.40163900727833,
+                    "delta2": 6.45816325579634,
+                    "type": 0
+                },
+                "4": {
+                    "intensity": 347.8863739967346,
+                    "rangeMin1": 104.2100324059216,
+                    "rangeMin2": 6.406000836402562,
+                    "rangeMax1": 103.16141680718634,
+                    "rangeMax2": 6.4315348878540615,
+                    "delta1": 103.68572460655398,
+                    "delta2": 6.418767862128312,
+                    "type": 0
+                },
+                "5": {
+                    "intensity": 364.8397521972656,
+                    "rangeMin1": 97.37305870216755,
+                    "rangeMin2": 6.4432075970890335,
+                    "rangeMax1": 96.36638772738169,
+                    "rangeMax2": 6.466188243395384,
+                    "delta1": 96.86972321477462,
+                    "delta2": 6.454697920242209,
+                    "type": 0
+                },
+                "6": {
+                    "intensity": 312.1905199289322,
+                    "rangeMin1": 78.86469000909902,
+                    "rangeMin2": 5.482386328167604,
+                    "rangeMax1": 78.00182927669616,
+                    "rangeMax2": 5.51758064804774,
+                    "delta1": 78.43325964289758,
+                    "delta2": 5.499983488107672,
+                    "type": 0
+                },
+                "7": {
+                    "intensity": 311.30083894729614,
+                    "rangeMin1": 66.87546720097505,
+                    "rangeMin2": 4.2176372584324735,
+                    "rangeMax1": 66.05802019133021,
+                    "rangeMax2": 4.270054330594379,
+                    "delta1": 66.46674369615263,
+                    "delta2": 4.243845794513426,
+                    "type": 0
+                },
+                "8": {
+                    "intensity": 280.1957907676697,
+                    "rangeMin1": 67.0344152306282,
+                    "rangeMin2": 3.582641869956813,
+                    "rangeMax1": 66.01260646857219,
+                    "rangeMax2": 3.659769847566474,
+                    "delta1": 66.5235108496002,
+                    "delta2": 3.621205858761644,
+                    "type": 0
+                },
+                "9": {
+                    "intensity": 743.2950695753098,
+                    "rangeMin1": 55.83993257077,
+                    "rangeMin2": 3.760859915307293,
+                    "rangeMax1": 54.90895125423007,
+                    "rangeMax2": 3.786319636071647,
+                    "delta1": 55.37444191250003,
+                    "delta2": 3.7735897756894703,
+                    "type": 0
+                },
+                "10": {
+                    "intensity": 165.5223640203476,
+                    "rangeMin1": 39.74076785304292,
+                    "rangeMin2": 3.510006784246743,
+                    "rangeMax1": 39.036855150293206,
+                    "rangeMax2": 3.5624238564086483,
+                    "delta1": 39.38881150166806,
+                    "delta2": 3.5362153203276954,
+                    "type": 0
+                }
+            }
+        },
+        "filename": "Medicarpin.7.ser_4"
+    },
+    "HMBC": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H13C, HMBC",
+        "experimenttype": "2D-HMBC",
+        "experiment": "HMBC",
+        "pulsesequence": "hmbcetgpl3nd",
+        "intrument": "spect",
+        "probe": "Z108641_0002 (CP TXO 500S2 C/N-H-D-05 Z)",
+        "datafilename": "/Users/dch1amk/Downloads/bmse001290/nmr/Medicarpin/8/ser",
+        "nucleus": "[13C, 1H]",
+        "specfrequency": "[125.699237558299, 499.842799104]",
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 161.11408447896548,
+                    "delta2": 7.133665122276066,
+                    "intensity": 19.7479190826416,
+                    "type": 0
+                },
+                "1": {
+                    "delta1": 161.11408447896548,
+                    "delta2": 6.452399386812265,
+                    "intensity": 6.423959255218506,
+                    "type": 0
+                },
+                "2": {
+                    "delta1": 161.09183453237893,
+                    "delta2": 3.769047342944182,
+                    "intensity": 69.39331817626953,
+                    "type": 0
+                },
+                "3": {
+                    "delta1": 160.66282905636518,
+                    "delta2": 3.5328975110310394,
+                    "intensity": 3.7096991539001465,
+                    "type": 0
+                },
+                "4": {
+                    "delta1": 160.64440230263415,
+                    "delta2": 7.132011564665717,
+                    "intensity": 17.221454620361328,
+                    "type": 0
+                },
+                "5": {
+                    "delta1": 160.64440230263415,
+                    "delta2": 6.450745829201916,
+                    "intensity": 8.050566673278809,
+                    "type": 0
+                },
+                "6": {
+                    "delta1": 156.9868772699264,
+                    "delta2": 6.551612843433208,
+                    "intensity": 1.9652504920959473,
+                    "type": 0
+                },
+                "7": {
+                    "delta1": 156.96689079433784,
+                    "delta2": 7.394100445906037,
+                    "intensity": 24.05904197692871,
+                    "type": 0
+                },
+                "8": {
+                    "delta1": 156.96689079433784,
+                    "delta2": 6.4176746769949355,
+                    "intensity": 1.968209147453308,
+                    "type": 0
+                },
+                "9": {
+                    "delta1": 156.67665317507078,
+                    "delta2": 4.240038697452389,
+                    "intensity": 10.500670433044434,
+                    "type": 0
+                },
+                "10": {
+                    "delta1": 156.67665317507078,
+                    "delta2": 3.6218625446603667,
+                    "intensity": 5.127364158630371,
+                    "type": 0
+                },
+                "11": {
+                    "delta1": 156.65710042271505,
+                    "delta2": 7.394100445906037,
+                    "intensity": 22.8491153717041,
+                    "type": 0
+                },
+                "12": {
+                    "delta1": 156.65710042271505,
+                    "delta2": 6.4176746769949355,
+                    "intensity": 2.004892110824585,
+                    "type": 0
+                },
+                "13": {
+                    "delta1": 156.65710042271505,
+                    "delta2": 5.498296645640875,
+                    "intensity": 1.8519576787948608,
+                    "type": 0
+                },
+                "14": {
+                    "delta1": 132.28235639343643,
+                    "delta2": 5.49784544031201,
+                    "intensity": 2.297808885574341,
+                    "type": 0
+                },
+                "15": {
+                    "delta1": 119.19259389591366,
+                    "delta2": 4.241727196211809,
+                    "intensity": 0.5868293046951294,
+                    "type": 0
+                },
+                "16": {
+                    "delta1": 119.19259389591366,
+                    "delta2": 3.6221200801031386,
+                    "intensity": 4.21843957901001,
+                    "type": 0
+                },
+                "17": {
+                    "delta1": 119.19259389591366,
+                    "delta2": 3.5329233666987347,
+                    "intensity": 4.686224937438965,
+                    "type": 0
+                },
+                "18": {
+                    "delta1": 112.64775537509071,
+                    "delta2": 5.49784544031201,
+                    "intensity": 0.9918844103813171,
+                    "type": 0
+                },
+                "19": {
+                    "delta1": 112.64481251056924,
+                    "delta2": 6.553407058519814,
+                    "intensity": 4.3827924728393555,
+                    "type": 0
+                },
+                "20": {
+                    "delta1": 112.64481251056924,
+                    "delta2": 6.417476143166507,
+                    "intensity": 2.419452667236328,
+                    "type": 0
+                },
+                "21": {
+                    "delta1": 109.75662603819325,
+                    "delta2": 6.417772935558109,
+                    "intensity": 3.4278457164764404,
+                    "type": 0
+                },
+                "22": {
+                    "delta1": 103.69144804453879,
+                    "delta2": 7.39313165223107,
+                    "intensity": 0.4772352874279022,
+                    "type": 0
+                },
+                "23": {
+                    "delta1": 103.66103248333647,
+                    "delta2": 6.553110266128213,
+                    "intensity": 4.543881416320801,
+                    "type": 0
+                },
+                "24": {
+                    "delta1": 96.95625158068052,
+                    "delta2": 7.13337017812955,
+                    "intensity": 0.7341771125793457,
+                    "type": 0
+                },
+                "25": {
+                    "delta1": 78.55108103535929,
+                    "delta2": 4.241727196211809,
+                    "intensity": 11.16935920715332,
+                    "type": 0
+                },
+                "26": {
+                    "delta1": 78.55108103535929,
+                    "delta2": 3.6211661045587067,
+                    "intensity": 8.45091438293457,
+                    "type": 0
+                },
+                "27": {
+                    "delta1": 78.5058952069596,
+                    "delta2": 7.39384430373752,
+                    "intensity": 3.4968347549438477,
+                    "type": 0
+                },
+                "28": {
+                    "delta1": 66.58030815643234,
+                    "delta2": 3.5329233666987347,
+                    "intensity": 3.9612200260162354,
+                    "type": 0
+                },
+                "29": {
+                    "delta1": 66.57189165203934,
+                    "delta2": 5.498329999318707,
+                    "intensity": 6.547199726104736,
+                    "type": 0
+                },
+                "30": {
+                    "delta1": 39.4859662493961,
+                    "delta2": 4.240773220667377,
+                    "intensity": 1.899438738822937,
+                    "type": 0
+                },
+                "31": {
+                    "delta1": 39.4859662493961,
+                    "delta2": 3.6211661045587067,
+                    "intensity": 8.042558670043945,
+                    "type": 0
+                },
+                "32": {
+                    "delta1": 39.48257508908972,
+                    "delta2": 7.133013852376324,
+                    "intensity": 1.622715711593628,
+                    "type": 0
+                }
+            },
+            "count": 33
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "Medicarpin.8.ser_5"
+    },
+    "COSY": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H1H, COSY",
+        "experimenttype": "2D-COSY",
+        "experiment": "COSY",
+        "pulsesequence": "cosyqf45",
+        "intrument": "spect",
+        "probe": "Z108641_0002 (CP TXO 500S2 C/N-H-D-05 Z)",
+        "datafilename": "/Users/dch1amk/Downloads/bmse001290/nmr/Medicarpin/9/ser",
+        "nucleus": "[1H, 1H]",
+        "specfrequency": "[499.842349248, 499.842349248]",
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 6.554474570556599,
+                    "delta2": 7.3931533995321015,
+                    "intensity": 67.90809631347656,
+                    "type": 0
+                },
+                "1": {
+                    "delta1": 6.554474570556599,
+                    "delta2": 6.418542328153368,
+                    "intensity": 122.44474029541016,
+                    "type": 0
+                },
+                "2": {
+                    "delta1": 6.462066681498973,
+                    "delta2": 7.135405017018717,
+                    "intensity": 44.582096099853516,
+                    "type": 0
+                },
+                "3": {
+                    "delta1": 4.242143457387151,
+                    "delta2": 3.6238299358273105,
+                    "intensity": 103.64859008789062,
+                    "type": 0
+                },
+                "4": {
+                    "delta1": 4.239499706957547,
+                    "delta2": 3.537746671334852,
+                    "intensity": 87.7654037475586,
+                    "type": 0
+                },
+                "5": {
+                    "delta1": 3.6208621064301454,
+                    "delta2": 3.5394021187289386,
+                    "intensity": 240.1593475341797,
+                    "type": 0
+                },
+                "6": {
+                    "delta1": 3.538905843112413,
+                    "delta2": 5.497796385932375,
+                    "intensity": 129.22129821777344,
+                    "type": 0
+                }
+            },
+            "count": 7
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "Medicarpin.9.ser_6"
+    },
+    "carbonCalcPositionsMethod": {
+        "datatype": "carbonCalcPositionsMethod",
+        "count": 1,
+        "data": {
+            "0": "Calculated Positions"
+        }
+    },
+    "MNOVAcalcMethod": {
+        "datatype": "MNOVAcalcMethod",
+        "count": 1,
+        "data": {
+            "0": "NMRSHIFTDB2 Predict"
+        }
+    },
+    "exptIdentifiers": {
+        "count": 6,
+        "datatype": "exptIdentifiers",
+        "data": {
+            "0": "H1_1D",
+            "1": "C13_1D",
+            "2": "DEPT",
+            "3": "HSQC",
+            "4": "HMBC",
+            "5": "COSY"
+        }
+    },
+    "workingDirectory": {
+        "datatype": "workingDirectory",
+        "count": 1,
+        "data": {
+            "0": "/Users/vsmw51/Library/CloudStorage/Dropbox/Mac/Downloads/4Eric/Medicarpin"
+        }
+    },
+    "workingFilename": {
+        "datatype": "workingFilename",
+        "count": 1,
+        "data": {
+            "0": "Medicarpin"
+        }
+    },
+    "simulatedAnnealing": {
+        "datatype": "simulatedAnnealing",
+        "count": 1,
+        "data": {
+            "0": true
+        }
+    },
+    "randomizeStart": {
+        "datatype": "randomizeStart",
+        "count": 1,
+        "data": {
+            "0": true
+        }
+    },
+    "startingTemperature": {
+        "datatype": "startingTemperature",
+        "count": 1,
+        "data": {
+            "0": 1000
+        }
+    },
+    "endingTemperature": {
+        "datatype": "endingTemperature",
+        "count": 1,
+        "data": {
+            "0": 0.001
+        }
+    },
+    "coolingRate": {
+        "datatype": "coolingRate",
+        "count": 1,
+        "data": {
+            "0": 0.995
+        }
+    },
+    "numberOfSteps": {
+        "datatype": "numberOfSteps",
+        "count": 1,
+        "data": {
+            "0": 50000
+        }
+    },
+    "ppmGroupSeparation": {
+        "datatype": "ppmGroupSeparation",
+        "count": 1,
+        "data": {
+            "0": 2
+        }
+    },
+    "spectraWithPeaks": {
+        "datatype": "spectraWithPeaks",
+        "count": 6,
+        "data": {
+            "0": "1H 1D zgcppr Medicarpin.1.fid_1",
+            "1": "13C 1D zgpg30 Medicarpin.3.fid_2",
+            "2": "13C DEPT-135 deptsp135 Medicarpin.5.fid_3",
+            "3": "[13C, 1H] HSQC hsqcetgp Medicarpin.7.ser_4",
+            "4": "[13C, 1H] HMBC hmbcetgpl3nd Medicarpin.8.ser_5",
+            "5": "[1H, 1H] COSY cosyqf45 Medicarpin.9.ser_6"
+        }
+    }
+}
