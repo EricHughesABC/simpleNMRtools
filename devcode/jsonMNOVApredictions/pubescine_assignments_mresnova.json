@@ -1,0 +1,2597 @@
+{
+    "smiles": {
+        "datatype": "smiles",
+        "count": 1,
+        "data": {
+            "0": "C[C@H]1[C@@H]2CN3CCC4c5ccc(OC)cc5NC=4[C@@H]3C[C@@H]2C(C(=O)OC)=CO1"
+        }
+    },
+    "molfile": {
+        "datatype": "molfile",
+        "count": 1,
+        "data": {
+            "0": "\r\n  Mnova   09242413372D\r\n\r\n 28 32  0  0  0  0  0  0  0  0999 V2000\r\n    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    1.3339    0.7700    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n    1.3339    2.3101    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    0.0000    3.0802    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n    2.6676    3.0802    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    4.0013    2.3101    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    5.3351    3.0802    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n    5.3351    4.6203    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    6.6273    5.5631    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    4.0013    5.3903    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    4.0013    6.9304    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    2.6676    7.7005    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0\r\n    2.6676    9.2406    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    1.3339   10.0106    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    0.0002    9.2406    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    0.0000    7.7005    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   -1.4646    7.2246    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0\r\n   -2.3699    8.4705    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   -3.9015    8.6316    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   -4.5279   10.0385    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   -6.0597   10.1995    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n   -6.6860   11.6065    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   -3.6228   11.2845    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   -2.0910   11.1235    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n   -1.4646    9.7165    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    1.3339    6.9304    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    1.3339    5.3903    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    2.6676    4.6203    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n  1  2  1  0  0  0  0\r\n  2  3  1  0  0  0  0\r\n  3  4  2  0  0  0  0\r\n  3  5  1  0  0  0  0\r\n  5  6  2  0  0  0  0\r\n  6  7  1  0  0  0  0\r\n  7  8  1  0  0  0  0\r\n  8  9  1  6  0  0  0\r\n  8 10  1  0  0  0  0\r\n 10 11  1  1  0  0  0\r\n 11 12  1  0  0  0  0\r\n 12 13  1  0  0  0  0\r\n 13 14  1  0  0  0  0\r\n 14 15  1  0  0  0  0\r\n 15 16  2  0  0  0  0\r\n 16 17  1  0  0  0  0\r\n 17 18  1  0  0  0  0\r\n 18 19  2  0  0  0  0\r\n 19 20  1  0  0  0  0\r\n 20 21  1  0  0  0  0\r\n 21 22  1  0  0  0  0\r\n 20 23  2  0  0  0  0\r\n 23 24  1  0  0  0  0\r\n 24 25  2  0  0  0  0\r\n 25 15  1  0  0  0  0\r\n 25 18  1  0  0  0  0\r\n 26 16  1  1  0  0  0\r\n 26 12  1  0  0  0  0\r\n 26 27  1  0  0  0  0\r\n 28 27  1  1  0  0  0\r\n 28  5  1  0  0  0  0\r\n 28 10  1  0  0  0  0\r\nM  ZZC   1 21\r\nM  ZZC   2 20\r\nM  ZZC   3 19\r\nM  ZZC   4 26\r\nM  ZZC   5 5\r\nM  ZZC   6 6\r\nM  ZZC   7 1\r\nM  ZZC   8 2\r\nM  ZZC   9 7\r\nM  ZZC  10 3\r\nM  ZZC  11 8\r\nM  ZZC  12 9\r\nM  ZZC  13 17\r\nM  ZZC  14 16\r\nM  ZZC  15 15\r\nM  ZZC  16 11\r\nM  ZZC  17 12\r\nM  ZZC  18 13\r\nM  ZZC  19 22\r\nM  ZZC  20 23\r\nM  ZZC  21 27\r\nM  ZZC  22 28\r\nM  ZZC  23 24\r\nM  ZZC  24 25\r\nM  ZZC  25 14\r\nM  ZZC  26 10\r\nM  ZZC  27 18\r\nM  ZZC  28 4\r\nM  END\r\n"
+        }
+    },
+    "hostname": {
+        "datatype": "hostname",
+        "count": 1,
+        "data": {
+            "0": "Z49BR-HKPP041Y-42DHS-ANANTMPA"
+        }
+    },
+    "allAtomsInfo": {
+        "datatype": "allAtomsInfo",
+        "data": {
+            "0": {
+                "atom_idx": 0,
+                "id": 0,
+                "atomNumber": "21",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "1": {
+                "atom_idx": 1,
+                "id": 1,
+                "atomNumber": "20",
+                "symbol": "O",
+                "numProtons": 0
+            },
+            "2": {
+                "atom_idx": 2,
+                "id": 2,
+                "atomNumber": "19",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "3": {
+                "atom_idx": 3,
+                "id": 3,
+                "atomNumber": "26",
+                "symbol": "O",
+                "numProtons": 0
+            },
+            "4": {
+                "atom_idx": 4,
+                "id": 4,
+                "atomNumber": "5",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "5": {
+                "atom_idx": 5,
+                "id": 5,
+                "atomNumber": "6",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "6": {
+                "atom_idx": 6,
+                "id": 6,
+                "atomNumber": "1",
+                "symbol": "O",
+                "numProtons": 0
+            },
+            "7": {
+                "atom_idx": 7,
+                "id": 7,
+                "atomNumber": "2",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "8": {
+                "atom_idx": 8,
+                "id": 8,
+                "atomNumber": "7",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "9": {
+                "atom_idx": 9,
+                "id": 9,
+                "atomNumber": "3",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "10": {
+                "atom_idx": 10,
+                "id": 10,
+                "atomNumber": "8",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "11": {
+                "atom_idx": 11,
+                "id": 11,
+                "atomNumber": "9",
+                "symbol": "N",
+                "numProtons": 0
+            },
+            "12": {
+                "atom_idx": 12,
+                "id": 12,
+                "atomNumber": "17",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "13": {
+                "atom_idx": 13,
+                "id": 13,
+                "atomNumber": "16",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "14": {
+                "atom_idx": 14,
+                "id": 14,
+                "atomNumber": "15",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "15": {
+                "atom_idx": 15,
+                "id": 15,
+                "atomNumber": "11",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "16": {
+                "atom_idx": 16,
+                "id": 16,
+                "atomNumber": "12",
+                "symbol": "N",
+                "numProtons": 1
+            },
+            "17": {
+                "atom_idx": 17,
+                "id": 17,
+                "atomNumber": "13",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "18": {
+                "atom_idx": 18,
+                "id": 18,
+                "atomNumber": "22",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "19": {
+                "atom_idx": 19,
+                "id": 19,
+                "atomNumber": "23",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "20": {
+                "atom_idx": 20,
+                "id": 20,
+                "atomNumber": "27",
+                "symbol": "O",
+                "numProtons": 0
+            },
+            "21": {
+                "atom_idx": 21,
+                "id": 21,
+                "atomNumber": "28",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "22": {
+                "atom_idx": 22,
+                "id": 22,
+                "atomNumber": "24",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "23": {
+                "atom_idx": 23,
+                "id": 23,
+                "atomNumber": "25",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "24": {
+                "atom_idx": 24,
+                "id": 24,
+                "atomNumber": "14",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "25": {
+                "atom_idx": 25,
+                "id": 25,
+                "atomNumber": "10",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "26": {
+                "atom_idx": 26,
+                "id": 26,
+                "atomNumber": "18",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "27": {
+                "atom_idx": 27,
+                "id": 27,
+                "atomNumber": "4",
+                "symbol": "C",
+                "numProtons": 1
+            }
+        },
+        "count": 28
+    },
+    "carbonAtomsInfo": {
+        "datatype": "carbonAtomsInfo",
+        "data": {
+            "0": {
+                "atom_idx": 0,
+                "id": 0,
+                "atomNumber": "21",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "2": {
+                "atom_idx": 2,
+                "id": 2,
+                "atomNumber": "19",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "4": {
+                "atom_idx": 4,
+                "id": 4,
+                "atomNumber": "5",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "5": {
+                "atom_idx": 5,
+                "id": 5,
+                "atomNumber": "6",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "7": {
+                "atom_idx": 7,
+                "id": 7,
+                "atomNumber": "2",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "8": {
+                "atom_idx": 8,
+                "id": 8,
+                "atomNumber": "7",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "9": {
+                "atom_idx": 9,
+                "id": 9,
+                "atomNumber": "3",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "10": {
+                "atom_idx": 10,
+                "id": 10,
+                "atomNumber": "8",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "12": {
+                "atom_idx": 12,
+                "id": 12,
+                "atomNumber": "17",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "13": {
+                "atom_idx": 13,
+                "id": 13,
+                "atomNumber": "16",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "14": {
+                "atom_idx": 14,
+                "id": 14,
+                "atomNumber": "15",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "15": {
+                "atom_idx": 15,
+                "id": 15,
+                "atomNumber": "11",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "17": {
+                "atom_idx": 17,
+                "id": 17,
+                "atomNumber": "13",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "18": {
+                "atom_idx": 18,
+                "id": 18,
+                "atomNumber": "22",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "19": {
+                "atom_idx": 19,
+                "id": 19,
+                "atomNumber": "23",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "21": {
+                "atom_idx": 21,
+                "id": 21,
+                "atomNumber": "28",
+                "symbol": "C",
+                "numProtons": 3
+            },
+            "22": {
+                "atom_idx": 22,
+                "id": 22,
+                "atomNumber": "24",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "23": {
+                "atom_idx": 23,
+                "id": 23,
+                "atomNumber": "25",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "24": {
+                "atom_idx": 24,
+                "id": 24,
+                "atomNumber": "14",
+                "symbol": "C",
+                "numProtons": 0
+            },
+            "25": {
+                "atom_idx": 25,
+                "id": 25,
+                "atomNumber": "10",
+                "symbol": "C",
+                "numProtons": 1
+            },
+            "26": {
+                "atom_idx": 26,
+                "id": 26,
+                "atomNumber": "18",
+                "symbol": "C",
+                "numProtons": 2
+            },
+            "27": {
+                "atom_idx": 27,
+                "id": 27,
+                "atomNumber": "4",
+                "symbol": "C",
+                "numProtons": 1
+            }
+        },
+        "count": 22
+    },
+    "nmrAssignments": {
+        "datatype": "nmrAssignments",
+        "count": 0,
+        "data": {}
+    },
+    "c13predictions": {
+        "datatype": "c13predictions",
+        "count": 22,
+        "data": {
+            "0": {
+                "atomNumber": 21,
+                "atom_idx": 1,
+                "numProtons": 3,
+                "ppm": 51.735
+            },
+            "1": {
+                "atomNumber": 19,
+                "atom_idx": 3,
+                "numProtons": 0,
+                "ppm": 167.598
+            },
+            "2": {
+                "atomNumber": 5,
+                "atom_idx": 5,
+                "numProtons": 0,
+                "ppm": 108.355
+            },
+            "3": {
+                "atomNumber": 6,
+                "atom_idx": 6,
+                "numProtons": 1,
+                "ppm": 154.954
+            },
+            "4": {
+                "atomNumber": 2,
+                "atom_idx": 8,
+                "numProtons": 1,
+                "ppm": 73.557
+            },
+            "5": {
+                "atomNumber": 7,
+                "atom_idx": 9,
+                "numProtons": 3,
+                "ppm": 17.383
+            },
+            "6": {
+                "atomNumber": 3,
+                "atom_idx": 10,
+                "numProtons": 1,
+                "ppm": 39.292
+            },
+            "7": {
+                "atomNumber": 8,
+                "atom_idx": 11,
+                "numProtons": 2,
+                "ppm": 54.949
+            },
+            "8": {
+                "atomNumber": 17,
+                "atom_idx": 13,
+                "numProtons": 2,
+                "ppm": 52.731
+            },
+            "9": {
+                "atomNumber": 16,
+                "atom_idx": 14,
+                "numProtons": 2,
+                "ppm": 21.785
+            },
+            "10": {
+                "atomNumber": 15,
+                "atom_idx": 15,
+                "numProtons": 0,
+                "ppm": 107.417
+            },
+            "11": {
+                "atomNumber": 11,
+                "atom_idx": 16,
+                "numProtons": 0,
+                "ppm": 136.629
+            },
+            "12": {
+                "atomNumber": 13,
+                "atom_idx": 18,
+                "numProtons": 0,
+                "ppm": 136.426
+            },
+            "13": {
+                "atomNumber": 22,
+                "atom_idx": 19,
+                "numProtons": 1,
+                "ppm": 95.292
+            },
+            "14": {
+                "atomNumber": 23,
+                "atom_idx": 20,
+                "numProtons": 0,
+                "ppm": 156.135
+            },
+            "15": {
+                "atomNumber": 28,
+                "atom_idx": 22,
+                "numProtons": 3,
+                "ppm": 55.421
+            },
+            "16": {
+                "atomNumber": 24,
+                "atom_idx": 23,
+                "numProtons": 1,
+                "ppm": 108.741
+            },
+            "17": {
+                "atomNumber": 25,
+                "atom_idx": 24,
+                "numProtons": 1,
+                "ppm": 118.637
+            },
+            "18": {
+                "atomNumber": 14,
+                "atom_idx": 25,
+                "numProtons": 0,
+                "ppm": 122.213
+            },
+            "19": {
+                "atomNumber": 10,
+                "atom_idx": 26,
+                "numProtons": 1,
+                "ppm": 59.758
+            },
+            "20": {
+                "atomNumber": 18,
+                "atom_idx": 27,
+                "numProtons": 2,
+                "ppm": 33.005
+            },
+            "21": {
+                "atomNumber": 4,
+                "atom_idx": 28,
+                "numProtons": 1,
+                "ppm": 30.243
+            }
+        }
+    },
+    "Predicted_13C_NMR_Spectrum_0": {
+        "datatype": "nmrspectrum",
+        "origin": "Predictor",
+        "type": "1D",
+        "subtype": "predicted, 13C",
+        "experimenttype": "1D",
+        "experiment": "1D",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "",
+        "intrument": "",
+        "probe": "",
+        "datafilename": "",
+        "nucleus": "13C",
+        "specfrequency": 175,
+        "solvent": "Chloroform-d",
+        "temperature": "",
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {},
+            "count": 0
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        }
+    },
+    "chosenSpectra": {
+        "datatype": "chosenSpectra",
+        "count": 6,
+        "data": {
+            "0": "1H 1D zgcppr pubescine.1.fid_1 SKIP",
+            "1": "13C 1D zgpg30 pubescine.3.fid_2 C13_1D",
+            "2": "13C DEPT-135 deptsp135 pubescine.5.fid_3 DEPT135",
+            "3": "[1H, 1H] COSY cosyqf45 pubescine.9.ser_4 COSY",
+            "4": "[13C, 1H] HSQC hsqcetgp pubescine.7.ser_5 HSQC",
+            "5": "[13C, 1H] HMBC hmbcetgpl3nd pubescine.8.ser_6 HMBC"
+        }
+    },
+    "SKIP": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "1D",
+        "subtype": "1H",
+        "experimenttype": "1D",
+        "experiment": "1D",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "zgcppr",
+        "intrument": "spect",
+        "probe": "Z108641_0002 (CP TXO 500S2 C/N-H-D-05 Z)",
+        "datafilename": "/Users/dch1amk/Desktop/raw_nmr/pubescine/1/fid",
+        "nucleus": "1H",
+        "specfrequency": 499.842349248,
+        "solvent": "CDCl3",
+        "temperature": 298.16,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 161571.80078125,
+            "data": {
+                "0": {
+                    "delta1": 4.496774276988646,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 107760.331094414,
+                    "category": "dq",
+                    "type": 0,
+                    "jlistcount": 2,
+                    "jvals": [
+                        6.1700439453125,
+                        12.31982421875
+                    ]
+                },
+                "1": {
+                    "delta1": 7.316840645579592,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 161570.6935119629,
+                    "category": "d",
+                    "type": 0,
+                    "jlistcount": 1,
+                    "jvals": [
+                        8.5400390625
+                    ]
+                },
+                "2": {
+                    "delta1": 6.7872588161984115,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 160989.07751464844,
+                    "category": "d",
+                    "type": 0,
+                    "jlistcount": 1,
+                    "jvals": [
+                        2.140869140625
+                    ]
+                },
+                "3": {
+                    "delta1": 6.742191566758386,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 158302.94129180908,
+                    "category": "dd",
+                    "type": 0,
+                    "jlistcount": 2,
+                    "jvals": [
+                        2.2393798828125,
+                        8.5404052734375
+                    ]
+                },
+                "4": {
+                    "delta1": 7.560574280969676,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 126001.96928024292,
+                    "category": "s",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "5": {
+                    "delta1": 3.8271954817594733,
+                    "nH": 3,
+                    "realH": 3,
+                    "integralValue": 463766.0512084961,
+                    "category": "s",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "6": {
+                    "delta1": 3.747287029606159,
+                    "nH": 3,
+                    "realH": 3,
+                    "integralValue": 446671.6169433594,
+                    "category": "s",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "7": {
+                    "delta1": 3.3202889284116055,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 178828.34100532532,
+                    "category": "m",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "8": {
+                    "delta1": 3.0917268314913695,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 180277.67108154297,
+                    "category": "dd",
+                    "type": 0,
+                    "jlistcount": 2,
+                    "jvals": [
+                        1.69134521484375,
+                        12.26470947265625
+                    ]
+                },
+                "9": {
+                    "delta1": 2.469173273117115,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 186405.0788421631,
+                    "category": "dt",
+                    "type": 0,
+                    "jlistcount": 2,
+                    "jvals": [
+                        3.40704345703125,
+                        12.880859375
+                    ]
+                },
+                "10": {
+                    "delta1": 2.540260937512921,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 184250.70906066895,
+                    "category": "m",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "11": {
+                    "delta1": 2.6462761070068086,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 185825.59253692627,
+                    "category": "m",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "12": {
+                    "delta1": 2.716593706390673,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 168927.69436645508,
+                    "category": "m",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "13": {
+                    "delta1": 2.883690095739837,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 145817.77475738525,
+                    "category": "ddd",
+                    "type": 0,
+                    "jlistcount": 3,
+                    "jvals": [
+                        3.55303955078125,
+                        6.038818359375,
+                        12.5986328125
+                    ]
+                },
+                "14": {
+                    "delta1": 2.9374079001619555,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 223777.71684265137,
+                    "category": "m",
+                    "type": 0,
+                    "jlistcount": 0,
+                    "jvals": []
+                },
+                "15": {
+                    "delta1": 1.6946720587257667,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 192437.81385803223,
+                    "category": "d",
+                    "type": 0,
+                    "jlistcount": 1,
+                    "jvals": [
+                        10.02691650390625
+                    ]
+                },
+                "16": {
+                    "delta1": 1.5185813535695045,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 207152.48541259766,
+                    "category": "q",
+                    "type": 0,
+                    "jlistcount": 1,
+                    "jvals": [
+                        12.074554443359375
+                    ]
+                },
+                "17": {
+                    "delta1": 1.399262232098498,
+                    "nH": 3,
+                    "realH": 3,
+                    "integralValue": 539805.8277435303,
+                    "category": "d",
+                    "type": 0,
+                    "jlistcount": 1,
+                    "jvals": [
+                        6.208984375
+                    ]
+                },
+                "18": {
+                    "delta1": 2.760980479441659,
+                    "nH": 1,
+                    "realH": 1,
+                    "integralValue": 175278.87866210938,
+                    "category": "dd",
+                    "type": 0,
+                    "jlistcount": 2,
+                    "jvals": [
+                        3.6741943359375,
+                        8.2635498046875
+                    ]
+                }
+            },
+            "count": 19
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 7.747011887838279,
+                    "delta2": 0,
+                    "intensity": 223.85640446541206,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "1": {
+                    "delta1": 7.702687967035417,
+                    "delta2": 0,
+                    "intensity": 5176.674938722371,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "2": {
+                    "delta1": 7.560574280969676,
+                    "delta2": 0,
+                    "intensity": 10077.965741063765,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "6": {
+                    "delta1": 7.325383331605988,
+                    "delta2": 0,
+                    "intensity": 6851.790245830383,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "7": {
+                    "delta1": 7.308297959553195,
+                    "delta2": 0,
+                    "intensity": 7096.4257435428435,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "13": {
+                    "delta1": 6.789400445030741,
+                    "delta2": 0,
+                    "intensity": 8096.793207245413,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "14": {
+                    "delta1": 6.785117187366081,
+                    "delta2": 0,
+                    "intensity": 8852.443794196563,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "15": {
+                    "delta1": 6.7529815859617415,
+                    "delta2": 0,
+                    "intensity": 5802.630053753799,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "16": {
+                    "delta1": 6.748487713658735,
+                    "delta2": 0,
+                    "intensity": 4518.227398586648,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "17": {
+                    "delta1": 6.735881804585361,
+                    "delta2": 0,
+                    "intensity": 5210.174409275596,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "18": {
+                    "delta1": 6.731415162827709,
+                    "delta2": 0,
+                    "intensity": 4200.162609441985,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "21": {
+                    "delta1": 4.525619074675206,
+                    "delta2": 0,
+                    "intensity": 581.1405088113966,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "22": {
+                    "delta1": 4.513278433858648,
+                    "delta2": 0,
+                    "intensity": 1649.5089149513012,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "23": {
+                    "delta1": 4.5009785163963105,
+                    "delta2": 0,
+                    "intensity": 1774.6719972236478,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "24": {
+                    "delta1": 4.492572430922092,
+                    "delta2": 0,
+                    "intensity": 1751.0213499971499,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "25": {
+                    "delta1": 4.4802725450061205,
+                    "delta2": 0,
+                    "intensity": 1549.233527336316,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "26": {
+                    "delta1": 4.467924661073498,
+                    "delta2": 0,
+                    "intensity": 461.9328273742927,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "29": {
+                    "delta1": 3.8271954817594733,
+                    "delta2": 0,
+                    "intensity": 60079.68016868864,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "31": {
+                    "delta1": 3.747287029606159,
+                    "delta2": 0,
+                    "intensity": 58168.20943721283,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "36": {
+                    "delta1": 3.4880925484558176,
+                    "delta2": 0,
+                    "intensity": 896.6523830524759,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "37": {
+                    "delta1": 3.329303306681022,
+                    "delta2": 0,
+                    "intensity": 3071.057134887578,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "38": {
+                    "delta1": 3.3254450197945635,
+                    "delta2": 0,
+                    "intensity": 2781.0921575624575,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "39": {
+                    "delta1": 3.3061184587592325,
+                    "delta2": 0,
+                    "intensity": 3090.1038299834363,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "41": {
+                    "delta1": 3.1057041239610426,
+                    "delta2": 0,
+                    "intensity": 3936.363403661395,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "42": {
+                    "delta1": 3.102286774010312,
+                    "delta2": 0,
+                    "intensity": 3804.7490092990506,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "43": {
+                    "delta1": 3.0811333131940866,
+                    "delta2": 0,
+                    "intensity": 4420.262503203161,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "44": {
+                    "delta1": 3.0777831148000376,
+                    "delta2": 0,
+                    "intensity": 4074.3694567568314,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "45": {
+                    "delta1": 2.951546862743745,
+                    "delta2": 0,
+                    "intensity": 2381.8143974550053,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "46": {
+                    "delta1": 2.940136904531345,
+                    "delta2": 0,
+                    "intensity": 3351.6563021063275,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "47": {
+                    "delta1": 2.931270890549685,
+                    "delta2": 0,
+                    "intensity": 1988.080170475053,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "48": {
+                    "delta1": 2.9205399332107764,
+                    "delta2": 0,
+                    "intensity": 7049.683410896391,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "49": {
+                    "delta1": 2.9047642558170237,
+                    "delta2": 0,
+                    "intensity": 1614.7598049400451,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "50": {
+                    "delta1": 2.8972101475028165,
+                    "delta2": 0,
+                    "intensity": 2127.7359861340897,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "51": {
+                    "delta1": 2.8923696230592664,
+                    "delta2": 0,
+                    "intensity": 2226.7752567808916,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "52": {
+                    "delta1": 2.8880619563330225,
+                    "delta2": 0,
+                    "intensity": 1361.384850603725,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "53": {
+                    "delta1": 2.880114225706721,
+                    "delta2": 0,
+                    "intensity": 1068.8087432073432,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "54": {
+                    "delta1": 2.8746248777217436,
+                    "delta2": 0,
+                    "intensity": 1661.385705751707,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "55": {
+                    "delta1": 2.8695191267138536,
+                    "delta2": 0,
+                    "intensity": 1541.5364512882957,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "56": {
+                    "delta1": 2.862856553064253,
+                    "delta2": 0,
+                    "intensity": 1156.322504225696,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "57": {
+                    "delta1": 2.8578927947774955,
+                    "delta2": 0,
+                    "intensity": 985.8856003124125,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "58": {
+                    "delta1": 2.773747801788181,
+                    "delta2": 0,
+                    "intensity": 1953.9980298950459,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "59": {
+                    "delta1": 2.764745459169275,
+                    "delta2": 0,
+                    "intensity": 3576.0559804010672,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "60": {
+                    "delta1": 2.755563891137445,
+                    "delta2": 0,
+                    "intensity": 2437.4537944037243,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "61": {
+                    "delta1": 2.749864765671734,
+                    "delta2": 0,
+                    "intensity": 2487.7693542720053,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "62": {
+                    "delta1": 2.738017649800041,
+                    "delta2": 0,
+                    "intensity": 5310.33531357712,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "63": {
+                    "delta1": 2.7308114028574484,
+                    "delta2": 0,
+                    "intensity": 5557.58952479764,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "64": {
+                    "delta1": 2.7129797818347567,
+                    "delta2": 0,
+                    "intensity": 3757.413746482066,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "65": {
+                    "delta1": 2.705989934479813,
+                    "delta2": 0,
+                    "intensity": 3461.6196154867657,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "66": {
+                    "delta1": 2.67988287550504,
+                    "delta2": 0,
+                    "intensity": 920.9001043370336,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "67": {
+                    "delta1": 2.6665331135866053,
+                    "delta2": 0,
+                    "intensity": 3374.3006982169954,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "68": {
+                    "delta1": 2.6396784502624264,
+                    "delta2": 0,
+                    "intensity": 1901.734110640408,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "69": {
+                    "delta1": 2.6326167571713945,
+                    "delta2": 0,
+                    "intensity": 2241.901764879105,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "70": {
+                    "delta1": 2.564395732043662,
+                    "delta2": 0,
+                    "intensity": 2600.6035214809285,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "71": {
+                    "delta1": 2.5523747181054266,
+                    "delta2": 0,
+                    "intensity": 1350.7642672289583,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "72": {
+                    "delta1": 2.542413269247895,
+                    "delta2": 0,
+                    "intensity": 4047.558996734511,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "73": {
+                    "delta1": 2.533967140168222,
+                    "delta2": 0,
+                    "intensity": 3469.5174664759143,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "74": {
+                    "delta1": 2.520267608591905,
+                    "delta2": 0,
+                    "intensity": 2179.760602864437,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "75": {
+                    "delta1": 2.5048881307424864,
+                    "delta2": 0,
+                    "intensity": 609.8062485224464,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "76": {
+                    "delta1": 2.4887054979153174,
+                    "delta2": 0,
+                    "intensity": 2059.3918695765947,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "77": {
+                    "delta1": 2.4826150556747604,
+                    "delta2": 0,
+                    "intensity": 2459.4714194635485,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "78": {
+                    "delta1": 2.4749528301849635,
+                    "delta2": 0,
+                    "intensity": 1910.010167816489,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "79": {
+                    "delta1": 2.4628586246716617,
+                    "delta2": 0,
+                    "intensity": 2200.210108389556,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "80": {
+                    "delta1": 2.4567248866153064,
+                    "delta2": 0,
+                    "intensity": 2438.7708861243905,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "81": {
+                    "delta1": 2.4491827436406823,
+                    "delta2": 0,
+                    "intensity": 1670.671806726209,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "83": {
+                    "delta1": 1.7047022235814753,
+                    "delta2": 0,
+                    "intensity": 2424.8100467657223,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "85": {
+                    "delta1": 1.6846418938700578,
+                    "delta2": 0,
+                    "intensity": 2296.6786704902484,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "86": {
+                    "delta1": 1.6172959467637986,
+                    "delta2": 0,
+                    "intensity": 4072.5059946700576,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "87": {
+                    "delta1": 1.5551970505601223,
+                    "delta2": 0,
+                    "intensity": 2043.2468137134324,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "88": {
+                    "delta1": 1.5310812970188865,
+                    "delta2": 0,
+                    "intensity": 4634.35075815128,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "89": {
+                    "delta1": 1.5061224965868154,
+                    "delta2": 0,
+                    "intensity": 4268.580319070074,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "90": {
+                    "delta1": 1.4819245701121946,
+                    "delta2": 0,
+                    "intensity": 1758.628079538719,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "91": {
+                    "delta1": 1.4054731901581718,
+                    "delta2": 0,
+                    "intensity": 23265.090573420548,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "92": {
+                    "delta1": 1.3930512740388243,
+                    "delta2": 0,
+                    "intensity": 22440.253945421424,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "95": {
+                    "delta1": 1.276800185142706,
+                    "delta2": 0,
+                    "intensity": 244.4137833786303,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "96": {
+                    "delta1": 1.264053693790371,
+                    "delta2": 0,
+                    "intensity": 301.6684494268156,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "97": {
+                    "delta1": 1.2527898939206947,
+                    "delta2": 0,
+                    "intensity": 484.00996150886306,
+                    "type": 0,
+                    "annotation": ""
+                }
+            },
+            "count": 76
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 19,
+            "normValue": 161571.80078125,
+            "data": {
+                "0": {
+                    "intensity": 107760.331094414,
+                    "rangeMin1": 4.432267375216737,
+                    "rangeMin2": 0,
+                    "rangeMax1": 4.569506236687192,
+                    "rangeMax2": 0,
+                    "delta1": 4.500886805951964,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "1": {
+                    "intensity": 161570.6935119629,
+                    "rangeMin1": 7.294926310353442,
+                    "rangeMin2": 0,
+                    "rangeMax1": 7.343320404262934,
+                    "rangeMax2": 0,
+                    "delta1": 7.319123357308188,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "2": {
+                    "intensity": 160989.07751464844,
+                    "rangeMin1": 6.776034081212783,
+                    "rangeMin2": 0,
+                    "rangeMax1": 6.814122025493402,
+                    "rangeMax2": 0,
+                    "delta1": 6.795078053353093,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "3": {
+                    "intensity": 158302.94129180908,
+                    "rangeMin1": 6.719574304985045,
+                    "rangeMin2": 0,
+                    "rangeMax1": 6.776034081212783,
+                    "rangeMax2": 0,
+                    "delta1": 6.747804193098914,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "4": {
+                    "intensity": 126001.96928024292,
+                    "rangeMin1": 7.538176307857818,
+                    "rangeMin2": 0,
+                    "rangeMax1": 7.59589296433994,
+                    "rangeMax2": 0,
+                    "delta1": 7.56703463609888,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "5": {
+                    "intensity": 463766.0512084961,
+                    "rangeMin1": 3.817174622495363,
+                    "rangeMin2": 0,
+                    "rangeMax1": 3.837430749161616,
+                    "rangeMax2": 0,
+                    "delta1": 3.8273026858284895,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "6": {
+                    "intensity": 446671.6169433594,
+                    "rangeMin1": 3.737779919125346,
+                    "rangeMin2": 0,
+                    "rangeMax1": 3.7585793135565915,
+                    "rangeMax2": 0,
+                    "delta1": 3.748179616340969,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "7": {
+                    "intensity": 178828.34100532532,
+                    "rangeMin1": 3.276501238255406,
+                    "rangeMin2": 0,
+                    "rangeMax1": 3.3575756368580127,
+                    "rangeMax2": 0,
+                    "delta1": 3.3170384375567092,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "8": {
+                    "intensity": 180277.67108154297,
+                    "rangeMin1": 3.0492157447369883,
+                    "rangeMin2": 0,
+                    "rangeMax1": 3.1240536511393935,
+                    "rangeMax2": 0,
+                    "delta1": 3.086634697938191,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "9": {
+                    "intensity": 186405.0788421631,
+                    "rangeMin1": 2.4261957174855855,
+                    "rangeMin2": 0,
+                    "rangeMax1": 2.5060228176481503,
+                    "rangeMax2": 0,
+                    "delta1": 2.4661092675668677,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "10": {
+                    "intensity": 184250.70906066895,
+                    "rangeMin1": 2.5069097854277356,
+                    "rangeMin2": 0,
+                    "rangeMax1": 2.5800846272434215,
+                    "rangeMax2": 0,
+                    "delta1": 2.5434972063355783,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "11": {
+                    "intensity": 185825.59253692627,
+                    "rangeMin1": 2.614232886757408,
+                    "rangeMin2": 0,
+                    "rangeMax1": 2.690068631911845,
+                    "rangeMax2": 0,
+                    "delta1": 2.6521507593346265,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "12": {
+                    "intensity": 168927.69436645508,
+                    "rangeMin1": 2.6940599869199744,
+                    "rangeMin2": 0,
+                    "rangeMax1": 2.736786658915487,
+                    "rangeMax2": 0,
+                    "delta1": 2.7154233229177307,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "13": {
+                    "intensity": 145817.77475738525,
+                    "rangeMin1": 2.8457314772288496,
+                    "rangeMin2": 0,
+                    "rangeMax1": 2.9109236090282784,
+                    "rangeMax2": 0,
+                    "delta1": 2.878327543128564,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "14": {
+                    "intensity": 223777.71684265137,
+                    "rangeMin1": 2.912697544587446,
+                    "rangeMin2": 0,
+                    "rangeMax1": 2.9716809019297865,
+                    "rangeMax2": 0,
+                    "delta1": 2.942189223258616,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "15": {
+                    "intensity": 192437.81385803223,
+                    "rangeMin1": 1.662850458068204,
+                    "rangeMin2": 0,
+                    "rangeMax1": 1.729730600423153,
+                    "rangeMax2": 0,
+                    "delta1": 1.6962905292456785,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "16": {
+                    "intensity": 207152.48541259766,
+                    "rangeMin1": 1.468845658704365,
+                    "rangeMin2": 0,
+                    "rangeMax1": 1.5699516702540173,
+                    "rangeMax2": 0,
+                    "delta1": 1.519398664479191,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "17": {
+                    "intensity": 539805.8277435303,
+                    "rangeMin1": 1.3721051916948566,
+                    "rangeMin2": 0,
+                    "rangeMax1": 1.4326989499120049,
+                    "rangeMax2": 0,
+                    "delta1": 1.4024020708034306,
+                    "delta2": 0,
+                    "type": 0
+                },
+                "18": {
+                    "intensity": 175278.87866210938,
+                    "rangeMin1": 2.7394490463474526,
+                    "rangeMin2": 0,
+                    "rangeMax1": 2.7915557718016486,
+                    "rangeMax2": 0,
+                    "delta1": 2.765502409074551,
+                    "delta2": 0,
+                    "type": 0
+                }
+            }
+        },
+        "filename": "pubescine.1.fid_1"
+    },
+    "C13_1D": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "1D",
+        "subtype": "13C",
+        "experimenttype": "1D",
+        "experiment": "1D",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "zgpg30",
+        "intrument": "spect",
+        "probe": "Z108641_0002 (CP TXO 500S2 C/N-H-D-05 Z)",
+        "datafilename": "/Users/dch1amk/Desktop/raw_nmr/pubescine/3/fid",
+        "nucleus": "13C",
+        "specfrequency": 125.699237558299,
+        "solvent": "CDCl3",
+        "temperature": 298.16,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 168.0132420440074,
+                    "delta2": 0,
+                    "intensity": 1613.8254285317362,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "1": {
+                    "delta1": 156.000093428993,
+                    "delta2": 0,
+                    "intensity": 2113.1562763033708,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "2": {
+                    "delta1": 155.74313520308868,
+                    "delta2": 0,
+                    "intensity": 2891.829500859335,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "3": {
+                    "delta1": 136.70888029469288,
+                    "delta2": 0,
+                    "intensity": 1799.187089229592,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "4": {
+                    "delta1": 133.29563594003636,
+                    "delta2": 0,
+                    "intensity": 2026.505021819915,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "5": {
+                    "delta1": 118.58126098360523,
+                    "delta2": 0,
+                    "intensity": 2982.724268461801,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "6": {
+                    "delta1": 121.67265645034782,
+                    "delta2": 0,
+                    "intensity": 1803.500213049631,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "7": {
+                    "delta1": 109.53289276796272,
+                    "delta2": 0,
+                    "intensity": 2214.2349364454876,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "8": {
+                    "delta1": 108.77882711325385,
+                    "delta2": 0,
+                    "intensity": 2955.2739244112545,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "9": {
+                    "delta1": 107.85036436162639,
+                    "delta2": 0,
+                    "intensity": 2176.061755879591,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "10": {
+                    "delta1": 94.93157931512343,
+                    "delta2": 0,
+                    "intensity": 3306.5708040310974,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "11": {
+                    "delta1": 72.4922130799151,
+                    "delta2": 0,
+                    "intensity": 3155.576642660028,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "12": {
+                    "delta1": 59.80633764072004,
+                    "delta2": 0,
+                    "intensity": 3292.693925483606,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "13": {
+                    "delta1": 56.25397742354412,
+                    "delta2": 0,
+                    "intensity": 2743.769736627469,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "14": {
+                    "delta1": 55.73274302785465,
+                    "delta2": 0,
+                    "intensity": 3844.3810170182114,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "15": {
+                    "delta1": 53.5354498290124,
+                    "delta2": 0,
+                    "intensity": 2945.714183283461,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "16": {
+                    "delta1": 38.40367499089895,
+                    "delta2": 0,
+                    "intensity": 3315.821818310659,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "17": {
+                    "delta1": 51.13895792913861,
+                    "delta2": 0,
+                    "intensity": 3384.8854975255886,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "18": {
+                    "delta1": 34.27381378073638,
+                    "delta2": 0,
+                    "intensity": 2833.510489127893,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "19": {
+                    "delta1": 31.311140697683022,
+                    "delta2": 0,
+                    "intensity": 3343.9588422588763,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "20": {
+                    "delta1": 21.77653412458374,
+                    "delta2": 0,
+                    "intensity": 2940.872769076658,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "21": {
+                    "delta1": 18.517505388684924,
+                    "delta2": 0,
+                    "intensity": 3381.271644699822,
+                    "type": 0,
+                    "annotation": ""
+                }
+            },
+            "count": 22
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "pubescine.3.fid_2"
+    },
+    "DEPT135": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "1D",
+        "subtype": "13C",
+        "experimenttype": "1D-DEPT-135",
+        "experiment": "DEPT-135",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "deptsp135",
+        "intrument": "spect",
+        "probe": "Z108641_0002 (CP TXO 500S2 C/N-H-D-05 Z)",
+        "datafilename": "/Users/dch1amk/Desktop/raw_nmr/pubescine/5/fid",
+        "nucleus": "13C",
+        "specfrequency": 125.6974364868,
+        "solvent": "CDCl3",
+        "temperature": 298.16,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 155.74310116009644,
+                    "delta2": 0,
+                    "intensity": 914.7608738740621,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "1": {
+                    "delta1": 118.58238517352879,
+                    "delta2": 0,
+                    "intensity": 1216.1449089953203,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "2": {
+                    "delta1": 108.77990933784929,
+                    "delta2": 0,
+                    "intensity": 1193.3062107222422,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "3": {
+                    "delta1": 94.93213610001416,
+                    "delta2": 0,
+                    "intensity": 1304.9512180041704,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "4": {
+                    "delta1": 59.805944963258995,
+                    "delta2": 0,
+                    "intensity": 1313.5079003348894,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "5": {
+                    "delta1": 72.49281122639724,
+                    "delta2": 0,
+                    "intensity": 1285.5752196382177,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "6": {
+                    "delta1": 56.255011247783976,
+                    "delta2": 0,
+                    "intensity": -1677.0079048407915,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "7": {
+                    "delta1": 53.53586460583697,
+                    "delta2": 0,
+                    "intensity": -1755.493601535915,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "8": {
+                    "delta1": 55.73381026606742,
+                    "delta2": 0,
+                    "intensity": 2266.9100385166344,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "9": {
+                    "delta1": 51.139569461380965,
+                    "delta2": 0,
+                    "intensity": 2014.5657092404501,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "10": {
+                    "delta1": 38.40467662987414,
+                    "delta2": 0,
+                    "intensity": 1323.2698917623852,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "11": {
+                    "delta1": 34.27473408301294,
+                    "delta2": 0,
+                    "intensity": -1611.686591366638,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "12": {
+                    "delta1": 31.311870663567458,
+                    "delta2": 0,
+                    "intensity": 1287.32768905101,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "13": {
+                    "delta1": 21.777304961201963,
+                    "delta2": 0,
+                    "intensity": -1543.3035282492276,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "14": {
+                    "delta1": 18.518196308846193,
+                    "delta2": 0,
+                    "intensity": 1999.8459575048757,
+                    "type": 0,
+                    "annotation": ""
+                }
+            },
+            "count": 15
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "pubescine.5.fid_3"
+    },
+    "COSY": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H1H, COSY",
+        "experimenttype": "2D-COSY",
+        "experiment": "COSY",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "cosyqf45",
+        "intrument": "spect",
+        "probe": "Z108641_0002 (CP TXO 500S2 C/N-H-D-05 Z)",
+        "datafilename": "/Users/dch1amk/Desktop/raw_nmr/pubescine/9/ser",
+        "nucleus": "[1H, 1H]",
+        "specfrequency": "[499.842349248, 499.842349248]",
+        "solvent": "CDCl3",
+        "temperature": 298.16,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 6.742951179439669,
+                    "delta2": 7.314178959836644,
+                    "intensity": 148.82595825195312,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "1": {
+                    "delta1": 4.497332263035228,
+                    "delta2": 1.6945016449601806,
+                    "intensity": 77.0733413696289,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "2": {
+                    "delta1": 4.497332263035228,
+                    "delta2": 1.399710851546919,
+                    "intensity": 276.9472961425781,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "3": {
+                    "delta1": 3.316338297571708,
+                    "delta2": 1.520739090353694,
+                    "intensity": 24.91562843322754,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "4": {
+                    "delta1": 3.092442011616228,
+                    "delta2": 2.722811853143569,
+                    "intensity": 55.12689208984375,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "5": {
+                    "delta1": 2.9423709875163393,
+                    "delta2": 2.5390269559115555,
+                    "intensity": 25.16471290588379,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "6": {
+                    "delta1": 2.8830687279929963,
+                    "delta2": 2.65333219687293,
+                    "intensity": 37.502017974853516,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "7": {
+                    "delta1": 2.754782207391478,
+                    "delta2": 1.5192449041973362,
+                    "intensity": 4.367895126342773,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "8": {
+                    "delta1": 2.7523617070027697,
+                    "delta2": 2.471788578875453,
+                    "intensity": 28.759428024291992,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "9": {
+                    "delta1": 2.467952911329593,
+                    "delta2": 1.520739090353694,
+                    "intensity": 26.890806198120117,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "10": {
+                    "delta1": 2.4631119105521773,
+                    "delta2": 3.318245036452166,
+                    "intensity": 13.450300216674805,
+                    "type": 0,
+                    "annotation": ""
+                }
+            },
+            "count": 11
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "pubescine.9.ser_4"
+    },
+    "HSQC": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H13C, HSQC",
+        "experimenttype": "2D-HSQC",
+        "experiment": "HSQC",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "hsqcetgp",
+        "intrument": "spect",
+        "probe": "Z108641_0002 (CP TXO 500S2 C/N-H-D-05 Z)",
+        "datafilename": "/Users/dch1amk/Desktop/raw_nmr/pubescine/7/ser",
+        "nucleus": "[13C, 1H]",
+        "specfrequency": "[125.695824169311, 499.842349248]",
+        "solvent": "CDCl3",
+        "temperature": 298.16,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 155.743599036072,
+                    "delta2": 7.560615053457603,
+                    "intensity": 6.545415878295898,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "1": {
+                    "delta1": 118.575326661418,
+                    "delta2": 7.318028924414417,
+                    "intensity": 12.861412048339844,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "2": {
+                    "delta1": 108.79426634071658,
+                    "delta2": 6.742175296292635,
+                    "intensity": 14.739828109741211,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "3": {
+                    "delta1": 94.94674944573929,
+                    "delta2": 6.78782223022912,
+                    "intensity": 17.32517433166504,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "4": {
+                    "delta1": 72.51193431996376,
+                    "delta2": 4.496611683791175,
+                    "intensity": 11.835725784301758,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "5": {
+                    "delta1": 59.82329524339603,
+                    "delta2": 3.3181414503334485,
+                    "intensity": 11.25059700012207,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "6": {
+                    "delta1": 56.255453811718425,
+                    "delta2": 3.094554974533591,
+                    "intensity": 11.878235816955566,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "7": {
+                    "delta1": 56.255453811718425,
+                    "delta2": 2.72325613385513,
+                    "intensity": 11.253057479858398,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "8": {
+                    "delta1": 55.745762178621604,
+                    "delta2": 3.829080941962724,
+                    "intensity": 39.657100677490234,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "9": {
+                    "delta1": 53.57286626910369,
+                    "delta2": 2.9363493815488564,
+                    "intensity": 10.381302833557129,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "10": {
+                    "delta1": 53.57286626910369,
+                    "delta2": 2.5400282276942354,
+                    "intensity": 9.258145332336426,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "11": {
+                    "delta1": 51.14512454303735,
+                    "delta2": 3.7491709740775763,
+                    "intensity": 29.66899299621582,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "12": {
+                    "delta1": 38.40913805398773,
+                    "delta2": 1.6952407938765064,
+                    "intensity": 11.225300788879395,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "13": {
+                    "delta1": 34.29214499181228,
+                    "delta2": 2.4692346590629137,
+                    "intensity": 7.925023078918457,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "14": {
+                    "delta1": 34.29214499181228,
+                    "delta2": 1.520009665307204,
+                    "intensity": 6.257719039916992,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "15": {
+                    "delta1": 31.339827598541735,
+                    "delta2": 2.754746382059996,
+                    "intensity": 9.513555526733398,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "16": {
+                    "delta1": 21.778652921252686,
+                    "delta2": 2.890059994854823,
+                    "intensity": 6.123318672180176,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "17": {
+                    "delta1": 21.778652921252686,
+                    "delta2": 2.652584604399902,
+                    "intensity": 7.252120018005371,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "18": {
+                    "delta1": 18.54193798092396,
+                    "delta2": 1.4009336860477581,
+                    "intensity": 27.922426223754883,
+                    "type": 0,
+                    "annotation": ""
+                }
+            },
+            "count": 19
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "pubescine.7.ser_5"
+    },
+    "HMBC": {
+        "datatype": "nmrspectrum",
+        "origin": "Bruker XWIN-NMR",
+        "type": "2D",
+        "subtype": "1H13C, HMBC",
+        "experimenttype": "2D-HMBC",
+        "experiment": "HMBC",
+        "class": "",
+        "spectype": "",
+        "pulsesequence": "hmbcetgpl3nd",
+        "intrument": "spect",
+        "probe": "Z108641_0002 (CP TXO 500S2 C/N-H-D-05 Z)",
+        "datafilename": "/Users/dch1amk/Desktop/raw_nmr/pubescine/8/ser",
+        "nucleus": "[13C, 1H]",
+        "specfrequency": "[125.699237558299, 499.842799104]",
+        "solvent": "CDCl3",
+        "temperature": 298.16,
+        "multiplets": {
+            "datatype": "multiplets",
+            "normValue": 1,
+            "data": {},
+            "count": 0
+        },
+        "peaks": {
+            "datatype": "peaks",
+            "data": {
+                "0": {
+                    "delta1": 168.03863271449114,
+                    "delta2": 7.5624624474387065,
+                    "intensity": 5.993610382080078,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "1": {
+                    "delta1": 168.03863271449114,
+                    "delta2": 3.7538821844819488,
+                    "intensity": 55.46999740600586,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "2": {
+                    "delta1": 168.0151148522379,
+                    "delta2": 2.7561261077116104,
+                    "intensity": 1.369140625,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "3": {
+                    "delta1": 156.01018289819973,
+                    "delta2": 3.828527184946973,
+                    "intensity": 91.18492889404297,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "4": {
+                    "delta1": 156.00671709318016,
+                    "delta2": 7.316390109785163,
+                    "intensity": 18.733430862426758,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "5": {
+                    "delta1": 156.00671709318016,
+                    "delta2": 6.787696342174289,
+                    "intensity": 5.558551788330078,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "6": {
+                    "delta1": 156.00671709318016,
+                    "delta2": 6.74148814682124,
+                    "intensity": 0.5315906405448914,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "7": {
+                    "delta1": 155.75711471696167,
+                    "delta2": 2.752585953261535,
+                    "intensity": 1.5112624168395996,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "8": {
+                    "delta1": 136.79938093805612,
+                    "delta2": 7.318703180974943,
+                    "intensity": 18.946943283081055,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "9": {
+                    "delta1": 136.74167351074377,
+                    "delta2": 6.78865846878541,
+                    "intensity": 1.028080701828003,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "10": {
+                    "delta1": 133.29973734726352,
+                    "delta2": 2.6554114599452787,
+                    "intensity": 0.6355571746826172,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "11": {
+                    "delta1": 133.29973734726352,
+                    "delta2": 1.5192466826142632,
+                    "intensity": 1.0802013874053955,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "12": {
+                    "delta1": 121.82843222294626,
+                    "delta2": 7.316976937150386,
+                    "intensity": 0.6331542134284973,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "13": {
+                    "delta1": 121.7088886958758,
+                    "delta2": 6.78865846878541,
+                    "intensity": 10.929237365722656,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "14": {
+                    "delta1": 121.7088886958758,
+                    "delta2": 6.743675124090389,
+                    "intensity": 4.629673957824707,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "15": {
+                    "delta1": 109.58743836680878,
+                    "delta2": 7.560692970643691,
+                    "intensity": 9.335420608520508,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "16": {
+                    "delta1": 109.55130126053497,
+                    "delta2": 2.756084288316381,
+                    "intensity": 8.025197982788086,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "17": {
+                    "delta1": 109.55130126053497,
+                    "delta2": 1.5178084993518182,
+                    "intensity": 1.1303125619888306,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "18": {
+                    "delta1": 108.78242497790869,
+                    "delta2": 6.78865846878541,
+                    "intensity": 7.565208911895752,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "19": {
+                    "delta1": 107.90546974535481,
+                    "delta2": 7.316312408088374,
+                    "intensity": 1.8197664022445679,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "20": {
+                    "delta1": 107.87440787273161,
+                    "delta2": 2.937295379384367,
+                    "intensity": 5.144315242767334,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "21": {
+                    "delta1": 107.87440787273161,
+                    "delta2": 2.8819253237802585,
+                    "intensity": 1.2420917749404907,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "22": {
+                    "delta1": 94.99034985025631,
+                    "delta2": 6.743675124090389,
+                    "intensity": 4.278635501861572,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "23": {
+                    "delta1": 94.96365563027814,
+                    "delta2": 7.315980143557367,
+                    "intensity": 0.5574498772621155,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "24": {
+                    "delta1": 72.54516878515838,
+                    "delta2": 3.0914065017693257,
+                    "intensity": 1.4527865648269653,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "25": {
+                    "delta1": 72.54516878515838,
+                    "delta2": 2.757787345687321,
+                    "intensity": 4.223300457000732,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "26": {
+                    "delta1": 72.54516878515838,
+                    "delta2": 2.7224034957998358,
+                    "intensity": 9.059664726257324,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "27": {
+                    "delta1": 72.54516878515838,
+                    "delta2": 1.399480781639155,
+                    "intensity": 58.30856704711914,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "28": {
+                    "delta1": 72.52225996028638,
+                    "delta2": 7.560985246569877,
+                    "intensity": 6.216033935546875,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "29": {
+                    "delta1": 59.8536165212994,
+                    "delta2": 3.0935728599257026,
+                    "intensity": 4.484452247619629,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "30": {
+                    "delta1": 59.8536165212994,
+                    "delta2": 2.941927788979338,
+                    "intensity": 2.0348317623138428,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "31": {
+                    "delta1": 59.8536165212994,
+                    "delta2": 2.7224034957998358,
+                    "intensity": 2.3944311141967773,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "32": {
+                    "delta1": 59.8536165212994,
+                    "delta2": 2.5397072912787375,
+                    "intensity": 7.293765068054199,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "33": {
+                    "delta1": 59.8536165212994,
+                    "delta2": 1.5215189577817068,
+                    "intensity": 5.769829750061035,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "34": {
+                    "delta1": 56.27899327385588,
+                    "delta2": 2.9383171920520423,
+                    "intensity": 1.9907808303833008,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "35": {
+                    "delta1": 53.5570324524081,
+                    "delta2": 3.0935728599257026,
+                    "intensity": 1.9179552793502808,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "36": {
+                    "delta1": 53.5570324524081,
+                    "delta2": 2.7238477345707532,
+                    "intensity": 0.873772144317627,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "37": {
+                    "delta1": 38.40587703663846,
+                    "delta2": 3.0914065017693257,
+                    "intensity": 3.5603697299957275,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "38": {
+                    "delta1": 38.40587703663846,
+                    "delta2": 2.753454629374567,
+                    "intensity": 1.6032342910766602,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "39": {
+                    "delta1": 38.40587703663846,
+                    "delta2": 1.399480781639155,
+                    "intensity": 43.14175033569336,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "40": {
+                    "delta1": 34.27374374142853,
+                    "delta2": 2.754898868145486,
+                    "intensity": 2.4665257930755615,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "41": {
+                    "delta1": 31.387809376520035,
+                    "delta2": 2.7238477345707532,
+                    "intensity": 0.9605346322059631,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "42": {
+                    "delta1": 31.360537307143936,
+                    "delta2": 7.560985246569877,
+                    "intensity": 6.881593227386475,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "43": {
+                    "delta1": 31.322219959135765,
+                    "delta2": 3.0935728599257026,
+                    "intensity": 5.4427385330200195,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "44": {
+                    "delta1": 31.322219959135765,
+                    "delta2": 1.5179083608544126,
+                    "intensity": 2.8897149562835693,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "45": {
+                    "delta1": 31.31668833395227,
+                    "delta2": 4.496906042228559,
+                    "intensity": 2.413517713546753,
+                    "type": 0,
+                    "annotation": ""
+                },
+                "46": {
+                    "delta1": 21.77895972972241,
+                    "delta2": 2.9318181175829126,
+                    "intensity": 4.425483703613281,
+                    "type": 0,
+                    "annotation": ""
+                }
+            },
+            "count": 47
+        },
+        "integrals": {
+            "datatype": "integrals",
+            "count": 0,
+            "normValue": 1,
+            "data": {}
+        },
+        "filename": "pubescine.8.ser_6"
+    },
+    "MNOVAcalcMethod": {
+        "datatype": "MNOVAcalcMethod",
+        "count": 1,
+        "data": {
+            "0": "MNOVA Predict"
+        }
+    },
+    "exptIdentifiers": {
+        "count": 6,
+        "datatype": "exptIdentifiers",
+        "data": {
+            "0": "SKIP",
+            "1": "C13_1D",
+            "2": "DEPT135",
+            "3": "COSY",
+            "4": "HSQC",
+            "5": "HMBC"
+        }
+    },
+    "workingDirectory": {
+        "datatype": "workingDirectory",
+        "count": 1,
+        "data": {
+            "0": "/Users/vsmw51/Library/CloudStorage/Dropbox/Mac/Downloads/4Eric/pubescine"
+        }
+    },
+    "workingFilename": {
+        "datatype": "workingFilename",
+        "count": 1,
+        "data": {
+            "0": "pubescine"
+        }
+    },
+    "simulatedAnnealing": {
+        "datatype": "simulatedAnnealing",
+        "count": 1,
+        "data": {
+            "0": true
+        }
+    },
+    "ml_consent": {
+        "datatype": "ml_consent",
+        "count": 1,
+        "data": {
+            "0": true
+        }
+    },
+    "spectraWithPeaks": {
+        "datatype": "spectraWithPeaks",
+        "count": 6,
+        "data": {
+            "0": "1H 1D zgcppr pubescine.1.fid_1",
+            "1": "13C 1D zgpg30 pubescine.3.fid_2",
+            "2": "13C DEPT-135 deptsp135 pubescine.5.fid_3",
+            "3": "[1H, 1H] COSY cosyqf45 pubescine.9.ser_4",
+            "4": "[13C, 1H] HSQC hsqcetgp pubescine.7.ser_5",
+            "5": "[13C, 1H] HMBC hmbcetgpl3nd pubescine.8.ser_6"
+        }
+    }
+}

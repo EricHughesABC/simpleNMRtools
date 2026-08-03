@@ -16,13 +16,13 @@ case of proton data, the assignment is to the carbon atom to which the
 proton is attached. This is not necessarily a suitable final form in all
 cases. For example, if the user wants to include analysis of proton
 J-couplings that needs to be added in separately. But the data presented
-does neatly summarise the assignments arrived at using simplePREDICT.
+does neatly summarise the assignments arrived at using simpleVERIFY.
 
 The contents of the information dialog are pasted to the clipboard
 automatically. Which can be pasted into a WORD document such as this
 one.
 
-.. image:: media/image1.png
+.. image:: ./media/image1.png
    :alt: simpleREPORT dialog
    :width: 5.27157in
    :height: 2.20864in

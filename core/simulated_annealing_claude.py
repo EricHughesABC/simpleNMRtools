@@ -1,0 +1,1174 @@
+import sys
+import copy
+
+sys.path.append("../")
+
+# import platform
+import math
+import random
+import json
+import time
+import numpy as np
+import pandas as pd
+import networkx as nx
+from rdkit import Chem
+from pathlib import Path
+
+# import matplotlib.pyplot as plt
+from rdkit.Chem import Draw
+from rdkit.Chem.rdchem import Mol
+from typing import Dict, List, Optional, Tuple
+from loguru import logger
+
+from config.globals import SVG_DIMENSIONS as svgDimensions
+from config.globals import NODE_COLOR_MAP as color_map
+
+
+# from plotResults import fix_svg_string, plot_mapping, svgDimensions, color_map
+
+# import rdkit
+from rdkit import Chem
+# from rdkit.Chem import AllChem
+# from rdkit.Chem import Draw
+from collections import defaultdict
+
+
+# def compute_total_weight(
+#     graph: nx.Graph,
+#     mapping: Dict[int, int],
+#     shortest_paths: Dict[int, Dict[int, float]],
+# ) -> float:
+#     """
+#     Compute the total weight for a given mapping.
+
+#     Args:
+#         graph (nx.Graph): NetworkX graph of the molecule, with nodes representing atoms and edges representing bonds.
+#         mapping (Dict[int, int]): Node mapping between the molecule graph and the NMR graph.
+#         shortest_paths (Dict[int, Dict[int, float]]): Shortest paths between all pairs of nodes in the molecule graph.
+
+#     Returns:
+#         float: Sum of the path lengths of COSY and HMBC edges mapped onto the molecule graph.
+#     """
+
+#     total_weight = 0
+#     for u, v, d in graph.edges(data=True):
+#         if d["cosy"] or d["hmbc"]:
+#             uu = mapping[u]
+#             vv = mapping[v]
+
+#             if uu == vv:
+#                 continue
+
+#             if d.get("cosy"):
+#                 weight = shortest_paths[uu][vv]
+#                 total_weight += (weight - 1) ** 3
+#             if d.get("hmbc"):
+#                 weight = shortest_paths[uu][vv]
+#                 if weight < 3:
+#                     weight = 2
+#                 total_weight += (weight - 2) ** 3
+
+#     return total_weight
+
+def compute_total_weight(
+    graph: nx.Graph,
+    mapping: Dict[int, int],
+    shortest_paths: Dict[int, Dict[int, float]],
+) -> float:
+    """
+    Compute the total weight for a given mapping.
+
+    Args:
+        graph (nx.Graph): NetworkX graph of the molecule, with nodes representing atoms and edges representing bonds.
+        mapping (Dict[int, int]): Node mapping between the molecule graph and the NMR graph.
+        shortest_paths (Dict[int, Dict[int, float]]): Shortest paths between all pairs of nodes in the molecule graph.
+
+    Returns:
+        float: Sum of the path lengths of COSY and HMBC edges mapped onto the molecule graph.
+    """
+
+    total_weight = 0
+    for u, v, d in graph.edges(data=True):
+        if d["cosy"] or d["hmbc"]:
+            uu = mapping[u]
+            vv = mapping[v]
+
+            if uu == vv:
+                continue
+
+            if d.get("cosy"):
+                weight = shortest_paths[uu][vv]
+                total_weight += (weight - 1) ** 3
+            if d.get("hmbc"):
+                weight = shortest_paths[uu][vv]
+                if weight < 3:
+                    weight = 2
+                total_weight += (weight - 2) ** 3
+
+    return total_weight
+
+
+def modify_mapping(grouped_nodes, current_mapping, nProtons_to_nodes):
+    """
+    Modify a mapping by randomly swapping values between two nodes.
+
+    `grouped_nodes` and `nProtons_to_nodes` are expected to already be
+    restricted to the minimal symmetry-representative node set
+    (orig_nodes_displayed) before being passed in here -- see
+    SimulatedAnnealing2.setup_run/run_optimization, which build them from
+    the explicitly-supplied orig_nodes_displayed parameter. Because every
+    candidate node is already guaranteed valid, every proposed swap is valid
+    by construction -- there is nothing left to reject or retry for
+    symmetry reasons (unlike earlier versions of this function, which drew
+    from the full carbon graph and then rejected/retried swaps that
+    violated symmetry after the fact).
+
+    Parameters:
+        grouped_nodes (dict): numProtons -> list of candidate node ids
+            (restricted to orig_nodes_displayed).
+        current_mapping (dict): Current mapping {node_in_graph1: node_in_graph2}.
+        nProtons_to_nodes (dict): node id -> numProtons (restricted to
+            orig_nodes_displayed).
+
+    Returns:
+        dict: Updated mapping after the swap.
+        bool: True if a swap was made, False otherwise.
+    """
+    new_mapping = current_mapping.copy()
+
+    # Step 1: choose a random key (node in graph1)
+    random_node = random.choice(list(nProtons_to_nodes.keys()))
+    nprotons_key = int(nProtons_to_nodes[random_node])
+
+    # Step 2: randomly select a value from its possible mappings
+    possible_values = grouped_nodes[nprotons_key]
+    chosen_value = random.choice(possible_values)
+
+    # Step 3: avoid a no-op self-swap (unrelated to symmetry -- just retries
+    # if we happened to pick the same node for both slots)
+    num_trys = 0
+    while chosen_value == random_node and num_trys < 100:
+        chosen_value = random.choice(possible_values)
+        num_trys += 1
+
+    swapped = False
+    if random_node != chosen_value:
+        v1 = new_mapping[random_node]
+        v2 = new_mapping[chosen_value]
+        new_mapping[random_node] = v2
+        new_mapping[chosen_value] = v1
+        swapped = True
+
+    return new_mapping, swapped
+
+
+def simulated_annealing(
+    G2: nx.Graph,
+    shortest_paths: Dict[int, Dict[int, int]],
+    grouped_nodes: Dict[int, List[int]],
+    nProtons_to_nodes: Dict[int, int],
+    current_mapping: Optional[Dict[int, int]] = None,
+    randomize_mapping=False,
+    initial_temp: float = 100000,
+    final_temp: float = 0.001,
+    cooling_rate: float = 0.999,
+    max_iterations: int = 500000,
+) -> Tuple[Dict[int, int], int, Dict[str, int], List[Tuple[int, int, int, float]]]:
+    """
+    Simulated annealing algorithm for graph mapping.
+
+    Parameters:
+    - G2: The second graph (networkx.Graph). carbon_graph
+    - shortest_paths: A dictionary of shortest paths in G2.
+    - grouped_nodes: A dictionary of possible permutations for each node,
+      already restricted to the minimal symmetry-representative node set
+      (orig_nodes_displayed) by the caller -- see
+      SimulatedAnnealing2.run_optimization.
+    - nProtons_to_nodes: node id -> numProtons, likewise already restricted.
+    - current_mapping: The initial mapping of nodes from G1 to G2.
+    - randomized_mapping: Randomize the initial mapping.
+    - initial_temp: The initial temperature for the annealing process.
+    - cooling_rate: The rate at which the temperature decreases.
+    - max_iterations: The maximum number of iterations to perform.
+
+    Returns:
+    - best_mapping: The best mapping found.
+    - best_weight: The weight of the best mapping.
+    - stats: Statistics about the annealing process.
+    - weights: A list of tuples containing iteration, best weight, current weight, and temperature.
+    """
+
+    # Initialize mappings and weights
+    if current_mapping is None:
+        current_mapping = {node: node for node in G2.nodes()}
+    best_mapping = current_mapping.copy()
+    current_weight = best_weight = compute_total_weight(
+        G2, current_mapping, shortest_paths
+    )
+    temperature = initial_temp
+
+    stats = {
+        "not_swapped": 0,
+        "improvements": 0,
+        "worsen_accepted": 0,
+        "move_rejected": 0,
+    }
+    weights = []
+
+    for iteration in range(max_iterations):
+        neighbor_mapping, swapped = modify_mapping(grouped_nodes, current_mapping, nProtons_to_nodes)
+        if not swapped:
+            stats["not_swapped"] += 1
+            continue
+
+        neighbor_weight = compute_total_weight(G2, neighbor_mapping, shortest_paths)
+
+        # Update mapping and weights based on acceptance criteria
+        if neighbor_weight < current_weight:
+            stats["improvements"] += 1
+            current_mapping = neighbor_mapping
+            current_weight = neighbor_weight
+        elif random.random() < math.exp(
+            (current_weight - neighbor_weight) / temperature
+        ):
+            current_mapping = neighbor_mapping
+            current_weight = neighbor_weight
+            stats["worsen_accepted"] += 1
+        else:
+            stats["move_rejected"] += 1
+
+        # Update the best solution found so far
+        if current_weight < best_weight:
+            best_mapping, best_weight = current_mapping, current_weight
+
+        weights.append((iteration, best_weight, current_weight, temperature))
+
+        # Cooling
+        temperature *= cooling_rate
+
+        # Early stopping condition
+        if temperature < final_temp:
+            break
+
+    return best_mapping, best_weight, stats, weights
+
+
+class NMRgraphs:
+    def __init__(self, df, links):
+        self.df = df
+        self.graph = nx.Graph()
+        self.graph.add_nodes_from(df.id)
+
+        # add node attributes from the dataframe to the graph
+        columns = df.columns
+        for _, row in df.iterrows():
+            id = row["id"]
+            for col in columns:
+                self.graph.nodes[id][col] = row[col]
+
+        # add links to the graph
+        for link in links:
+            self.graph.add_edge(
+                link["source"],
+                link["target"],
+                bond=link.get("bond", False),
+                cosy=link.get("cosy", False),
+                hmbc=link.get("hmbc", False),
+            )
+
+
+class SimulatedAnnealing2:
+    def __init__(self, json_data):
+
+        self.json_data = json_data
+        self.nmr_nodes = json_data["nodes_now"]
+        self.nmr_links = json_data["links"]
+        self.possible_symmetry = json_data["possible_symmetry"]
+
+        # Both of these are computed once, upstream (in the main NMR solution
+        # pipeline), from the same molecule/symmetry-reconciliation logic --
+        # not re-derived here -- so there is exactly one place to fix if
+        # something about the symmetry handling looks wrong.
+        #
+        # orig_nodes_displayed: the minimal, symmetry-consistent set of atom
+        #   ids that carry experimental data. modify_mapping's candidate
+        #   pool (see run_optimization) is restricted to this set, so a
+        #   symmetry-invalid swap can never be proposed in the first place.
+        #
+        # pool_ch3_ch1: whether CH3/CH1 were pooled together upstream when
+        #   sizing orig_nodes_displayed (true when there's no real evidence,
+        #   e.g. a CH3-only experiment or user annotation, distinguishing
+        #   them). This is stored for provenance/logging only -- it does NOT
+        #   affect swap grouping here: CH3 and CH1 are always kept as
+        #   separate swap groups (see run_optimization), since by the time
+        #   SA runs the program has already committed to a specific CH3/CH1
+        #   assignment, and SA refining HMBC/COSY connectivity should not be
+        #   able to silently reclassify a peak's fundamental multiplicity
+        #   type as a side effect.
+        self.orig_nodes_displayed = json_data["orig_nodes_displayed"]
+        self.pool_ch3_ch1 = json_data["pool_ch3_ch1"]
+
+        # remove any links where the source equals the target
+        self.nmr_links = [
+            link for link in self.nmr_links if link["source"] != link["target"]
+        ]
+
+        self.nodes_offset = 0
+        # adjust index offset in nmr_nodes and nmr_links
+        if (
+            json_data["oldjsondata"]["MNOVAcalcMethod"]["data"]["0"]
+            == "NMRSHIFTDB2 Predict"
+        ):
+            self.nodes_offset = 0
+
+        elif(
+            json_data["oldjsondata"]["MNOVAcalcMethod"]["data"]["0"]
+            == "JEOL Predict"
+        ): 
+            self.nodes_offset = 0
+        else:
+            # self.nodes_offset = 1
+            self.nodes_offset = 0  # EEH 2025-sep-06
+
+
+        for link in self.nmr_links:
+            link["source"] = int(link["source"]) - self.nodes_offset
+            link["target"] = int(link["target"]) - self.nodes_offset
+            link["weight"] = 1
+
+        for node in self.nmr_nodes:
+            node["id"] = int(node["id"]) - self.nodes_offset
+
+        # orig_nodes_displayed is expressed in the same (offset-adjusted)
+        # id space as nmr_nodes/nmr_links above
+        self.orig_nodes_displayed = [
+            int(node_id) - self.nodes_offset for node_id in self.orig_nodes_displayed
+        ]
+
+        mol_str = json_data["molfile"]
+        self.mol = Chem.MolFromMolBlock(mol_str)
+
+        self.mol_links = []
+        # add edges from simAnneal.mol
+        for idx, bond in enumerate(self.mol.GetBonds()):
+            self.mol_links.append(
+                {
+                    "source": bond.GetBeginAtomIdx(),
+                    "target": bond.GetEndAtomIdx(),
+                    "bond": True,
+                }
+            )
+
+        self.all_links = self.mol_links + self.nmr_links
+
+        self.graph_df = self.create_graph_df(json_data, self.nmr_nodes)
+        self.carbon_df = self.graph_df[self.graph_df["symbol"] == "C"]
+
+        self.xy3 = self.calc_xy3_coords(self.mol)
+
+        # update coodinates in graph_df
+        for idx, (x, y) in self.xy3.items():
+            self.graph_df.loc[idx, "x"] = x
+            self.graph_df.loc[idx, "y"] = y
+
+        self.nmr_graph = NMRgraphs(self.graph_df, self.all_links).graph
+        self.carbon_graph = NMRgraphs(self.carbon_df, self.nmr_links).graph
+        self.mol_graph = NMRgraphs(self.graph_df, self.mol_links).graph
+
+        cosy_hmbc_edges = [
+            (u, v)
+            for u, v, d in self.nmr_graph.edges(data=True)
+            if d.get("cosy") or d.get("hmbc")
+        ]
+        self.cosy_hmbc_subgraph = self.nmr_graph.edge_subgraph(cosy_hmbc_edges)
+
+        cosy_edges = [
+            (u, v) for u, v, d in self.nmr_graph.edges(data=True) if d["cosy"]
+        ]
+        self.cosy_subgraph = self.nmr_graph.edge_subgraph(cosy_edges)
+
+        hmbc_edges = [
+            (u, v) for u, v, d in self.nmr_graph.edges(data=True) if d["hmbc"]
+        ]
+        self.hmbc_subgraph = self.nmr_graph.edge_subgraph(hmbc_edges)
+
+        bonds_edges = [
+            (u, v) for u, v, d in self.nmr_graph.edges(data=True) if d["bond"]
+        ]
+        self.bonds_subgraph = self.nmr_graph.edge_subgraph(bonds_edges)
+
+        self.carbon_grouped_nodes = {}
+        for node in self.carbon_graph.nodes(data=True):
+            # the keys are numProtons and add the node to a list of nodes with the same numProtons
+            self.carbon_grouped_nodes.setdefault(node[1]["numProtons"], []).append(
+                node[0]
+            )
+
+    @classmethod
+    def from_json_file(cls, json_file_path: Path, orig_nodes_displayed=None, pool_ch3_ch1=None):
+        """
+        Load a SimulatedAnnealing2 instance from a raw JSON file, for
+        standalone/CLI use and testing.
+
+        orig_nodes_displayed and pool_ch3_ch1 are normally computed upstream
+        (by the main NMR solution pipeline) and are required by __init__.
+        For a raw exported/test JSON file that doesn't already carry these
+        two fields at its top level, pass them in explicitly here (e.g.
+        computed via core.symmetry_unique_carbons against the same molfile)
+        rather than leaving them to silently default to something incorrect.
+        """
+        if not json_file_path.exists():
+            raise FileNotFoundError(f"File {json_file_path} not found.")
+        with open(json_file_path, "r") as f:
+            json_data = json.load(f)
+
+        if orig_nodes_displayed is not None:
+            json_data["orig_nodes_displayed"] = orig_nodes_displayed
+        if pool_ch3_ch1 is not None:
+            json_data["pool_ch3_ch1"] = pool_ch3_ch1
+
+        return cls(json_data)
+
+    @classmethod
+    def from_params(
+        cls,
+        nodes_now,
+        links,
+        molfile,
+        oldjson_data,
+        possible_symmetry,
+        orig_nodes_displayed,
+        pool_ch3_ch1,
+    ):
+        # collect all parameters internally
+        # make a list of what is used from the dict
+
+        # "nodes_now"
+        # "links"
+        # "molfile"
+        # json_data["oldjsondata"]["allAtomsInfo"]
+
+        json_data = {
+            "nodes_now": nodes_now,
+            "links": links,
+            "molfile": molfile,
+            "oldjsondata": oldjson_data,
+            "possible_symmetry": possible_symmetry,
+            "orig_nodes_displayed": orig_nodes_displayed,
+            "pool_ch3_ch1": pool_ch3_ch1,
+        }
+
+        return cls(json_data)
+
+    def create_graph_df(self, json_data, nmr_nodes):
+
+        # create a dataframe from the mol_graph nodes using the data dictionary as the columns transpose the dataframe
+        graph_df = pd.DataFrame.from_dict(
+            json_data["oldjsondata"]["allAtomsInfo"]["data"], orient="index"
+        )
+        c13predictions_df = pd.DataFrame.from_dict(
+            json_data["oldjsondata"]["c13predictions"]["data"], orient="index"
+        )
+
+        # change index to integer
+        graph_df.index = graph_df.index.astype(int)
+
+
+        for cnode in nmr_nodes:
+            for key, value in cnode.items():
+                if isinstance(value, list):
+                    value1 = "[" + ",".join([str(x) for x in value]) + "]"
+                else:
+                    value1 = value
+                graph_df.at[int(cnode["id"]), key] = value1
+
+
+        graph_df["iupacLabel"] = graph_df["iupacLabel"].fillna("")
+        graph_df["jCouplingClass"] = graph_df["jCouplingClass"].fillna("")
+        graph_df["jCouplingVals"] = graph_df["jCouplingVals"].fillna("")
+        graph_df["x"] = graph_df["x"].fillna("")
+        graph_df["y"] = graph_df["y"].fillna("")
+        graph_df["H1_ppm"] = graph_df["H1_ppm"].fillna("")
+        graph_df["ppm"] = graph_df["ppm"].fillna("")
+        graph_df["ppm_calculated"] = graph_df["ppm_calculated"].fillna("")
+        if "visible" in graph_df.columns:
+            graph_df["visible"] = graph_df["visible"].fillna(True)
+        else:
+            graph_df["visible"] = True
+
+        # add color column based on numprotons and atom type
+        graph_df["color"] = graph_df.apply(
+            lambda x: color_map.get(x["numProtons"], color_map.get(-1)), axis=1
+        )
+
+        # set color of non carbon atoms to lightblue
+        graph_df.loc[graph_df["symbol"] != "C", "color"] = color_map.get(-1)
+
+        return graph_df
+
+    def calc_xy3_coords(
+        self,
+        mol: Mol,
+        molWidth: int = svgDimensions.mol_width,
+        molHeight: int = svgDimensions.mol_height,
+        svgWidth: int = svgDimensions.svg_width,
+        svgHeight: int = svgDimensions.svg_height
+    ) -> Tuple[str, Dict[int, Tuple[float, float]]]:
+        """
+        Create an SVG string representation of a molecule and extract atom coordinates.
+
+        Parameters:
+        mol (Mol): RDKit molecule object.
+        molWidth (int): Width of the molecule drawing area in pixels. Default is 1000.
+        molHeight (int): Height of the molecule drawing area in pixels. Default is 400.
+        svgWidth (int): Width of the SVG canvas in pixels. Default is 1200.
+        svgHeight (int): Height of the SVG canvas in pixels. Default is 600.
+
+        Returns:
+        Tuple[str, Dict[int, Tuple[float, float]]]: A tuple containing the SVG string and a dictionary of atom coordinates.
+        """
+        translateWidth = int((svgWidth - molWidth) / 2)
+        translateHeight = int((svgHeight - molHeight) / 2)
+
+        d2d = Draw.rdMolDraw2D.MolDraw2DSVG(molWidth, molHeight)
+        d2d.drawOptions().minFontSize = 20
+        d2d.DrawMolecule(mol)
+        d2d.TagAtoms(mol)
+        d2d.FinishDrawing()
+
+        sss = d2d.GetDrawingText()
+        sss = d2d.GetDrawingText().replace(
+            f"width='{molWidth}px' height='{molHeight}px'",
+            f"width={molWidth} height={molHeight}",
+        )
+        sss = sss.replace("fill:#FFFFFF", "fill:none").replace(
+            "<svg", '<svg class="center"'
+        )
+
+        sss = sss.replace(
+            f"<!-- END OF HEADER -->",
+            f"<!-- END OF HEADER -->\n<g transform='translate({translateWidth}, {translateHeight})'>",
+        )
+        sss = sss.replace("</svg>", "</g>\n</svg>")
+        # sss = sss.replace(
+        #     f"width={molWidth} height={molHeight} viewBox='0 0 {molWidth} {molHeight}'",
+        #     f"width={svgWidth} height={svgHeight} viewBox='0 0 {svgWidth} {svgHeight}'",
+        # )
+        sss = sss.replace(
+            f"width='{molWidth}px' height='{molHeight}px'",
+            f"width='{molWidth}' height='{molHeight}'",  # keep the quotes
+        )
+
+        idx_list = []
+        xxx = []
+        yyy = []
+
+        new_xy3 = {}
+        for atom in mol.GetAtoms():
+            idx = atom.GetIdx()
+            point = d2d.GetDrawCoords(idx)
+            idx_list.append(idx)
+            xxx.append(point.x / molWidth)
+            yyy.append(point.y / molHeight)
+            new_xy3[idx] = (point.x / molWidth, point.y / molHeight)
+
+        return new_xy3
+
+    def initialize_mapping(
+        self,
+        carbon_graph: nx.Graph,
+        carbon_grouped_nodes: Dict[int, List[int]],
+        randomize_mapping: bool = False,
+        displayed_nodes: Optional[List[int]] = None,
+    ) -> Dict[int, int]:
+        """
+        Initialize a mapping of nodes in the carbon graph.
+
+        Args:
+            carbon_graph (nx.Graph): The graph representing the carbon atoms.
+            carbon_grouped_nodes (Dict[int, List[int]]): A dictionary grouping nodes by the number of protons.
+            randomize_mapping (bool): Whether to randomize the initial mapping.
+            displayed_nodes (list, optional): If given, only nodes in this
+                set are eligible to be shuffled -- matches the same
+                orig_nodes_displayed restriction modify_mapping enforces
+                during annealing, so a random initial mapping can't assign
+                an excluded (non-displayed, symmetry-redundant) node's
+                identity onto a displayed position before SA even starts.
+                Nodes not in this set always keep their identity mapping.
+
+        Returns:
+            Dict[int, int]: The initialized mapping of nodes.
+        """
+        random_mapping = {node: node for node in carbon_graph.nodes()}
+        if randomize_mapping:
+            displayed_set = set(displayed_nodes) if displayed_nodes is not None else None
+            for nprotons in range(4):
+                nodes1 = carbon_grouped_nodes.get(nprotons, []).copy()
+                if displayed_set is not None:
+                    nodes1 = [n for n in nodes1 if n in displayed_set]
+                nodes2 = nodes1.copy()
+                random.shuffle(nodes2)
+                for i, node in enumerate(nodes1):
+                    random_mapping[node] = nodes2[i]
+        return random_mapping
+
+
+    def map_protons_to_nodes(self, graph_df: pd.DataFrame) -> Dict[int, int]:
+        """
+        Map the number of protons to their corresponding nodes in the dataframe.
+
+        Args:
+            graph_df (pd.DataFrame): DataFrame containing molecular information with columns 'symbol' and 'numProtons'.
+
+        Returns:
+            Dict[int, int]: A dictionary mapping node indices to the number of protons.
+        """
+        nProtons_to_nodes = {}
+        for idx, row in graph_df.iterrows():
+            if row["symbol"] != "C":
+                continue
+            nProtons = row["numProtons"]
+            nProtons_to_nodes[idx] = nProtons
+
+        return nProtons_to_nodes
+
+    def run_optimization(self, num_times: int = 1) -> None:
+        """
+        Run the simulated annealing optimization process multiple times.
+
+        Args:
+            num_times (int): Number of times to run the optimization process.
+        """
+
+        self.bestest_weight = float("inf")
+
+        self.predicted_mapping = self.initialize_mapping(
+            self.carbon_graph, self.carbon_grouped_nodes, randomize_mapping=False,
+            displayed_nodes=self.orig_nodes_displayed,
+        )
+
+        self.predicted_weight = compute_total_weight(
+            self.carbon_graph, self.predicted_mapping, self.shortest_paths
+        )
+
+        self.initial_mapping = self.initialize_mapping(
+            self.carbon_graph,
+            self.carbon_grouped_nodes,
+            randomize_mapping=self.randomize_mapping,
+            displayed_nodes=self.orig_nodes_displayed,
+        )
+        self.initial_weight = compute_total_weight(
+            self.carbon_graph, self.initial_mapping, self.shortest_paths
+        )
+
+        # Restrict the swap candidate pool to the minimal symmetry-consistent
+        # node set (orig_nodes_displayed) -- every node NOT in this set is a
+        # redundant symmetric duplicate that carries no independent
+        # experimental information, so it's excluded from consideration
+        # entirely rather than being a candidate that might get rejected
+        # after the fact. Within that restricted set, groups are still kept
+        # exactly as they were (by numProtons, >1 member) -- CH3 and CH1
+        # remain separate groups regardless of self.pool_ch3_ch1 (see
+        # __init__ for why).
+        displayed_set = set(self.orig_nodes_displayed)
+        carbon_grouped_nodes_displayed = {
+            nprotons: [n for n in nodes if n in displayed_set]
+            for nprotons, nodes in self.carbon_grouped_nodes.items()
+        }
+        carbon_grouped_nodes_reduced = {
+            k: v for k, v in carbon_grouped_nodes_displayed.items() if len(v) > 1
+        }
+        nProtons_to_nodes_reduced = {
+            k: v
+            for k, v in self.nProtons_to_nodes.items()
+            if (k in displayed_set) and (int(v) in carbon_grouped_nodes_reduced)
+        }
+
+        self.results = {}
+
+        for i in range(num_times):
+
+            self.initial_mapping = self.initialize_mapping(
+                self.carbon_graph,
+                self.carbon_grouped_nodes,
+                randomize_mapping=self.randomize_mapping,
+                displayed_nodes=self.orig_nodes_displayed,
+            )
+            self.initial_weight = compute_total_weight(
+                self.carbon_graph, self.initial_mapping, self.shortest_paths
+            )
+
+            best_mapping, best_weight, stats, weights = simulated_annealing(
+                self.carbon_graph,
+                self.shortest_paths,
+                carbon_grouped_nodes_reduced,
+                nProtons_to_nodes_reduced,
+                self.initial_mapping,
+                randomize_mapping=self.randomize_mapping,
+                initial_temp=self.max_temp,
+                final_temp=self.min_temp,
+                cooling_rate=self.cooling_rate,
+                max_iterations=self.max_iter,
+            )
+
+            if best_weight not in self.results:
+                self.results[best_weight] = {}
+                self.results[best_weight]["num_times"] = 0
+                self.results[best_weight]["results"] = []
+                self.results[best_weight]["best_mapping"] = []
+
+            self.results[best_weight]["results"].append((best_mapping, stats, weights))
+            self.results[best_weight]["num_times"] += 1
+            self.results[best_weight]["best_mapping"].append(best_mapping)
+
+            if best_weight < self.bestest_weight:
+                self.bestest_weight = best_weight
+                self.bestest_mapping = best_mapping
+                self.bestest_stats = stats
+                self.bestest_weights = weights
+
+    def setup_run(
+        self,
+        max_iter: int = 1000000,
+        max_temp: float = 100.0,
+        min_temp: float = 0.1,
+        cooling_rate: float = 0.999,
+        randomize_mapping: bool = False,
+    ) -> None:
+        """
+        Set up the parameters for the simulated annealing run.
+
+        Args:
+            max_iter (int): Maximum number of iterations for the annealing process.
+            max_temp (float): Maximum temperature for the annealing process.
+            min_temp (float): Minimum temperature for the annealing process.
+            cooling_rate (float): Cooling rate for the annealing process.
+            randomize_mapping (bool): Whether to randomize the initial mapping.
+        """
+
+        self.max_iter = max_iter
+        self.max_temp = max_temp
+        self.min_temp = min_temp
+        self.cooling_rate = cooling_rate
+        self.randomize_mapping = randomize_mapping
+
+
+
+        # initialize the mapping
+        self.mapping = self.initialize_mapping(
+            self.carbon_graph, self.carbon_grouped_nodes, self.randomize_mapping,
+            displayed_nodes=self.orig_nodes_displayed,
+        )
+
+        self.shortest_paths = dict(nx.all_pairs_shortest_path_length(self.mol_graph))
+
+        self.nProtons_to_nodes = self.map_protons_to_nodes(self.graph_df)
+
+        self.predicted_mapping = self.initialize_mapping(
+            self.carbon_graph, self.carbon_grouped_nodes, randomize_mapping=self.randomize_mapping,
+            displayed_nodes=self.orig_nodes_displayed,
+        )
+
+        self.predicted_weight = compute_total_weight(
+            self.carbon_graph, self.predicted_mapping, self.shortest_paths
+        )
+
+    def process_results(self, catoms_df, jsonGraphData):
+
+        best_weight = self.bestest_weight
+
+        unique_mappings = set()
+        unique_mapping_dict = {}
+
+        for mapping in self.results[best_weight]["best_mapping"]:
+            v1 = list(mapping.values())
+            v1_str = "".join([str(x) for x in v1])
+            #  add the string to the set
+            unique_mappings.add(v1_str)
+            unique_mapping_dict[v1_str] = mapping
+
+        optimized_nodes_dicts = {}
+        for k, v in unique_mapping_dict.items():
+            optimized_nodes = []
+            for node in self.nmr_nodes:
+                moved_node = copy.deepcopy(node)
+                orig_id = node["id"]
+                moved_id = v[orig_id]
+
+                if orig_id != moved_id:
+                    moved_node["id"] = moved_id
+                    moved_node["atomNumber"] = catoms_df.loc[moved_id, "atomNumber"]
+                    moved_node["ppm_calculated"] = catoms_df.loc[
+                        moved_id, "ppm_calculated"
+                    ]
+                    moved_node["x"] = catoms_df.loc[moved_id, "x"]
+                    moved_node["y"] = catoms_df.loc[moved_id, "y"]
+                    moved_node["jCouplingVals"] = catoms_df.loc[
+                        moved_id, "jCouplingVals"
+                    ]
+                    moved_node["jCouplingClass"] = catoms_df.loc[
+                        moved_id, "jCouplingClass"
+                    ]
+
+                optimized_nodes.append(moved_node)
+
+            optimized_nodes_dicts[k] = optimized_nodes
+
+        # NOTE: an earlier, disabled post-hoc symmetry filter used to sit
+        # here (checking catoms_df.sym_atom_idx and discarding any tied-best
+        # mapping where a symmetric pair both ended up displayed). It's
+        # removed now rather than just left disabled: restricting
+        # modify_mapping's candidate pool to orig_nodes_displayed (see
+        # run_optimization) means a symmetry-invalid mapping can no longer
+        # be produced by SA in the first place, so there is nothing left for
+        # a post-hoc filter to catch.
+        #
+        # The MAE/LAE tie-break below is unrelated and unchanged: SA can
+        # still find multiple distinct mappings tied at the same lowest
+        # HMBC/COSY-based weight, and this step is what chooses between
+        # them, by preferring the one whose calculated shifts best match
+        # the experimental ones.
+
+        # calc MAE and LAE for each of the unique nodes_dict
+        for k, optimized_nodes in optimized_nodes_dicts.items():
+            mae = 0.0
+            lae_biggest = 0.0
+            num_carbons = 0
+            lae_atomNumber = -1
+            for node in optimized_nodes:
+                ppm_exptal = node["ppm"]
+                ppm_calculated = node["ppm_calculated"]
+
+                try:
+                    ppm_exptal = float(ppm_exptal)
+                    ppm_calculated = float(ppm_calculated)
+                    lae = abs(ppm_exptal - ppm_calculated)
+                    mae += lae
+                    if lae > lae_biggest:
+                        lae_biggest = lae
+                        lae_atomNumber = node["atomNumber"]
+                    num_carbons += 1
+                except:
+                    continue
+
+            mae = mae / num_carbons
+            optimized_nodes_dicts[k] = [
+                optimized_nodes,
+                mae,
+                lae_biggest,
+                lae_atomNumber,
+            ]
+        
+
+        # decide which is the best solution based on lowest MAE and LAE
+        best_mae = float("inf")
+        best_lae = float("inf")
+        best_lae_atomNumber = -1
+        # best_nodes = optimized_nodes_dicts[list(optimized_nodes_dicts.keys())[0]][0]  
+        logger.debug(f"optimized_nodes_dicts for MAE/LAE: {len(optimized_nodes_dicts)}")
+        for k, v in optimized_nodes_dicts.items():
+            mae, lae, lae_atomNumber = v[1:]
+            # best_nodes, mae, lae, lae_atomNumber = v[0:]
+            if (mae <= best_mae) and (lae <= best_lae):
+                best_mae = mae
+                best_lae = lae
+                best_nodes = v[0]
+                best_lae_atomNumber = lae_atomNumber
+                best_key = k
+                best_mapping = unique_mapping_dict[k]
+
+        optimized_nodes_eeh = best_nodes
+        best_results = {
+            "best_weight": best_weight,
+            "best_mae": best_mae,
+            "best_lae": best_lae,
+            "best_lae_atomNumber": best_lae_atomNumber,
+        }
+
+        for i, row in catoms_df.iterrows():
+            id = row["id"] - self.nodes_offset
+
+        optimized_links = copy.deepcopy(self.nmr_links)
+
+        for link in optimized_links:
+            link["source"] = best_mapping[link["source"]]
+            link["target"] = best_mapping[link["target"]]
+
+        # add offset back
+
+        for node in optimized_nodes_eeh:
+            node["id"] = int(node["id"]) + self.nodes_offset
+
+        for link in optimized_links:
+            link["source"] = int(link["source"]) + self.nodes_offset
+            link["target"] = int(link["target"]) + self.nodes_offset
+
+        jsonGraphData["nodes"] = optimized_nodes_eeh
+        jsonGraphData["moved_nodes"] = optimized_nodes_eeh
+        jsonGraphData["links"] = optimized_links
+
+        return jsonGraphData, best_results
+
+    def process_results_SA_skipped(self):
+
+        best_results = {}
+
+        # set the best weights to the predicted weight
+        best_results["best_weight"] = self.predicted_weight
+
+        # calculated MAE and LAE from predicted values
+        # decide which is the best solution based on lowest MAE and LAE
+        best_mae = float("inf")
+        best_lae = float("inf")
+
+        df = self.graph_df
+        num_carbons = len(self.carbon_graph.nodes())
+        best_mapping = self.predicted_mapping
+        ppm_rss = 0.0
+        mae = 0.0
+        lae = 0.0
+        lae_atomNumber = -1
+        for node_orig, node_moved in best_mapping.items():
+            id_orig = df.loc[node_orig, "id"]
+            ppm_moved = df.loc[node_moved, "ppm"]
+            ppm_calculated_orig = df.loc[node_orig, "ppm_calculated"]
+            atomNumber_orig = df.loc[node_orig, "atomNumber"]
+
+            if isinstance(ppm_calculated_orig, float) and isinstance(ppm_moved, float):
+                ppm_rss += (ppm_calculated_orig - ppm_moved) ** 2
+                diff = abs(ppm_calculated_orig - ppm_moved)
+                mae += diff
+                if diff > lae:
+                    lae = diff
+                    lae_atomNumber = atomNumber_orig
+
+        best_results["best_mae"] = mae / num_carbons
+        best_results["best_lae"] = lae
+        best_results["best_lae_atomNumber"] = lae_atomNumber
+
+        return best_results
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Entry point
+# ─────────────────────────────────────────────────────────────────────────────
+
+def main() -> None:
+    """
+    Command-line entry point for the Simulated Annealing NMR assignment solver.
+
+    Usage
+    -----
+    python simulatedAnnealing_v5.py path/to/input.json [options]
+
+    All SA hyper-parameters have sensible defaults and can be overridden
+    via command-line flags.  Results are printed to stdout; no output file
+    is written unless --output is supplied.
+
+    Examples
+    --------
+    # Single run with defaults
+    python simulatedAnnealing_v5.py molecule.json
+
+    # Five restarts, custom temperature schedule, results saved to JSON
+    python simulatedAnnealing_v5.py molecule.json \\
+        --runs 5 --max-iter 200000 --max-temp 500 --min-temp 0.01 \\
+        --cooling-rate 0.995 --output results.json
+    """
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        prog="simulatedAnnealing_v5",
+        description="Simulated Annealing optimiser for NMR carbon assignment.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    # ── Required ──────────────────────────────────────────────────────────────
+    parser.add_argument(
+        "json_file",
+        type=Path,
+        help="Path to the input JSON file containing NMR graph data.",
+    )
+
+    # ── Symmetry inputs (normally computed upstream; see from_json_file) ─────
+    parser.add_argument(
+        "--orig-nodes-displayed",
+        type=str,
+        default=None,
+        metavar="ID,ID,...",
+        help="Comma-separated atom ids forming the minimal symmetry-"
+             "consistent node set. Normally computed upstream by the main "
+             "NMR solution pipeline; required here unless the input JSON "
+             "already has this at its top level.",
+    )
+    parser.add_argument(
+        "--pool-ch3-ch1",
+        action="store_true",
+        default=None,
+        help="Whether CH3/CH1 were pooled upstream when sizing "
+             "--orig-nodes-displayed (no real evidence distinguishing them). "
+             "Stored for provenance only -- does not affect swap grouping.",
+    )
+
+    # ── SA hyper-parameters ───────────────────────────────────────────────────
+    parser.add_argument(
+        "--runs",
+        type=int,
+        default=1,
+        metavar="N",
+        help="Number of independent SA restarts.  More runs reduce the chance "
+             "of being trapped in a local minimum.",
+    )
+    parser.add_argument(
+        "--max-iter",
+        type=int,
+        default=100_000,
+        metavar="N",
+        help="Maximum number of SA iterations per run.",
+    )
+    parser.add_argument(
+        "--max-temp",
+        type=float,
+        default=100.0,
+        metavar="T",
+        help="Initial (maximum) temperature.",
+    )
+    parser.add_argument(
+        "--min-temp",
+        type=float,
+        default=0.1,
+        metavar="T",
+        help="Final (minimum) temperature — triggers early stopping when reached.",
+    )
+    parser.add_argument(
+        "--cooling-rate",
+        type=float,
+        default=0.995,
+        metavar="R",
+        help="Multiplicative cooling rate applied each accepted iteration "
+             "(0 < R < 1; values close to 1 cool more slowly).",
+    )
+    parser.add_argument(
+        "--no-randomize",
+        action="store_true",
+        default=False,
+        help="Start from the identity mapping rather than a random permutation.",
+    )
+
+    # ── Output ────────────────────────────────────────────────────────────────
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        metavar="FILE",
+        help="Optional path for saving the optimised graph JSON.  "
+             "If omitted the result is printed to stdout.",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        default=False,
+        help="Print per-run statistics in addition to the final summary.",
+    )
+
+    args = parser.parse_args()
+
+    # ── Validate inputs ───────────────────────────────────────────────────────
+    if not args.json_file.exists():
+        parser.error(f"Input file not found: {args.json_file}")
+    if not (0.0 < args.cooling_rate < 1.0):
+        parser.error("--cooling-rate must be strictly between 0 and 1.")
+    if args.min_temp >= args.max_temp:
+        parser.error("--min-temp must be less than --max-temp.")
+    if args.runs < 1:
+        parser.error("--runs must be at least 1.")
+
+    # ── Build solver ──────────────────────────────────────────────────────────
+    logger.info(f"Loading NMR data from: {args.json_file}")
+    orig_nodes_displayed = (
+        [int(x.strip()) for x in args.orig_nodes_displayed.split(",") if x.strip()]
+        if args.orig_nodes_displayed is not None
+        else None
+    )
+    solver = SimulatedAnnealing2.from_json_file(
+        args.json_file,
+        orig_nodes_displayed=orig_nodes_displayed,
+        pool_ch3_ch1=args.pool_ch3_ch1,
+    )
+
+    solver.setup_run(
+        max_iter=args.max_iter,
+        max_temp=args.max_temp,
+        min_temp=args.min_temp,
+        cooling_rate=args.cooling_rate,
+        randomize_mapping=False,
+    )
+
+    logger.info(
+        f"Predicted (identity) weight: {solver.predicted_weight:.4f} | "
+        f"{args.runs} run(s) × {args.max_iter:,} iterations "
+        f"(T: {args.max_temp}→{args.min_temp}, α={args.cooling_rate})"
+    )
+
+    # ── Run optimisation ──────────────────────────────────────────────────────
+    t0 = time.perf_counter()
+    solver.run_optimization(num_times=args.runs)
+    wall = time.perf_counter() - t0
+
+    # ── Per-run statistics (verbose) ──────────────────────────────────────────
+    if args.verbose:
+        logger.info("Per-weight-bucket results")
+        for weight, bucket in sorted(solver.results.items()):
+            logger.info(f"  weight={weight:.4f}  runs={bucket['num_times']}")
+            for mapping, stats, _ in bucket["results"]:
+                logger.info(
+                    f"    improvements={stats['improvements']:,}  "
+                    f"worsen_accepted={stats['worsen_accepted']:,}  "
+                    f"not_swapped={stats['not_swapped']:,}  "
+                    f"rejected={stats['move_rejected']:,}"
+                )
+
+    # ── Final summary ─────────────────────────────────────────────────────────
+    improvement = solver.predicted_weight - solver.bestest_weight
+    logger.info("── SA final results ──")
+    logger.info(f"  initial mapping   : {solver.initial_mapping}")
+    logger.info(f"  predicted weight  : {solver.predicted_weight:.4f}")
+    logger.info(f"  best SA weight    : {solver.bestest_weight:.4f}")
+    logger.info(f"  improvement       : {improvement:.4f}")
+    logger.info(f"  distinct solutions: {len(solver.results)}")
+    logger.info(f"  best mapping      : {solver.bestest_mapping}")
+    logger.info(f"  time taken        : {wall:.2f}s")
+
+
+    # for v in dir(solver):
+    #     print(v)
+
+    # ── Optionally save output JSON ───────────────────────────────────────────
+    if args.output is not None:
+        with open(args.json_file, "r") as f:
+            json_graph_data = json.load(f)
+
+        catoms_df = solver.carbon_df.copy()
+        result_json, best_results = solver.process_results(catoms_df, json_graph_data)
+
+        logger.info(f"MAE: {best_results['best_mae']:.4f} ppm")
+        logger.info(
+            f"LAE: {best_results['best_lae']:.4f} ppm  "
+            f"(worst atom #{best_results['best_lae_atomNumber']})"
+        )
+
+        with open(args.output, "w") as f:
+            json.dump(result_json, f, indent=2)
+        logger.info(f"Output written to: {args.output}")
+
+
+
+    plot_mapping(solver, "SA")
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+

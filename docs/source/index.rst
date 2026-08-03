@@ -14,6 +14,7 @@ Welcome to simpleNMR's documentation!
    dataPreparation/dataPreparation.rst
    structures/structures.rst
    simplePeakPick/simplePeakPick.rst
+   snapToCarbonHSQC/snapToCarbonHSQC.rst
    simpleIntegrate2D/simpleIntegrate2D.rst
    simplePREDICT/simplePREDICT.rst
    simpleHTMLGUI/simpleHTMLGUI.rst

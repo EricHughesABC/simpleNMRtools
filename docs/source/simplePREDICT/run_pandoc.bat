@@ -1,1 +1,1 @@
-pandoc --extract-media . -o simplePREDICT.rst simplePREDICT.docx
+pandoc simplePREDICT.docx  -o simplePREDICT.rst --extract-media .

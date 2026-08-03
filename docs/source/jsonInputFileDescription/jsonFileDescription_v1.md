@@ -10,6 +10,7 @@ The simpleNMR workflow involves two JSON files:
 
 ---
 
+(part-1--input-file-_mresnovajson)=
 ## Part 1 — Input File (`*_mresnova.json`)
 
 The input file contains two categories of data:
@@ -21,7 +22,7 @@ The input file contains two categories of data:
 
 All metadata blocks share a common envelope:
 
-```json
+```text
 "block_name": {
     "datatype": "block_name",   // must match the key
     "count": 1,                  // number of items in data
@@ -399,7 +400,7 @@ Optional: `C13_1D`, `H1_1D`, `H1_pureshift`, `HMBC`, `COSY`, `DDEPT_CH3_ONLY`.
 
 Each spectrum block begins with a set of scalar attributes describing the acquisition:
 
-```json
+```text
 "HSQC_0": {
     "datatype": "nmrspectrum",
     "experimenttype": "HSQC",         // experiment type label
@@ -631,7 +632,7 @@ A precomputed all-pairs shortest-path distance matrix for the molecular graph, e
 
 This is used by the assignment algorithm to check whether HMBC correlations (which should span 2–3 bonds) are topologically plausible for a given assignment.
 
-```json
+```text
 "shortest_paths": {
     "0": { "0": 0, "1": 1, "2": 2, "3": 3, "4": 2, "5": 1, "6": 3, "7": 4 },
     "1": { "0": 1, "1": 0, "2": 1, "3": 2, "4": 3, "5": 2, "6": 4, "7": 3 },

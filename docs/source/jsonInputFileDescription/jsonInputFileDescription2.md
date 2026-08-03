@@ -10,6 +10,7 @@ The file is made up of two types of JSON data structures:
       
     - Data structures that hold information about the NMR spectra and the peaks and integrals picked
 
+(list-of-the-components-in-the-file)=
 ## List of the components in the file
 
 - [smiles](#11-smiles)
@@ -77,6 +78,7 @@ The file is made up of two types of JSON data structures:
     }
 }
 ```
+(11-smiles)=
 - #### 1.1 smiles
 ```python
     "smiles": {
@@ -89,6 +91,7 @@ The file is made up of two types of JSON data structures:
 ```
 [↑ Back to list](#list-of-the-components-in-the-file)
 
+(12-molfile)=
 - #### 1.2 molfile
 ```python
     "molfile": {
@@ -100,6 +103,7 @@ The file is made up of two types of JSON data structures:
   },
 ```
 [↑ Back to list](#list-of-the-components-in-the-file)
+(13-hostname)=
   - #### 1.3 hostname
 ```python
     "hostname": {
@@ -113,6 +117,7 @@ The file is made up of two types of JSON data structures:
 ```
 [↑ Back to list](#list-of-the-components-in-the-file)
 
+(14-workingdirectory)=
 - #### 1.4 workingDirectory
 
 ```python
@@ -126,6 +131,7 @@ The file is made up of two types of JSON data structures:
      },
 ```
 [↑ Back to list](#list-of-the-components-in-the-file)
+(15-workingfilename)=
 - #### 1.5 workingFilename
 
 ```python
@@ -139,6 +145,7 @@ The file is made up of two types of JSON data structures:
 ```
 [↑ Back to list](#list-of-the-components-in-the-file)
 
+(16-mnovacalcmethod)=
   - #### 1.6 MNOVAcalcMethod
 
 ```python
@@ -153,6 +160,7 @@ The file is made up of two types of JSON data structures:
 ```
 [↑ Back to list](#list-of-the-components-in-the-file)
 
+(17-carboncalcpositionsmethod)=
 - #### 1.7 carbonCalcPositionsMethod
   Not really used by the program, but included for backward compatibility
   ```python
@@ -166,6 +174,7 @@ The file is made up of two types of JSON data structures:
   ```
   [↑ Back to list](#list-of-the-components-in-the-file)
 
+(18-allatomsinfo)=
 - #### 1.8 allAtomsInfo
   
   All hetero atoms
@@ -196,6 +205,7 @@ The file is made up of two types of JSON data structures:
   ```
   [↑ Back to list](#list-of-the-components-in-the-file)
   
+(19-carbonatomsinfo)=
 - #### 1.9 carbonAtomsInfo
   
   Carbon atoms only
@@ -224,6 +234,7 @@ The file is made up of two types of JSON data structures:
   ```
   [↑ Back to list](#list-of-the-components-in-the-file)
   
+(110-c13predictions)=
 - #### 1.10 c13predictions
   
   This structure holds the carbon 13 ppm predicted values. When nmshiftDB2 is used to predict the values the data structure is empty as nmrshiftdb is called from the simpleNMR server after the json file has been posted.
@@ -265,6 +276,7 @@ The file is made up of two types of JSON data structures:
   ```
   [↑ Back to list](#list-of-the-components-in-the-file)
   
+(111-nmrassignments)=
 - #### 1.11 nmrAssignments
   
   ```python
@@ -318,6 +330,7 @@ The file is made up of two types of JSON data structures:
   ```
   [↑ Back to list](#list-of-the-components-in-the-file)
   
+(112-chosenspectra)=
 - #### 1.12 chosenSpectra
   
   ```python
@@ -335,6 +348,7 @@ The file is made up of two types of JSON data structures:
   ```
   [↑ Back to list](#list-of-the-components-in-the-file)
   
+(113-spectrawithpeaks)=
 - #### 1.13 spectraWithPeaks
   
   ```python
@@ -352,6 +366,7 @@ The file is made up of two types of JSON data structures:
   ```
   [↑ Back to list](#list-of-the-components-in-the-file)
   
+(114-exptidentifiers)=
 - #### 1.14 exptIdentifiers
   
   ```python
@@ -369,6 +384,7 @@ The file is made up of two types of JSON data structures:
   ```
   [↑ Back to list](#list-of-the-components-in-the-file)
   
+(115-simulatedannealing)=
 - #### 1.15 simulatedAnnealing
   
   ```python
@@ -382,6 +398,7 @@ The file is made up of two types of JSON data structures:
   ```
   [↑ Back to list](#list-of-the-components-in-the-file)
   
+(116-ml_consent)=
 - #### 1.16 ml_consent
   
   ```python
