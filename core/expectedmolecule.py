@@ -7,23 +7,19 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 
-
 import rdkit
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import Draw
 
-
-# from decorators import count_calls
-
-
-# import java
 import utils.java_utils as javaUtils
 
 from functools import lru_cache
 from loguru import logger
 
 from config.globals import SVG_DIMENSIONS as svgDimensions
+
+import config.globals as g
 
 # NOTE: assumed module location -- adjust the import path to wherever
 # symmetry_unique_carbons.py actually lives in your package layout.
@@ -33,8 +29,6 @@ from core.symmetry_unique_carbons import (
     build_molgraph,
     choose_best_representatives,
 )
-
-XYDIM = 800
 
 
 @lru_cache(maxsize=None)
@@ -66,8 +60,8 @@ class expectedMolecule:
         # copy new_xy3 to molprops_df x and y columns
         for idx, row in molprops_df.iterrows():
             if idx in new_xy3:
-                molprops_df.at[idx, "x"] = new_xy3[idx][0]
-                molprops_df.at[idx, "y"] = new_xy3[idx][1]
+                molprops_df.at[idx, g.X] = new_xy3[idx][0]
+                molprops_df.at[idx, g.Y] = new_xy3[idx][1]
             else:
                 logger.warning(f"idx {idx} not found in new_xy3")
 
@@ -105,7 +99,7 @@ class expectedMolecule:
 
         # copy_xy3_to_molecule(self, self.xy3)
 
-        self.png = Draw.MolToImage(self.mol, size=(XYDIM, XYDIM))
+        self.png = Draw.MolToImage(self.mol, size=(g.XYDIM, g.XYDIM))
 
         self.dbe = self.calc_dbe()
         self.elements = self.init_elements_dict()
@@ -129,13 +123,13 @@ class expectedMolecule:
         self.molprops_df = pd.DataFrame(
             data=molprops,
             columns=[
-                "idx",
-                "atom_idx",
-                "implicitHs",
-                "totalNumHs",
-                "degree",
-                "hybridization",
-                "aromatic",
+                g.IDX,
+                g.ATOMIDX,
+                g.IMPLICITHS,
+                g.TOTALNUMHS,
+                g.DEGREE,
+                g.HYBRIDIZATION,
+                g.AROMATIC,
             ],
         )
 
@@ -154,31 +148,31 @@ class expectedMolecule:
 
         logger.debug(f"molprops_df AFTER merge:\n{self.molprops_df}")
 
-        self.molprops_df["numProtons"] = self.molprops_df["totalNumHs"].astype(int)
-        self.molprops_df = self.molprops_df.set_index(["idx"])
-        self.molprops_df["idx"] = self.molprops_df.index
+        self.molprops_df[g.NUMPROTONS] = self.molprops_df["totalNumHs"].astype(int)
+        self.molprops_df = self.molprops_df.set_index([g.IDX])
+        self.molprops_df[g.IDX] = self.molprops_df.index
 
         # define quaternary carbon atoms column for totalNumHs == 0
-        self.molprops_df["quaternary"] = False
-        self.molprops_df["CH0"] = False
-        self.molprops_df.loc[self.molprops_df["totalNumHs"] == 0, "quaternary"] = True
-        self.molprops_df["CH0"] = self.molprops_df["quaternary"]
+        self.molprops_df[g.QUATERNARY_CARBON] = False
+        self.molprops_df[g.CH0] = False
+        self.molprops_df.loc[self.molprops_df["totalNumHs"] == 0, g.QUATERNARY_CARBON] = True
+        self.molprops_df[g.CH0] = self.molprops_df[g.QUATERNARY_CARBON]
 
         # define CH1 column for totalNumHs == 1
-        self.molprops_df["CH1"] = False
-        self.molprops_df.loc[self.molprops_df["totalNumHs"] == 1, "CH1"] = True
+        self.molprops_df[g.CH1] = False
+        self.molprops_df.loc[self.molprops_df["totalNumHs"] == 1, g.CH1] = True
 
-        self.molprops_df["CH2"] = False
+        self.molprops_df[g.CH2] = False
         # set CH2 to True if carbon has 2 protons attached
-        self.molprops_df.loc[self.molprops_df["totalNumHs"] == 2, "CH2"] = True
+        self.molprops_df.loc[self.molprops_df["totalNumHs"] == 2, g.CH2] = True
 
         # define CH3 column for totalNumHs == 3
-        self.molprops_df["CH3"] = False
-        self.molprops_df.loc[self.molprops_df["totalNumHs"] == 3, "CH3"] = True
+        self.molprops_df[g.CH3] = False
+        self.molprops_df.loc[self.molprops_df["totalNumHs"] == 3, g.CH3] = True
 
         # define CH3CH1 column where CH3 or CH1 are True
-        self.molprops_df["CH3CH1"] = False
-        self.molprops_df["CH3CH1"] = self.molprops_df["CH3"] | self.molprops_df["CH1"]
+        self.molprops_df[f"{g.CH3}{g.CH1}"] = False
+        self.molprops_df[f"{g.CH3}{g.CH1}"] = self.molprops_df[g.CH3] | self.molprops_df[g.CH1]
 
         self.molprops_df["picked"] = False
 
@@ -194,19 +188,14 @@ class expectedMolecule:
             logger.info("Using JEOL predictions for C13 shifts")
             logger.debug(f"mnova_c13predictions:\n{mnova_c13predictions}")
 
-            # self.c13ppm = {}
-            # self.c13ppm['mean'] = mnova_c13predictions["ppm"].values
-
-            # self.molprops_df["atom_idx"] = self.molprops_df.index
-
             logger.debug(f"mnova_c13predictions columns: {mnova_c13predictions.columns.tolist()}")
 
             self.molprops_df = pd.merge(
-                mnova_c13predictions, self.molprops_df, on="atom_idx", how="left"
+                mnova_c13predictions, self.molprops_df, on=g.ATOMIDX, how="left"
             )
-            self.molprops_df["numProtons"] = self.molprops_df["numProtons_x"]
+            self.molprops_df[g.NUMPROTONS] = self.molprops_df["numProtons_x"]
             # reset the index to atom index
-            self.molprops_df.set_index("idx", inplace=True)
+            self.molprops_df.set_index(g.IDX, inplace=True)
 
             logger.debug(f"molprops_df after MNOVA merge:\n{self.molprops_df}")
 
@@ -217,20 +206,20 @@ class expectedMolecule:
             try:
                 logger.debug(f"c13ppm length: {len(self.c13ppm)}, molprops_df: {len(self.molprops_df)}")
                 if len(self.c13ppm) == len(self.molprops_df):
-                    self.molprops_df["ppm"] = self.c13ppm["mean"]
+                    self.molprops_df[g.PPM] = self.c13ppm["mean"]
 
-                    self.molprops_df["atom_idx"] = self.molprops_df.index
+                    self.molprops_df[g.ATOMIDX] = self.molprops_df.index
                     # this is wrong we need to use the carbonAtomInfo dataframe!!!!!
-                    self.molprops_df["atomNumber"] = carbonAtomsInfo[
+                    self.molprops_df[g.ATOMNUMBER] = carbonAtomsInfo[
                         "atomNumber"
                     ].values
                     self.nmrshiftdb_failed = False
 
                 else:
                     self.nmrshiftdb_failed_message = "<p> An error occurred during the calculation of the chemical shifts using nmrshiftDB  </p><p>- number of atoms in c13ppm does not match number of atoms in th molecule </p>"
-                    self.molprops_df["ppm"] = -100000.0
-                    self.molprops_df["atom_idx"] = self.molprops_df.index
-                    self.molprops_df["atomNumber"] = carbonAtomsInfo[
+                    self.molprops_df[g.PPM] = -100000.0
+                    self.molprops_df[g.ATOMIDX] = self.molprops_df.index
+                    self.molprops_df[g.ATOMNUMBER] = carbonAtomsInfo[
                         "atomNumber"
                     ].values
                     self.nmrshiftdb_failed = True
@@ -239,9 +228,9 @@ class expectedMolecule:
             except:
                 logger.error("Error during nmrshiftDB chemical shift calculation")
                 self.nmrshiftdb_failed_message = "<p> An error occurred during the calculation of the chemical shifts using nmrshiftDB </p>"
-                self.molprops_df["ppm"] = -100000.0
-                self.molprops_df["atom_idx"] = self.molprops_df.index
-                self.molprops_df["atomNumber"] = carbonAtomsInfo["atomNumber"].values
+                self.molprops_df[g.PPM] = -100000.0
+                self.molprops_df[g.ATOMIDX] = self.molprops_df.index
+                self.molprops_df[g.ATOMNUMBER] = carbonAtomsInfo["atomNumber"].values
                 self.nmrshiftdb_failed = True
                 self.nmrshiftdb_failed_code = 401
 
@@ -274,10 +263,8 @@ class expectedMolecule:
         )
 
         # idx_list, xxx, yyy = self.calc_carbon_xy_positions_png(self.mol)
-        self.molprops_df["x"] = 0.0
-        self.molprops_df["y"] = 0.0
-        # self.molprops_df.loc[idx_list, "x"] = xxx
-        # self.molprops_df.loc[idx_list, "y"] = yyy
+        self.molprops_df[g.X] = 0.0
+        self.molprops_df[g.Y] = 0.0
 
         self.copy_xy3_to_molecule(self.xy3, self.molprops_df)
 
@@ -291,8 +278,8 @@ class expectedMolecule:
         # find the symmetry atoms in each ring and non ring group and assign the symmetry indices to each
         for ring_idx in self.molprops_df.ring_idx.unique():
             ring_df = self.molprops_df[self.molprops_df.ring_idx == ring_idx]
-            for ppm in ring_df.ppm.unique():
-                ring_df_ppm = ring_df[ring_df.ppm == ppm]
+            for ppm in ring_df[g.PPM].unique():
+                ring_df_ppm = ring_df[ring_df[g.PPM] == ppm]
                 if len(ring_df_ppm) == 2:
                     self.molprops_df.loc[ring_df_ppm.index[0], "symmetry_idx1"] = (
                         ring_df_ppm.index[1]
@@ -316,8 +303,8 @@ class expectedMolecule:
 
         # update symmetry indices sym_atom_idx and sym_atomNumber
 
-        self.molprops_df["sym_atom_idx"] = ""
-        self.molprops_df["sym_atomNumber"] = ""
+        self.molprops_df[g.SYM_ATOMIDX] = ""
+        self.molprops_df[g.SYM_ATOMNUMBER] = ""
 
         # Topological symmetry classes (carbon-only, singleton classes included).
         # Stored raw (self.carbon_classes) so nmrsolution.py can later refine this
@@ -329,8 +316,8 @@ class expectedMolecule:
                 continue
             logger.debug(f"Symmetry class: atoms {atoms}")
 
-            atomNumbers = self.molprops_df[self.molprops_df["atom_idx"].isin(atoms)][
-                "atomNumber"
+            atomNumbers = self.molprops_df[self.molprops_df[g.ATOMIDX].isin(atoms)][
+                g.ATOMNUMBER
             ].tolist()
             for i, idx in enumerate(atoms):
                 # creat a new list with the value at index i in th atoms removed
@@ -340,48 +327,25 @@ class expectedMolecule:
                 other_atoms_str = ", ".join(str(a) for a in other_atoms)
                 other_atomNumbers_str = ", ".join(str(a) for a in other_atomNumbers)
                 logger.debug(f"  Atom {idx} symmetric to: {other_atoms_str}")
-                self.molprops_df.at[idx, "sym_atom_idx"] = other_atoms_str
-                self.molprops_df.at[idx, "sym_atomNumber"] = other_atomNumbers_str
-
-        # for idx, row in self.molprops_df.iterrows():
-        #     df = self.molprops_df[self.molprops_df.ppm == row["ppm"]]
-        #     # keep only the rows where the numProtons is the same as the current row
-        #     df = df[df.numProtons == row["numProtons"]]
-
-        #     if len(df) > 1:
-        #         # remove row from df that has the same index as the current row
-        #         df = df.drop(idx)
-
-        #         for idx2, row2 in df.iterrows():
-        #             if self.molprops_df.at[idx2, "sym_atom_idx"] == "":
-        #                 self.molprops_df.at[idx2, "sym_atom_idx"] = f"{row['atom_idx']}"
-        #                 self.molprops_df.at[
-        #                     idx2, "sym_atomNumber"
-        #                 ] = f"{row['atomNumber']}"
-        #             else:
-        #                 self.molprops_df.at[
-        #                     idx2, "sym_atom_idx"
-        #                 ] = f"{self.molprops_df.at[idx2, 'sym_atom_idx']}, {row['atom_idx']}"
-        #                 self.molprops_df.at[
-        #                     idx2, "sym_atomNumber"
-        #                 ] = f"{self.molprops_df.at[idx2, 'sym_atomNumber']}, {row['atomNumber']}"
+                self.molprops_df.at[idx, g.SYM_ATOMIDX] = other_atoms_str
+                self.molprops_df.at[idx, g.SYM_ATOMNUMBER] = other_atomNumbers_str
 
         # calculate number of carbons without protons attached
         self.num_quaternary_carbons = self.molprops_df[
-            self.molprops_df.quaternary
+            self.molprops_df[g.QUATERNARY_CARBON]
         ].shape[0]
-        self.num_CH0_carbon_atoms = self.molprops_df[self.molprops_df.quaternary].shape[
+        self.num_CH0_carbon_atoms = self.molprops_df[self.molprops_df[g.QUATERNARY_CARBON]].shape[
             0
         ]
 
         # calculate number of carbon with two protons attached
-        self.num_CH2_carbon_atoms = self.molprops_df[self.molprops_df.CH2].shape[0]
+        self.num_CH2_carbon_atoms = self.molprops_df[self.molprops_df[g.CH2]].shape[0]
 
         # calculate number of carbon with three protons attached
-        self.num_CH3_carbon_atoms = self.molprops_df[self.molprops_df.CH3].shape[0]
+        self.num_CH3_carbon_atoms = self.molprops_df[self.molprops_df[g.CH3]].shape[0]
 
         # calculate number of carbon with one proton  attached
-        self.num_CH1_carbon_atoms = self.molprops_df[self.molprops_df.CH1].shape[0]
+        self.num_CH1_carbon_atoms = self.molprops_df[self.molprops_df[g.CH1]].shape[0]
 
         # calculate number of carbons with protons attached
         self.num_carbon_atoms_with_protons = (
@@ -454,7 +418,7 @@ class expectedMolecule:
         representative_atoms = [chosen_reps[i] for i in range(len(carbon_classes))]
         print(f"Representative atoms for sym_molprops_df:\n {representative_atoms}")
         self.sym_molprops_df = self.molprops_df.loc[representative_atoms]
-        print(f"self.sym_molprops_df AFTER refresh:\n{self.sym_molprops_df[['atom_idx', 'atomNumber', 'ppm']]}")
+        print(f"self.sym_molprops_df AFTER refresh:\n{self.sym_molprops_df[[g.ATOMIDX, g.ATOMNUMBER, g.PPM]]}")
 
 
         # molecule has hose-code symmetry if there are fewer rows in
@@ -467,19 +431,19 @@ class expectedMolecule:
             self.sym_molprops_df.aromatic
         ].shape[0]
         self.num_sym_CH0_carbon_atoms = self.sym_molprops_df[
-            self.sym_molprops_df.CH0
+            self.sym_molprops_df[g.CH0]
         ].shape[0]
         self.num_sym_quaternary_carbons = self.sym_molprops_df[
-            self.sym_molprops_df.quaternary
+            self.sym_molprops_df[g.QUATERNARY_CARBON]
         ].shape[0]
         self.num_sym_CH2_carbon_atoms = self.sym_molprops_df[
-            self.sym_molprops_df.CH2
+            self.sym_molprops_df[g.CH2]
         ].shape[0]
         self.num_sym_CH3_carbon_atoms = self.sym_molprops_df[
-            self.sym_molprops_df.CH3
+            self.sym_molprops_df[g.CH3]
         ].shape[0]
         self.num_sym_CH1_carbon_atoms = self.sym_molprops_df[
-            self.sym_molprops_df.CH1
+            self.sym_molprops_df[g.CH1]
         ].shape[0]
         self.num_sym_carbon_atoms_with_protons = (
             self.num_sym_CH2_carbon_atoms
@@ -498,8 +462,8 @@ class expectedMolecule:
         # first get the symmetry pairs
         symmetry_pairs = []
         for x, y in np.array(np.triu_indices(df.ring_idx.max() + 1, k=1)).T:
-            s1 = df.query("ring_idx == @x")["ppm"].to_list()
-            s2 = df.query("ring_idx == @y")["ppm"].to_list()
+            s1 = df.query("ring_idx == @x")[g.PPM].to_list()
+            s2 = df.query("ring_idx == @y")[g.PPM].to_list()
             s1.sort()
             s2.sort()
             if s1 == s2:
@@ -588,7 +552,7 @@ class expectedMolecule:
                     [atom.GetIdx(), atom.GetSymbol()]
                     for atom in Chem.AddHs(self.mol).GetAtoms()
                 ],
-                columns=["atom_index", "atom_symbol"],
+                columns=[g.ATOMIDX, "atom_symbol"],
             )["atom_symbol"]
             .value_counts()
             .to_dict()
@@ -607,8 +571,7 @@ class expectedMolecule:
 
         return dbe_value + 1
 
-    # def calculated_c13_chemical_shifts(self) -> pd.DataFrame:
-    #     return self.calc_c13_chemical_shifts_using_nmrshift2D()
+
 
     def calculated_c13_chemical_shifts(self) -> pd.DataFrame:
         return calc_c13_chemical_shifts_using_nmrshift2D(self.mol_str)
@@ -629,24 +592,6 @@ class expectedMolecule:
 
         return c13_nmr_shifts
 
-    # @cache
-    # def calc_c13_chemical_shifts_using_nmrshift2D(self) -> pd.DataFrame:
-    #     print("*****************************************")
-    #     print("calc_c13_chemical_shifts_using_nmrshift2D")
-    #     print("*****************************************")
-
-    #     with open("mol.mol", "w") as fp:
-    #         fp.write(Chem.MolToMolBlock(self.mol))
-
-    #     ret = os.system(self.java_command)
-
-    #     if ret == 1:
-    #         print("NMRShift2D failed to calculate C13 chemical shifts")
-    #         return False
-    #     else:
-    #         mol_df = pd.read_csv("mol.csv", index_col=0)
-    #         mol_df.index = mol_df.index - 1
-    #         return mol_df
 
     # return dictionary of lists key is the number of protons attached to carbon, value is list of carbon atom indices
     def proton_groups(self) -> dict:
@@ -670,26 +615,13 @@ class expectedMolecule:
 
         # rdkit_molecule.Compute2DCoords()
 
-        return Draw.MolToImage(rdkit_molecule, size=(XYDIM, XYDIM))
+        return Draw.MolToImage(rdkit_molecule, size=(g.XYDIM, g.XYDIM))
 
-    # def create_png_from_smiles(smiles_str: str) -> PIL.Image.Image:
-    #     """Creates a png image from a smiles string via rdkit"""
-    #     png = None
-    #     # rdkit_molecule = Chem.MolFromSmiles(smiles_str)
-    #     rdkit_molecule = expectedmolecule.expectedMolecule(smiles_str)
-
-    #     mol2 = Chem.AddHs(rdkit_molecule)
-    #     AllChem.EmbedMolecule(mol2, randomSeed=3)
-    #     rdkit_molecule = Chem.RemoveHs(mol2)
-
-    #     rdkit_molecule.Compute2DCoords()
-
-    #     return Draw.MolToImage(rdkit_molecule, size=(XYDIM, XYDIM))
 
     def calc_carbon_xy_positions_png(self, rdkit_molecule: Chem.Mol) -> list:
         """Returns the xy3 positions of the carbon atoms in the molecule"""
 
-        d2d = Draw.rdMolDraw2D.MolDraw2DSVG(XYDIM, XYDIM)
+        d2d = Draw.rdMolDraw2D.MolDraw2DSVG(g.XYDIM, g.XYDIM)
         d2d.DrawMolecule(rdkit_molecule)
         d2d.FinishDrawing()
         idx_list = []
@@ -700,14 +632,14 @@ class expectedMolecule:
                 idx = atom.GetIdx()
                 point = d2d.GetDrawCoords(idx)
                 idx_list.append(idx)
-                xxx.append(point.x / XYDIM)
-                yyy.append(point.y / XYDIM)
+                xxx.append(point.x / g.XYDIM)
+                yyy.append(point.y / g.XYDIM)
         return idx_list, xxx, yyy
 
     def calc_allatom_xy_positions_png(self) -> list:
         """Returns the xy3 positions of all heavy atoms in the molecule"""
 
-        d2d = Draw.rdMolDraw2D.MolDraw2DSVG(XYDIM, XYDIM)
+        d2d = Draw.rdMolDraw2D.MolDraw2DSVG(g.XYDIM, g.XYDIM)
         d2d.DrawMolecule(self.mol)
         d2d.FinishDrawing()
         idx_list = []
@@ -718,54 +650,10 @@ class expectedMolecule:
             idx = atom.GetIdx()
             point = d2d.GetDrawCoords(idx)
             idx_list.append(idx)
-            xxx.append(point.x / XYDIM)
-            yyy.append(point.y / XYDIM)
+            xxx.append(point.x / g.XYDIM)
+            yyy.append(point.y / g.XYDIM)
         return idx_list, xxx, yyy
 
-    # def create_svg_string(self,
-    #     mol, molWidth=1000, molHeight=600, svgWidth=1200, svgHeight=700
-    # ):
-
-    #     translateWidth = int((svgWidth - molWidth) / 2)
-    #     translateHeight = int((svgHeight - molHeight) / 2)
-
-    #     d2d = Draw.rdMolDraw2D.MolDraw2DSVG(molWidth, molHeight)
-    #     d2d.DrawMolecule(mol)
-    #     d2d.TagAtoms(mol)
-    #     d2d.FinishDrawing()
-    #     sss = d2d.GetDrawingText().replace(
-    #         f"width='{molWidth}px' height='{molHeight}px'",
-    #         f"width={molWidth} height={molHeight}",
-    #     )
-    #     sss = sss.replace("fill:#FFFFFF", "fill:none").replace(
-    #         "<svg", '<svg class="center"'
-    #     )
-
-    #     sss = sss.replace(
-    #         f"<!-- END OF HEADER -->",
-    #         f"<!-- END OF HEADER -->\n<g transform='translate({translateWidth}, {translateHeight})'>",
-    #     )
-    #     sss = sss.replace("</svg>", "</g>\n</svg>")
-    #     sss = sss.replace(
-    #         f"width={molWidth} height={molHeight} viewBox='0 0 {molWidth} {molHeight}'",
-    #         f"width={svgWidth} height={svgHeight} viewBox='0 0 {svgWidth} {svgHeight}'",
-    #     )
-
-    #     idx_list = []
-    #     xxx = []
-    #     yyy = []
-
-    #     new_xy3 = {}
-    #     for atom in mol.GetAtoms():
-    #         if atom.GetSymbol() == "C":
-    #             idx = atom.GetIdx()
-    #             point = d2d.GetDrawCoords(idx)
-    #             idx_list.append(idx)
-    #             xxx.append(point.x / molWidth)
-    #             yyy.append(point.y / molHeight)
-    #             new_xy3[idx] = (point.x / molWidth, point.y / molHeight)
-
-    #     return sss, new_xy3
 
     def create_svg_string(
         self, molWidth=1000, molHeight=600, svgWidth=1200, svgHeight=700
@@ -773,22 +661,6 @@ class expectedMolecule:
 
         translateWidth = int((svgWidth - molWidth) / 2)
         translateHeight = int((svgHeight - molHeight) / 2)
-
-        # self.mol = Chem.AddHs(self.mol)
-        # AllChem.EmbedMolecule(self.mol)
-        # self.mol = Chem.RemoveHs(self.mol)
-
-        # d2d = Draw.rdMolDraw2D.MolDraw2DSVG(molWidth, molHeight)
-        # d2d.drawOptions().minFontSize = 15
-        # d2d.DrawMolecule(self.mol)
-        # d2d.TagAtoms(self.mol)
-        # d2d.FinishDrawing()
-
-        # fixed_coords = {}
-        # for atom in self.mol.GetAtoms():
-        #     idx = atom.GetIdx()
-        #     point = d2d.GetDrawCoords(idx)
-        #     fixed_coords[idx] = point
 
         # AllChem.Compute2DCoords(self.mol)
 
@@ -848,82 +720,3 @@ class expectedMolecule:
         return sss, new_xy3, new_xy3_all
 
 
-# if __name__ == "__main__":
-
-#     from matplotlib import pyplot as plt
-
-#     # mol = expectedMolecule("COc1cc(/C=C/C=O)cc(OC)c1O")
-#     # mol = expectedMolecule("CO[C@H]1[C@@H](O)[C@@H](C)O[C@H](O[C@@H]2[C@@H](O)[C@@H](O)[C@@H](C)O[C@H]2OC2=CC=CC3=C(O)C4=C5C(OC(=O)C6=C5C(OC4=O)=CC=C6C)=C23)[C@@H]1O")
-#     # mol = expectedMolecule("CCCC1CC(N(C1)C)C(=O)NC(C2C(C(C(C(O2)SC)OP(=O)(O)O)O)O)C(C)Cl")
-#     # mol = expectedMolecule("CC(=O)OC(C)(C)\C=C\C(=O)C(C)(O)C1C(O)CC2(C)C3CC=C4C(C=C(O)C(=O)C4(C)C)C3(C)C(=O)CC12C")
-#     # mol = expectedMolecule("CNC(=O)OC1=CC=C2N(C)C3N(C)CCC3(C)C2=C1")
-#     # mol = expectedMolecule("CC1=CC(=CC(=C1C2=CC=CC(=C2)COC3=CC4=C(C=C3)[C@@H](CO4)CC(=O)O)C)OCCCS(=O)(=O)C")
-#     # mol = expectedMolecule("c1cc2ccc1CC2")
-#     # mol = expectedMolecule("c1cc2cc(c1)CC2")
-
-#     molstr = """
-# RDKit          2D
-
-#  20 22  0  0  0  0  0  0  0  0999 V2000
-#     2.6401   -3.1891    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#     1.2135   -2.7256    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0
-#     0.7500   -1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#     1.5000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#     0.7500    1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#    -0.7500    1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#    -1.5000    2.5981    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
-#    -0.7500    3.8971    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#    -1.5000    5.1962    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0
-#    -0.7500    6.4952    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#     0.7500    3.8971    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
-#    -1.5000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#    -0.7500   -1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#    -1.2135   -2.7256    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#    -2.4271   -1.8439    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#    -2.4271   -3.6073    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#    -1.9635   -5.0339    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#    -0.4635   -5.0339    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0
-#     0.4182   -6.2474    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#    -0.0000   -3.6073    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-#   1  2  1  0
-#   2  3  1  0
-#   3  4  2  0
-#   4  5  1  0
-#   5  6  2  0
-#   6  7  1  0
-#   7  8  1  0
-#   8  9  1  0
-#   9 10  1  0
-#   8 11  2  0
-#   6 12  1  0
-#  12 13  2  0
-#  13 14  1  0
-#  14 15  1  0
-#  14 16  1  0
-#  16 17  1  0
-#  17 18  1  0
-#  18 19  1  0
-#  18 20  1  0
-#  20  2  1  0
-#  13  3  1  0
-#  20 14  1  0
-# M  END
-# """
-
-#     mol = expectedMolecule(molstr, is_smiles=False)
-
-#     print(mol.molprops_df)
-
-#     plt.imshow(
-#         mol.png,
-#         aspect="auto",
-#         extent=[0, 1, 1, 0],
-#     )
-
-#     xxx = mol.molprops_df["x"]
-#     yyy = mol.molprops_df["y"]
-#     plt.scatter(xxx, yyy, c="red", s=50)
-
-#     plt.xlim(-0.1, 1.1)
-#     plt.ylim(1.1, -0.1)
-#     plt.show()

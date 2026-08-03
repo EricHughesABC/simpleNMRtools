@@ -37,6 +37,21 @@ node_color = colors[2]
 import collections
 import types
 
+# globals.py
+import sys
+
+class _ConstModule(types.ModuleType):
+    def __setattr__(self, name, value):
+        if name in self.__dict__:
+            raise AttributeError(f"Cannot reassign constant '{name}'")
+        super().__setattr__(name, value)
+
+XYDIM = 800
+CH1 = "CH1"
+CH3 = "CH3"
+
+
+
 # SVG dimensions configuration
 SVGDimensions = collections.namedtuple(
     "SVGDimensions", ["mol_width", "mol_height", "svg_width", "svg_height"]
@@ -46,9 +61,75 @@ SVG_DIMENSIONS = SVGDimensions(
     mol_width=1000, mol_height=600, svg_width=1000, svg_height=600
 )
 
+# Global constant for XY dimension used in visualizations of molecule PNG image
+XYDIM = 800
+
 # Chemical separation constants
 CARBONSEPARATION = 0.0025
 PROTONSEPARATION = 0.005
+
+IDX = "idx"
+IMPLICITHS = "implicitHs"
+TOTALNUMHS = "totalNumHs"
+DEGREE = "degree"
+HYBRIDIZATION = "hybridization"
+AROMATIC = "aromatic"
+
+CH1 = "CH1"
+CH2 = "CH2"
+CH3 = "CH3"
+CH0 = "CH0"
+CH3CH1 = "CH3CH1"  
+CH3plusCH1 = "CH3+CH1"
+QUATERNARY_CARBON = "quaternary"  # Quaternary carbon (no attached hydrogens)
+NUMPROTONS = "numProtons"  # Number of attached protons (0, 1, 2, 3)
+ATTACHED_PROTONS = "attached_protons"  # Number of attached protons (0, 1, 2, 3)
+INTEGRAL = "integral"  # Integral value of the signal
+F2_INTEGRAL = "f2_integral"  # Integral value of the signal in F2 dimension
+INTENSITY = "intensity"  # Intensity of the signal
+PPM = "ppm"  # Chemical shift in parts per million (ppm)
+PPM_CALCULATED = "ppm_calculated"
+F1_PPM = "f1_ppm"  # Chemical shift in F1 dimension (ppm)
+F2_PPM = "f2_ppm"  # Chemical shift in F2 dimension (ppm)
+F2P_PPM = "f2p_ppm"  # Chemical shift in F2 dimension (ppm) for HSQC one-to-one mapping
+F1P_PPM = "f1p_ppm"  # Chemical shift in F1 dimension (ppm) for HMBC one-to-one mapping
+J_COUPLING_CLASS = "jCouplingClass"  # J-coupling class (e.g., doublet, triplet)
+J_COUPLING_VALS = "jCouplingVals"  # J-coupling
+RANGE = "range"  # Range of the signal (start and end ppm)
+SIGNALTYPE = "signaltype"  # Type of signal (e.g., multiplet, singlet)
+COMPOUND = "Compound"  # Compound signal type
+
+
+ATOMNUMBER = "atomNumber"  # Atom number in the molecule
+SYM_ATOMNUMBER = "sym_atomNumber"  # Symmetric atom number in the molecule
+ATOMIDX = "atom_idx"  # Atom index in the molecule
+SYM_ATOMIDX = "sym_atom_idx"  # Symmetric atom index in the molecule
+
+F1_ATOMIDX = "f1_atom_idx"  # Atom index in the F1 dimension
+F1_SYM_ATOMIDX = "f1_sym_atom_idx"  # Symmetric atom index in the F1 dimension
+F1_ATOMNUMBER = "f1_atomNumber"  # Atom number in the F1 dimension
+F1_SYM_ATOMNUMBER = "f1_sym_atomNumber"  # Symmetric atom number in the F1 dimension
+F2_ATOMIDX = "f2_atom_idx"  # Atom index in the F2 dimension
+F2_SYM_ATOMIDX = "f2_sym_atom_idx"  # Symmetric atom index in the F2 dimension
+F2_ATOMNUMBER = "f2_atomNumber"  # Atom number in the F2 dimension
+F2_SYM_ATOMNUMBER = "f2_sym_atomNumber"  # Symmetric atom number in the F2 dimension
+
+
+X = "x"  # X-coordinate of the atom in the molecule
+Y = "y"  # Y-coordinate of the atom in the molecule
+F1_X = "f1_x"  # X-coordinate of the atom in the F1 dimension
+F1_Y = "f1_y"  # Y-coordinate of the atom in the F1 dimension
+F2_X = "f2_x"  # X-coordinate of the atom in the F2 dimension
+F2_Y = "f2_y"  # Y-coordinate of the atom in the F2 dimension
+
+IUPAC_LABEL = "iupacLabel"  # IUPAC label for the atom
+H1_PPM = "H1_ppm"  # Proton chemical shift in parts per million (ppm)
+# HTML CODES
+BADREQUEST = 400
+NOTFOUND = 404
+GOODREQUEST = 200
+
+
 
 # CH3/CH1 split heuristic boundary (ppm)
 # CH1 groups (e.g. C-O, C-N) typically resonate at or above this value;
@@ -105,6 +186,10 @@ NMREXPERIMENTS_COLUMN_RENAME_MAP = types.MappingProxyType(
 SIMULATED_ANNEALING_RUNS = 50
 SIMULATED_ANNEALING_COOLING_RATE = 0.995
 
+COSY = "cosy"
+
+sys.modules[__name__].__class__ = _ConstModule
+
 # Example usage (remove in production)
 if __name__ == "__main__":
     print(
@@ -112,3 +197,5 @@ if __name__ == "__main__":
     )
     print(f"SVG dimensions: {SVG_DIMENSIONS.svg_width}x{SVG_DIMENSIONS.svg_height}")
     print(f"Available NMR experiments: {len(NMREXPERIMENTS)}")
+
+

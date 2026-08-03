@@ -20,6 +20,7 @@ docs/build
 .Python
 build/
 develop-eggs/
+devcode/
 dist/
 downloads/
 eggs/

@@ -7,7 +7,10 @@ import networkx as nx
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from typing import Tuple, Union, List, Dict, Any
 from loguru import logger
-from config.globals import CH1_CH3_PPM_BOUNDARY
+# from config.globals import CH1_CH3_PPM_BOUNDARY
+# from config.globals import CH1, CH2, CH3, CH0, QUATERNARY_CARBON
+
+import config.globals as g
 
 from flask import render_template
 
@@ -103,7 +106,7 @@ class NMRsolution:
         if (
             (self.expected_molecule.num_CH2_carbon_atoms > 0)
             and (self.hsqc_df[self.hsqc_df.intensity < 0].shape[0] == 0)
-            and (self.hsqc_df[self.hsqc_df.Annotation == "CH2"].shape[0] == 0)
+            and (self.hsqc_df[self.hsqc_df.Annotation == g.CH2].shape[0] == 0)
         ):
 
             self.check_hsqc_assign_CH2_from_DEPT135()
@@ -111,12 +114,12 @@ class NMRsolution:
         elif (
             (self.expected_molecule.num_CH2_carbon_atoms > 0)
             and (self.hsqc_df[self.hsqc_df.intensity < 0].shape[0] == 0)
-            and (self.hsqc_df[self.hsqc_df.Annotation == "CH2"].shape[0] > 0)
+            and (self.hsqc_df[self.hsqc_df.Annotation == g.CH2].shape[0] > 0)
         ):
 
             # multiply the intensity and the integral by -1 in the hsqc_df where CH2 is present in the annotation column
-            self.hsqc_df.loc[self.hsqc_df.Annotation == "CH2", "intensity"] = -1.0
-            self.hsqc_df.loc[self.hsqc_df.Annotation == "CH2", "integral"] = -1.0
+            self.hsqc_df.loc[self.hsqc_df.Annotation == g.CH2, g.INTENSITY] = -1.0
+            self.hsqc_df.loc[self.hsqc_df.Annotation == g.CH2, g.INTEGRAL] = -1.0
 
     def initiate_molgraph(self, json_data: dict, G2: nx.Graph) -> None:
         """
@@ -165,27 +168,27 @@ class NMRsolution:
 
         # set the 'ppm' attribute for each node in the molgraph to 10000 to begin with
         for node in molgraph.nodes():
-            molgraph.nodes[node]["ppm"] = 10000
+            molgraph.nodes[node][g.PPM] = 10000
 
         for node in molgraph.nodes():
 
             G2_node = node + nodes_offset
 
             if G2_node in G2.nodes():
-                molgraph.nodes[node]["ppm"] = G2.nodes[G2_node]["ppm"]
+                molgraph.nodes[node][g.PPM] = G2.nodes[G2_node][g.PPM]
                 # check if the atmomNumber can be converted to an integer if not dont try
-                if isinstance(G2.nodes[G2_node]["atomNumber"], (float, int)):
-                    molgraph.nodes[node]["atomNumber"] = int(
-                        G2.nodes[G2_node]["atomNumber"]
+                if isinstance(G2.nodes[G2_node][g.ATOMNUMBER], (float, int)):
+                    molgraph.nodes[node][g.ATOMNUMBER] = int(
+                        G2.nodes[G2_node][g.ATOMNUMBER]
                     )
-                elif isinstance(G2.nodes[G2_node]["atomNumber"], str):
+                elif isinstance(G2.nodes[G2_node][g.ATOMNUMBER], str):
                     try:
-                        molgraph.nodes[node]["atomNumber"] = int(
-                            G2.nodes[G2_node]["atomNumber"]
+                        molgraph.nodes[node][g.ATOMNUMBER] = int(
+                            G2.nodes[G2_node][g.ATOMNUMBER]
                         )
                     except:
-                        molgraph.nodes[node]["atomNumber"] = G2.nodes[G2_node][
-                            "atomNumber"
+                        molgraph.nodes[node][g.ATOMNUMBER] = G2.nodes[G2_node][
+                            g.ATOMNUMBER
                         ]
                 molgraph.nodes[node]["id"] = int(node)
 
@@ -251,7 +254,7 @@ class NMRsolution:
         for name, guard, method in chain:
             if not self._has_unresolved():
                 logger.info(f"CH3/CH2/CH1 assignment complete after \'{name}\' step")
-                return "ok", 200
+                return "ok", g.GOODREQUEST
             if name == "ExpectedMolecule":  # NOTE: see question about the "H1" step
                 self.ch3_ch1_evidence_based = False
             if guard is None or guard():
@@ -266,7 +269,7 @@ class NMRsolution:
             return self.nmrsolution_error_message, 400
 
         logger.info("CH3/CH2/CH1 assignment complete")
-        return "ok", 200
+        return "ok", g.GOODREQUEST
 
     def _reconcile_molecule_symmetry(self):
         """
@@ -328,14 +331,14 @@ class NMRsolution:
         """
         self._reconcile_molecule_symmetry()
 
-        self.c13 = self.c13.sort_values("ppm", ascending=False, ignore_index=True)
+        self.c13 = self.c13.sort_values(g.PPM, ascending=False, ignore_index=True)
         c13 = self.c13
 
         self.all_molprops_df = self.expected_molecule.molprops_df.sort_values(
-            "ppm", ascending=False, ignore_index=True
+            g.PPM, ascending=False, ignore_index=True
         ).copy()
         self.sym_molprops_df = self.expected_molecule.sym_molprops_df.sort_values(
-            "ppm", ascending=False, ignore_index=True
+            g.PPM, ascending=False, ignore_index=True
         ).copy()
 
         error_msg = ""
@@ -374,40 +377,40 @@ class NMRsolution:
             # and return it as a html page
 
             c13_df_list = []
-            for CHn_str in ["CH0", "CH1", "CH2", "CH3"]:
+            for CHn_str in [g.CH0, g.CH1, g.CH2, g.CH3]:
                 df1_C13 = c13[c13[CHn_str]][
-                    ["ppm", "numProtons", "CH0", "CH1", "CH2", "CH3"]
+                    [g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3]
                 ].copy()
                 # replace True with 1 and False with 0
-                df1_C13[["CH0", "CH1", "CH2", "CH3"]] = (
-                    df1_C13[["CH0", "CH1", "CH2", "CH3"]].astype(int)
+                df1_C13[[g.CH0, g.CH1, g.CH2, g.CH3]] = (
+                    df1_C13[[g.CH0, g.CH1, g.CH2, g.CH3]].astype(int)
                 )
                 # set ppm value to a string with 2 decimal places
-                df1_C13["ppm"] = df1_C13["ppm"].map("{:.2f}".format)
+                df1_C13[g.PPM] = df1_C13[g.PPM].map("{:.2f}".format)
                 c13_df_list.append(df1_C13.values.tolist())
 
                 self.molprops_df1 = self.all_molprops_df[self.all_molprops_df[CHn_str]][
-                    ["ppm", "numProtons", "CH0", "CH1", "CH2", "CH3"]
+                    [g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3]
                 ].copy()
                 # replace True with 1 and False with 0
-                self.molprops_df1[["CH0", "CH1", "CH2", "CH3"]] = (
-                    self.molprops_df1[["CH0", "CH1", "CH2", "CH3"]].astype(int)
+                self.molprops_df1[[g.CH0, g.CH1, g.CH2, g.CH3]] = (
+                    self.molprops_df1[[g.CH0, g.CH1, g.CH2, g.CH3]].astype(int)
                 )
 
                 c13_df_list.append(self.molprops_df1.values.tolist())
 
-            tab_headings = ["CH0", "CH1", "CH2", "CH3"]
+            tab_headings = [g.CH0, g.CH1, g.CH2, g.CH3]
 
             rtn_html = render_template(
                 "error_table.html",
-                colHeadings=["ppm", "numProtons", "CH0", "CH1", "CH2", "CH3"],
+                colHeadings=[g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3],
                 df_data=c13_df_list,
                 tab_headings=tab_headings,
             )
 
-            return rtn_html, 400
+            return rtn_html, g.BADREQUEST
 
-        return "ok", 200
+        return "ok", g.GOODREQUEST
 
     def update_assignments_expt_dataframes(self):
         """
@@ -430,22 +433,22 @@ class NMRsolution:
         # add atom_idx, atomNumber, x and y columns to h1 dataframe using hsqc dataframe
 
         for idx, row in self.h1.iterrows():
-            f2_ppm = row["ppm"]
-            hsqc_row = self.hsqc[self.hsqc["f2_ppm"] == f2_ppm]
+            f2_ppm = row[g.PPM]
+            hsqc_row = self.hsqc[self.hsqc[g.F2_PPM] == f2_ppm]
             if len(hsqc_row) == 0:
                 continue
-            self.h1.at[idx, "atom_idx"] = hsqc_row["f2_atom_idx"].values[0]
-            self.h1.at[idx, "sym_atom_idx"] = hsqc_row["f2_sym_atom_idx"].values[0]
-            self.h1.at[idx, "atomNumber"] = hsqc_row["f2_atomNumber"].values[0]
-            self.h1.at[idx, "sym_atomNumber"] = hsqc_row["f2_sym_atomNumber"].values[0]
-            self.h1.at[idx, "x"] = hsqc_row["f2_x"].values[0]
-            self.h1.at[idx, "y"] = hsqc_row["f2_y"].values[0]
+            self.h1.at[idx, g.ATOMIDX] = hsqc_row[g.F2_ATOMIDX].values[0]
+            self.h1.at[idx, g.SYM_ATOMIDX] = hsqc_row[g.F2_SYM_ATOMIDX].values[0]
+            self.h1.at[idx, g.ATOMNUMBER] = hsqc_row[g.F2_ATOMNUMBER].values[0]
+            self.h1.at[idx, g.SYM_ATOMNUMBER] = hsqc_row[g.F2_SYM_ATOMNUMBER].values[0]
+            self.h1.at[idx, g.X] = hsqc_row[g.F2_X].values[0]
+            self.h1.at[idx, g.Y] = hsqc_row[g.F2_Y].values[0]
 
         self.hsqc = assign_jcouplings(self.hsqc, self.h1)
         self.c13 = assign_jcouplings_to_c13(self.c13, self.hsqc)
 
-        self.h1["f1_ppm"] = self.h1["ppm"]
-        self.c13["f1_ppm"] = self.c13["ppm"]
+        self.h1[g.F1_PPM] = self.h1[g.PPM]
+        self.c13[g.F1_PPM] = self.c13[g.PPM]
         self.c13["iupacLabel"] = ""
 
     def attempt_assignment_CH3_CH2_CH1_to_C13_table(self):
@@ -477,22 +480,22 @@ class NMRsolution:
 
         if pool_ch3_ch1:
             groups = [
-                ("CH3+CH1", lambda df: df["CH3"] | df["CH1"], [3, 1]),
-                ("CH2", lambda df: df["CH2"], [2]),
-                ("CH0", lambda df: df["CH0"], [0]),
+                (g.CH3plusCH1, lambda df: df[g.CH3] | df[g.CH1], [3, 1]),
+                (g.CH2, lambda df: df[g.CH2], [2]),
+                (g.CH0, lambda df: df[g.CH0], [0]),
             ]
         else:
             groups = [
-                ("CH3", lambda df: df["CH3"], [3]),
-                ("CH2", lambda df: df["CH2"], [2]),
-                ("CH1", lambda df: df["CH1"], [1]),
-                ("CH0", lambda df: df["CH0"], [0]),
+                (g.CH3, lambda df: df[g.CH3], [3]),
+                (g.CH2, lambda df: df[g.CH2], [2]),
+                (g.CH1, lambda df: df[g.CH1], [1]),
+                (g.CH0, lambda df: df[g.CH0], [0]),
             ]
 
         for CHn, mask_fn, nProtons_list in groups:
 
             df_CHn = self.molprops_df[mask_fn(self.molprops_df)]
-            c13_CHn = c13[c13["numProtons"].isin(nProtons_list)]
+            c13_CHn = c13[c13[g.NUMPROTONS].isin(nProtons_list)]
 
             if c13_CHn.empty:
                 logger.debug(f"{CHn}: no experimental peaks, skipping")
@@ -503,7 +506,7 @@ class NMRsolution:
 
                 # Compute the pairwise distance matrix
                 distance_matrix = np.abs(
-                    df_CHn["ppm"].values[:, np.newaxis] - c13_CHn["ppm"].values
+                    df_CHn[g.PPM].values[:, np.newaxis] - c13_CHn[g.PPM].values
                 )
 
                 # Find optimal assignment
@@ -517,42 +520,42 @@ class NMRsolution:
                 total_distance = distance_matrix[row_ind, col_ind].sum()
 
                 for df_idx, c13_idx in matches:
-                    c13.at[c13_idx, "atom_idx"] = df_CHn.at[df_idx, "atom_idx"]
-                    c13.at[c13_idx, "sym_atom_idx"] = df_CHn.at[df_idx, "sym_atom_idx"]
-                    c13.at[c13_idx, "atomNumber"] = df_CHn.at[df_idx, "atomNumber"]
-                    c13.at[c13_idx, "sym_atomNumber"] = df_CHn.at[
-                        df_idx, "sym_atomNumber"
+                    c13.at[c13_idx, g.ATOMIDX] = df_CHn.at[df_idx, g.ATOMIDX]
+                    c13.at[c13_idx, g.SYM_ATOMIDX] = df_CHn.at[df_idx, g.SYM_ATOMIDX]
+                    c13.at[c13_idx, g.ATOMNUMBER] = df_CHn.at[df_idx, g.ATOMNUMBER]
+                    c13.at[c13_idx, g.SYM_ATOMNUMBER] = df_CHn.at[
+                        df_idx, g.SYM_ATOMNUMBER
                     ]
-                    c13.at[c13_idx, "x"] = df_CHn.at[df_idx, "x"]
-                    c13.at[c13_idx, "y"] = df_CHn.at[df_idx, "y"]
-                    c13.at[c13_idx, "ppm_calculated"] = df_CHn.at[df_idx, "ppm"]
+                    c13.at[c13_idx, g.X] = df_CHn.at[df_idx, g.X]
+                    c13.at[c13_idx, g.Y] = df_CHn.at[df_idx, g.Y]
+                    c13.at[c13_idx, g.PPM_CALCULATED] = df_CHn.at[df_idx, g.PPM]
 
             elif len(c13_CHn) < len(df_CHn):
                 # attempt to match the c13 rows individually to the molprops_df rows
                 # based on the ppm values
 
                 # calculate the number of unique ppm values in df_CHn
-                nunique_ppm = df_CHn.ppm.nunique()
+                nunique_ppm = df_CHn[g.PPM].nunique()
 
                 if len(c13_CHn) == nunique_ppm:
                     # drop duplicates from df_CHn based on ppm
-                    df_CHn = df_CHn.drop_duplicates(subset=["ppm"])
+                    df_CHn = df_CHn.drop_duplicates(subset=[g.PPM])
 
                 for idx, row in c13_CHn.iterrows():
-                    ppm = row["ppm"]
+                    ppm = row[g.PPM]
 
                     # find closet ppm value in df_CHn to ppm
-                    mol_row = df_CHn.iloc[(df_CHn["ppm"] - ppm).abs().argsort()[:1]]
+                    mol_row = df_CHn.iloc[(df_CHn[g.PPM] - ppm).abs().argsort()[:1]]
                     if len(mol_row) == 0:
                         continue
-                    c13.at[idx, "atom_idx"] = mol_row["atom_idx"].values[0]
-                    c13.at[idx, "sym_atom_idx"] = mol_row["sym_atom_idx"].values[0]
-                    c13.at[idx, "atomNumber"] = mol_row["atomNumber"].values[0]
-                    c13.at[idx, "sym_atomNumber"] = mol_row["sym_atomNumber"].values[0]
-                    c13.at[idx, "x"] = mol_row["x"].values[0]
-                    c13.at[idx, "y"] = mol_row["y"].values[0]
+                    c13.at[idx, g.ATOMIDX] = mol_row[g.ATOMIDX].values[0]
+                    c13.at[idx, g.SYM_ATOMIDX] = mol_row[g.SYM_ATOMIDX].values[0]
+                    c13.at[idx, g.ATOMNUMBER] = mol_row[g.ATOMNUMBER].values[0]
+                    c13.at[idx, g.SYM_ATOMNUMBER] = mol_row[g.SYM_ATOMNUMBER].values[0]
+                    c13.at[idx, g.X] = mol_row[g.X].values[0]
+                    c13.at[idx, g.Y] = mol_row[g.Y].values[0]
 
-                    c13.at[idx, "ppm_calculated"] = mol_row["ppm"].values[0]
+                    c13.at[idx, "ppm_calculated"] = mol_row[g.PPM].values[0]
 
                     # remove the row from df_CHn
                     df_CHn = df_CHn.drop(mol_row.index)
@@ -560,41 +563,41 @@ class NMRsolution:
             else:
 
                 c13_df_list = []
-                for CHn_str in ["CH0", "CH1", "CH2", "CH3"]:
+                for CHn_str in [g.CH0, g.CH1, g.CH2, g.CH3]:
                     df1_C13 = c13[c13[CHn_str]][
-                        ["ppm", "numProtons", "CH0", "CH1", "CH2", "CH3"]
+                        [g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3]
                     ].copy()
                     # replace True with 1 and False with 0
-                    df1_C13[["CH0", "CH1", "CH2", "CH3"]] = (
-                        df1_C13[["CH0", "CH1", "CH2", "CH3"]].astype(int)
+                    df1_C13[[g.CH0, g.CH1, g.CH2, g.CH3]] = (
+                        df1_C13[[g.CH0, g.CH1, g.CH2, g.CH3]].astype(int)
                     )
                     # set ppm value to a string with 2 decimal places
-                    df1_C13["ppm"] = df1_C13["ppm"].map("{:.2f}".format)
+                    df1_C13[g.PPM] = df1_C13[g.PPM].map("{:.2f}".format)
                     c13_df_list.append(df1_C13.values.tolist())
 
                     self.molprops_df1 = self.molprops_df[self.molprops_df[CHn_str]][
-                        ["ppm", "numProtons", "CH0", "CH1", "CH2", "CH3"]
+                        [g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3]
                     ].copy()
                     # replace True with 1 and False with 0
-                    self.molprops_df1[["CH0", "CH1", "CH2", "CH3"]] = (
-                        self.molprops_df1[["CH0", "CH1", "CH2", "CH3"]].astype(int)
+                    self.molprops_df1[[g.CH0, g.CH1, g.CH2, g.CH3]] = (
+                        self.molprops_df1[[g.CH0, g.CH1, g.CH2, g.CH3]].astype(int)
                     )
 
                     c13_df_list.append(self.molprops_df1.values.tolist())
 
-                tab_headings = ["CH0", "CH1", "CH2", "CH3"]
+                tab_headings = [g.CH0, g.CH1, g.CH2, g.CH3]
 
                 logger.debug(f"C13 mismatch table: {c13_df_list}")
 
                 rtn_html = render_template(
                     "error_table.html",
-                    colHeadings=["ppm", "numProtons", "CH0", "CH1", "CH2", "CH3"],
+                    colHeadings=[g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3],
                     df_data=c13_df_list,
                     tab_headings=tab_headings,
                 )
-                return rtn_html, 400
+                return rtn_html, g.BADREQUEST
 
-        return "ok", 200
+        return "ok", g.GOODREQUEST
 
     def check_hsqc_assign_CH2_from_DEPT135(self):
         """
@@ -643,16 +646,16 @@ class NMRsolution:
                 return
 
             # sort dept_CH2 by ppm in descending order
-            dept_CH2 = dept_CH2.sort_values(by=["ppm"], ascending=False).reset_index(
+            dept_CH2 = dept_CH2.sort_values(by=[g.PPM], ascending=False).reset_index(
                 drop=True
             )
 
             # sort hsqc by f1_ppm in descending order
             self.hsqc_df = self.hsqc_df.sort_values(
-                by=["f1_ppm"], ascending=False
+                by=[g.F1_PPM], ascending=False
             ).reset_index(drop=True)
 
-            hsqc_ppm_values = self.hsqc_df.f1_ppm.tolist()
+            hsqc_ppm_values = self.hsqc_df[g.F1_PPM].tolist()
 
             # check if the number of hsqc values is equal to the number of carbons in molprops_df with protons attached
             if len(hsqc_ppm_values) > mol.num_carbon_atoms_with_protons:
@@ -671,26 +674,26 @@ class NMRsolution:
             if self.hsqc_df.shape[0] == self.dept_df.shape[0]:
                 # loop through dept_CH2, find closest ppm value in hsqc and set the intensity to negative
                 tol = self.problemdata_json.carbonSeparation
-                for v1 in dept_CH2["ppm"]:
+                for v1 in dept_CH2[g.PPM]:
 
                     hsqc = self.hsqc_df[self.hsqc_df.intensity > 0]
 
                     # find the index of closest ppm value in hsqc
-                    idx = hsqc["f1_ppm"].sub(v1).abs().idxmin()
+                    idx = hsqc[g.F1_PPM].sub(v1).abs().idxmin()
                     # set the intensity of the idx loc in self.hsqc_df to -1
-                    self.hsqc_df.loc[idx, "intensity"] = -1.0
+                    self.hsqc_df.loc[idx, g.INTENSITY] = -1.0
 
             elif self.hsqc_df.shape[0] > self.dept_df.shape[0]:
                 # loop through dept_CH2, find closest ppm value in hsqc and set the intensity to negative
                 # tol = 0.0025  # CARBONSEPARATION
                 tol = self.problemdata_json.carbonSeparation
-                for v1 in dept_CH2["ppm"]:
+                for v1 in dept_CH2[g.PPM]:
 
                     self.hsqc_df["prob"] = self.hsqc_df.apply(
-                        lambda x: stats.norm(v1, tol).pdf(x["f1_ppm"]), axis=1
+                        lambda x: stats.norm(v1, tol).pdf(x[g.F1_PPM]), axis=1
                     )
                     # set the intensity to -1 for all prob values greater than 0.0
-                    self.hsqc_df.loc[self.hsqc_df["prob"] > 0.0, "intensity"] = -1.0
+                    self.hsqc_df.loc[self.hsqc_df["prob"] > 0.0, g.INTENSITY] = -1.0
                     self.hsqc_df["prob"] = 0.0
 
             self.dept135_not_used_to_solve_problem = False
@@ -906,32 +909,32 @@ class NMRsolution:
         # ── Primary: build H1 from HSQC ──────────────────────────────────────
         self.h1_df = pd.DataFrame(
             columns=[
-                "ppm",
-                "numProtons",
-                "integral",
-                "jCouplingVals",
-                "jCouplingClass",
-                "intensity",
-                "range",
-                "signaltype",
+                g.PPM,
+                g.NUMPROTONS,
+                g.INTEGRAL,
+                g.J_COUPLING_VALS,
+                g.J_COUPLING_CLASS,
+                g.INTENSITY,
+                g.RANGE,
+                g.SIGNALTYPE,
             ]
         )
-        self.h1_df["ppm"] = self.hsqc_df["f2_ppm"].copy()
-        self.h1_df["signaltype"] = self.hsqc_df["signaltype"].copy()
+        self.h1_df[g.PPM] = self.hsqc_df[g.F2_PPM].copy()
+        self.h1_df[g.SIGNALTYPE] = self.hsqc_df[g.SIGNALTYPE].copy()
 
         # keep only rows where signaltype is 'Compound' or "" (empty)
         self.h1_df = self.h1_df[
-            (self.h1_df["signaltype"] == "Compound") | (self.h1_df["signaltype"] == 0)
+            (self.h1_df[g.SIGNALTYPE] == "Compound") | (self.h1_df[g.SIGNALTYPE] == 0)
         ]
 
-        self.h1_df["numProtons"] = -1
-        self.h1_df["integral"] = -1
-        self.h1_df["jCouplingVals"] = ""
-        self.h1_df["jCouplingClass"] = ""
-        self.h1_df["intensity"] = self.hsqc_df["intensity"].copy()
-        self.h1_df["range"] = 0.0
+        self.h1_df[g.NUMPROTONS] = -1
+        self.h1_df[g.INTEGRAL] = -1
+        self.h1_df[g.J_COUPLING_VALS] = ""
+        self.h1_df[g.J_COUPLING_CLASS] = ""
+        self.h1_df[g.INTENSITY] = self.hsqc_df[g.INTENSITY].copy()
+        self.h1_df[g.RANGE] = 0.0
 
-        self.h1_df = self.h1_df.sort_values("ppm", ascending=False, ignore_index=True)
+        self.h1_df = self.h1_df.sort_values(g.PPM, ascending=False, ignore_index=True)
         self.h1_df.index = self.h1_df.index + 1
 
         # ── Supplement: merge J-coupling from 1D proton ──────────────────────
@@ -939,21 +942,21 @@ class NMRsolution:
         # (pureshift and HSQC-derived sources have empty jCouplingVals).
         if (
             h1_1d_source is not None
-            and "jCouplingVals" in h1_1d_source.columns
-            and not h1_1d_source["jCouplingVals"].eq("").all()
+            and g.J_COUPLING_VALS in h1_1d_source.columns
+            and not h1_1d_source[g.J_COUPLING_VALS].eq("").all()
         ):
             logger.debug("Supplementing HSQC-derived H1 with J-coupling from 1D proton")
             tol = self.problemdata_json.protonSeparation
             for idx, row in self.h1_df.iterrows():
                 nearest = h1_1d_source.iloc[
-                    (h1_1d_source["ppm"] - row["ppm"]).abs().argsort()[:1]
+                    (h1_1d_source[g.PPM] - row[g.PPM]).abs().argsort()[:1]
                 ]
                 if (
                     not nearest.empty
-                    and abs(nearest.iloc[0]["ppm"] - row["ppm"]) <= tol
+                    and abs(nearest.iloc[0][g.PPM] - row[g.PPM]) <= tol
                 ):
-                    self.h1_df.at[idx, "jCouplingVals"] = nearest.iloc[0]["jCouplingVals"]
-                    self.h1_df.at[idx, "jCouplingClass"] = nearest.iloc[0]["jCouplingClass"]
+                    self.h1_df.at[idx, g.J_COUPLING_VALS] = nearest.iloc[0][g.J_COUPLING_VALS]
+                    self.h1_df.at[idx, g.J_COUPLING_CLASS] = nearest.iloc[0][g.J_COUPLING_CLASS]
 
         # pureshift is a copy of the HSQC-derived H1 (no J-coupling by design)
         self.pureshift_df = self.h1_df.copy()
@@ -997,32 +1000,32 @@ class NMRsolution:
 
         h1_df = pd.DataFrame(
             columns=[
-                "ppm",
-                "numProtons",
-                "integral",
-                "jCouplingVals",
-                "jCouplingClass",
-                "intensity",
-                "range",
-                "signaltype",
+                g.PPM,
+                g.NUMPROTONS,
+                g.INTEGRAL,
+                g.J_COUPLING_VALS,
+                g.J_COUPLING_CLASS,
+                g.INTENSITY,
+                g.RANGE,
+                g.SIGNALTYPE,
             ]
         )
-        h1_df["ppm"] = self.pureshift_df["ppm"].copy()
-        h1_df["signaltype"] = self.pureshift_df["signaltype"].copy()
+        h1_df[g.PPM] = self.pureshift_df[g.PPM].copy()
+        h1_df[g.SIGNALTYPE] = self.pureshift_df[g.SIGNALTYPE].copy()
 
-        # keep only rows where type is 'Compound' or  "" (empty)
+        # keep only rows where signaltype is 'Compound' or  "" (empty)
 
-        h1_df = h1_df[(h1_df["signaltype"] == "Compound") | (h1_df["signaltype"] == 0)]
+        h1_df = h1_df[(h1_df[g.SIGNALTYPE] == "Compound") | (h1_df[g.SIGNALTYPE] == 0)]
 
-        h1_df["numProtons"] = -1
-        h1_df["integral"] = -1
-        h1_df["jCouplingVals"] = ""
-        h1_df["jCouplingClass"] = ""
-        h1_df["intensity"] = 1.0
-        h1_df["range"] = 0.0
+        h1_df[g.NUMPROTONS] = -1
+        h1_df[g.INTEGRAL] = -1
+        h1_df[g.J_COUPLING_VALS] = ""
+        h1_df[g.J_COUPLING_CLASS] = ""
+        h1_df[g.INTENSITY] = 1.0
+        h1_df[g.RANGE] = 0.0
 
         # order h1_df by ppm in place highest to lowest, reset index to 1,2,3,4,5...
-        h1_df = h1_df.sort_values("ppm", ascending=False, ignore_index=True)
+        h1_df = h1_df.sort_values(g.PPM, ascending=False, ignore_index=True)
         h1_df.index = h1_df.index + 1
 
         return h1_df
@@ -1036,25 +1039,25 @@ class NMRsolution:
         """
 
         # label c13 values as CH2 or not using the hsqc_df_
-        self.c13_df["CH0"] = False
-        self.c13_df["CH1"] = False
-        self.c13_df["CH2"] = False
-        self.c13_df["CH3"] = False
-        self.c13_df["CH3CH1"] = False
-        self.c13_df["quaternary"] = False
-        self.c13["numProtons"] = -1
+        self.c13_df[g.CH0] = False
+        self.c13_df[g.CH1] = False
+        self.c13_df[g.CH2] = False
+        self.c13_df[g.CH3] = False
+        self.c13_df[g.CH3CH1] = False
+        self.c13_df[g.QUATERNARY_CARBON] = False
+        self.c13_df[g.NUMPROTONS] = -1
 
         for idx, hsqc_row in self.hsqc.iterrows():
-            hsqc_ppm = hsqc_row["f1_ppm"]
-            c13_rows = self.c13_df[self.c13_df.ppm == hsqc_ppm]
+            hsqc_ppm = hsqc_row[g.F1_PPM]
+            c13_rows = self.c13_df[self.c13_df[g.PPM] == hsqc_ppm]
 
-            if hsqc_ppm in self.c13_df.ppm.values:
-                for column in ["numProtons", "CH1", "CH2", "CH3", "CH3CH1"]:
+            if hsqc_ppm in self.c13_df[g.PPM].values:
+                for column in [g.NUMPROTONS, g.CH1, g.CH2, g.CH3, g.CH3CH1]:
                     self.c13_df.loc[c13_rows.index, column] = hsqc_row[column].values[0]
 
         # label all rows in c13_df as CH0 where numProtons is -1
-        self.c13_df.loc[self.c13_df.numProtons == -1, "CH0"] = True
-        self.c13_df.loc[self.c13_df.numProtons == -1, "numProtons"] = 0
+        self.c13_df.loc[self.c13_df[g.NUMPROTONS] == -1, g.CH0] = True
+        self.c13_df.loc[self.c13_df[g.NUMPROTONS] == -1, g.NUMPROTONS] = 0
 
         self.c13
 
@@ -1067,32 +1070,30 @@ class NMRsolution:
         """
 
         # label c13 values as CH2 or not using the hsqc_df_
-        self.c13["CH0"] = False
-        self.c13["CH1"] = False
-        self.c13["CH2"] = False
-        self.c13["CH3"] = False
-        self.c13["CH3CH1"] = False
-        self.c13["quaternary"] = False
-        self.c13["numProtons"] = -1
+        self.c13[g.CH0] = False
+        self.c13[g.CH1] = False
+        self.c13[g.CH2] = False
+        self.c13[g.CH3] = False
+        self.c13[g.CH3CH1] = False
+        self.c13[g.QUATERNARY_CARBON] = False
+        self.c13[g.NUMPROTONS] = -1
 
-        for idx, ppm in zip(self.c13.index, self.c13.ppm):
-            if ppm in self.hsqc.f1_ppm.values:
-                self.c13.loc[idx, "CH2"] = self.hsqc_df[self.hsqc.f1_ppm == ppm][
-                    "CH2"
-                ].values[0]
-                self.c13.loc[idx, "numProtons"] = 2
+        for idx, ppm in zip(self.c13.index, self.c13[g.PPM]):
+            if ppm in self.hsqc[g.F1_PPM].values:
+                self.c13.loc[idx, g.CH2] = self.hsqc_df[self.hsqc[g.F1_PPM] == ppm][g.CH2].values[0]
+                self.c13.loc[idx, g.NUMPROTONS] = 2
 
         # label c13 values as quaternary if not present in hsqc_df
-        for idx, ppm in zip(self.c13.index, self.c13.ppm):
-            if ppm not in self.hsqc.f1_ppm.values:
-                self.c13.loc[idx, "quaternary"] = True
-                self.c13.loc[idx, "CH0"] = True
-                self.c13.loc[idx, "numProtons"] = 0
+        for idx, ppm in zip(self.c13.index, self.c13[g.PPM]):
+            if ppm not in self.hsqc[g.F1_PPM].values:
+                self.c13.loc[idx, g.QUATERNARY_CARBON] = True
+                self.c13.loc[idx, g.CH0] = True
+                self.c13.loc[idx, g.NUMPROTONS] = 0
 
         # label c13 values as CH3CH if quaternary and CH2 both False
-        for idx, ppm in zip(self.c13.index, self.c13.ppm):
-            if not self.c13.loc[idx, "quaternary"] and not self.c13.loc[idx, "CH2"]:
-                self.c13.loc[idx, "CH3CH1"] = True
+        for idx, ppm in zip(self.c13.index, self.c13[g.PPM]):
+            if not self.c13.loc[idx, g.QUATERNARY_CARBON] and not self.c13.loc[idx, g.CH2]:
+                self.c13.loc[idx, g.CH3CH1] = True
 
     def init_CH_CH3_HSQC_from_DDEPT_CH3_only(self) -> None:
         """
@@ -1104,23 +1105,23 @@ class NMRsolution:
         if self.ddept_ch3_only.empty:
             return
 
-        if "CH1" not in self.hsqc_df.columns:
-            self.hsqc_df["CH1"] = False
-        if "CH3" not in self.hsqc_df.columns:
-            self.hsqc_df["CH3"] = False
-        if "CH1" not in self.hsqc.columns:
-            self.hsqc["CH1"] = False
-        if "CH3" not in self.hsqc.columns:
-            self.hsqc["CH3"] = False
+        if g.CH1 not in self.hsqc_df.columns:
+            self.hsqc_df[g.CH1] = False
+        if g.CH3 not in self.hsqc_df.columns:
+            self.hsqc_df[g.CH3] = False
+        if g.CH1 not in self.hsqc.columns:
+            self.hsqc[g.CH1] = False
+        if g.CH3 not in self.hsqc.columns:
+            self.hsqc[g.CH3] = False
 
         for idx, ppm in zip(self.ddept_ch3_only.index, self.ddept_ch3_only.f1_ppm):
-            if ppm in self.hsqc.f1_ppm.values:
-                self.hsqc.loc[self.hsqc.f1_ppm == ppm, "CH3"] = True
-                self.hsqc.loc[self.hsqc.f1_ppm == ppm, "CH1"] = False
+            if ppm in self.hsqc[g.F1_PPM].values:
+                self.hsqc.loc[self.hsqc[g.F1_PPM] == ppm, g.CH3] = True
+                self.hsqc.loc[self.hsqc[g.F1_PPM] == ppm, g.CH1] = False
 
         # update hsqc_df with CH3 and CH1 values from hsqc
-        self.hsqc_df["CH3"] = self.hsqc["CH3"]
-        self.hsqc_df["CH1"] = self.hsqc["CH1"]
+        self.hsqc_df[g.CH3] = self.hsqc[g.CH3]
+        self.hsqc_df[g.CH1] = self.hsqc[g.CH1]
 
     def init_c13_from_hsqc_and_hmbc(self) -> Tuple[pd.DataFrame, bool]:
         """
@@ -1140,24 +1141,24 @@ class NMRsolution:
         # replace values for f2_ppm in hmbc starting from f2_ppm hsqc
         self.hmbc_df = self.snap(
                 self.hmbc_df,
-                sorted(self.hsqc.f2_ppm.unique().tolist(), reverse=True),
-                "f2_ppm",
+                sorted(self.hsqc[g.F2_PPM].unique().tolist(), reverse=True),
+                g.F2_PPM,
                 self.problemdata_json.protonSeparation,
             )
 
         # if any hmbc f2_ppm_probs == 0 then drop the row
         self.hmbc_df.drop(
-            self.hmbc_df[self.hmbc_df.f2_ppm_prob == 0].index, inplace=True
+            self.hmbc_df[self.hmbc_df[g.F2_PPM + "_prob"] == 0].index, inplace=True
         )
 
         # find all f1_ppm HMBC idx resonances that are not showing up in the HSQC f2_ppm
         iii = []
         for i in self.hmbc_df.index:
             prob_vals = []
-            for c in self.hsqc.f1_ppm.unique():
+            for c in self.hsqc[g.F1_PPM].unique():
                 prob_vals.append(
                     stats.norm.pdf(
-                        self.hmbc_df.loc[i, "f1_ppm"],
+                        self.hmbc_df.loc[i, g.F1_PPM],
                         loc=c,
                         scale=self.problemdata_json.carbonSeparation,
                     )
@@ -1169,7 +1170,7 @@ class NMRsolution:
 
         # keep only the unique hmbc resonances not in f1_ppm HSQC
         # get a list of the hmbc resonances
-        hmbcs = self.hmbc_df.loc[iii, "f1_ppm"].tolist()
+        hmbcs = self.hmbc_df.loc[iii, g.F1_PPM].tolist()
         unique_hmbc = []
 
         # start with first hmbc value in the hmbc list
@@ -1214,15 +1215,15 @@ class NMRsolution:
             hmbc_1 = self.snap(
                 self.hmbc_df.loc[iii],
                 mean_unique_hmbc_vals,
-                "f1_ppm",
+                g.F1_PPM,
                 self.problemdata_json.carbonSeparation,
             )
 
             # tidyup f1_ppm values in hmbc that are in f1_ppm HSQC
             hmbc_2 = self.snap(
                 self.hmbc_df.drop(iii),
-                self.hsqc.f1_ppm.unique(),
-                "f1_ppm",
+                self.hsqc[g.F1_PPM].unique(),
+                g.F1_PPM,
                 self.problemdata_json.carbonSeparation,
             )
 
@@ -1233,78 +1234,82 @@ class NMRsolution:
 
         # add f2p_ppm column to HSQC and HMBC tables
         # f2p_ppm is C13 one to one relation between f1_ppm and f2_ppm in HSQC
-        self.hmbc_df["f2p_ppm"] = 0.0
+        self.hmbc_df[g.F2P_PPM] = 0.0
         for idx, f2ppmHSQC, f1ppmHSQC in zip(
-            self.hsqc.index, self.hsqc.f2_ppm, self.hsqc.f1_ppm
+            self.hsqc.index, self.hsqc[g.F2_PPM], self.hsqc[g.F1_PPM]
         ):
-            self.hmbc_df.loc[self.hmbc_df.f2_ppm == f2ppmHSQC, "f2p_ppm"] = f1ppmHSQC
+            self.hmbc_df.loc[self.hmbc_df[g.F2_PPM] == f2ppmHSQC, g.F2P_PPM] = f1ppmHSQC
 
         # return list of C13 values
         c13_list = sorted(
-            set(self.hmbc_df.f1_ppm).union(
-                set(self.hmbc_df.f2p_ppm), set(self.hsqc.f1_ppm)
+                set(self.hmbc_df[g.F1_PPM]).union(
+                set(self.hmbc_df[g.F2P_PPM]), set(self.hsqc[g.F1_PPM])
             ),
             reverse=True,
         )
 
         # create a dataframe of C13 values
-        self.c13_df = pd.DataFrame(c13_list, columns=["ppm"])
-        self.c13_df["signaltype"] = "Compound"
+        self.c13_df = pd.DataFrame(c13_list, columns=[g.PPM])
+        self.c13_df[g.SIGNALTYPE] = g.COMPOUND
         self.c13_df.index = self.c13_df.index + 1
 
         # label c13 values as CH2 or not using the hsqc
-        self.c13_df["CH2"] = False
-        if "numProtons" not in self.c13_df.columns:
-            self.c13_df["numProtons"] = -1
+        self.c13_df[g.CH2] = False
+        if g.NUMPROTONS not in self.c13_df.columns:
+            self.c13_df[g.NUMPROTONS] = -1
 
-        CH2_hsqc_df = self.hsqc[self.hsqc.CH2]
-        for idx, ppm in zip(self.c13_df.index, self.c13_df.ppm):
-            if ppm in CH2_hsqc_df.f1_ppm.values:
-                self.c13_df.loc[idx, "CH2"] = True
+        CH2_hsqc_df = self.hsqc[self.hsqc[g.CH2]]
+        for idx, ppm in zip(self.c13_df.index, self.c13_df[g.PPM]):
+            if ppm in CH2_hsqc_df[g.F1_PPM].values:
+                self.c13_df.loc[idx, g.CH2] = True
 
         #  label c13 values as quaternary if not present in hsqc
-        self.c13_df["quaternary"] = False
-        self.c13_df["CH0"] = False
-        for idx, ppm in zip(self.c13_df.index, self.c13_df.ppm):
-            if ppm not in self.hsqc.f1_ppm.values:
-                self.c13_df.loc[idx, "quaternary"] = True
-                self.c13_df.loc[idx, "CH0"] = True
+        self.c13_df[g.QUATERNARY_CARBON] = False
+        self.c13_df[g.CH0] = False
+        for idx, ppm in zip(self.c13_df.index, self.c13_df[g.PPM]):
+            if ppm not in self.hsqc[g.F1_PPM].values:
+                self.c13_df.loc[idx, g.QUATERNARY_CARBON] = True
+                self.c13_df.loc[idx, g.CH0] = True
 
         # label c13 values as CH3CH if quaternary and CH2 both False
-        self.c13_df["CH3CH1"] = False
-        CH3CH1_hsqc_df = self.hsqc[self.hsqc.CH3CH1]
-        for idx, ppm in zip(self.c13_df.index, self.c13_df.ppm):
-            if ppm in CH3CH1_hsqc_df.f1_ppm.values:
-                self.c13_df.loc[idx, "CH3CH1"] = True
+        self.c13_df[g.CH3CH1] = False
+        CH3CH1_hsqc_df = self.hsqc[self.hsqc[g.CH3CH1]]
+        for idx, ppm in zip(self.c13_df.index, self.c13_df[g.PPM]):
+            if ppm in CH3CH1_hsqc_df[g.F1_PPM].values:
+                self.c13_df.loc[idx, g.CH3CH1] = True
 
         # label c13 values as CH3 if any CH3 values in hsqc
-        self.c13_df["CH3"] = False
-        self.c13_df["CH1"] = False
-        if "numProtons" not in self.c13_df.columns:
-            self.c13_df["numProtons"] = -1
-        CH3_hsqc_df = self.hsqc[self.hsqc.CH3]
+        self.c13_df[g.CH3] = False
+        self.c13_df[g.CH1] = False
+        if g.NUMPROTONS not in self.c13_df.columns:
+            self.c13_df[g.NUMPROTONS] = -1
+        CH3_hsqc_df = self.hsqc[self.hsqc[g.CH3]]
         if not CH3_hsqc_df.empty:
-            for idx, ppm in zip(self.c13_df.index, self.c13_df.ppm):
-                if ppm in CH3_hsqc_df.f1_ppm.values:
-                    self.c13_df.loc[idx, "CH3"] = True
+            for idx, ppm in zip(self.c13_df.index, self.c13_df[g.PPM]):
+                if ppm in CH3_hsqc_df[g.F1_PPM].values:
+                    self.c13_df.loc[idx, g.CH3] = True
 
         # label c13 values as CH1 if any CH1 values in hsqc
-        CH1_hsqc_df = self.hsqc[self.hsqc.CH1]
+        CH1_hsqc_df = self.hsqc[self.hsqc[g.CH1]]
         if not CH1_hsqc_df.empty:
-            for idx, ppm in zip(self.c13_df.index, self.c13_df.ppm):
-                if ppm in CH1_hsqc_df.f1_ppm.values:
-                    self.c13_df.loc[idx, "CH1"] = True
+            for idx, ppm in zip(self.c13_df.index, self.c13_df[g.PPM]):
+                if ppm in CH1_hsqc_df[g.F1_PPM].values:
+                    self.c13_df.loc[idx, g.CH1] = True
 
-        self.c13_df.loc[self.c13_df.CH3, "numProtons"] = 3
-        self.c13_df.loc[self.c13_df.CH2, "numProtons"] = 2
-        self.c13_df.loc[self.c13_df.CH1, "numProtons"] = 1
-        self.c13_df.loc[self.c13_df.CH0, "numProtons"] = 0
+        self.c13_df.loc[self.c13_df[g.CH3], g.NUMPROTONS] = 3
+        self.c13_df.loc[self.c13_df[g.CH2], g.NUMPROTONS] = 2
+        self.c13_df.loc[self.c13_df[g.CH1], g.NUMPROTONS] = 1
+        self.c13_df.loc[self.c13_df[g.CH0], g.NUMPROTONS] = 0
 
         return self.c13_df, True
 
     def check_what_experiments_are_present(self) -> None:
         """Build the set of available experiments from submitted data."""
         self.available_experiments = frozenset(self.expts_available)
+
+    # def check_what_experiments_are_present(self) -> None:
+    #     """Build the set of available experiments from submitted data."""
+    #     self.c13_df.loc[self.c13_df[g.QUATERNARY_CARBON], g.NUMPROTONS] = 0
 
     def check_h1_pureshift_not_empty(self) -> Tuple[bool, str]:
         """
@@ -1319,22 +1324,22 @@ class NMRsolution:
         """
         if not self.pureshift_df.empty:
             self.h1 = self.pureshift_df[
-                (self.pureshift_df.signaltype == "Compound")
-                | (self.pureshift_df.signaltype == 0)
-            ][["ppm"]].copy()
+                (self.pureshift_df[g.SIGNALTYPE] == g.COMPOUND)
+                | (self.pureshift_df[g.SIGNALTYPE] == 0)
+            ][[g.PPM]].copy()
             if self.h1.empty:
                 # maybe user forgot to set type to compound so search for "" in Type column
-                self.h1 = self.pureshift_df[self.pureshift_df.signaltype == ""][
-                    ["ppm"]
+                self.h1 = self.pureshift_df[self.pureshift_df[g.SIGNALTYPE] == ""][
+                    [g.PPM]
                 ].copy()
-                self.h1["signaltype"] = "Compound"
+                self.h1[g.SIGNALTYPE] = g.COMPOUND
             if self.h1.empty:
                 warning_dialog(
                     "H1 Excel Sheet is Empty", "Error in Excel Sheet", self.qtstarted
                 )
                 return False, "h1 is empty"
         elif not self.h1_df.empty:
-            self.h1 = self.h1_df[["ppm"]].copy()
+            self.h1 = self.h1_df[[g.PPM]].copy()
         else:
             warning_dialog(
                 "H1_df or pureshift_df excel sheet is empty",
@@ -1363,53 +1368,53 @@ class NMRsolution:
             return False, "c13 is empty"
         else:
             self.c13 = self.c13_df[
-                (self.c13_df.signaltype == "Compound") | (self.c13_df.signaltype == 0)
-            ][["ppm"]].copy()
+                (self.c13_df[g.SIGNALTYPE] == g.COMPOUND) | (self.c13_df[g.SIGNALTYPE] == 0)
+            ][[g.PPM]].copy()
             if self.c13.empty:
                 # maybe user forgot to set type to compound so search for "" in Type column
-                self.c13 = self.c13_df[self.c13_df.signaltype == ""][["ppm"]].copy()
-                self.c13["signaltype"] = "Compound"
+                self.c13 = self.c13_df[self.c13_df[g.SIGNALTYPE] == ""][[g.PPM]].copy()
+                self.c13[g.SIGNALTYPE] = g.COMPOUND
             if self.c13.empty:
                 warning_dialog(
                     "C13 Excel Sheet is Empty", "Error in Excel File", self.qtstarted
                 )
                 return False, "c13 is empty"
 
-        if "numProtons" not in self.c13.columns:
-            self.c13["numProtons"] = -1
-        if "attached_protons" not in self.c13.columns:
-            self.c13["attached_protons"] = -1
-        if "CH0" not in self.c13.columns:
-            self.c13["CH0"] = False
-        if "CH1" not in self.c13.columns:
-            self.c13["CH1"] = False
-        if "CH2" not in self.c13.columns:
-            self.c13["CH2"] = False
-        if "CH3" not in self.c13.columns:
-            self.c13["CH3"] = False
-        if "CH3CH1" not in self.c13.columns:
-            self.c13["CH3CH1"] = False
-        if "quaternary" not in self.c13.columns:
-            self.c13["quaternary"] = False
+        if g.NUMPROTONS not in self.c13.columns:
+            self.c13[g.NUMPROTONS] = -1
+        if g.ATTACHED_PROTONS not in self.c13.columns:
+            self.c13[g.ATTACHED_PROTONS] = -1
+        if g.CH0 not in self.c13.columns:
+            self.c13[g.CH0] = False
+        if g.CH1 not in self.c13.columns:
+            self.c13[g.CH1] = False
+        if g.CH2 not in self.c13.columns:
+            self.c13[g.CH2] = False
+        if g.CH3 not in self.c13.columns:
+            self.c13[g.CH3] = False
+        if g.CH3CH1 not in self.c13.columns:
+            self.c13[g.CH3CH1] = False
+        if g.QUATERNARY_CARBON not in self.c13.columns:
+            self.c13[g.QUATERNARY_CARBON] = False
 
-        for CHn in ["CH0", "CH1", "CH2", "CH3", "CH3CH1", "quaternary", "numProtons"]:
+        for CHn in [g.CH0, g.CH1, g.CH2, g.CH3, g.CH3CH1, g.QUATERNARY_CARBON, g.NUMPROTONS]:
             if CHn in self.c13_df.columns:
                 self.c13[CHn] = self.c13_df[
-                    (self.c13_df.signaltype == "Compound")
-                    | (self.c13_df.signaltype == 0)
+                    (self.c13_df[g.SIGNALTYPE] == g.COMPOUND)
+                    | (self.c13_df[g.SIGNALTYPE] == 0)
                 ][CHn].copy()
 
         # add two to numProtons for CH2
-        self.c13.loc[self.c13.CH2, "numProtons"] = 2
-        # add one to numProtons for CH3CH
-        self.c13.loc[self.c13.CH1, "numProtons"] = 1
+        self.c13.loc[self.c13[g.CH2], g.NUMPROTONS] = 2
+        # add one to numProtons for CH3CH1
+        self.c13.loc[self.c13[g.CH3CH1], g.NUMPROTONS] = 1
         # add zero to numProtons for quaternary
-        self.c13.loc[self.c13.quaternary, "numProtons"] = 0
-        self.c13.loc[self.c13.CH0, "numProtons"] = 0
+        self.c13.loc[self.c13[g.QUATERNARY_CARBON], g.NUMPROTONS] = 0
+        self.c13.loc[self.c13[g.CH0], g.NUMPROTONS] = 0
         # add three to numProtons for CH3
-        self.c13.loc[self.c13.CH3, "numProtons"] = 3
+        self.c13.loc[self.c13[g.CH3], g.NUMPROTONS] = 3
 
-        self.c13.loc[:, "attached_protons"] = self.c13.numProtons
+        self.c13.loc[:, g.ATTACHED_PROTONS] = self.c13[g.NUMPROTONS]
 
         return True, "c13 is not empty"
 
@@ -1428,15 +1433,15 @@ class NMRsolution:
         if not self.hsqc_df.empty:
             # copy rows where signaltype is Compound or 0
             self.hsqc = self.hsqc_df[
-                (self.hsqc_df.signaltype == "Compound") | (self.hsqc_df.signaltype == 0)
-            ][["f2_ppm", "f1_ppm", "intensity", "signaltype", "Annotation"]].copy()
+                (self.hsqc_df[g.SIGNALTYPE] == g.COMPOUND) | (self.hsqc_df[g.SIGNALTYPE] == 0)
+            ][[g.F2_PPM, g.F1_PPM, g.INTENSITY, g.SIGNALTYPE, "Annotation"]].copy()
 
         if self.hsqc.empty:
             # maybe user forgot to set type to compound so search for "" in Type column
-            self.hsqc = self.hsqc_df[self.hsqc_df.signaltype == ""][
-                ["f2_ppm", "f1_ppm", "intensity", "signaltype", "Annotation"]
+            self.hsqc = self.hsqc_df[self.hsqc_df[g.SIGNALTYPE] == ""][
+                [g.F2_PPM, g.F1_PPM, g.INTENSITY, g.SIGNALTYPE, "Annotation"]
             ].copy()
-            self.hsqc["signaltype"] = "Compound"
+            self.hsqc[g.SIGNALTYPE] = g.COMPOUND
 
         if self.hsqc.empty:
             warning_dialog(
@@ -1452,17 +1457,17 @@ class NMRsolution:
             self.hsqc["f2Cp_i"] = "-1"
             self.hsqc["f2p_ppm"] = -1.0
 
-            self.hsqc["CH2"] = False
+            self.hsqc[g.CH2] = False
             self.numtimes_HSQC_CH2_set_to_FALSE += 1
-            self.hsqc["CH3CH1"] = False
-            self.hsqc["CH3"] = False
-            self.hsqc["CH1"] = False
-            self.hsqc["CH0"] = False
-            self.hsqc["quaternary"] = False
+            self.hsqc[g.CH3CH1] = False
+            self.hsqc[g.CH3] = False
+            self.hsqc[g.CH1] = False
+            self.hsqc[g.CH0] = False
+            self.hsqc[g.QUATERNARY_CARBON] = False
 
-            self.hsqc["numProtons"] = -1
-            self.hsqc["attached_protons"] = -1
-            self.hsqc["f2_integral"] = -1
+            self.hsqc[g.NUMPROTONS] = -1
+            self.hsqc[g.ATTACHED_PROTONS] = -1
+            self.hsqc[g.F2_INTEGRAL] = -1
             return True, "hsqc is not empty"
 
     def tidyup_ppm_values(
@@ -1513,17 +1518,17 @@ class NMRsolution:
         DataFrame versions of HSQC for each group type, ensuring correct assignment for downstream NMR analysis.
         """
 
-        self.hsqc["numProtons"] = -1
-        self.hsqc["integral"] = -1
-        self.hsqc["attached_protons"] = -1
+        self.hsqc[g.NUMPROTONS] = -1
+        self.hsqc[g.INTEGRAL] = -1
+        self.hsqc[g.ATTACHED_PROTONS] = -1
 
-        self.hsqc_df["numProtons"] = -1
-        self.hsqc_df["integral"] = -1
-        self.hsqc_df["attached_protons"] = -1
+        self.hsqc_df[g.NUMPROTONS] = -1
+        self.hsqc_df[g.INTEGRAL] = -1
+        self.hsqc_df[g.ATTACHED_PROTONS] = -1
 
-        for CHn, nHs in zip(["CH3", "CH2", "CH1"], [3, 2, 1]):
+        for CHn, nHs in zip([g.CH3, g.CH2, g.CH1], [3, 2, 1]):
 
-            for col_id in ["numProtons", "integral", "attached_protons"]:
+            for col_id in [g.NUMPROTONS, g.INTEGRAL, g.ATTACHED_PROTONS]:
                 self.hsqc.loc[self.hsqc[CHn], col_id] = nHs
                 self.hsqc_df.loc[self.hsqc_df[CHn], col_id] = nHs
 
@@ -1540,39 +1545,39 @@ class NMRsolution:
         h1 = self.h1
         hsqc = self.hsqc
 
-        for col in ["CH3CH1", "CH3", "CH2", "CH1"]:
+        for col in [g.CH3CH1, g.CH3, g.CH2, g.CH1]:
             if col not in h1.columns:
                 h1[col] = False
 
         # copy information from HSQC to H1
         for index, row in hsqc.iterrows():
-            h1.loc[h1["ppm"] == row["f2_ppm"], "CH3CH1"] = row["CH3CH1"]
-            h1.loc[h1["ppm"] == row["f2_ppm"], "CH3"] = row["CH3"]
-            h1.loc[h1["ppm"] == row["f2_ppm"], "CH2"] = row["CH2"]
-            h1.loc[h1["ppm"] == row["f2_ppm"], "CH1"] = row["CH1"]
+            h1.loc[h1[g.PPM] == row["f2_ppm"], g.CH3CH1] = row[g.CH3CH1]
+            h1.loc[h1[g.PPM] == row["f2_ppm"], g.CH3] = row[g.CH3]
+            h1.loc[h1[g.PPM] == row["f2_ppm"], g.CH2] = row[g.CH2]
+            h1.loc[h1[g.PPM] == row["f2_ppm"], g.CH1] = row[g.CH1]
 
         # transfer numProtons from hsqc to h1 if numProtons in h1 == -1
         if h1[h1.numProtons == -1].shape[0] > 0:
             for idx, row in h1[h1.numProtons == -1].iterrows():
-                h1.loc[idx, "numProtons"] = hsqc[hsqc.f2_ppm == row.ppm][
-                    "numProtons"
+                h1.loc[idx, g.NUMPROTONS] = hsqc[hsqc.f2_ppm == row[g.PPM]][
+                    g.NUMPROTONS
                 ].values[0]
 
-        h1["attached_protons"] = h1["numProtons"]
+        h1[g.ATTACHED_PROTONS] = h1[g.NUMPROTONS]
 
         # check if h1 integrals all negative then set to intensity
-        if h1[h1.integral < 0].shape[0] > 0:
-            h1["integral"] = h1["numProtons"]
+        if h1[h1[g.INTEGRAL] < 0].shape[0] > 0:
+            h1[g.INTEGRAL] = h1[g.NUMPROTONS]
 
         # set any integral that equals 2 to -2 in h1
-        h1.loc[h1.integral == 2, "integral"] = -2
+        h1.loc[h1[g.INTEGRAL] == 2, g.INTEGRAL] = -2
 
         # if we have diasteremeric protons then set integral to -1
         # this can be tested if we count the frequency of the values in column f1p_i in h1 and if an equal 2 set the integraal to -1
         unique_f1p_i = h1.f1p_i.unique()
         for f1p_i in unique_f1p_i:
             if h1[h1.f1p_i == f1p_i].shape[0] == 2:
-                h1.loc[h1.f1p_i == f1p_i, "integral"] = -1
+                h1.loc[h1.f1p_i == f1p_i, g.INTEGRAL] = -1
 
     def transfer_hsqc_info_to_c13(self) -> None:
         """
@@ -1591,18 +1596,18 @@ class NMRsolution:
 
         for idx, row in hsqc.iterrows():
             # search c13 by ppm
-            c13.loc[c13.ppm == row.f1_ppm, "numProtons"] = row.numProtons
-            c13.loc[c13.ppm == row.f1_ppm, "CH3"] = row.CH3
-            c13.loc[c13.ppm == row.f1_ppm, "CH2"] = row.CH2
-            c13.loc[c13.ppm == row.f1_ppm, "CH1"] = row.CH1
-            c13.loc[c13.ppm == row.f1_ppm, "CH3CH1"] = row.CH3CH1
+            c13.loc[c13[g.PPM] == row.f1_ppm, g.NUMPROTONS] = row[g.NUMPROTONS]
+            c13.loc[c13[g.PPM] == row.f1_ppm, g.CH3] = row[g.CH3]
+            c13.loc[c13[g.PPM] == row.f1_ppm, g.CH2] = row[g.CH2]
+            c13.loc[c13[g.PPM] == row.f1_ppm, g.CH1] = row[g.CH1]
+            c13.loc[c13[g.PPM] == row.f1_ppm, g.CH3CH1] = row[g.CH3CH1]
 
         # any leftover numprotons in c13 == -1 set to 0
-        c13.loc[c13.numProtons == -1, "numProtons"] = 0
-        c13.loc[c13.numProtons == 0, "CH0"] = True
-        c13.loc[c13.numProtons == 0, "quaternary"] = True
+        c13.loc[c13[g.NUMPROTONS] == -1, g.NUMPROTONS] = 0
+        c13.loc[c13[g.NUMPROTONS] == 0, g.CH0] = True
+        c13.loc[c13[g.NUMPROTONS] == 0, g.QUATERNARY_CARBON] = True
 
-        c13["attached_protons"] = c13["numProtons"]
+        c13[g.ATTACHED_PROTONS] = c13[g.NUMPROTONS]
 
     def assign_CH3_CH1_in_HSQC_using_expected_molecule(self) -> None:
         """
@@ -1618,24 +1623,24 @@ class NMRsolution:
         CH3_mol_df = expected_molecule.molprops_df[expected_molecule.molprops_df.CH3]
 
         CH3CH1_mol_df = expected_molecule.molprops_df[
-            expected_molecule.molprops_df.CH3CH1
+            expected_molecule.molprops_df[g.CH3CH1]
         ]
 
         CH1_mol_df = expected_molecule.molprops_df[expected_molecule.molprops_df.CH1]
 
         CH3CH1_sym_mol_df = expected_molecule.sym_molprops_df[
-            expected_molecule.sym_molprops_df.CH3CH1
+            expected_molecule.sym_molprops_df[g.CH3CH1]
         ]
         CH3_sym_mol_df = expected_molecule.sym_molprops_df[
-            expected_molecule.sym_molprops_df.CH3
+            expected_molecule.sym_molprops_df[g.CH3]
         ]
         CH1_sym_mol_df = expected_molecule.sym_molprops_df[
-            expected_molecule.sym_molprops_df.CH1
+            expected_molecule.sym_molprops_df[g.CH1]
         ]
-        CH1_sym_mol_gt_67_df = CH1_sym_mol_df[CH1_sym_mol_df.ppm >= CH1_CH3_PPM_BOUNDARY]
-        CH1_sym_mol_lt_67_df = CH1_sym_mol_df[CH1_sym_mol_df.ppm < CH1_CH3_PPM_BOUNDARY]
+        CH1_sym_mol_gt_67_df = CH1_sym_mol_df[CH1_sym_mol_df[g.PPM] >= g.CH1_CH3_PPM_BOUNDARY]
+        CH1_sym_mol_lt_67_df = CH1_sym_mol_df[CH1_sym_mol_df[g.PPM] < g.CH1_CH3_PPM_BOUNDARY]
 
-        CH3CH1_hsqc_df = hsqc[hsqc.CH3CH1].copy()
+        CH3CH1_hsqc_df = hsqc[hsqc[g.CH3CH1]].copy()
 
         num_CH3CH1_hsqc = CH3CH1_hsqc_df.shape[0]
 
@@ -1652,21 +1657,21 @@ class NMRsolution:
         #  check if CH3 groups already assigned and if so assign CH1 groups
         if (CH3_mol_df.shape[0] > 0) and hsqc.CH3.sum() > 0:
             #  set the CH1 to True where hsqc.numprotons < 0
-            hsqc.loc[hsqc.numProtons < 0, "CH1"] = True
-            hsqc.loc[hsqc.numProtons < 0, "numProtons"] = 1
+            hsqc.loc[hsqc[g.NUMPROTONS] < 0, g.CH1] = True
+            hsqc.loc[hsqc[g.NUMPROTONS] < 0, g.NUMPROTONS] = 1
             return
 
         # if no CH3 groups in expected molecule assign all CH3CH1 groups to CH1
         if CH3_mol_df.shape[0] == 0:
 
-            hsqc.loc[CH3CH1_hsqc_df.index, "CH1"] = True
-            hsqc.loc[CH3CH1_hsqc_df.index, "numProtons"] = 1
+            hsqc.loc[CH3CH1_hsqc_df.index, g.CH1] = True
+            hsqc.loc[CH3CH1_hsqc_df.index, g.NUMPROTONS] = 1
             return
 
         # if no CH1 groups in expected molecule assign all CH3CH1 groups to CH3
         elif CH1_mol_df.shape[0] == 0:
-            hsqc.loc[CH3CH1_hsqc_df.index, "CH3"] = True
-            hsqc.loc[CH3CH1_hsqc_df.index, "numProtons"] = 3
+            hsqc.loc[CH3CH1_hsqc_df.index, g.CH3] = True
+            hsqc.loc[CH3CH1_hsqc_df.index, g.NUMPROTONS] = 3
             return
 
         #  if not all CH3CH1 peaks are picked
@@ -1682,15 +1687,15 @@ class NMRsolution:
             for idx, row in CH3CH1_hsqc_df.iterrows():
                 # find the closest match in the CH3CH1_mol_df
                 closest_match = CH3CH1_sym_mol_df.iloc[
-                    (CH3CH1_sym_mol_df["ppm"] - row.f1_ppm).abs().argsort()[:1]
+                    (CH3CH1_sym_mol_df[g.PPM] - row.f1_ppm).abs().argsort()[:1]
                 ]
                 if not closest_match.empty:
                     # update the hsqc dataframe with the closest match
-                    hsqc.loc[row.name, "numProtons"] = closest_match.totalNumHs.values[
+                    hsqc.loc[row.name, g.NUMPROTONS] = closest_match.totalNumHs.values[
                         0
                     ]
-                    hsqc.loc[row.name, "CH3"] = closest_match.CH3.values[0]
-                    hsqc.loc[row.name, "CH1"] = closest_match.CH1.values[0]
+                    hsqc.loc[row.name, g.CH3] = closest_match[g.CH3].values[0]
+                    hsqc.loc[row.name, g.CH1] = closest_match[g.CH1].values[0]
 
                     CH3CH1_sym_mol_df.loc[closest_match.index, "picked"] = True
                     CH3CH1_sym_mol_df = CH3CH1_sym_mol_df[~CH3CH1_sym_mol_df.picked]
@@ -1702,17 +1707,17 @@ class NMRsolution:
             # split the CH3CH1 based on ppm value above and below 67 ppm
             # CH3 groups expected to be below 67 ppm
 
-            CH3CH1_hsqc_df_lessthan_67 = CH3CH1_hsqc_df[CH3CH1_hsqc_df.f1_ppm < CH1_CH3_PPM_BOUNDARY]
-            CH3CH1_hsqc_df_morethan_67 = CH3CH1_hsqc_df[CH3CH1_hsqc_df.f1_ppm >= CH1_CH3_PPM_BOUNDARY]
+            CH3CH1_hsqc_df_lessthan_67 = CH3CH1_hsqc_df[CH3CH1_hsqc_df.f1_ppm < g.CH1_CH3_PPM_BOUNDARY]
+            CH3CH1_hsqc_df_morethan_67 = CH3CH1_hsqc_df[CH3CH1_hsqc_df.f1_ppm >= g.CH1_CH3_PPM_BOUNDARY]
 
             #  label the CH3CH1 groups above 67 ppm as CH1
-            hsqc.loc[CH3CH1_hsqc_df_morethan_67.index, "CH1"] = True
-            hsqc.loc[CH3CH1_hsqc_df_morethan_67.index, "numProtons"] = 1
+            hsqc.loc[CH3CH1_hsqc_df_morethan_67.index, g.CH1] = True
+            hsqc.loc[CH3CH1_hsqc_df_morethan_67.index, g.NUMPROTONS] = 1
 
             # split the expected molecule CH3CH1 groups based on 67 ppm
             # CH3 groups expected to be below 67 ppm
-            CH3CH1_mol_df_lessthan_67 = CH3CH1_mol_df[CH3CH1_mol_df.ppm < CH1_CH3_PPM_BOUNDARY]
-            CH3CH1_mol_df_morethan_67 = CH3CH1_mol_df[CH3CH1_mol_df.ppm >= CH1_CH3_PPM_BOUNDARY]
+            CH3CH1_mol_df_lessthan_67 = CH3CH1_mol_df[CH3CH1_mol_df.ppm < g.CH1_CH3_PPM_BOUNDARY]
+            CH3CH1_mol_df_morethan_67 = CH3CH1_mol_df[CH3CH1_mol_df.ppm >= g.CH1_CH3_PPM_BOUNDARY]
 
             CH3_mol_df_lessthan_67 = CH3CH1_mol_df_lessthan_67[
                 CH3CH1_mol_df_lessthan_67.CH3
@@ -1723,8 +1728,8 @@ class NMRsolution:
 
             # if there are no CH1 groups below 67 ppm in the expected molecule then we can set the hsqc CH3CH1 groups to CH3
             if CH1_mol_df_lessthan_67.shape[0] == 0:
-                hsqc.loc[CH3CH1_hsqc_df_lessthan_67.index, "CH3"] = True
-                hsqc.loc[CH3CH1_hsqc_df_lessthan_67.index, "numProtons"] = 3
+                hsqc.loc[CH3CH1_hsqc_df_lessthan_67.index, g.CH3] = True
+                hsqc.loc[CH3CH1_hsqc_df_lessthan_67.index, g.NUMPROTONS] = 3
 
             # check the numbers
             elif CH3CH1_hsqc_df.shape[0] == CH3CH1_mol_df.shape[0]:
@@ -1732,20 +1737,20 @@ class NMRsolution:
                     # find the closest match in the hsqc dataframe
                     # and update the numProtons column to 3
                     closest_match = CH3CH1_hsqc_df.iloc[
-                        (CH3CH1_hsqc_df["f1_ppm"] - row.ppm).abs().argsort()[:1]
+                        (CH3CH1_hsqc_df[g.F1_PPM] - row[g.PPM]).abs().argsort()[:1]
                     ]
-                    hsqc.loc[closest_match.index, "numProtons"] = 3
-                    hsqc.loc[closest_match.index, "CH3"] = True
+                    hsqc.loc[closest_match.index, g.NUMPROTONS] = 3
+                    hsqc.loc[closest_match.index, g.CH3] = True
                     CH3CH1_hsqc_df.drop(closest_match.index, inplace=True)
 
                 for idx, row in CH1_mol_df.iterrows():
                     # find the closest match in the hsqc dataframe
                     # and update the numProtons column to 1
                     closest_match = CH3CH1_hsqc_df.iloc[
-                        (CH3CH1_hsqc_df["f1_ppm"] - row.ppm).abs().argsort()[:1]
+                        (CH3CH1_hsqc_df[g.F1_PPM] - row[g.PPM]).abs().argsort()[:1]
                     ]
-                    hsqc.loc[closest_match.index, "numProtons"] = 1
-                    hsqc.loc[closest_match.index, "CH1"] = True
+                    hsqc.loc[closest_match.index, g.NUMPROTONS] = 1
+                    hsqc.loc[closest_match.index, g.CH1] = True
                     CH3CH1_hsqc_df.drop(closest_match.index, inplace=True)
 
             elif CH3CH1_hsqc_df.shape[0] == CH3CH1_sym_mol_df.shape[0]:
@@ -1753,20 +1758,20 @@ class NMRsolution:
                     # find the closest match in the hsqc dataframe
                     # and update the numProtons column to 3
                     closest_match = CH3CH1_hsqc_df.iloc[
-                        (CH3CH1_hsqc_df["f1_ppm"] - row.ppm).abs().argsort()[:1]
+                        (CH3CH1_hsqc_df[g.F1_PPM] - row[g.PPM]).abs().argsort()[:1]
                     ]
-                    hsqc.loc[closest_match.index, "numProtons"] = 3
-                    hsqc.loc[closest_match.index, "CH3"] = True
+                    hsqc.loc[closest_match.index, g.NUMPROTONS] = 3
+                    hsqc.loc[closest_match.index, g.CH3] = True
                     CH3CH1_hsqc_df.drop(closest_match.index, inplace=True)
 
                 for idx, row in CH1_sym_mol_df.iterrows():
                     # find the closest match in the hsqc dataframe
                     # and update the numProtons column to 1
                     closest_match = CH3CH1_hsqc_df.iloc[
-                        (CH3CH1_hsqc_df["f1_ppm"] - row.ppm).abs().argsort()[:1]
+                        (CH3CH1_hsqc_df[g.F1_PPM] - row[g.PPM]).abs().argsort()[:1]
                     ]
-                    hsqc.loc[closest_match.index, "numProtons"] = 1
-                    hsqc.loc[closest_match.index, "CH1"] = True
+                    hsqc.loc[closest_match.index, g.NUMPROTONS] = 1
+                    hsqc.loc[closest_match.index, g.CH1] = True
                     CH3CH1_hsqc_df.drop(closest_match.index, inplace=True)
 
             elif (
@@ -1777,31 +1782,31 @@ class NMRsolution:
 
                 # sort the CH3CH1_hsqc_df_lessthan_67 by f1_ppm
                 CH3CH1_hsqc_df_lessthan_67 = CH3CH1_hsqc_df_lessthan_67.sort_values(
-                    by=["f1_ppm"]
+                    by=[g.F1_PPM]
                 )
                 CH3CH1_mol_df_lessthan_67 = CH3CH1_mol_df_lessthan_67.sort_values(
-                    by=["ppm"]
+                    by=[g.PPM]
                 )
                 CH3CH1_sym_mol_df_lessthan_67 = CH3CH1_sym_mol_df[
-                    CH3CH1_sym_mol_df.ppm < CH1_CH3_PPM_BOUNDARY
-                ].sort_values(by=["ppm"])
+                    CH3CH1_sym_mol_df.ppm < g.CH1_CH3_PPM_BOUNDARY
+                ].sort_values(by=[g.PPM])
 
                 mol_idx = CH3CH1_mol_df_lessthan_67.index
                 mol_sym_idx = CH3CH1_sym_mol_df_lessthan_67.index
                 hsqc_idx = CH3CH1_hsqc_df_lessthan_67.index
 
                 if len(hsqc_idx) == len(mol_idx):
-                    hsqc.loc[hsqc_idx, "numProtons"] = CH3CH1_mol_df_lessthan_67.loc[
-                        mol_idx, "numProtons"
+                    hsqc.loc[hsqc_idx, g.NUMPROTONS] = CH3CH1_mol_df_lessthan_67.loc[
+                        mol_idx, g.NUMPROTONS
                     ].values
-                    hsqc.loc[hsqc.numProtons == 3, "CH3"] = True
-                    hsqc.loc[hsqc.numProtons == 1, "CH1"] = True
+                    hsqc.loc[hsqc[g.NUMPROTONS] == 3, g.CH3] = True
+                    hsqc.loc[hsqc[g.NUMPROTONS] == 1, g.CH1] = True
                 elif len(hsqc_idx) == len(mol_sym_idx):
-                    hsqc.loc[hsqc_idx, "numProtons"] = CH3CH1_mol_df_lessthan_67.loc[
-                        mol_sym_idx, "numProtons"
+                    hsqc.loc[hsqc_idx, g.NUMPROTONS] = CH3CH1_mol_df_lessthan_67.loc[
+                        mol_sym_idx, g.NUMPROTONS
                     ].values
-                    hsqc.loc[hsqc.numProtons == 3, "CH3"] = True
-                    hsqc.loc[hsqc.numProtons == 1, "CH1"] = True
+                    hsqc.loc[hsqc[g.NUMPROTONS] == 3, g.CH3] = True
+                    hsqc.loc[hsqc[g.NUMPROTONS] == 1, g.CH1] = True
                 else:
                     self.fail("CH3/CH1 assignment failed: HSQC counts do not match expected molecule")
 
@@ -1814,15 +1819,15 @@ class NMRsolution:
                 for idx, row in CH3CH1_hsqc_df.iterrows():
                     # find the closest match in the CH3CH1_mol_df
                     closest_match = CH3CH1_mol_df.iloc[
-                        (CH3CH1_mol_df["ppm"] - row.f1_ppm).abs().argsort()[:1]
+                        (CH3CH1_mol_df[g.PPM] - row.f1_ppm).abs().argsort()[:1]
                     ]
                     if not closest_match.empty:
                         # update the hsqc dataframe with the closest match
-                        hsqc.loc[row.name, "numProtons"] = (
+                        hsqc.loc[row.name, g.NUMPROTONS] = (
                             closest_match.totalNumHs.values[0]
                         )
-                        hsqc.loc[row.name, "CH3"] = closest_match.CH3.values[0]
-                        hsqc.loc[row.name, "CH1"] = closest_match.CH1.values[0]
+                        hsqc.loc[row.name, g.CH3] = closest_match.CH3.values[0]
+                        hsqc.loc[row.name, g.CH1] = closest_match.CH1.values[0]
                         # mark the closest match as picked in the CH3CH1_mol_df
 
                         CH3CH1_mol_df.loc[closest_match.index, "picked"] = True
@@ -1834,15 +1839,15 @@ class NMRsolution:
 
         if not self.nmrsolution_failed:
             # updated integral and f2_integral columns based on numProtons
-            hsqc["integral"] = hsqc["numProtons"]
-            hsqc["f2_integral"] = hsqc["numProtons"]
-            hsqc["attached_protons"] = hsqc["numProtons"]
+            hsqc[g.INTEGRAL] = hsqc[g.NUMPROTONS]
+            hsqc[g.F2_INTEGRAL] = hsqc[g.NUMPROTONS]
+            hsqc[g.ATTACHED_PROTONS] = hsqc[g.NUMPROTONS]
             # set the integral to negative if CH2 columns is True
-            hsqc.loc[hsqc.CH2, "integral"] = (
-                np.abs(hsqc.loc[hsqc.CH2, "integral"].values) * -1
+            hsqc.loc[hsqc[g.CH2], g.INTEGRAL] = (
+                np.abs(hsqc.loc[hsqc[g.CH2], g.INTEGRAL].values) * -1
             )
-            hsqc.loc[hsqc.CH2, "f2_integral"] = (
-                np.abs(hsqc.loc[hsqc.CH2, "f2_integral"].values) * -1
+            hsqc.loc[hsqc[g.CH2], g.F2_INTEGRAL] = (
+                np.abs(hsqc.loc[hsqc[g.CH2], g.F2_INTEGRAL].values) * -1
             )
 
     def assign_CH3_CH1_in_HSQC_using_H1(self) -> None:
@@ -1867,26 +1872,26 @@ class NMRsolution:
                 hsqc_rows = hsqc[hsqc.f2_ppm == row.ppm]
                 if hsqc_rows.shape[0] == 1:
                     idx = hsqc_rows.index[0]
-                    hsqc.loc[idx, "CH3"] = True
-                    hsqc.loc[idx, "numProtons"] = 3
+                    hsqc.loc[idx, g.CH3] = True
+                    hsqc.loc[idx, g.NUMPROTONS] = 3
                 else:
                     self.fail("Unexpected state while assigning HSQC CH3 protons using H1 data source")
 
             # now assign the rest of the -1 numProtons in HSQC to 1 and update CH1 flag in HSQC
-            hsqc.loc[hsqc.numProtons == -1, "numProtons"] = 1
-            hsqc.loc[hsqc.numProtons == 1, "CH1"] = True
+            hsqc.loc[hsqc[g.NUMPROTONS] == -1, g.NUMPROTONS] = 1
+            hsqc.loc[hsqc[g.NUMPROTONS] == 1, g.CH1] = True
 
-        hsqc["attached_protons"] = hsqc["numProtons"]
-        hsqc["f2_integral"] = hsqc["numProtons"]
-        hsqc["integral"] = hsqc["numProtons"]
+        hsqc[g.ATTACHED_PROTONS] = hsqc[g.NUMPROTONS]
+        hsqc[g.F2_INTEGRAL] = hsqc[g.NUMPROTONS]
+        hsqc[g.INTEGRAL] = hsqc[g.NUMPROTONS]
         #  set the integral to negative if CH2 columns is True
-        hsqc.loc[hsqc.CH2, "integral"] = (
-            np.abs(hsqc.loc[hsqc.CH2, "integral"].values) * -1
+        # set the integral to negative if CH2 columns is True
+        hsqc.loc[hsqc[g.CH2], g.INTEGRAL] = (
+            np.abs(hsqc.loc[hsqc[g.CH2], g.INTEGRAL].values) * -1
         )
-        hsqc.loc[hsqc.CH2, "f2_integral"] = (
-            np.abs(hsqc.loc[hsqc.CH2, "f2_integral"].values) * -1
+        hsqc.loc[hsqc[g.CH2], g.F2_INTEGRAL] = (
+            np.abs(hsqc.loc[hsqc[g.CH2], g.F2_INTEGRAL].values) * -1
         )
-
     def assign_CH3_CH2_CH1_in_HSQC_using_Assignments(self) -> None:
         """
         Assigns CH3, CH2, and CH1 group information in the HSQC DataFrame using the Annotation column.
@@ -1897,37 +1902,37 @@ class NMRsolution:
 
         hsqc = self.hsqc
 
-        hsqc["numProtons"] = -1
+        hsqc[g.NUMPROTONS] = -1
 
         #  check if all Assignments in the column are "" then just return
 
         # set column CH2 to True if intensity < 0
-        hsqc.loc[hsqc.intensity < 0, "CH2"] = True
+        hsqc.loc[hsqc.intensity < 0, g.CH2] = True
 
-        hsqc.loc[hsqc["Annotation"] == "CH3", "CH3"] = True
-        hsqc.loc[hsqc["Annotation"] == "CH2", "CH2"] = True
-        hsqc.loc[hsqc["Annotation"] == "CH1", "CH1"] = True
+        hsqc.loc[hsqc["Annotation"] == g.CH3, g.CH3] = True
+        hsqc.loc[hsqc["Annotation"] == g.CH2, g.CH2] = True
+        hsqc.loc[hsqc["Annotation"] == g.CH1, g.CH1] = True
 
         # set CH3CH1 to true for all other rows
-        hsqc.loc[hsqc.CH2 == False, "CH3CH1"] = True
+        hsqc.loc[hsqc[g.CH2] == False, g.CH3CH1] = True
 
-        hsqc.loc[hsqc.CH3, "numProtons"] = 3
-        hsqc.loc[hsqc.CH2, "numProtons"] = 2
-        hsqc.loc[hsqc.CH1, "numProtons"] = 1
+        hsqc.loc[hsqc[g.CH3], g.NUMPROTONS] = 3
+        hsqc.loc[hsqc[g.CH2], g.NUMPROTONS] = 2
+        hsqc.loc[hsqc[g.CH1], g.NUMPROTONS] = 1
 
         # set the integral, attached_protons and f2_integral
-        hsqc["f2_integral"] = hsqc["numProtons"]
-        hsqc["integral"] = hsqc["numProtons"]
-        hsqc["attached_protons"] = hsqc["numProtons"]
-        hsqc["f2_integral"] = hsqc["numProtons"]
-        hsqc["integral"] = hsqc["numProtons"]
+        hsqc[g.F2_INTEGRAL] = hsqc[g.NUMPROTONS]
+        hsqc[g.INTEGRAL] = hsqc[g.NUMPROTONS]
+        hsqc[g.ATTACHED_PROTONS] = hsqc[g.NUMPROTONS]
+        hsqc[g.F2_INTEGRAL] = hsqc[g.NUMPROTONS]
+        hsqc[g.INTEGRAL] = hsqc[g.NUMPROTONS]
 
         #  set the integral to negative if CH2 columns is True
-        hsqc.loc[hsqc.CH2, "integral"] = (
-            np.abs(hsqc.loc[hsqc.CH2, "integral"].values) * -1
+        hsqc.loc[hsqc[g.CH2], g.INTEGRAL] = (
+            np.abs(hsqc.loc[hsqc[g.CH2], g.INTEGRAL].values) * -1
         )
-        hsqc.loc[hsqc.CH2, "f2_integral"] = (
-            np.abs(hsqc.loc[hsqc.CH2, "f2_integral"].values) * -1
+        hsqc.loc[hsqc[g.CH2], g.F2_INTEGRAL] = (
+            np.abs(hsqc.loc[hsqc[g.CH2], g.F2_INTEGRAL].values) * -1
         )
 
     def assign_CH3_CH2_CH1_in_HSQC_using_DoubleDept(self) -> None:
@@ -1943,10 +1948,10 @@ class NMRsolution:
 
         ddept_ch3_only_df = self.ddept_ch3_only_df
 
-        hsqc["numProtons"] = -1
+        hsqc[g.NUMPROTONS] = -1
 
         # set CH3CH1 for all other rows
-        hsqc.loc[hsqc.CH2 == False, "CH3CH1"] = True
+        hsqc.loc[hsqc[g.CH2] == False, g.CH3CH1] = True
 
         # if ddept_ch3_only not empty set CH3 based on f1_ppm values closest to hsqc f1_ppm values
         if not ddept_ch3_only_df.empty:
@@ -1956,36 +1961,36 @@ class NMRsolution:
             for idx, ppm in zip(ddept_ch3_only_df.index, ddept_ch3_only_df.f1_ppm):
                 # find the closest match in the hsqc dataframe
                 closest_match = hsqc_CH3.iloc[
-                    (hsqc_CH3["f1_ppm"] - ppm).abs().argsort()[:1]
+                    (hsqc_CH3[g.F1_PPM] - ppm).abs().argsort()[:1]
                 ]
-                ddept_ch3_only_df.loc[idx, "CH3"] = True
-                hsqc.loc[closest_match.index, "CH3"] = True
+                ddept_ch3_only_df.loc[idx, g.CH3] = True
+                hsqc.loc[closest_match.index, g.CH3] = True
                 # remove row from hsqc_CH3
                 hsqc_CH3.drop(closest_match.index, inplace=True)
 
             # set CH1 based on CH3 values and CH3CH1 values
-            CH3CH1_hsqc_df = hsqc[hsqc.CH3CH1]
-            CH1_hsqc_df = CH3CH1_hsqc_df[~CH3CH1_hsqc_df.CH3]
-            hsqc.loc[CH1_hsqc_df.index, "CH1"] = True
+            CH3CH1_hsqc_df = hsqc[hsqc[g.CH3CH1]]
+            CH1_hsqc_df = CH3CH1_hsqc_df[~CH3CH1_hsqc_df[g.CH3]]
+            hsqc.loc[CH1_hsqc_df.index, g.CH1] = True
 
         # set the numprotons for CH3 CH2 and CH1 of self.hsqc
-        hsqc.loc[hsqc.CH3, "numProtons"] = 3
-        hsqc.loc[hsqc.CH2, "numProtons"] = 2
-        hsqc.loc[hsqc.CH1, "numProtons"] = 1
+        hsqc.loc[hsqc[g.CH3], g.NUMPROTONS] = 3
+        hsqc.loc[hsqc[g.CH2], g.NUMPROTONS] = 2
+        hsqc.loc[hsqc[g.CH1], g.NUMPROTONS] = 1
 
         # set the integral, attached_protons and f2_integral
-        hsqc["f2_integral"] = hsqc["numProtons"]
-        hsqc["integral"] = hsqc["numProtons"]
-        hsqc["attached_protons"] = hsqc["numProtons"]
-        hsqc["f2_integral"] = hsqc["numProtons"]
-        hsqc["integral"] = hsqc["numProtons"]
+        hsqc[g.F2_INTEGRAL] = hsqc[g.NUMPROTONS]
+        hsqc[g.INTEGRAL] = hsqc[g.NUMPROTONS]
+        hsqc[g.ATTACHED_PROTONS] = hsqc[g.NUMPROTONS]
+        hsqc[g.F2_INTEGRAL] = hsqc[g.NUMPROTONS]
+        hsqc[g.INTEGRAL] = hsqc[g.NUMPROTONS]
 
         #  set the integral to negative if CH2 columns is True
-        hsqc.loc[hsqc.CH2, "integral"] = (
-            np.abs(hsqc.loc[hsqc.CH2, "integral"].values) * -1
+        hsqc.loc[hsqc[g.CH2], g.INTEGRAL] = (
+            np.abs(hsqc.loc[hsqc[g.CH2], g.INTEGRAL].values) * -1
         )
-        hsqc.loc[hsqc.CH2, "f2_integral"] = (
-            np.abs(hsqc.loc[hsqc.CH2, "f2_integral"].values) * -1
+        hsqc.loc[hsqc[g.CH2], g.F2_INTEGRAL] = (
+            np.abs(hsqc.loc[hsqc[g.CH2], g.F2_INTEGRAL].values) * -1
         )
 
     def init_class_from_json(self) -> Union[Tuple[bool, str], Tuple[bool, str, int]]:
@@ -2023,12 +2028,12 @@ class NMRsolution:
             return False, return_message, self.nmrsolution_error_code
 
         # find CH2 groups in hsqc_df
-        self.hsqc.loc[self.hsqc.intensity < 0, "CH2"] = True
+        self.hsqc.loc[self.hsqc.intensity < 0, g.CH2] = True
         unique_idxs, unique_ch2s = self.find_and_group_CH2s(self.hsqc)
 
         # replace hsqc CH2 values in f1_ppm of HSQC
         for idx, ch2 in zip(unique_idxs, unique_ch2s):
-            self.hsqc.loc[idx, "f1_ppm"] = np.mean(ch2)
+            self.hsqc.loc[idx, g.F1_PPM] = np.mean(ch2)
 
         # count how many unique CH2 groups are in the hsqc dataframe
         # create missing dataframes
@@ -2072,7 +2077,7 @@ class NMRsolution:
         self.hsqc["f2Cp_i"] = ""
         self.hsqc["f2p_ppm"] = 0.0
 
-        self.hmbc = self.hmbc_df[["f1_ppm", "f2_ppm", "intensity"]].copy()
+        self.hmbc = self.hmbc_df[[g.F1_PPM, g.F2_PPM, g.INTENSITY]].copy()
         self.hmbc["f2p_ppm"] = 0.0
         self.hmbc["f1_i"] = 0
         self.hmbc["f2_i"] = 0
@@ -2080,7 +2085,7 @@ class NMRsolution:
 
         self.pureshift = self.pureshift_df.copy()
 
-        self.cosy = self.cosy_df[["f1_ppm", "f2_ppm", "intensity"]].copy()
+        self.cosy = self.cosy_df[[g.F1_PPM, g.F2_PPM, g.INTENSITY]].copy()
         self.cosy = self.cosy.assign(f1_i=lambda x: 0)
         self.cosy = self.cosy.assign(f1p_i=lambda x: 0)
         self.cosy = self.cosy.assign(f2_i=lambda x: 0)
@@ -2097,10 +2102,10 @@ class NMRsolution:
 
         self.c13["max_bonds"] = 4
 
-        self.h1["integral"] = self.h1_df["integral"]
-        self.h1["numProtons"] = self.h1_df["numProtons"]
-        self.h1["jCouplingClass"] = self.h1_df["jCouplingClass"]
-        self.h1["jCouplingVals"] = self.h1_df["jCouplingVals"]
+        self.h1[g.INTEGRAL] = self.h1_df[g.INTEGRAL]
+        self.h1[g.NUMPROTONS] = self.h1_df[g.NUMPROTONS]
+        self.h1[g.J_COUPLING_CLASS] = self.h1_df[g.J_COUPLING_CLASS]
+        self.h1[g.J_COUPLING_VALS] = self.h1_df[g.J_COUPLING_VALS]
         # self.h1["range"] = self.h1_df["range"]
         # tidy up chemical shift values by replacing cosy, hsqc and hmbc picked peaks with values from c13ppm and h1ppm dataframes
 
@@ -2109,18 +2114,18 @@ class NMRsolution:
             self.hmbc = self.snap(
                 self.hmbc,
                 self.c13.ppm.tolist(),
-                "f1_ppm",
+                g.F1_PPM,
                 self.problemdata_json.carbonSeparation,
             )
             self.hmbc = self.snap(
                 self.hmbc,
                 self.h1.ppm.tolist(),
-                "f2_ppm",
+                g.F2_PPM,
                 self.problemdata_json.protonSeparation,
             )
 
-            self.hmbc.drop(self.hmbc[self.hmbc.f1_ppm_prob == 0].index, inplace=True)
-            self.hmbc.drop(self.hmbc[self.hmbc.f2_ppm_prob == 0].index, inplace=True)
+            self.hmbc.drop(self.hmbc[self.hmbc[g.F1_PPM + "_prob"] == 0].index, inplace=True)
+            self.hmbc.drop(self.hmbc[self.hmbc[g.F2_PPM + "_prob"] == 0].index, inplace=True)
 
 
 
@@ -2129,13 +2134,13 @@ class NMRsolution:
             self.hsqc = self.snap(
                 self.hsqc,
                 self.c13.ppm.tolist(),
-                "f1_ppm",
+                g.F1_PPM,
                 self.problemdata_json.carbonSeparation,
             )
             self.hsqc = self.snap(
                 self.hsqc,
                 self.h1.ppm.tolist(),
-                "f2_ppm",
+                g.F2_PPM,
                 self.problemdata_json.protonSeparation,
             )
 
@@ -2143,13 +2148,13 @@ class NMRsolution:
             self.cosy = self.snap(
                 self.cosy,
                 self.h1.ppm.tolist(),
-                "f1_ppm",
+                g.F1_PPM,
                 self.problemdata_json.protonSeparation,
             )
             self.cosy = self.snap(
                 self.cosy,
                 self.h1.ppm.tolist(),
-                "f2_ppm",
+                g.F2_PPM,
                 self.problemdata_json.protonSeparation,
             )
 
@@ -2197,19 +2202,19 @@ class NMRsolution:
         # add index columns to hsqc
         for i in self.hsqc.index:
             logger.debug(f"Indexing HSQC row: {i}")
-            self.hsqc.loc[i, "f2_i"] = self.H1ppmH1index[self.hsqc.loc[i, "f2_ppm"]]
-            self.hsqc.loc[i, "f2H_i"] = self.H1ppmH1label[self.hsqc.loc[i, "f2_ppm"]]
-            self.hsqc.loc[i, "f1_i"] = self.C13ppmC13index[self.hsqc.loc[i, "f1_ppm"]]
-            self.hsqc.loc[i, "f1C_i"] = self.C13ppmC13label[self.hsqc.loc[i, "f1_ppm"]]
-            self.hsqc.loc[i, "f2Cp_i"] = self.C13ppmC13label[self.hsqc.loc[i, "f1_ppm"]]
+            self.hsqc.loc[i, "f2_i"] = self.H1ppmH1index[self.hsqc.loc[i, g.F2_PPM]]
+            self.hsqc.loc[i, "f2H_i"] = self.H1ppmH1label[self.hsqc.loc[i, g.F2_PPM]]
+            self.hsqc.loc[i, "f1_i"] = self.C13ppmC13index[self.hsqc.loc[i, g.F1_PPM]]
+            self.hsqc.loc[i, "f1C_i"] = self.C13ppmC13label[self.hsqc.loc[i, g.F1_PPM]]
+            self.hsqc.loc[i, "f2Cp_i"] = self.C13ppmC13label[self.hsqc.loc[i, g.F1_PPM]]
 
         self.hsqc["f2p_i"] = self.hsqc["f1_i"]
-        self.hsqc["f2p_ppm"] = self.hsqc["f1_ppm"]
+        self.hsqc["f2p_ppm"] = self.hsqc[g.F1_PPM]
 
         # add lookup dicts for hsqc
-        self.hsqcH1ppmC13index = dict(zip(self.hsqc.f2_ppm, self.hsqc.f2p_i))
-        self.hsqcH1ppmC13label = dict(zip(self.hsqc.f2_ppm, self.hsqc.f2Cp_i))
-        self.hsqcH1ppmC13ppm = dict(zip(self.hsqc.f2_ppm, self.hsqc.f2p_ppm))
+        self.hsqcH1ppmC13index = dict(zip(self.hsqc[g.F2_PPM], self.hsqc.f2p_i))
+        self.hsqcH1ppmC13label = dict(zip(self.hsqc[g.F2_PPM], self.hsqc.f2Cp_i))
+        self.hsqcH1ppmC13ppm = dict(zip(self.hsqc[g.F2_PPM], self.hsqc.f2p_ppm))
 
         self.hsqcH1indexC13index = dict(zip(self.hsqc.f2_i, self.hsqc.f2p_i))
         self.hsqcH1indexC13ppm = dict(zip(self.hsqc.f2_i, self.hsqc.f2p_ppm))
@@ -2217,7 +2222,7 @@ class NMRsolution:
 
         self.hsqcH1labelC13label = dict(zip(self.hsqc.f2H_i, self.hsqc.f1C_i))
         self.hsqcH1labelC13index = dict(zip(self.hsqc.f2H_i, self.hsqc.f1_i))
-        self.hsqcH1labelC13ppm = dict(zip(self.hsqc.f2H_i, self.hsqc.f1_ppm))
+        self.hsqcH1labelC13ppm = dict(zip(self.hsqc.f2H_i, self.hsqc[g.F1_PPM]))
 
         if not self.exact_ppm_values:
             # Snap ppm values and add index columns for downstream edge building
@@ -2238,14 +2243,14 @@ class NMRsolution:
         if not self.exact_ppm_values:
             self.ddept_ch3_only = self.snap(
                 self.ddept_ch3_only,
-                self.c13["ppm"],
-                "f1_ppm",
+                self.c13[g.PPM],
+                g.F1_PPM,
                 self.problemdata_json.carbonSeparation,
             )
             self.ddept_ch3_only = self.snap(
                 self.ddept_ch3_only,
-                self.h1["ppm"],
-                "f2_ppm",
+                self.h1[g.PPM],
+                g.F2_PPM,
                 self.problemdata_json.protonSeparation,
             )
 
@@ -2310,25 +2315,25 @@ class NMRsolution:
                 f"hsqc_C13={self.hsqcH1ppmC13ppm.get(self.hmbc.loc[i, 'f2_ppm'])}"
             )
             self.hmbc.loc[i, "f2p_ppm"] = float(
-                self.hsqcH1ppmC13ppm.get(self.hmbc.loc[i, "f2_ppm"])
+                self.hsqcH1ppmC13ppm.get(self.hmbc.loc[i, g.F2_PPM])
             )
             self.hmbc.loc[i, "f2p_i"] = int(
-                self.hsqcH1ppmC13index.get(self.hmbc.loc[i, "f2_ppm"])
+                self.hsqcH1ppmC13index.get(self.hmbc.loc[i, g.F2_PPM])
             )
 
-            self.hmbc.loc[i, "f2_i"] = self.H1ppmH1index.get(self.hmbc.loc[i, "f2_ppm"])
+            self.hmbc.loc[i, "f2_i"] = self.H1ppmH1index.get(self.hmbc.loc[i, g.F2_PPM])
             self.hmbc.loc[i, "f1_i"] = self.C13ppmC13index.get(
-                self.hmbc.loc[i, "f1_ppm"]
+                self.hmbc.loc[i, g.F1_PPM]
             )
 
             self.hmbc.loc[i, "f1C_i"] = self.C13ppmC13label.get(
-                self.hmbc.loc[i, "f1_ppm"]
+                self.hmbc.loc[i, g.F1_PPM]
             )
             self.hmbc.loc[i, "f2H_i"] = self.H1ppmH1label.get(
-                self.hmbc.loc[i, "f2_ppm"]
+                self.hmbc.loc[i, g.F2_PPM]
             )
             self.hmbc.loc[i, "f2Cp_i"] = self.hsqcH1ppmC13label.get(
-                self.hmbc.loc[i, "f2_ppm"]
+                self.hmbc.loc[i, g.F2_PPM]
             )
 
         # add f1p_ppm and f1p_i columns to self.h1 based on hsqc dataframe
@@ -2336,16 +2341,16 @@ class NMRsolution:
         self.h1["f1p_i"] = -1
 
         for i in self.h1.index:
-            f2_ppm = self.h1.loc[i, "ppm"]
+            f2_ppm = self.h1.loc[i, g.PPM]
             if self.hsqc[self.hsqc.f2_ppm == f2_ppm].empty:
                 self.h1.loc[i, "f1p_ppm"] = -1e6
                 self.h1.loc[i, "f1p_i"] = -1
                 break
 
             self.h1.loc[i, "f1p_ppm"] = self.hsqc[
-                self.hsqc.f2_ppm == f2_ppm
+                self.hsqc[g.F2_PPM] == f2_ppm
             ].f1_ppm.values[0]
-            self.h1.loc[i, "f1p_i"] = self.hsqc[self.hsqc.f2_ppm == f2_ppm].f1_i.values[
+            self.h1.loc[i, "f1p_i"] = self.hsqc[self.hsqc[g.F2_PPM] == f2_ppm].f1_i.values[
                 0
             ]
 
@@ -2383,7 +2388,7 @@ class NMRsolution:
         cosy_all = pd.concat(frames, axis=0, ignore_index=True)
 
         # Remove duplicate rows
-        cosy_all = cosy_all.drop_duplicates(subset=["f1_ppm", "f2_ppm"], keep="first")
+        cosy_all = cosy_all.drop_duplicates(subset=[g.F1_PPM, g.F2_PPM], keep="first")
 
         return cosy_all
 
@@ -2413,11 +2418,11 @@ class NMRsolution:
 
         df["f1C_i"] = ""
         df["f2Cp_i"] = ""
-        df["integral"] = 3
-        df["numProtons"] = 3
-        df["CH3"] = True
-        df["CH3CH1"] = True
-        df["CH2"] = False
+        df[g.INTEGRAL] = 3
+        df[g.NUMPROTONS] = 3
+        df[g.CH3] = True
+        df[g.CH3CH1] = True
+        df[g.CH2] = False
 
         for f2_ppm, f1_ppm, f2p_ppm, f2p_i, f1_i, f2_i in zip(
             hsqc.f2_ppm, hsqc.f1_ppm, hsqc.f2p_ppm, hsqc.f2p_i, hsqc.f1_i, hsqc.f2_i
@@ -2461,14 +2466,14 @@ class NMRsolution:
             # Tidy up ppm values
             hsqc_clipcosy = self.snap(
                 hsqc_clipcosy,
-                c13["ppm"],
-                "f1_ppm",
+                c13[g.PPM],
+                g.F1_PPM,
                 self.problemdata_json.carbonSeparation,
             )
             hsqc_clipcosy = self.snap(
                 hsqc_clipcosy,
-                h1["ppm"],
-                "f2_ppm",
+                h1[g.PPM],
+                g.F2_PPM,
                 self.problemdata_json.protonSeparation,
             )
 
@@ -2507,22 +2512,22 @@ class NMRsolution:
         # df["signaltype"] = "compound"
 
         # copy f1_ppm column to f1p_ppm
-        df["f1p_ppm"] = df["f1_ppm"]
+        df["f1p_ppm"] = df[g.F1_PPM]
 
         for f2_ppm, f1_ppm, f2p_ppm, f2p_i, f1_i, f2_i in zip(
             hsqc.f2_ppm, hsqc.f1_ppm, hsqc.f2p_ppm, hsqc.f2p_i, hsqc.f1_i, hsqc.f2_i
         ):
-            df.loc[df.f1_ppm == f1_ppm, "f1_ppm"] = f2_ppm
-            df.loc[df.f2_ppm == f2_ppm, "f2_i"] = f2_i
-            df.loc[df.f2_ppm == f2_ppm, "f2p_i"] = f2p_i
-            df.loc[df.f2_ppm == f2_ppm, "f2p_ppm"] = f2p_ppm
-            df.loc[df.f2_ppm == f2_ppm, "f2Cp_i"] = f"C{f2p_i}"
-            df.loc[df.f2_ppm == f2_ppm, "f2H_i"] = f"H{f2_i}"
+            df.loc[df[g.F1_PPM] == f1_ppm, g.F1_PPM] = f2_ppm
+            df.loc[df[g.F2_PPM] == f2_ppm, "f2_i"] = f2_i
+            df.loc[df[g.F2_PPM] == f2_ppm, "f2p_i"] = f2p_i
+            df.loc[df[g.F2_PPM] == f2_ppm, "f2p_ppm"] = f2p_ppm
+            df.loc[df[g.F2_PPM] == f2_ppm, "f2Cp_i"] = f"C{f2p_i}"
+            df.loc[df[g.F2_PPM] == f2_ppm, "f2H_i"] = f"H{f2_i}"
 
-            df.loc[df.f1_ppm == f2_ppm, "f1_i"] = f2_i
-            df.loc[df.f1_ppm == f2_ppm, "f1p_i"] = f2p_i
-            df.loc[df.f1_ppm == f2_ppm, "f1H_i"] = f"H{f2_i}"
-            df.loc[df.f1_ppm == f2_ppm, "f1Cp_i"] = f"C{f2p_i}"
+            df.loc[df[g.F1_PPM] == f2_ppm, "f1_i"] = f2_i
+            df.loc[df[g.F1_PPM] == f2_ppm, "f1p_i"] = f2p_i
+            df.loc[df[g.F1_PPM] == f2_ppm, "f1H_i"] = f"H{f2_i}"
+            df.loc[df[g.F1_PPM] == f2_ppm, "f1Cp_i"] = f"C{f2p_i}"
 
         return df
 
@@ -2605,51 +2610,51 @@ def copy_over_values_c13_all_to_hetero2D(
 
     if df.empty:
         columns = list(df.columns)
-        columns.append("f1_atom_idx")
-        columns.append("f1_sym_atom_idx")
-        columns.append("f1_atomNumber")
-        columns.append("f1_sym_atomNumber")
-        columns.append("f1_x")
-        columns.append("f1_y")
-        columns.append("f2_atom_idx")
-        columns.append("f2_sym_atom_idx")
-        columns.append("f2_atomNumber")
-        columns.append("f2_sym_atomNumber")
-        columns.append("f2_x")
-        columns.append("f2_y")
+        columns.append(g.F1_ATOMIDX)
+        columns.append(g.F1_SYM_ATOMIDX)
+        columns.append(g.F1_ATOMNUMBER)
+        columns.append(g.F1_SYM_ATOMNUMBER)
+        columns.append(g.F1_X)
+        columns.append(g.F1_Y)
+        columns.append(g.F2_ATOMIDX)
+        columns.append(g.F2_SYM_ATOMIDX)
+        columns.append(g.F2_ATOMNUMBER)
+        columns.append(g.F2_SYM_ATOMNUMBER)
+        columns.append(g.F2_X)
+        columns.append(g.F2_Y)
         df = pd.DataFrame(columns=columns)
         return df
 
-    df["f1_atom_idx"] = None
-    df["f1_sym_atom_idx"] = None
-    df["f1_atomNumber"] = None
-    df["f1_sym_atomNumber"] = None
-    df["f1_x"] = None
-    df["f1_y"] = None
-    df["f2_atom_idx"] = None
-    df["f2_sym_atom_idx"] = None
-    df["f2_atomNumber"] = None
-    df["f2_sym_atomNumber"] = None
-    df["f2_x"] = None
-    df["f2_y"] = None
+    df[g.F1_ATOMIDX] = None
+    df[g.F1_SYM_ATOMIDX] = None
+    df[g.F1_ATOMNUMBER] = None
+    df[g.F1_SYM_ATOMNUMBER] = None
+    df[g.F1_X] = None
+    df[g.F1_Y] = None
+    df[g.F2_ATOMIDX] = None
+    df[g.F2_SYM_ATOMIDX] = None
+    df[g.F2_ATOMNUMBER] = None
+    df[g.F2_SYM_ATOMNUMBER] = None
+    df[g.F2_X] = None
+    df[g.F2_Y] = None
 
     for idx, row in c13_all.iterrows():
-        c13_ppm = row["ppm"]
-        f1_idx = df[df["f1_ppm"] == c13_ppm].index
+        c13_ppm = row[g.PPM]
+        f1_idx = df[df[g.F1_PPM] == c13_ppm].index
         for ii in f1_idx:
-            df.loc[ii, "f1_atom_idx"] = row["atom_idx"]
-            df.at[ii, "f1_sym_atom_idx"] = row["sym_atom_idx"]
-            df.at[ii, "f1_atomNumber"] = row["atomNumber"]
-            df.at[ii, "f1_x"] = row["x"]
-            df.at[ii, "f1_y"] = row["y"]
+            df.loc[ii, g.F1_ATOMIDX] = row[g.ATOMIDX]
+            df.at[ii, g.F1_SYM_ATOMIDX] = row[g.SYM_ATOMIDX]
+            df.at[ii, g.F1_ATOMNUMBER] = row[g.ATOMNUMBER]
+            df.at[ii, g.F1_X] = row[g.X]
+            df.at[ii, g.F1_Y] = row[g.Y]
 
-        f2p_idx = (df[df["f2p_ppm"] == c13_ppm]).index.tolist()
+        f2p_idx = (df[df[g.F2P_PPM] == c13_ppm]).index.tolist()
         for ii in f2p_idx:
-            df.at[ii, "f2_atom_idx"] = row["atom_idx"]
-            df.at[ii, "f2_sym_atom_idx"] = row["sym_atom_idx"]
-            df.at[ii, "f2_atomNumber"] = row["atomNumber"]
-            df.at[ii, "f2_x"] = row["x"]
-            df.at[ii, "f2_y"] = row["y"]
+            df.at[ii, g.F2_ATOMIDX] = row[g.ATOMIDX]
+            df.at[ii, g.F2_SYM_ATOMIDX] = row[g.SYM_ATOMIDX]
+            df.at[ii, g.F2_ATOMNUMBER] = row[g.ATOMNUMBER]
+            df.at[ii, g.F2_X] = row[g.X]
+            df.at[ii, g.F2_Y] = row[g.Y]
 
     return df
 
@@ -2660,39 +2665,39 @@ def copy_over_values_c13_all_to_homo2D(df, c13_all):
     """
     if df.empty:
         columns = list(df.columns)
-        columns.append("f1_atom_idx")
-        columns.append("f1_asym_tom_idx")
-        columns.append("f1_atomNumber")
-        columns.append("f1_sym_atomNumber")
-        columns.append("f1_x")
-        columns.append("f1_y")
-        columns.append("f2_atom_idx")
-        columns.append("f2_sym_atom_idx")
-        columns.append("f2_atomNumber")
-        columns.append("f2_sym_atomNumber")
-        columns.append("f2_x")
-        columns.append("f2_y")
+        columns.append(g.F1_ATOMIDX)
+        columns.append(g.F1_SYM_ATOMIDX)
+        columns.append(g.F1_ATOMNUMBER)
+        columns.append(g.F1_SYM_ATOMNUMBER)
+        columns.append(g.F1_X)
+        columns.append(g.F1_Y)
+        columns.append(g.F2_ATOMIDX)
+        columns.append(g.F2_SYM_ATOMIDX)
+        columns.append(g.F2_ATOMNUMBER)
+        columns.append(g.F2_SYM_ATOMNUMBER)
+        columns.append(g.F2_X)
+        columns.append(g.F2_Y)
         df = pd.DataFrame(columns=columns)
         return df
     for idx, row in c13_all.iterrows():
-        c13_ppm = row["ppm"]
-        f1_idx = df[df["f1p_ppm"] == c13_ppm].index
+        c13_ppm = row[g.PPM]
+        f1_idx = df[df[g.F1P_PPM] == c13_ppm].index
         for ii in f1_idx:
-            df.at[ii, "f1_atom_idx"] = row["atom_idx"]
-            df.at[ii, "f1_sym_atom_idx"] = row["sym_atom_idx"]
-            df.at[ii, "f1_atomNumber"] = row["atomNumber"]
-            df.at[ii, "f1_sym_atomNumber"] = row["sym_atomNumber"]
-            df.at[ii, "f1_x"] = row["x"]
-            df.at[ii, "f1_y"] = row["y"]
+            df.loc[ii, g.F1_ATOMIDX] = row[g.ATOMIDX]
+            df.loc[ii, g.F1_SYM_ATOMIDX] = row[g.SYM_ATOMIDX]
+            df.loc[ii, g.F1_ATOMNUMBER] = row[g.ATOMNUMBER]
+            df.loc[ii, g.F1_SYM_ATOMNUMBER] = row[g.SYM_ATOMNUMBER]
+            df.loc[ii, g.F1_X] = row[g.X]
+            df.loc[ii, g.F1_Y] = row[g.Y]
 
-        f2p_idx = df[df["f2p_ppm"] == c13_ppm].index
+        f2p_idx = df[df[g.F2P_PPM] == c13_ppm].index
         for ii in f2p_idx:
-            df.at[ii, "f2_atom_idx"] = row["atom_idx"]
-            df.at[ii, "f2_sym_atom_idx"] = row["sym_atom_idx"]
-            df.at[ii, "f2_atomNumber"] = row["atomNumber"]
-            df.at[ii, "f2_sym_atomNumber"] = row["sym_atomNumber"]
-            df.at[ii, "f2_x"] = row["x"]
-            df.at[ii, "f2_y"] = row["y"]
+            df.loc[ii, g.F2_ATOMIDX] = row[g.ATOMIDX]
+            df.loc[ii, g.F2_SYM_ATOMIDX] = row[g.SYM_ATOMIDX]
+            df.loc[ii, g.F2_ATOMNUMBER] = row[g.ATOMNUMBER]
+            df.loc[ii, g.F2_SYM_ATOMNUMBER] = row[g.SYM_ATOMNUMBER]
+            df.loc[ii, g.F2_X] = row[g.X]
+            df.loc[ii, g.F2_Y] = row[g.Y]
 
     return df
 
@@ -2745,25 +2750,25 @@ def create_network_graph(c13: pd.DataFrame, h1: pd.DataFrame) -> nx.Graph:
         # check if the atomNumber is a numeric value string
 
         if isinstance(atomNumber, (int, float)):
-            G2.nodes[idx]["atomNumber"] = int(atomNumber)
+            G2.nodes[idx][g.ATOMNUMBER] = int(atomNumber)
         elif isinstance(atomNumber, str):
             if atomNumber.isnumeric():
-                G2.nodes[idx]["atomNumber"] = int(atomNumber)
+                G2.nodes[idx][g.ATOMNUMBER] = int(atomNumber)
             else:
-                G2.nodes[idx]["atomNumber"] = atomNumber
-        G2.nodes[idx]["ppm"] = ppm
-        G2.nodes[idx]["ppm_calculated"] = ppm_calculated
-        G2.nodes[idx]["numProtons"] = numProtons
-        G2.nodes[idx]["iupacLabel"] = iupacLabel
-        G2.nodes[idx]["jCouplingVals"] = jcouplingVals
-        G2.nodes[idx]["jCouplingClass"] = jcouplingClass
-        G2.nodes[idx]["x"] = x
-        G2.nodes[idx]["y"] = y
+                G2.nodes[idx][g.ATOMNUMBER] = atomNumber
+        G2.nodes[idx][g.PPM] = ppm
+        G2.nodes[idx][g.PPM_CALCULATED] = ppm_calculated
+        G2.nodes[idx][g.NUMPROTONS] = numProtons
+        G2.nodes[idx][g.IUPAC_LABEL] = iupacLabel
+        G2.nodes[idx][g.J_COUPLING_VALS] = jcouplingVals
+        G2.nodes[idx][g.J_COUPLING_CLASS] = jcouplingClass
+        G2.nodes[idx][g.X] = x
+        G2.nodes[idx][g.Y] = y
 
     # Add proton ppm information to the graph nodes
     for c in h1.atom_idx.unique():
         idx = c
-        G2.nodes[idx]["H1_ppm"] = list(h1[h1.atom_idx == c].ppm.values)
+        G2.nodes[idx][g.H1_PPM] = list(h1[h1.atom_idx == c].ppm.values)
 
     return G2
 
@@ -2787,28 +2792,28 @@ def assign_jcouplings(df1: pd.DataFrame, df2: pd.DataFrame) -> pd.DataFrame:
         return df1
 
     # sort the dataframes by ppm in descending order
-    if ("ppm" not in df1.columns) and ("f2_ppm" not in df1.columns):
+    if (g.PPM not in df1.columns) and (g.F2_PPM not in df1.columns):
         return df1
 
-    if ("ppm" not in df2.columns) and ("f2_ppm" not in df2.columns):
+    if (g.PPM not in df2.columns) and (g.F2_PPM not in df2.columns):
         return df1
 
-    if "ppm" in df1.columns:
-        df1 = df1.sort_values(by=["ppm"], ascending=False).reset_index(drop=True)
-    elif "f2_ppm" in df1.columns:
-        df1 = df1.sort_values(by=["f2_ppm"], ascending=False).reset_index(drop=True)
+    if g.PPM in df1.columns:
+        df1 = df1.sort_values(by=[g.PPM], ascending=False).reset_index(drop=True)
+    elif g.F2_PPM in df1.columns:
+        df1 = df1.sort_values(by=[g.F2_PPM], ascending=False).reset_index(drop=True)
 
-    if "ppm" in df2.columns:
-        df2 = df2.sort_values(by=["ppm"], ascending=False).reset_index(drop=True)
-    elif "f2_ppm" in df2.columns:
-        df2 = df2.sort_values(by=["f2_ppm"], ascending=False).reset_index(drop=True)
+    if g.PPM in df2.columns:
+        df2 = df2.sort_values(by=[g.PPM], ascending=False).reset_index(drop=True)
+    elif g.F2_PPM in df2.columns:
+        df2 = df2.sort_values(by=[g.F2_PPM], ascending=False).reset_index(drop=True)
 
-    if "jCouplingVals" not in df2.columns:
-        df1["jCouplingVals"] = ""
-        df1["jCouplingClass"] = ""
+    if g.J_COUPLING_VALS not in df2.columns:
+        df1[g.J_COUPLING_VALS] = ""
+        df1[g.J_COUPLING_CLASS] = ""
     else:
-        df1["jCouplingVals"] = df2["jCouplingVals"].values
-        df1["jCouplingClass"] = df2["jCouplingClass"].values
+        df1[g.J_COUPLING_VALS] = df2[g.J_COUPLING_VALS].values
+        df1[g.J_COUPLING_CLASS] = df2[g.J_COUPLING_CLASS].values
 
     return df1
 
@@ -2828,17 +2833,17 @@ def assign_jcouplings_to_c13(c13: pd.DataFrame, hsqc: pd.DataFrame) -> pd.DataFr
         pd.DataFrame: The updated C13 DataFrame with assigned J-coupling values and classes.
     """
 
-    c13["jCouplingVals"] = ""
-    c13["jCouplingClass"] = ""
+    c13[g.J_COUPLING_CLASS] = ""
+    c13[g.J_COUPLING_VALS] = ""
 
-    if ("jCouplingVals" not in hsqc.columns) or ("jCouplingClass" not in hsqc.columns):
+    if (g.J_COUPLING_VALS not in hsqc.columns) or (g.J_COUPLING_CLASS not in hsqc.columns):
         return c13
     for hsqc_idx, row in hsqc.iterrows():
         # find the row in c13 with the same atom_idx
-        c13_rows = c13[c13.atom_idx == row["f1_atom_idx"]]
+        c13_rows = c13[c13.atom_idx == row[g.F1_ATOMIDX]]
         c13_idx = c13_rows.index
-        c13.loc[c13_idx, "jCouplingVals"] = row["jCouplingVals"]
-        c13.loc[c13_idx, "jCouplingClass"] = row["jCouplingClass"]
+        c13.loc[c13_idx, g.J_COUPLING_VALS] = row[g.J_COUPLING_VALS]
+        c13.loc[c13_idx, g.J_COUPLING_CLASS] = row[g.J_COUPLING_CLASS]
 
     return c13
 
@@ -2987,11 +2992,11 @@ def add_cosy_edges_to_graph(G2: nx.Graph, keep: dict) -> nx.Graph:
             node2 = int(vv[1])
             if G2.has_edge(node1, node2):
                 # set cosy attribute to True
-                G2.get_edge_data(node1, node2)["cosy"] = True
+                G2.get_edge_data(node1, node2)[g.COSY] = True
             else:
                 G2.add_edge(node1, node2)
                 # set cosy attribute to True
-                G2.get_edge_data(node1, node2)["cosy"] = True
+                G2.get_edge_data(node1, node2)[g.COSY] = True
 
     return G2
 
@@ -3018,11 +3023,11 @@ def add_clipcosy_edges_to_graph(G2: nx.Graph, keep: dict) -> nx.Graph:
             node2 = int(vv[1])
             if G2.has_edge(node1, node2):
                 # set cosy attribute to True
-                G2.get_edge_data(node1, node2)["cosy"] = True
+                G2.get_edge_data(node1, node2)[g.COSY] = True
             else:
                 G2.add_edge(node1, node2)
                 # set cosy attribute to True
-                G2.get_edge_data(node1, node2)["cosy"] = True
+                G2.get_edge_data(node1, node2)[g.COSY] = True
 
     return G2
 
