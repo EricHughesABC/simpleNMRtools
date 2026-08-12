@@ -11,6 +11,8 @@ from scipy import stats
 import networkx as nx
 from networkx.readwrite import json_graph
 
+import config.globals as g
+
 
 def _node_link_data(G) -> dict:
     """Version-safe wrapper for json_graph.node_link_data.
@@ -39,10 +41,12 @@ from config.excel_headers import EXCEL_ORIG_DF_COLUMNS as excel_orig_df_columns
 
 from config.globals import SVG_DIMENSIONS as svgDimensions
 
-from config.globals import CARBONSEPARATION
-from config.globals import PROTONSEPARATION
-from config.globals import NMREXPERIMENTS
-from config.globals import NMREXPERIMENTS_COLUMN_RENAME_MAP
+# from config.globals import CARBONSEPARATION
+# from config.globals import PROTONSEPARATION
+# from config.globals import NMREXPERIMENTS
+# from config.globals import NMREXPERIMENTS_COLUMN_RENAME_MAP
+
+import config.globals as g
 
 
 def find_nearest(true_values: list[float], value: float) -> float:
@@ -66,7 +70,7 @@ def find_nearest(true_values: list[float], value: float) -> float:
 
 
 def tidyup_ppm_values(
-    df: pd.DataFrame, true_values: list, column_name: str, ppm_tolerance=0.005
+    df: pd.DataFrame, true_values: list, column_name: str, ppm_tolerance=g.CARBONSEPARATION
 ) -> pd.DataFrame:
     """
     Adjusts the values in a specified column of a DataFrame to their nearest true values and calculates the probability
@@ -126,11 +130,11 @@ def return_nonempty_mnova_datasets(data: dict) -> dict:
 
     dicts_to_keep = {}
     for k, v in data.items():
-        if v["datatype"] == "nmrspectrum":
+        if v[g.DATATYPE] == g.NMRSPECTRUM:
             if (
-                (v["multiplets"]["count"] > 0)
-                or (v["peaks"]["count"] > 0)
-                or (v["integrals"]["count"] > 0)
+                (v[g.MULTIPLETS][g.COUNT] > 0)
+                or (v[g.PEAKS][g.COUNT] > 0)
+                or (v[g.INTEGRALS][g.COUNT] > 0)
             ):
                 dicts_to_keep[k] = v
         else:
@@ -256,7 +260,7 @@ def get_2D_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
 
     df_data = []
 
-    signaltype = "peaks"
+    signaltype = g.PEAKS
 
     df_data = []
     for i in range(json_data[technique][signaltype]["count"]):
@@ -265,11 +269,11 @@ def get_2D_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
             continue
         df_data.append(
             [
-                json_data[technique]["peaks"]["data"][str(i)]["delta2"],
-                json_data[technique]["peaks"]["data"][str(i)]["delta1"],
-                json_data[technique]["peaks"]["data"][str(i)]["intensity"],
-                json_data[technique]["peaks"]["data"][str(i)]["type"],
-                json_data[technique]["peaks"]["data"][str(i)]["annotation"],
+                json_data[technique][g.PEAKS][g.DATA][str(i)][g.DELTA2],
+                json_data[technique][g.PEAKS][g.DATA][str(i)][g.DELTA1],
+                json_data[technique][g.PEAKS][g.DATA][str(i)][g.INTENSITY],
+                json_data[technique][g.PEAKS][g.DATA][str(i)][g.TYPE],
+                json_data[technique][g.PEAKS][g.DATA][str(i)][g.ANNOTATION],
             ]
         )
 
@@ -299,18 +303,18 @@ def get_1d_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
         pd.DataFrame: A DataFrame containing the extracted NMR data, or an empty DataFrame if no data is found.
     """
     df_data = []
-    if json_data[technique]["multiplets"]["count"] == 0:
-        if json_data[technique]["peaks"]["count"] == 0:
+    if json_data[technique][g.MULTIPLETS][g.COUNT] == 0:
+        if json_data[technique][g.PEAKS][g.COUNT] == 0:
             # print(f"no peaks found in {technique}")
             return pd.DataFrame()
         else:
-            pks_data = json_data[technique]["peaks"]["data"]
+            pks_data = json_data[technique][g.PEAKS][g.DATA]
             for pk in pks_data:
                 df_data.append(
                     [
-                        pks_data[pk]["delta1"],
-                        pks_data[pk]["intensity"],
-                        pks_data[pk]["type"],
+                        pks_data[pk][g.DELTA1],
+                        pks_data[pk][g.INTENSITY],
+                        pks_data[pk][g.TYPE],
                     ]
                 )
 
@@ -322,19 +326,19 @@ def get_1d_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
         # find peaks from  from multiplets key
         # Name	Shift	Range	H's	Integral	Class	J's	Method
 
-        count = json_data[technique]["multiplets"]["count"]
-        normValue = json_data[technique]["multiplets"]["normValue"]
+        count = json_data[technique][g.MULTIPLETS][g.COUNT]
+        normValue = json_data[technique][g.MULTIPLETS]["normValue"]
         for i in [str(i) for i in range(count)]:
-            if str(i) in json_data[technique]["multiplets"]["data"]:
+            if str(i) in json_data[technique][g.MULTIPLETS][g.DATA]:
                 row = [
-                    json_data[technique]["multiplets"]["data"][i]["delta1"],
-                    json_data[technique]["multiplets"]["data"][i]["integralValue"],
-                    json_data[technique]["multiplets"]["data"][i]["nH"],
-                    json_data[technique]["multiplets"]["data"][i]["category"],
+                    json_data[technique][g.MULTIPLETS][g.DATA][i][g.DELTA1],
+                    json_data[technique][g.MULTIPLETS][g.DATA][i]["integralValue"],
+                    json_data[technique][g.MULTIPLETS][g.DATA][i]["nH"],
+                    json_data[technique][g.MULTIPLETS][g.DATA][i]["category"],
                 ]
 
                 # create a string from the list of J values and add it to df_data
-                j_values = json_data[technique]["multiplets"]["data"][i]["jvals"]
+                j_values = json_data[technique][g.MULTIPLETS][g.DATA][i]["jvals"]
                 j_string = ", ".join([f"{j:1.3}" for j in j_values])
                 j_string = f"{j_string}"
                 row.append(j_string)
@@ -380,7 +384,7 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
         else:
             k1 = k1[0]
 
-        if k1 in NMREXPERIMENTS:
+        if k1 in g.NMREXPERIMENTS:
             if v["type"].lower() == "2d":
                 df = get_2D_dataframe_from_json(data, k)
                 _dataframes[k] = df
@@ -452,7 +456,7 @@ def create_dataframes_from_mresnova_json(data: dict) -> dict:
 def standardize_column_headings(dataframes: dict):
     for k in dataframes.keys():
         dataframes[k].rename(
-            columns=NMREXPERIMENTS_COLUMN_RENAME_MAP,
+            columns=g.NMREXPERIMENTS_COLUMN_RENAME_MAP,
             inplace=True,
         )
     return dataframes
@@ -460,7 +464,7 @@ def standardize_column_headings(dataframes: dict):
 
 def add_missing_columns_to_nmrExpt_dataframes(dataframes: dict):
 
-    nmrExpts = NMREXPERIMENTS
+    nmrExpts = g.NMREXPERIMENTS
 
     for k in dataframes:
         if k in nmrExpts:
@@ -967,7 +971,7 @@ def combine_multiple_nmrExpt_dataframes(dataframes):
         k1 = nameSplit[0]
         if len(nameSplit) == 2:
             k_number = nameSplit[1]
-        if k1 in NMREXPERIMENTS:
+        if k1 in g.NMREXPERIMENTS:
             if k1 not in nmrExptsDataframes:
                 nmrExptsDataframes[k1] = []
             nmrExptsDataframes[k1].append(v)
@@ -1027,8 +1031,8 @@ class NMRProblem:
         hsqc_H1_pks = self.dataframes["HSQC"].f2_ppm.values
         c13_pks = self.dataframes["C13_1D"].ppm.values
 
-        self.carbonSeparation = CARBONSEPARATION
-        self.protonSeparation = PROTONSEPARATION
+        self.carbonSeparation = g.CARBONSEPARATION
+        self.protonSeparation = g.PROTONSEPARATION
 
         self.exact_ppm_values = self.exact_ppm_values_only()
 

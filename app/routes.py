@@ -41,7 +41,7 @@ bp = Blueprint("main", __name__)
 
 # ── Module-level constants ────────────────────────────────────────────────────
 
-REGISTRATIONTIMEOUT = 1000 * 60 * 60 * 24  # 100 days in seconds
+REGISTRATIONTIMEOUT = 1000 * 60 * 60 * 24  # 1000 days in seconds
 
 # Path to Sphinx-generated HTML docs — project root is one level above app/
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -495,7 +495,7 @@ def simpleMNOVAfinalHTML():
         return jsonify(
             {
                 "status": "unregistered",
-                "registration_url": url_for("registration_page", _external=True)
+                "registration_url": url_for("main.registration_page", _external=True)
                 + f"?hostid={hostname}",
             }
         )
@@ -505,7 +505,7 @@ def simpleMNOVAfinalHTML():
         return jsonify(
             {
                 "status": "registration_expired",
-                "registration_url": url_for("registration_page", _external=True)
+                "registration_url": url_for("main.registration_page", _external=True)
                 + f"?hostid={hostname}"
                 + f"&email={email}",
             }
@@ -603,7 +603,7 @@ def check_machine_learning():
         return jsonify(
             {
                 "status": "unregistered",
-                "registration_url": url_for("registration_page", _external=True)
+                "registration_url": url_for("main.registration_page", _external=True)
                 + f"?hostid={hostname}",
             }
         )
@@ -613,7 +613,7 @@ def check_machine_learning():
         return jsonify(
             {
                 "status": "registration_expired",
-                "registration_url": url_for("registration_page", _external=True)
+                "registration_url": url_for("main.registration_page", _external=True)
                 + f"?hostid={hostname}"
                 + f"&email={email}",
             }
@@ -710,7 +710,7 @@ def simpleMNOVA_display_molecule():
         return jsonify(
             {
                 "status": "unregistered",
-                "registration_url": url_for("registration_page", _external=True)
+                "registration_url": url_for("main.registration_page", _external=True)
                 + f"?hostid={hostname}",
             }
         )
@@ -720,7 +720,7 @@ def simpleMNOVA_display_molecule():
         return jsonify(
             {
                 "status": "registration_expired",
-                "registration_url": url_for("registration_page", _external=True)
+                "registration_url": url_for("main.registration_page", _external=True)
                 + f"?hostid={hostname}"
                 + f"&email={email}",
             }

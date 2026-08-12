@@ -129,6 +129,22 @@ BADREQUEST = 400
 NOTFOUND = 404
 GOODREQUEST = 200
 
+DATATYPE = "datatype"
+MULTIPLETS = "multiplets"
+NMRSPECTRUM = "nmrspectrum"
+PEAKS = "peaks"
+INTEGRALS = "integrals"
+COUNT = "count"
+DATA = "data"
+
+
+DELTA1 = "delta1"
+DELTA2 = "delta2"
+TYPE = "type"
+ANNOTATION = "annotation"
+
+
+
 
 
 # CH3/CH1 split heuristic boundary (ppm)
