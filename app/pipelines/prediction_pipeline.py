@@ -77,8 +77,8 @@ def _build_solution(problemdata_json):
 
     if solution.expected_molecule.nmrshiftdb_failed:
         raise PipelineError(
-            solution.solution_error_message,
-            solution.solution_error_code,
+            solution.nmrshiftdb_error_message,
+            solution.nmrshiftdb_error_code,
         )
 
     ok, msg = solution.init_class_from_json()
@@ -131,8 +131,8 @@ def _build_graph(solution, json_data) -> tuple:
 
     Returns
     -------
-    tuple[dict, dict, dict]
-        ``(jsonGraphData, jsonGraphData_mol, shortest_paths)``
+    tuple[dict, dict, dict, int]
+        ``(jsonGraphData, jsonGraphData_mol, shortest_paths, number_of_hmbc_cosy_subgraphs)``
         where ``jsonGraphData`` is the node-link dict for the NMR graph,
         ``jsonGraphData_mol`` is the node-link dict for the molecule graph,
         and ``shortest_paths`` is the all-pairs Dijkstra path-length dict.
@@ -152,7 +152,19 @@ def _build_graph(solution, json_data) -> tuple:
     jsonGraphData_mol = _node_link_data(solution.molgraph)
     shortest_paths = dict(nx.all_pairs_dijkstra_path_length(solution.molgraph))
 
-    return jsonGraphData, jsonGraphData_mol, shortest_paths
+    if nx.is_connected(G2):
+        number_of_hmbc_cosy_subgraphs = 1
+    else:
+        # find the number of subgraphs
+        number_of_hmbc_cosy_subgraphs = nx.number_connected_components(G2)
+
+    components = list(nx.connected_components(G2))
+    number_of_hmbc_cosy_subgraphs = len(components)
+
+    for i, comp in enumerate(sorted(components, key=len, reverse=True)):
+        print(f"Sub-network {i+1} ({len(comp)} nodes): {sorted(comp)}")
+
+    return jsonGraphData, jsonGraphData_mol, shortest_paths, number_of_hmbc_cosy_subgraphs
 
 
 def _build_catoms_df(solution):
@@ -258,6 +270,7 @@ def _build_jinja_context(
     shortest_paths,
     catoms_df,
     best_results,
+    number_of_hmbc_cosy_subgraphs,
 ) -> dict:
     """Assemble the Jinja2 template context dict from all pipeline outputs.
 
@@ -293,6 +306,7 @@ def _build_jinja_context(
         "dataFrom": dataFrom,
         "oldjsondata": json_data_str,
         "best_results": best_results,
+        "number_of_hmbc_cosy_subgraphs": number_of_hmbc_cosy_subgraphs,
     }
 
 
@@ -333,8 +347,8 @@ def run(problemdata_json, json_data: dict) -> dict:
     _assign_carbons(solution)
     logger.debug("prediction_pipeline: carbons assigned")
 
-    jsonGraphData, jsonGraphData_mol, shortest_paths = _build_graph(solution, json_data)
-    logger.debug("prediction_pipeline: graphs built")
+    jsonGraphData, jsonGraphData_mol, shortest_paths, number_of_hmbc_cosy_subgraphs = _build_graph(solution, json_data)
+    logger.debug(f"prediction_pipeline: graphs built, number_of_hmbc_cosy_subgraphs={number_of_hmbc_cosy_subgraphs}")
 
     catoms_df = _build_catoms_df(solution)
     logger.debug("prediction_pipeline: catoms_df prepared")
@@ -353,6 +367,7 @@ def run(problemdata_json, json_data: dict) -> dict:
         shortest_paths,
         catoms_df,
         best_results,
+        number_of_hmbc_cosy_subgraphs,
     )
     logger.info("prediction_pipeline: complete")
     return context

@@ -790,6 +790,7 @@ def _render_and_save(
         catoms=jinja_template["catoms"],
         oldjsondata=jinja_template["oldjsondata"],
         best_results=jinja_template["best_results"],
+        number_of_hmbc_cosy_subgraphs=jinja_template["number_of_hmbc_cosy_subgraphs"],
     )
 
     rtn_html = rtn_html.replace("True", "true").replace("False", "false")
