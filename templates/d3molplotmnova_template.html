@@ -1713,49 +1713,6 @@ svgDomNode.addEventListener('wheel', (event) => {
 
     }
 
-//    function exportToMnova() {
-//
-//        // jsonFilename uses the module-level workingFilename constant
-//        const jsonFilename = workingFilename + '_assignments_from_simplemnova.json';
-//
-//        var nodes_export = JSON.parse(JSON.stringify(nodes));
-//
-//        // Convert all coordinate arrays to normalised [0,1] space for the JSON export
-//        unscaleNodes(nodes_export);
-//        unscaleNodes(catoms_orig);
-//        unscaleNodes(catoms);
-//        unscaleNodes(nodes_orig);
-//
-//        var nodes_data = {};
-//        nodes_data['nodes_orig']       = catoms_orig;
-//        nodes_data['nodes_now']        = nodes_export;
-//        nodes_data['links']            = links;
-//        nodes_data['smilesString']     = smilesString;
-//        nodes_data['molfile']          = molfile;
-//        nodes_data['dataFrom']         = dataFrom;
-//        nodes_data['oldjsondata']      = oldjsondata;
-//        nodes_data['molgraph']         = molgraph;
-//        nodes_data['shortest_paths']   = shortest_paths;
-//        nodes_data['svg']              = svg_bckgrnd_image_str;
-//        nodes_data['catoms']           = catoms;
-//        nodes_data['catoms_orig']      = catoms_orig;
-//        nodes_data['best_results']     = best_results;
-//        nodes_data['workingDirectory'] = workingDirectory;
-//        nodes_data['workingFilename']  = workingFilename;
-//        nodes_data['title']            = title;
-//
-//        // Trigger download
-//        const data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(nodes_data, null, 2));
-//        const a = document.createElement('a');
-//        a.href = 'data:' + data;
-//        a.download = jsonFilename;
-//        a.click();
-//
-//        // Restore all arrays to viewBox-space coordinates
-//        scaleNodes(catoms_orig);
-//        scaleNodes(catoms);
-//        scaleNodes(nodes_orig);   // was missing — left nodes_orig in normalised space after export
-//    }
 
 async function exportToMnova() {
 
@@ -1785,6 +1742,7 @@ async function exportToMnova() {
     nodes_data['workingDirectory'] = workingDirectory;
     nodes_data['workingFilename']  = workingFilename;
     nodes_data['title']            = title;
+    nodes_data['number_of_hmbc_cosy_subgraphs'] = number_of_hmbc_cosy_subgraphs;   
 
     // Copy working directory to clipboard before opening save dialog
     try {

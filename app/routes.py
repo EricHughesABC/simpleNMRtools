@@ -481,6 +481,7 @@ def simpleMNOVAfinalHTML():
         catoms=json_data["catoms_orig"],
         oldjsondata=json_data["oldjsondata"],
         best_results=json_data["best_results"],
+        number_of_hmbc_cosy_subgraphs=json_data.get("number_of_hmbc_cosy_subgraphs", 'unknown'),
     )
 
     rtn_html = rtn_html.replace("True", "true")
@@ -790,7 +791,7 @@ def _render_and_save(
         catoms=jinja_template["catoms"],
         oldjsondata=jinja_template["oldjsondata"],
         best_results=jinja_template["best_results"],
-        number_of_hmbc_cosy_subgraphs=jinja_template["number_of_hmbc_cosy_subgraphs"],
+        number_of_hmbc_cosy_subgraphs=jinja_template.get("number_of_hmbc_cosy_subgraphs", 'unknown'),
     )
 
     rtn_html = rtn_html.replace("True", "true").replace("False", "false")
