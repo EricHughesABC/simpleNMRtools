@@ -1714,7 +1714,7 @@ svgDomNode.addEventListener('wheel', (event) => {
     }
 
 
-async function exportToMnova() {
+function exportToMnova() {
 
     const jsonFilename = workingFilename + '_assignments_from_simplemnova.json';
 
@@ -1744,16 +1744,18 @@ async function exportToMnova() {
     nodes_data['title']            = title;
     nodes_data['number_of_hmbc_cosy_subgraphs'] = number_of_hmbc_cosy_subgraphs;   
 
-    // Copy working directory to clipboard before opening save dialog
-    try {
-        await navigator.clipboard.writeText(workingDirectory);
+    // Copy working directory to clipboard. Fire-and-forget: do NOT await
+    // this. Some embedding environments (e.g. a QWebEngineView with no
+    // clipboard permission handler wired up) never resolve or reject this
+    // promise, which would otherwise block everything below indefinitely
+    // and silently prevent the export from ever happening.
+    navigator.clipboard.writeText(workingDirectory).then(function () {
         console.log('Working directory copied to clipboard:', workingDirectory);
-    } catch (err) {
-        console.warn('Clipboard write failed:', err);
-        // Non-fatal — continue with download regardless
-    }
+    }).catch(function (err) {
+        console.warn('Clipboard write failed (non-fatal):', err);
+    });
 
-    // Trigger download
+    // Trigger download immediately — no longer gated on the clipboard call above
     const data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(nodes_data, null, 2));
     const a = document.createElement('a');
     a.href = 'data:' + data;
