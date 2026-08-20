@@ -249,7 +249,19 @@ class NMRsolution:
         # in initialise_prior_to_carbon_assignment) to decide whether CH3 and
         # CH1 symmetry classes must be pooled together rather than treated
         # independently -- see that method's pool_ch3_ch1 parameter.
+        #
+        # NOTE: this flag is solution-wide, not per-row. When it's False
+        # because SOME peaks needed the heuristic fallback, that does NOT
+        # mean every row's CH3/CH1 type is a guess -- rows resolved via
+        # Annotations/DoubleDept are still genuine evidence. The per-row
+        # "evidence_based" column (set below and in the Annotations/
+        # DoubleDept steps) tracks that distinction and is what protects
+        # individual annotated rows from being pooled together with
+        # heuristic-derived ones during atom-index matching -- see
+        # attempt_assignment_CH3_CH2_CH1_to_C13_table.
         self.ch3_ch1_evidence_based = True
+        if "evidence_based" not in self.hsqc.columns:
+            self.hsqc["evidence_based"] = False
 
         for name, guard, method in chain:
             if not self._has_unresolved():
@@ -451,6 +463,77 @@ class NMRsolution:
         self.c13[g.F1_PPM] = self.c13[g.PPM]
         self.c13["iupacLabel"] = ""
 
+    def _match_CHn_group(self, df_CHn, c13_CHn):
+        """Match c13_CHn rows to df_CHn candidates by closest ppm, writing
+        atom-index fields into self.c13 in place.
+
+        Handles the two "solvable" cases: equal counts (optimal Hungarian
+        assignment) and fewer c13 rows than candidates (greedy nearest-ppm
+        match, consuming candidates so none is used twice). Raises
+        ValueError if there are more c13 rows than candidates -- callers
+        that can't guarantee this in advance should catch it and fall back
+        to the existing error-table path.
+
+        Returns
+        -------
+        list
+            The ATOMIDX values consumed from df_CHn, so a caller matching
+            multiple groups against a shared candidate pool can exclude
+            them from subsequent matches.
+        """
+        c13 = self.c13
+        consumed_atomidx = []
+
+        if c13_CHn.empty:
+            return consumed_atomidx
+
+        if len(c13_CHn) > len(df_CHn):
+            raise ValueError("more c13 rows than candidate atoms")
+
+        if len(c13_CHn) == len(df_CHn):
+            distance_matrix = np.abs(
+                df_CHn[g.PPM].values[:, np.newaxis] - c13_CHn[g.PPM].values
+            )
+            row_ind, col_ind = linear_sum_assignment(distance_matrix)
+            matches = [
+                (df_CHn.index[i], c13_CHn.index[j])
+                for i, j in zip(row_ind, col_ind)
+            ]
+            for df_idx, c13_idx in matches:
+                c13.at[c13_idx, g.ATOMIDX] = df_CHn.at[df_idx, g.ATOMIDX]
+                c13.at[c13_idx, g.SYM_ATOMIDX] = df_CHn.at[df_idx, g.SYM_ATOMIDX]
+                c13.at[c13_idx, g.ATOMNUMBER] = df_CHn.at[df_idx, g.ATOMNUMBER]
+                c13.at[c13_idx, g.SYM_ATOMNUMBER] = df_CHn.at[
+                    df_idx, g.SYM_ATOMNUMBER
+                ]
+                c13.at[c13_idx, g.X] = df_CHn.at[df_idx, g.X]
+                c13.at[c13_idx, g.Y] = df_CHn.at[df_idx, g.Y]
+                c13.at[c13_idx, g.PPM_CALCULATED] = df_CHn.at[df_idx, g.PPM]
+                consumed_atomidx.append(df_CHn.at[df_idx, g.ATOMIDX])
+        else:
+            nunique_ppm = df_CHn[g.PPM].nunique()
+            working_df_CHn = df_CHn
+            if len(c13_CHn) == nunique_ppm:
+                working_df_CHn = working_df_CHn.drop_duplicates(subset=[g.PPM])
+            for idx, row in c13_CHn.iterrows():
+                ppm = row[g.PPM]
+                mol_row = working_df_CHn.iloc[
+                    (working_df_CHn[g.PPM] - ppm).abs().argsort()[:1]
+                ]
+                if len(mol_row) == 0:
+                    continue
+                c13.at[idx, g.ATOMIDX] = mol_row[g.ATOMIDX].values[0]
+                c13.at[idx, g.SYM_ATOMIDX] = mol_row[g.SYM_ATOMIDX].values[0]
+                c13.at[idx, g.ATOMNUMBER] = mol_row[g.ATOMNUMBER].values[0]
+                c13.at[idx, g.SYM_ATOMNUMBER] = mol_row[g.SYM_ATOMNUMBER].values[0]
+                c13.at[idx, g.X] = mol_row[g.X].values[0]
+                c13.at[idx, g.Y] = mol_row[g.Y].values[0]
+                c13.at[idx, "ppm_calculated"] = mol_row[g.PPM].values[0]
+                consumed_atomidx.append(mol_row[g.ATOMIDX].values[0])
+                working_df_CHn = working_df_CHn.drop(mol_row.index)
+
+        return consumed_atomidx
+
     def attempt_assignment_CH3_CH2_CH1_to_C13_table(self):
         """
         Attempts to assign CH3, CH2, CH1, and CH0 groups from the molecular properties DataFrame
@@ -478,9 +561,54 @@ class NMRsolution:
         # Hungarian/nearest-match logic below -- avoids that.
         pool_ch3_ch1 = not getattr(self, "ch3_ch1_evidence_based", False)
 
+        # pool_ch3_ch1 is solution-wide: it goes True the moment ANY peak
+        # needed the ExpectedMolecule shift-heuristic fallback, even if
+        # OTHER peaks were resolved with full confidence via an explicit
+        # mnova Annotation (or DoubleDept). Those individually-resolved rows
+        # must never be thrown into the pooled CH3-or-CH1 match -- doing so
+        # can silently reattach a user-annotated CH1 peak to the molecule's
+        # real CH3 atom position (and vice versa), even though its own
+        # numProtons/CH1 flag stays correct. So: match evidence-based CH3
+        # and CH1 rows strictly, within their own exact type, first -- and
+        # remove the atoms/rows they consume from the pool before any
+        # pooled matching happens for the remaining (non-evidence) rows.
+        consumed_atomidx = set()
+        consumed_c13_idx = set()
+        if pool_ch3_ch1 and "evidence_based" in c13.columns:
+            for exact_label, mask_fn, nProtons in (
+                (g.CH3, lambda df: df[g.CH3], 3),
+                (g.CH1, lambda df: df[g.CH1], 1),
+            ):
+                evidence_c13 = c13[
+                    (c13[g.NUMPROTONS] == nProtons) & (c13["evidence_based"])
+                ]
+                if evidence_c13.empty:
+                    continue
+                df_exact = self.molprops_df[mask_fn(self.molprops_df)]
+                try:
+                    newly_consumed = self._match_CHn_group(df_exact, evidence_c13)
+                except ValueError:
+                    logger.warning(
+                        f"{exact_label}: more evidence-based experimental "
+                        f"peaks than candidate atoms of that exact type -- "
+                        f"leaving unmatched for the pooled/error-table path"
+                    )
+                    continue
+                consumed_atomidx.update(newly_consumed)
+                consumed_c13_idx.update(evidence_c13.index)
+                logger.debug(
+                    f"{exact_label}: matched {len(evidence_c13)} "
+                    f"evidence-based row(s) strictly, ahead of CH3/CH1 pooling"
+                )
+
         if pool_ch3_ch1:
             groups = [
-                (g.CH3plusCH1, lambda df: df[g.CH3] | df[g.CH1], [3, 1]),
+                (
+                    g.CH3plusCH1,
+                    lambda df: (df[g.CH3] | df[g.CH1])
+                    & (~df[g.ATOMIDX].isin(consumed_atomidx)),
+                    [3, 1],
+                ),
                 (g.CH2, lambda df: df[g.CH2], [2]),
                 (g.CH0, lambda df: df[g.CH0], [0]),
             ]
@@ -496,6 +624,9 @@ class NMRsolution:
 
             df_CHn = self.molprops_df[mask_fn(self.molprops_df)]
             c13_CHn = c13[c13[g.NUMPROTONS].isin(nProtons_list)]
+            if CHn == g.CH3plusCH1 and consumed_c13_idx:
+                # already matched strictly, above -- don't reprocess
+                c13_CHn = c13_CHn[~c13_CHn.index.isin(consumed_c13_idx)]
 
             if c13_CHn.empty:
                 logger.debug(f"{CHn}: no experimental peaks, skipping")
@@ -1594,6 +1725,9 @@ class NMRsolution:
         c13: pd.DataFrame = self.c13
         hsqc: pd.DataFrame = self.hsqc
 
+        if "evidence_based" not in c13.columns:
+            c13["evidence_based"] = False
+
         for idx, row in hsqc.iterrows():
             # search c13 by ppm
             c13.loc[c13[g.PPM] == row.f1_ppm, g.NUMPROTONS] = row[g.NUMPROTONS]
@@ -1601,6 +1735,13 @@ class NMRsolution:
             c13.loc[c13[g.PPM] == row.f1_ppm, g.CH2] = row[g.CH2]
             c13.loc[c13[g.PPM] == row.f1_ppm, g.CH1] = row[g.CH1]
             c13.loc[c13[g.PPM] == row.f1_ppm, g.CH3CH1] = row[g.CH3CH1]
+            # Carries forward which rows were resolved by genuine evidence
+            # (mnova Annotations / DoubleDept) rather than a shift-heuristic
+            # fallback -- see assign_CH3_CH2_CH1_overall and
+            # attempt_assignment_CH3_CH2_CH1_to_C13_table.
+            c13.loc[c13[g.PPM] == row.f1_ppm, "evidence_based"] = row.get(
+                "evidence_based", False
+            )
 
         # any leftover numprotons in c13 == -1 set to 0
         c13.loc[c13[g.NUMPROTONS] == -1, g.NUMPROTONS] = 0
@@ -1640,7 +1781,16 @@ class NMRsolution:
         CH1_sym_mol_gt_67_df = CH1_sym_mol_df[CH1_sym_mol_df[g.PPM] >= g.CH1_CH3_PPM_BOUNDARY]
         CH1_sym_mol_lt_67_df = CH1_sym_mol_df[CH1_sym_mol_df[g.PPM] < g.CH1_CH3_PPM_BOUNDARY]
 
-        CH3CH1_hsqc_df = hsqc[hsqc[g.CH3CH1]].copy()
+        # Defensive gate: only rows that are BOTH flagged ambiguous AND still
+        # genuinely unresolved (numProtons == -1) are eligible for this
+        # heuristic reassignment. This mirrors assign_CH3_CH1_in_HSQC_using_H1,
+        # which already only ever overwrites numProtons == -1 rows, and
+        # protects against ever reassigning a peak the user (or an earlier,
+        # higher-confidence step) has already resolved -- even if the CH3CH1
+        # flag itself were ever set incorrectly upstream.
+        CH3CH1_hsqc_df = hsqc[
+            hsqc[g.CH3CH1] & (hsqc[g.NUMPROTONS] == -1)
+        ].copy()
 
         num_CH3CH1_hsqc = CH3CH1_hsqc_df.shape[0]
 
@@ -1913,8 +2063,22 @@ class NMRsolution:
         hsqc.loc[hsqc["Annotation"] == g.CH2, g.CH2] = True
         hsqc.loc[hsqc["Annotation"] == g.CH1, g.CH1] = True
 
-        # set CH3CH1 to true for all other rows
-        hsqc.loc[hsqc[g.CH2] == False, g.CH3CH1] = True
+        # Mark rows resolved by an explicit mnova annotation as genuine
+        # evidence, per-row. This is what lets attempt_assignment_CH3_CH2_CH1_
+        # to_C13_table keep an annotated CH1 (or CH3) row matched strictly
+        # within its own type, even when other -- unannotated -- rows in the
+        # same solution require CH3/CH1 pooling.
+        hsqc.loc[
+            hsqc["Annotation"].isin([g.CH3, g.CH2, g.CH1]), "evidence_based"
+        ] = True
+
+        # set CH3CH1 (still-ambiguous CH3-or-CH1) to true only for rows with
+        # NO explicit annotation at all. Rows already resolved to CH3 or CH1
+        # by the user's mnova annotation must never be marked ambiguous again,
+        # otherwise later fallback steps (H1 / ExpectedMolecule heuristics)
+        # will treat them as fair game and can overwrite the user's evidence.
+        still_unresolved = (~hsqc[g.CH2]) & (~hsqc[g.CH3]) & (~hsqc[g.CH1])
+        hsqc.loc[still_unresolved, g.CH3CH1] = True
 
         hsqc.loc[hsqc[g.CH3], g.NUMPROTONS] = 3
         hsqc.loc[hsqc[g.CH2], g.NUMPROTONS] = 2
@@ -1948,10 +2112,17 @@ class NMRsolution:
 
         ddept_ch3_only_df = self.ddept_ch3_only_df
 
-        hsqc[g.NUMPROTONS] = -1
+        # NOTE: deliberately NOT resetting hsqc[NUMPROTONS] = -1 here as the
+        # original code did. That blanket reset would silently discard
+        # genuine evidence from an earlier, higher-priority chain step (e.g.
+        # explicit mnova Annotations) every time a DoubleDEPT experiment
+        # happens to be present. Rows not yet resolved are already -1.
 
-        # set CH3CH1 for all other rows
-        hsqc.loc[hsqc[g.CH2] == False, g.CH3CH1] = True
+        # set CH3CH1 (still-ambiguous CH3-or-CH1) to true only for rows that
+        # are not already resolved to CH3 or CH1 by an earlier step. See the
+        # matching comment in assign_CH3_CH2_CH1_in_HSQC_using_Assignments.
+        still_unresolved = (~hsqc[g.CH2]) & (~hsqc[g.CH3]) & (~hsqc[g.CH1])
+        hsqc.loc[still_unresolved, g.CH3CH1] = True
 
         # if ddept_ch3_only not empty set CH3 based on f1_ppm values closest to hsqc f1_ppm values
         if not ddept_ch3_only_df.empty:
@@ -1972,6 +2143,13 @@ class NMRsolution:
             CH3CH1_hsqc_df = hsqc[hsqc[g.CH3CH1]]
             CH1_hsqc_df = CH3CH1_hsqc_df[~CH3CH1_hsqc_df[g.CH3]]
             hsqc.loc[CH1_hsqc_df.index, g.CH1] = True
+
+            # DoubleDEPT is a genuine-evidence tier (see the priority order
+            # in assign_CH3_CH2_CH1_overall's docstring), same as explicit
+            # mnova Annotations. Mark rows it resolved accordingly so they
+            # too are protected from later CH3/CH1 pooling.
+            hsqc.loc[hsqc[g.CH3], "evidence_based"] = True
+            hsqc.loc[CH1_hsqc_df.index, "evidence_based"] = True
 
         # set the numprotons for CH3 CH2 and CH1 of self.hsqc
         hsqc.loc[hsqc[g.CH3], g.NUMPROTONS] = 3

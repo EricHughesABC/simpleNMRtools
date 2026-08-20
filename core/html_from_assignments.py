@@ -3,6 +3,7 @@ import platform
 import itertools
 
 from pathlib import Path
+from typing import Tuple
 import pandas as pd
 import numpy as np
 import json
@@ -230,6 +231,62 @@ def read_in_mesrenova_json_multiple(fn: Path) -> dict:
     return data
 
 
+def parse_hsqc_annotation_ppm_override(
+    annotation: str, delta1: float
+) -> Tuple[str, float]:
+    """Parse an mnova HSQC peak annotation for an optional manual ppm override.
+
+    Normally an HSQC ``Annotation`` cell is just the CH-type the user
+    identified: ``"CH3"``, ``"CH2"``, or ``"CH1"``. This also accepts an
+    extended form, ``"<CHn>:<ppm>"`` (e.g. ``"CH1:191.2"``), for the case
+    where the picked f1 (13C) value is known to be wrong -- most commonly
+    because the F1 dimension aliased/folded during acquisition -- and the
+    true shift is known from another source (e.g. an HMBC cross peak).
+    When that form is used, the supplied ppm value replaces the picked
+    ``delta1`` value everywhere downstream; the plain CH-type is still
+    used for CH3/CH2/CH1 assignment exactly as before.
+
+    Parameters
+    ----------
+    annotation : str
+        The raw Annotation cell from the mnova peak table. May be empty,
+        a plain CH-type, or ``"<CHn>:<ppm>"``.
+    delta1 : float
+        The f1 (13C) ppm value mnova picked for this peak.
+
+    Returns
+    -------
+    tuple[str, float]
+        ``(plain_annotation, f1_ppm)``. ``plain_annotation`` is the bare
+        CH-type (or the original string, unchanged, if no override was
+        present). ``f1_ppm`` is the override value if one was supplied and
+        parsed successfully, otherwise the original ``delta1``.
+    """
+    if not annotation or ":" not in annotation:
+        return annotation, delta1
+
+    chtype, _, override_str = annotation.partition(":")
+    chtype = chtype.strip()
+    override_str = override_str.strip()
+
+    try:
+        override_ppm = float(override_str)
+    except ValueError:
+        logger.warning(
+            f"Could not parse ppm override in HSQC annotation "
+            f"'{annotation}' -- ignoring the override and using the "
+            f"picked f1 value ({delta1}) instead"
+        )
+        return chtype, delta1
+
+    logger.info(
+        f"HSQC annotation '{annotation}': overriding picked f1 ppm "
+        f"{delta1:.3f} with user-supplied value {override_ppm:.3f} "
+        f"(e.g. to correct for F1 folding/aliasing)"
+    )
+    return chtype, override_ppm
+
+
 def get_2D_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
     """
     Extracts 2D NMR peak data from a nested JSON structure and returns it as a pandas DataFrame.
@@ -252,6 +309,11 @@ def get_2D_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
     -----
     - Only peaks present in the JSON data are included.
     - The resulting DataFrame is sorted by 'f2 (ppm)' in descending order and indexed starting from 1.
+    - For HSQC only, an Annotation of the form "<CHn>:<ppm>" (e.g.
+      "CH1:191.2") overrides the picked f1 (ppm) value with the given
+      number -- see parse_hsqc_annotation_ppm_override. Useful for
+      correcting a peak known to be folded/aliased in F1. The Annotation
+      column itself still ends up holding just the plain CH-type.
     Example
     -------
     >>> df = get_2D_dataframe_from_json(json_data, 'HSQC')
@@ -262,18 +324,36 @@ def get_2D_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
 
     signaltype = g.PEAKS
 
+    # The "<CHn>:<ppm>" manual-override annotation syntax (see
+    # parse_hsqc_annotation_ppm_override) is only meaningful for HSQC --
+    # it corrects a picked f1 (13C) value using a CH-type/ppm pair the
+    # user read off the HSQC peak table. Other 2D techniques (HMBC, COSY,
+    # ...) don't use per-peak CH-type annotations, so their Annotation
+    # values are left exactly as mnova exported them.
+    is_hsqc = technique.upper().startswith("HSQC")
+
     df_data = []
     for i in range(json_data[technique][signaltype]["count"]):
         # check if the peak exists in the json data
         if str(i) not in json_data[technique][signaltype]["data"]:
             continue
+
+        f2_ppm = json_data[technique][g.PEAKS][g.DATA][str(i)][g.DELTA2]
+        f1_ppm = json_data[technique][g.PEAKS][g.DATA][str(i)][g.DELTA1]
+        annotation = json_data[technique][g.PEAKS][g.DATA][str(i)][g.ANNOTATION]
+
+        if is_hsqc:
+            annotation, f1_ppm = parse_hsqc_annotation_ppm_override(
+                annotation, f1_ppm
+            )
+
         df_data.append(
             [
-                json_data[technique][g.PEAKS][g.DATA][str(i)][g.DELTA2],
-                json_data[technique][g.PEAKS][g.DATA][str(i)][g.DELTA1],
+                f2_ppm,
+                f1_ppm,
                 json_data[technique][g.PEAKS][g.DATA][str(i)][g.INTENSITY],
                 json_data[technique][g.PEAKS][g.DATA][str(i)][g.TYPE],
-                json_data[technique][g.PEAKS][g.DATA][str(i)][g.ANNOTATION],
+                annotation,
             ]
         )
 
