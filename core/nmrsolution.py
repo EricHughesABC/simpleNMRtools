@@ -78,6 +78,16 @@ class NMRsolution:
         self.pureshift_df = problemdata_json.dataframes["H1_pureshift"]
         self.c13_df = problemdata_json.dataframes["C13_1D"]
 
+        # full, annotated (used_in_solution / exclusion_reason) versions of
+        # hmbc/cosy/hsqc_clipcosy/ddept_ch3_only, set once their respective
+        # tidy-up stage runs -- default to the raw table so an
+        # AttributeError is never possible for a run that exits before
+        # that stage
+        self.hmbc_all = self.hmbc_df
+        self.cosy_all = self.cosy_df
+        self.hsqc_clipcosy_all = self.hsqc_clipcosy_df
+        self.ddept_ch3_only_all = self.ddept_ch3_only_df
+
         self.dept135_not_used_to_solve_problem = True
 
         # if hsqc_df is empty then return
@@ -387,39 +397,7 @@ class NMRsolution:
         elif len(c13) > len(self.all_molprops_df):
             # No simple solution right now so create tables to show the differences
             # and return it as a html page
-
-            c13_df_list = []
-            for CHn_str in [g.CH0, g.CH1, g.CH2, g.CH3]:
-                df1_C13 = c13[c13[CHn_str]][
-                    [g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3]
-                ].copy()
-                # replace True with 1 and False with 0
-                df1_C13[[g.CH0, g.CH1, g.CH2, g.CH3]] = (
-                    df1_C13[[g.CH0, g.CH1, g.CH2, g.CH3]].astype(int)
-                )
-                # set ppm value to a string with 2 decimal places
-                df1_C13[g.PPM] = df1_C13[g.PPM].map("{:.2f}".format)
-                c13_df_list.append(df1_C13.values.tolist())
-
-                self.molprops_df1 = self.all_molprops_df[self.all_molprops_df[CHn_str]][
-                    [g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3]
-                ].copy()
-                # replace True with 1 and False with 0
-                self.molprops_df1[[g.CH0, g.CH1, g.CH2, g.CH3]] = (
-                    self.molprops_df1[[g.CH0, g.CH1, g.CH2, g.CH3]].astype(int)
-                )
-
-                c13_df_list.append(self.molprops_df1.values.tolist())
-
-            tab_headings = [g.CH0, g.CH1, g.CH2, g.CH3]
-
-            rtn_html = render_template(
-                "error_table.html",
-                colHeadings=[g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3],
-                df_data=c13_df_list,
-                tab_headings=tab_headings,
-            )
-
+            rtn_html = self._build_ch_mismatch_report(c13, self.all_molprops_df)
             return rtn_html, g.BADREQUEST
 
         return "ok", g.GOODREQUEST
@@ -533,6 +511,96 @@ class NMRsolution:
                 working_df_CHn = working_df_CHn.drop(mol_row.index)
 
         return consumed_atomidx
+
+    def _correlated_protons_for_report(self, ppm: float, chn_str: str) -> str:
+        """
+        Return a display string of proton ppm(s) associated with an
+        experimental carbon at the given ppm, for the CH-count mismatch
+        error report -- so the corresponding 2D crosspeak(s) can be found
+        quickly in the raw HMBC/HSQC data and, if wrong, removed.
+
+        Protonated carbons (CH1/CH2/CH3) have one directly-attached HSQC
+        proton. Quaternary carbons (CH0) have no attached proton by
+        definition -- instead every HMBC-correlating proton is listed
+        (there can be several), since any one of them might be the peak
+        that needs spotting and removing.
+        """
+        tol = self.problemdata_json.carbonSeparation
+        if chn_str == g.CH0:
+            source = self.hmbc
+        else:
+            source = self.hsqc
+        matches = source[
+            source[g.F1_PPM].apply(lambda c: self.within_tolerance(c, ppm, tol))
+        ]
+        protons = sorted(matches[g.F2_PPM].unique().tolist())
+        return ", ".join(f"{p:.4f}" for p in protons)
+
+    def _build_ch_mismatch_report(
+        self, c13: pd.DataFrame, molprops_df: pd.DataFrame
+    ) -> str:
+        """
+        Build the HTML mismatch report (error_table.html) comparing
+        experimental c13 CHn counts against the predicted molprops_df CHn
+        counts, one tab per CHn group, each row annotated with its
+        associated proton ppm(s) (see _correlated_protons_for_report) so
+        the corresponding 2D crosspeak(s) can be found quickly.
+
+        Shared by every place in this file that detects a genuine CH-count
+        mismatch and needs to stop and report it -- kept as one function so
+        the two report variants can't drift apart, as they briefly did
+        during development of this feature.
+        """
+        c13_df_list = []
+        for CHn_str in [g.CH0, g.CH1, g.CH2, g.CH3]:
+            df1_C13 = c13[c13[CHn_str]][
+                [g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3]
+            ].copy()
+            # attached/correlating proton ppm(s) -- computed from the
+            # numeric ppm column before it gets string-formatted below
+            df1_C13[g.H1_PPM] = df1_C13[g.PPM].apply(
+                lambda ppm: self._correlated_protons_for_report(ppm, CHn_str)
+            )
+            # replace True with 1 and False with 0
+            df1_C13[[g.CH0, g.CH1, g.CH2, g.CH3]] = (
+                df1_C13[[g.CH0, g.CH1, g.CH2, g.CH3]].astype(int)
+            )
+            # set ppm value to a string with 2 decimal places
+            df1_C13[g.PPM] = df1_C13[g.PPM].map("{:.2f}".format)
+            df1_C13 = df1_C13[
+                [g.PPM, g.H1_PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3]
+            ]
+            c13_df_list.append(df1_C13.values.tolist())
+
+            molprops_df1 = molprops_df[molprops_df[CHn_str]][
+                [g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3]
+            ].copy()
+            # no experimentally-measured proton exists for a predicted/
+            # calculated row -- left blank rather than guessed, but the
+            # column is still present so it lines up with the experimental
+            # table alongside it
+            molprops_df1[g.H1_PPM] = ""
+            # replace True with 1 and False with 0
+            molprops_df1[[g.CH0, g.CH1, g.CH2, g.CH3]] = (
+                molprops_df1[[g.CH0, g.CH1, g.CH2, g.CH3]].astype(int)
+            )
+            molprops_df1 = molprops_df1[
+                [g.PPM, g.H1_PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3]
+            ]
+            c13_df_list.append(molprops_df1.values.tolist())
+
+        tab_headings = [g.CH0, g.CH1, g.CH2, g.CH3]
+
+        logger.debug(f"C13 mismatch table: {c13_df_list}")
+
+        return render_template(
+            "error_table.html",
+            colHeadings=[
+                g.PPM, g.H1_PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3
+            ],
+            df_data=c13_df_list,
+            tab_headings=tab_headings,
+        )
 
     def attempt_assignment_CH3_CH2_CH1_to_C13_table(self):
         """
@@ -692,40 +760,7 @@ class NMRsolution:
                     df_CHn = df_CHn.drop(mol_row.index)
 
             else:
-
-                c13_df_list = []
-                for CHn_str in [g.CH0, g.CH1, g.CH2, g.CH3]:
-                    df1_C13 = c13[c13[CHn_str]][
-                        [g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3]
-                    ].copy()
-                    # replace True with 1 and False with 0
-                    df1_C13[[g.CH0, g.CH1, g.CH2, g.CH3]] = (
-                        df1_C13[[g.CH0, g.CH1, g.CH2, g.CH3]].astype(int)
-                    )
-                    # set ppm value to a string with 2 decimal places
-                    df1_C13[g.PPM] = df1_C13[g.PPM].map("{:.2f}".format)
-                    c13_df_list.append(df1_C13.values.tolist())
-
-                    self.molprops_df1 = self.molprops_df[self.molprops_df[CHn_str]][
-                        [g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3]
-                    ].copy()
-                    # replace True with 1 and False with 0
-                    self.molprops_df1[[g.CH0, g.CH1, g.CH2, g.CH3]] = (
-                        self.molprops_df1[[g.CH0, g.CH1, g.CH2, g.CH3]].astype(int)
-                    )
-
-                    c13_df_list.append(self.molprops_df1.values.tolist())
-
-                tab_headings = [g.CH0, g.CH1, g.CH2, g.CH3]
-
-                logger.debug(f"C13 mismatch table: {c13_df_list}")
-
-                rtn_html = render_template(
-                    "error_table.html",
-                    colHeadings=[g.PPM, g.NUMPROTONS, g.CH0, g.CH1, g.CH2, g.CH3],
-                    df_data=c13_df_list,
-                    tab_headings=tab_headings,
-                )
+                rtn_html = self._build_ch_mismatch_report(c13, self.molprops_df)
                 return rtn_html, g.BADREQUEST
 
         return "ok", g.GOODREQUEST
@@ -854,14 +889,8 @@ class NMRsolution:
         unique_ch2s = []
         unique_idxs = []
 
-        # start with first CH2 value in the  list
-        # create a probability distribution around it and obtain the probability of all the other values to
-        # to see if they are close to the first value.
-        # all values that have a +ve probability are close to the first value
-        # all values with a zero probability are not.
-        # add the +ve to a saved list of lists "similar_CH2s"
-        # then remove them from the original list and repeat until original list length is zero
-
+        # start with first CH2 value in the list, group every other value
+        # within tolerance of it, repeat on what's left until empty
         while len(ch2_vals):
             # choose first from the list
             p0 = ch2_vals[0]
@@ -869,18 +898,12 @@ class NMRsolution:
             similar_ch2s = [
                 p
                 for p in ch2_vals
-                if stats.norm.pdf(
-                    p, loc=p0, scale=self.problemdata_json.carbonSeparation
-                )
-                > 0
+                if self.within_tolerance(p, p0, self.problemdata_json.carbonSeparation)
             ]
             similar_idxs = [
                 i
                 for i, p in zip(ch2_idx_vals, ch2_vals)
-                if stats.norm.pdf(
-                    p, loc=p0, scale=self.problemdata_json.carbonSeparation
-                )
-                > 0
+                if self.within_tolerance(p, p0, self.problemdata_json.carbonSeparation)
             ]
             # if the length of the list is > 2 then we need to keep only the two closest values
             if len(similar_ch2s) > 2:
@@ -896,18 +919,12 @@ class NMRsolution:
             ch2_idx_vals = [
                 i
                 for i, p in zip(ch2_idx_vals, ch2_vals)
-                if stats.norm.pdf(
-                    p, loc=p0, scale=self.problemdata_json.carbonSeparation
-                )
-                == 0
+                if not self.within_tolerance(p, p0, self.problemdata_json.carbonSeparation)
             ]
             ch2_vals = [
                 p
                 for p in ch2_vals
-                if stats.norm.pdf(
-                    p, loc=p0, scale=self.problemdata_json.carbonSeparation
-                )
-                == 0
+                if not self.within_tolerance(p, p0, self.problemdata_json.carbonSeparation)
             ]
 
         return unique_idxs, unique_ch2s
@@ -1232,6 +1249,18 @@ class NMRsolution:
 
         This function sets the CH3 and CH1 columns in the HSQC DataFrames based on the presence of CH3 signals
         in the DDEPT CH3-only experiment, ensuring correct group assignments for downstream analysis.
+
+        Matches directly against self.hsqc's own F1 values, using the DDEPT
+        peak's original (pre-snap) value and an explicit tolerance check --
+        deliberately not by comparing the two tables' post-snap values for
+        equality. self.ddept_ch3_only and self.hsqc are snapped against the
+        same self.c13 reference list, but independently; if two entries in
+        that reference list sit closer together than the natural difference
+        between two separate peak-picks of the same real carbon (one from
+        HSQC, one from the DDEPT experiment), the two tables can legitimately
+        snap to different, both genuinely close, references -- which breaks
+        an equality match even though the underlying carbon is the same one.
+        Matching directly against HSQC's own values sidesteps that entirely.
         """
         if self.ddept_ch3_only.empty:
             return
@@ -1245,10 +1274,48 @@ class NMRsolution:
         if g.CH3 not in self.hsqc.columns:
             self.hsqc[g.CH3] = False
 
-        for idx, ppm in zip(self.ddept_ch3_only.index, self.ddept_ch3_only.f1_ppm):
-            if ppm in self.hsqc[g.F1_PPM].values:
-                self.hsqc.loc[self.hsqc[g.F1_PPM] == ppm, g.CH3] = True
-                self.hsqc.loc[self.hsqc[g.F1_PPM] == ppm, g.CH1] = False
+        orig_col = g.F1_PPM + "_orig"
+        tolerance = self.problemdata_json.carbonSeparation
+
+        for idx in self.ddept_ch3_only.index:
+            # self.ddept_ch3_only now always goes through snap() (exact mode
+            # included, at tolerance 0.0), so orig_col should always be
+            # present -- this fallback only guards against some other,
+            # unanticipated path leaving it unset.
+            if orig_col in self.ddept_ch3_only.columns:
+                ddept_ppm = self.ddept_ch3_only.loc[idx, orig_col]
+            else:
+                ddept_ppm = self.ddept_ch3_only.loc[idx, g.F1_PPM]
+
+            # Margin-based ambiguity, matching tidyup_ppm_values -- see its
+            # docstring/inline comment for why this isn't an absolute
+            # window check. Only relevant once the nearest HSQC carbon
+            # would be accepted at all.
+            distinct_vals = sorted(
+                set(self.hsqc[g.F1_PPM]), key=lambda c: abs(ddept_ppm - c)
+            )
+            if not distinct_vals:
+                continue
+            nearest_val = distinct_vals[0]
+            nearest_dist = abs(ddept_ppm - nearest_val)
+            if not self.within_tolerance(ddept_ppm, nearest_val, tolerance):
+                continue
+            if len(distinct_vals) >= 2:
+                second_val = distinct_vals[1]
+                second_dist = abs(ddept_ppm - second_val)
+                if (second_dist - nearest_dist) <= tolerance:
+                    reason = (
+                        "carbon ambiguous: within tolerance of multiple "
+                        f"values ({nearest_val:.4f}, {second_val:.4f} ppm)"
+                    )
+                    if idx in self.ddept_ch3_only_all.index:
+                        self.ddept_ch3_only_all.loc[idx, g.USED_IN_SOLUTION] = False
+                        self.ddept_ch3_only_all.loc[idx, g.EXCLUSION_REASON] = reason
+                    continue
+
+            matches = self.hsqc[g.F1_PPM] == nearest_val
+            self.hsqc.loc[matches, g.CH3] = True
+            self.hsqc.loc[matches, g.CH1] = False
 
         # update hsqc_df with CH3 and CH1 values from hsqc
         self.hsqc_df[g.CH3] = self.hsqc[g.CH3]
@@ -1275,43 +1342,53 @@ class NMRsolution:
                 sorted(self.hsqc[g.F2_PPM].unique().tolist(), reverse=True),
                 g.F2_PPM,
                 self.problemdata_json.protonSeparation,
+                detect_ambiguity=True,
             )
 
-        # if any hmbc f2_ppm_probs == 0 then drop the row
-        self.hmbc_df.drop(
-            self.hmbc_df[self.hmbc_df[g.F2_PPM + "_prob"] == 0].index, inplace=True
+        # ambiguous rows first -- equally close to two+ HSQC protons, so
+        # forcing a match would invent a preference the data doesn't
+        # support (see tidyup_ppm_values docstring) -- then the plain
+        # not-found case. mark_excluded_rows leaves an already-excluded
+        # row's reason alone, so the ambiguous ones keep their specific
+        # reason rather than being overwritten by the generic one below.
+        self.hmbc_df = self.mark_excluded_rows(
+            self.hmbc_df,
+            self.hmbc_df[g.F2_PPM + "_ambiguous"],
+            self._ambiguous_reason(self.hmbc_df, g.F2_PPM, "proton"),
+        )
+
+        # mark (do not drop) any hmbc row whose proton is not found within
+        # tolerance against HSQC's own proton set -- e.g. a real OH/NH
+        # correlation, or simply a proton not yet picked in HSQC. The row
+        # stays in self.hmbc_df with its original value; it just doesn't
+        # feed anything below.
+        self.hmbc_df = self.mark_excluded_rows(
+            self.hmbc_df,
+            self.hmbc_df[g.F2_PPM + "_prob"] == 0,
+            "no proton within tolerance against HSQC",
         )
 
         # find all f1_ppm HMBC idx resonances that are not showing up in the HSQC f2_ppm
+        # (only rows still active -- an f2-excluded row shouldn't also feed
+        # the quaternary-candidate clustering below)
         iii = []
-        for i in self.hmbc_df.index:
-            prob_vals = []
-            for c in self.hsqc[g.F1_PPM].unique():
-                prob_vals.append(
-                    stats.norm.pdf(
-                        self.hmbc_df.loc[i, g.F1_PPM],
-                        loc=c,
-                        scale=self.problemdata_json.carbonSeparation,
-                    )
-                )
-            if np.array(prob_vals).sum() == 0:
+        for i in self.active_rows(self.hmbc_df).index:
+            f1_val = self.hmbc_df.loc[i, g.F1_PPM]
+            found_in_hsqc = any(
+                self.within_tolerance(f1_val, c, self.problemdata_json.carbonSeparation)
+                for c in self.hsqc[g.F1_PPM].unique()
+            )
+            if not found_in_hsqc:
                 iii.append(i)
-            else:
-                pass
 
         # keep only the unique hmbc resonances not in f1_ppm HSQC
         # get a list of the hmbc resonances
         hmbcs = self.hmbc_df.loc[iii, g.F1_PPM].tolist()
         unique_hmbc = []
 
-        # start with first hmbc value in the hmbc list
-        # create a probability distribution around it and obtain the probability of all the other values to
-        # to see if they are close to the first value.
-        # all values that have a +ve probability are close to the first value
-        # all values with a zero probability are not.
-        # add the +ve to a saved list of lists "similar_hmbcs"
-        # then remove them from the original list and repeat until original list length is zero
-
+        # start with first hmbc value in the hmbc list, then group every
+        # other value in the list that's within tolerance of it; repeat on
+        # what's left until the list is empty
         while len(hmbcs):
             # choose first from the list
             p0 = hmbcs[0]
@@ -1319,10 +1396,7 @@ class NMRsolution:
             similar_hmbcs = [
                 p
                 for p in hmbcs
-                if stats.norm.pdf(
-                    p, loc=p0, scale=self.problemdata_json.carbonSeparation
-                )
-                > 0
+                if self.within_tolerance(p, p0, self.problemdata_json.carbonSeparation)
             ]
             # save the list
             unique_hmbc.append(similar_hmbcs)
@@ -1331,36 +1405,40 @@ class NMRsolution:
             hmbcs = [
                 p
                 for p in hmbcs
-                if stats.norm.pdf(
-                    p, loc=p0, scale=self.problemdata_json.carbonSeparation
-                )
-                == 0
+                if not self.within_tolerance(p, p0, self.problemdata_json.carbonSeparation)
             ]
 
         # create an array of mean values for hmbc f1_ppm not found in hsqc f1_ppm
         mean_unique_hmbc_vals = [np.mean(h) for h in unique_hmbc]
 
-        # tidyup f1_ppm values in hmbc that are not in f1_ppm HSQC
-        if not self.exact_ppm_values:
+        # rows already excluded (f2 check above) are set aside here, untouched,
+        # and reattached after the snap below -- they must not be re-snapped
+        # (that would silently overwrite the very value we're keeping for
+        # reporting) and must not contribute to the f1 clustering above
+        excluded_hmbc_rows = self.hmbc_df[~self.hmbc_df[g.USED_IN_SOLUTION]]
 
-            hmbc_1 = self.snap(
-                self.hmbc_df.loc[iii],
-                mean_unique_hmbc_vals,
-                g.F1_PPM,
-                self.problemdata_json.carbonSeparation,
-            )
+        # tidyup f1_ppm values in hmbc that are not in f1_ppm HSQC. No
+        # separate exact_ppm_values branch needed here -- self.snap()
+        # already handles that internally (tolerance 0.0 in exact mode,
+        # i.e. must be genuinely, exactly present in the reference list).
+        hmbc_1 = self.snap(
+            self.hmbc_df.loc[iii],
+            mean_unique_hmbc_vals,
+            g.F1_PPM,
+            self.problemdata_json.carbonSeparation,
+        )
 
-            # tidyup f1_ppm values in hmbc that are in f1_ppm HSQC
-            hmbc_2 = self.snap(
-                self.hmbc_df.drop(iii),
-                self.hsqc[g.F1_PPM].unique(),
-                g.F1_PPM,
-                self.problemdata_json.carbonSeparation,
-            )
+        # tidyup f1_ppm values in hmbc that are in f1_ppm HSQC
+        hmbc_2 = self.snap(
+            self.active_rows(self.hmbc_df).drop(iii),
+            self.hsqc[g.F1_PPM].unique(),
+            g.F1_PPM,
+            self.problemdata_json.carbonSeparation,
+        )
 
-
-        # rejoin two parts of HMBC data
-        self.hmbc_df = pd.concat([hmbc_1, hmbc_2])
+        # rejoin the two active parts of HMBC data, plus the untouched
+        # excluded rows set aside above (kept, not dropped)
+        self.hmbc_df = pd.concat([hmbc_1, hmbc_2, excluded_hmbc_rows])
         self.hmbc_df.sort_index(inplace=True)
 
         # add f2p_ppm column to HSQC and HMBC tables
@@ -1371,10 +1449,11 @@ class NMRsolution:
         ):
             self.hmbc_df.loc[self.hmbc_df[g.F2_PPM] == f2ppmHSQC, g.F2P_PPM] = f1ppmHSQC
 
-        # return list of C13 values
+        # return list of C13 values (excluded hmbc rows, kept above for
+        # reporting, must not contribute a carbon here)
         c13_list = sorted(
-                set(self.hmbc_df[g.F1_PPM]).union(
-                set(self.hmbc_df[g.F2P_PPM]), set(self.hsqc[g.F1_PPM])
+                set(self.active_rows(self.hmbc_df)[g.F1_PPM]).union(
+                set(self.active_rows(self.hmbc_df)[g.F2P_PPM]), set(self.hsqc[g.F1_PPM])
             ),
             reverse=True,
         )
@@ -1601,45 +1680,302 @@ class NMRsolution:
             self.hsqc[g.F2_INTEGRAL] = -1
             return True, "hsqc is not empty"
 
+    def within_tolerance(self, value: float, reference: float, tolerance: float) -> bool:
+        """
+        Explicit, hard ppm-distance check: True iff value is within
+        tolerance of reference -- scaled by g.EFFECTIVE_TOLERANCE_MULTIPLIER
+        so this reproduces the old pdf()==0 gate's actual results for
+        already-declared tolerance values (see that constant's docstring
+        for why). This replaces every use of
+        ``scipy.stats.norm.pdf(...) == 0`` / ``> 0`` as a proximity gate
+        throughout this file: pdf() only reaches literal float 0.0 at
+        roughly 39 standard deviations from the mean, not at the declared
+        tolerance itself, so a gate built directly on it was really testing
+        against that much wider effective boundary all along. This method
+        makes that boundary an explicit, intentional number instead of an
+        accident of floating-point underflow, while keeping today's results
+        the same as before.
+        """
+        return abs(value - reference) <= tolerance * g.EFFECTIVE_TOLERANCE_MULTIPLIER
+
     def tidyup_ppm_values(
-        self, df: pd.DataFrame, true_values: list, column_name: str, ppm_tolerance: float = 0.005
+        self,
+        df: pd.DataFrame,
+        true_values: list,
+        column_name: str,
+        ppm_tolerance: float = 0.005,
+        detect_ambiguity: bool = False,
     ) -> pd.DataFrame:
         """
         Adjusts chemical shift values in a DataFrame to their nearest true values within a specified tolerance.
 
-        This function creates new columns for the original values and their probability of matching the adjusted value,
-        then replaces each value in the specified column with its nearest value from a provided list.
+        This function creates new columns for the original values and whether
+        the adjusted value is genuinely within tolerance of the original,
+        then replaces each value in the specified column with its nearest
+        value from a provided list.
 
         Args:
             df (pd.DataFrame): The DataFrame containing chemical shift values to adjust.
             true_values (list): List of reference values to match against.
             column_name (str): Name of the column in df to adjust.
-            ppm_tolerance (float, optional): Standard deviation for probability calculation. Defaults to 0.005.
+            ppm_tolerance (float, optional): Hard ppm distance a match must fall within. Defaults to 0.005.
+            detect_ambiguity (bool, optional): When True, also check
+                whether the row's original value sits close to half-way
+                between its nearest and second-nearest distinct reference
+                value -- not merely whether more than one reference value
+                happens to fall within some fixed window (tried and
+                rejected; see the inline comment where this is computed
+                for why). Only evaluated once the nearest candidate would
+                otherwise be accepted. When ambiguous,
+                ``{column}_ambiguous`` is True and
+                ``{column}_ambiguous_candidates`` holds the two contending
+                reference values (nearest, second-nearest). Defaults to
+                False -- deliberately not used for HSQC's own snap against
+                predicted/derived carbon and proton lists, where two
+                close-but-genuinely-different peaks are expected and
+                normal, not a jitter problem; the caller decides per call
+                site.
 
         Returns:
-            pd.DataFrame: The DataFrame with adjusted values and probability columns.
+            pd.DataFrame: The DataFrame with adjusted values and a ``{column}_prob`` column
+                (1.0 = within tolerance, 0.0 = not -- kept as a float column, and the name
+                kept as "_prob", only for compatibility with every existing ``== 0`` /
+                ``!= 0`` check elsewhere in this file; it is no longer a probability).
+                When detect_ambiguity is True, also ``{column}_ambiguous`` (bool) and
+                ``{column}_ambiguous_candidates`` (list, populated only when ambiguous).
         """
 
         # make a copy of the column_name adding a suffix orig
         df[f"{column_name}_orig"] = df[column_name]
 
-        # make a probability column to see how far replacement is from original
+        # make a "prob" column: 1.0 if the snap below lands within
+        # tolerance, 0.0 if not. Column name kept as "_prob" only for
+        # compatibility with every existing consumer -- see docstring.
         df[f"{column_name}_prob"] = 0.0
+
+        if detect_ambiguity:
+            df[f"{column_name}_ambiguous"] = False
+            df[f"{column_name}_ambiguous_candidates"] = [
+                [] for _ in range(len(df))
+            ]
 
         # create dataframe with ppm values and their nearest true value
         df[column_name] = df[column_name].apply(
             lambda x: self.find_nearest(true_values, x)
         )
 
-        # calculate probabilities
+        # explicit tolerance check: was the nearest value actually close
+        # enough, or just the least-bad of a bad set? find_nearest above
+        # always returns *something*, however far away, so this is the
+        # only thing standing between a genuine match and a forced one.
         for idx in df.index:
-            df.loc[idx, f"{column_name}_prob"] = stats.norm.pdf(
+            orig = df.loc[idx, f"{column_name}_orig"]
+
+            if detect_ambiguity:
+                # Margin-based, not absolute-window-based: ambiguity is a
+                # relative question -- "does this pick sit close to
+                # half-way between its best and next-best candidate" --
+                # not "are two candidates within some fixed distance of
+                # it". An absolute window (tried first, tight or wide)
+                # gets this wrong both ways: too tight, and a pick roughly
+                # equidistant between two real peaks that happen to be
+                # further apart than the window is missed entirely (it
+                # silently gets accepted onto the marginally-nearer one);
+                # too wide (e.g. reusing the backward-compatible
+                # EFFECTIVE_TOLERANCE_MULTIPLIER window), and ordinary,
+                # correctly-picked peaks in any normally-dense spectrum
+                # get flagged ambiguous just for having a real neighbour
+                # somewhere in that generous radius.
+                #
+                # Only relevant once the pick would be accepted at all
+                # (nearest candidate within tolerance) -- a pick nowhere
+                # near anything stays a plain not-found, not ambiguous.
+                distinct_vals = sorted(set(true_values), key=lambda t: abs(orig - t))
+                if distinct_vals:
+                    nearest_val = distinct_vals[0]
+                    nearest_dist = abs(orig - nearest_val)
+                    if self.within_tolerance(orig, nearest_val, ppm_tolerance) and len(distinct_vals) >= 2:
+                        second_val = distinct_vals[1]
+                        second_dist = abs(orig - second_val)
+                        if (second_dist - nearest_dist) <= ppm_tolerance:
+                            df.at[idx, f"{column_name}_ambiguous"] = True
+                            df.at[idx, f"{column_name}_ambiguous_candidates"] = [
+                                nearest_val, second_val
+                            ]
+                            # ambiguous is excluded either way -- prob stays 0.0
+                            continue
+
+            df.loc[idx, f"{column_name}_prob"] = 1.0 if self.within_tolerance(
                 df.loc[idx, column_name],
-                loc=df.loc[idx, f"{column_name}_orig"],
-                scale=ppm_tolerance,
-            )
+                orig,
+                ppm_tolerance,
+            ) else 0.0
 
         return df
+
+    def _ambiguous_reason(
+        self, df: pd.DataFrame, column_name: str, dimension_label: str
+    ) -> pd.Series:
+        """
+        Build a per-row exclusion reason string for ambiguous matches,
+        naming the specific candidate values a row was equally close to --
+        e.g. "carbon ambiguous: within tolerance of multiple values
+        (130.7200, 130.8100 ppm)". dimension_label matches the wording
+        already used for the plain not-found case ("carbon"/"proton"), so
+        the two reasons read consistently in the Solution Statistics popup.
+        """
+
+        def fmt(candidates):
+            vals = ", ".join(f"{c:.4f}" for c in sorted(candidates))
+            return (
+                f"{dimension_label} ambiguous: within tolerance of "
+                f"multiple values ({vals} ppm)"
+            )
+
+        return df[f"{column_name}_ambiguous_candidates"].apply(fmt)
+
+    def mark_excluded_rows(
+        self, df: pd.DataFrame, mask: pd.Series, reason
+    ) -> pd.DataFrame:
+        """
+        Annotate rows of df matching mask as excluded from the solution graph,
+        without dropping them from df.
+
+        This replaces the old pattern of ``df.drop(df[df[col + "_prob"] == 0].index)``.
+        The row, and its original picked value (already preserved separately by
+        tidyup_ppm_values in the ``{column}_orig`` column), stay in df; only the
+        two columns below are added or updated, so the row can still be reported
+        to the user with the reason it wasn't used, and it never has to be
+        guessed-at or recovered later because it was never actually deleted.
+
+        If a row is already excluded (from an earlier check on the same table,
+        e.g. F1 already failed before F2 is checked), its existing reason is
+        left in place rather than being overwritten by this call.
+
+        Args:
+            df: The DataFrame to annotate.
+            mask: Boolean Series, same index as df, True for rows to exclude.
+            reason: Human-readable reason, used only for rows newly excluded
+                by this call. Either a single string applied to every newly
+                excluded row, or a pd.Series (same index as df) giving a
+                per-row reason -- e.g. an ambiguous-match reason naming the
+                specific candidate values for that row.
+
+        Returns:
+            The same df (mutated in place and returned, matching the style of
+            snap()/tidyup_ppm_values() elsewhere in this file).
+        """
+        if g.USED_IN_SOLUTION not in df.columns:
+            df[g.USED_IN_SOLUTION] = True
+        if g.EXCLUSION_REASON not in df.columns:
+            df[g.EXCLUSION_REASON] = ""
+
+        newly_excluded = mask & df[g.USED_IN_SOLUTION]
+        df.loc[newly_excluded, g.USED_IN_SOLUTION] = False
+        if isinstance(reason, pd.Series):
+            df.loc[newly_excluded, g.EXCLUSION_REASON] = reason.loc[newly_excluded]
+        else:
+            df.loc[newly_excluded, g.EXCLUSION_REASON] = reason
+        return df
+
+    def active_rows(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Return only the rows of df that are still used in the solution graph
+        (i.e. not excluded by mark_excluded_rows). If df has never been through
+        mark_excluded_rows, every row is returned unchanged.
+        """
+        if g.USED_IN_SOLUTION not in df.columns:
+            return df
+        return df[df[g.USED_IN_SOLUTION]]
+
+    def _report_ppm(self, row: pd.Series, col_orig: str, col: str):
+        """
+        Per-row fallback for reporting: prefer the original (pre-snap)
+        value when that specific row actually has one, else fall back to
+        the plain value. A column existing overall doesn't mean every row
+        in it is populated -- e.g. a row set aside before Stage B's own
+        snap even ran (see build_exclusion_summary's HMBC note) has no
+        _orig value despite the column existing for other rows.
+        """
+        val = row.get(col_orig) if col_orig in row.index else None
+        if val is None or (isinstance(val, float) and pd.isna(val)):
+            val = row.get(col)
+        return round(float(val), 4) if val is not None and pd.notna(val) else None
+
+    def build_exclusion_summary(self) -> dict:
+        """
+        Build a plain, JSON-serializable summary of which HMBC/COSY/
+        HSQC-CLIPCOSY/DDEPT-CH3-only correlations were used vs excluded in
+        this solution, for the Solution Statistics popup ("20 out of 25
+        HMBC correlations were used", etc.) and its per-experiment "not
+        used" tables.
+
+        One entry per experiment type, each with:
+            total (int), used (int),
+            excluded (list of {f1_ppm, f2_ppm, reason}).
+
+        f1_ppm/f2_ppm come from the row's original (pre-snap) value when
+        available, since find_nearest() always overwrites the displayed
+        value regardless of match quality -- the original is the value
+        that's actually findable in the raw 2D data.
+
+        HMBC is special-cased: it goes through two separate exclusion
+        stages -- the earliest F2-vs-HSQC check in init_c13_from_hsqc_and_hmbc
+        (Stage A, tracked on self.hmbc_df), and its own F1/F2 checks in
+        init_class_from_json (Stage B, tracked on self.hmbc_all). Stage B's
+        working table is built from only the rows that survived Stage A
+        (self.active_rows(self.hmbc_df)), so anything Stage A already
+        excluded never reaches Stage B at all -- self.hmbc_all alone would
+        silently omit it. Combining both tables' worth of rows gives the
+        true total.
+        """
+        summary = {}
+        for label, df, extra_df in (
+            ("hmbc", getattr(self, "hmbc_all", None), getattr(self, "hmbc_df", None)),
+            ("cosy", getattr(self, "cosy_all", None), None),
+            ("hsqc_clipcosy", getattr(self, "hsqc_clipcosy_all", None), None),
+            ("ddept_ch3_only", getattr(self, "ddept_ch3_only_all", None), None),
+        ):
+            if df is None or df.empty or g.USED_IN_SOLUTION not in df.columns:
+                summary[label] = {"total": 0, "used": 0, "excluded": []}
+                continue
+
+            f1_col = f"{g.F1_PPM}_orig" if f"{g.F1_PPM}_orig" in df.columns else g.F1_PPM
+            f2_col = f"{g.F2_PPM}_orig" if f"{g.F2_PPM}_orig" in df.columns else g.F2_PPM
+
+            total = int(len(df))
+            used = int(df[g.USED_IN_SOLUTION].sum())
+            excluded_rows = df[~df[g.USED_IN_SOLUTION]]
+
+            excluded = []
+            for _, row in excluded_rows.iterrows():
+                excluded.append(
+                    {
+                        "f1_ppm": self._report_ppm(row, f1_col, g.F1_PPM),
+                        "f2_ppm": self._report_ppm(row, f2_col, g.F2_PPM),
+                        "reason": row.get(g.EXCLUSION_REASON, "") or "",
+                    }
+                )
+
+            # rows an earlier stage already excluded before this table's
+            # own working set was even built (see HMBC docstring note above)
+            if extra_df is not None and not extra_df.empty and g.USED_IN_SOLUTION in extra_df.columns:
+                extra_f1_col = f"{g.F1_PPM}_orig" if f"{g.F1_PPM}_orig" in extra_df.columns else g.F1_PPM
+                extra_f2_col = f"{g.F2_PPM}_orig" if f"{g.F2_PPM}_orig" in extra_df.columns else g.F2_PPM
+                extra_excluded_rows = extra_df[~extra_df[g.USED_IN_SOLUTION]]
+                total += int(len(extra_excluded_rows))
+                for _, row in extra_excluded_rows.iterrows():
+                    excluded.append(
+                        {
+                            "f1_ppm": self._report_ppm(row, extra_f1_col, g.F1_PPM),
+                            "f2_ppm": self._report_ppm(row, extra_f2_col, g.F2_PPM),
+                            "reason": row.get(g.EXCLUSION_REASON, "") or "",
+                        }
+                    )
+
+            summary[label] = {"total": total, "used": used, "excluded": excluded}
+
+        return summary
 
     def add_CH2_CH3CH_to_hsqc_dataframes(self) -> None:
         """
@@ -2101,15 +2437,16 @@ class NMRsolution:
 
     def assign_CH3_CH2_CH1_in_HSQC_using_DoubleDept(self) -> None:
         """
-        Assigns CH3, CH2, and CH1 group information in the HSQC DataFrame using Double DEPT experiment data.
+        Assigns CH1 group information in the HSQC DataFrame using Double DEPT
+        experiment data (CH3 is confirmed, not re-derived, here -- see below).
 
-        This function labels CH3, CH2, and CH1 groups in the HSQC data based on matches to the Double DEPT CH3-only experiment,
-        sets the number of protons, and updates related columns for integrals and attached protons.
+        This function labels CH1 groups in the HSQC data based on what wasn't
+        already resolved to CH3 by the Double DEPT CH3-only experiment, sets
+        the number of protons, and updates related columns for integrals and
+        attached protons.
         """
 
         hsqc = self.hsqc
-        hsqc_CH3 = self.hsqc.copy()
-
         ddept_ch3_only_df = self.ddept_ch3_only_df
 
         # NOTE: deliberately NOT resetting hsqc[NUMPROTONS] = -1 here as the
@@ -2124,22 +2461,26 @@ class NMRsolution:
         still_unresolved = (~hsqc[g.CH2]) & (~hsqc[g.CH3]) & (~hsqc[g.CH1])
         hsqc.loc[still_unresolved, g.CH3CH1] = True
 
-        # if ddept_ch3_only not empty set CH3 based on f1_ppm values closest to hsqc f1_ppm values
         if not ddept_ch3_only_df.empty:
-            ddept_ch3_only_df = ddept_ch3_only_df.assign(
-                CH3=lambda x: False, CH2=lambda x: False, CH1=lambda x: False
-            )
-            for idx, ppm in zip(ddept_ch3_only_df.index, ddept_ch3_only_df.f1_ppm):
-                # find the closest match in the hsqc dataframe
-                closest_match = hsqc_CH3.iloc[
-                    (hsqc_CH3[g.F1_PPM] - ppm).abs().argsort()[:1]
-                ]
-                ddept_ch3_only_df.loc[idx, g.CH3] = True
-                hsqc.loc[closest_match.index, g.CH3] = True
-                # remove row from hsqc_CH3
-                hsqc_CH3.drop(closest_match.index, inplace=True)
-
-            # set CH1 based on CH3 values and CH3CH1 values
+            # CH3 is NOT (re-)matched here. init_CH_CH3_HSQC_from_DDEPT_CH3_only
+            # already did that, earlier in init_class_from_json, using
+            # self.ddept_ch3_only -- the properly tolerance-snapped working
+            # copy (self.snap() against self.c13, same reference list HSQC's
+            # own F1 values were snapped against). That gives exact-value
+            # agreement for a genuine match without ever forcing one.
+            #
+            # The previous version of this function instead re-derived CH3
+            # itself, right here, via "closest remaining HSQC row, however
+            # far away" with no tolerance check of any kind -- worse than
+            # even the old pdf()==0 gate elsewhere in this file, since there
+            # was no boundary at all. Whenever a DDEPT peak had no genuine
+            # HSQC partner (a spurious pick, or an HSQC peak not yet picked),
+            # that unconditional search still always found *something* and
+            # mislabeled it CH3, silently overwriting what should have been
+            # a CH1. Simply reading the already-correct self.hsqc[CH3] fixes
+            # this: a DDEPT peak with no real match leaves CH3 False on every
+            # row, and every still-ambiguous row falls through to CH1 (or the
+            # later H1/ExpectedMolecule chain steps) as it should.
             CH3CH1_hsqc_df = hsqc[hsqc[g.CH3CH1]]
             CH1_hsqc_df = CH3CH1_hsqc_df[~CH3CH1_hsqc_df[g.CH3]]
             hsqc.loc[CH1_hsqc_df.index, g.CH1] = True
@@ -2255,7 +2596,11 @@ class NMRsolution:
         self.hsqc["f2Cp_i"] = ""
         self.hsqc["f2p_ppm"] = 0.0
 
-        self.hmbc = self.hmbc_df[[g.F1_PPM, g.F2_PPM, g.INTENSITY]].copy()
+        # only rows still active after the earlier f2-vs-hsqc check feed the
+        # working hmbc table here -- an already-excluded row doesn't get a
+        # second chance to re-enter via this stage's own (differently
+        # referenced) snap/check below
+        self.hmbc = self.active_rows(self.hmbc_df)[[g.F1_PPM, g.F2_PPM, g.INTENSITY]].copy()
         self.hmbc["f2p_ppm"] = 0.0
         self.hmbc["f1_i"] = 0
         self.hmbc["f2_i"] = 0
@@ -2287,59 +2632,122 @@ class NMRsolution:
         # self.h1["range"] = self.h1_df["range"]
         # tidy up chemical shift values by replacing cosy, hsqc and hmbc picked peaks with values from c13ppm and h1ppm dataframes
 
-        # HMBC
-        if not self.exact_ppm_values:
-            self.hmbc = self.snap(
-                self.hmbc,
-                self.c13.ppm.tolist(),
-                g.F1_PPM,
-                self.problemdata_json.carbonSeparation,
-            )
-            self.hmbc = self.snap(
-                self.hmbc,
-                self.h1.ppm.tolist(),
-                g.F2_PPM,
-                self.problemdata_json.protonSeparation,
-            )
+        # HMBC. No separate exact_ppm_values branch needed -- self.snap()
+        # already handles that internally.
+        self.hmbc = self.snap(
+            self.hmbc,
+            self.c13.ppm.tolist(),
+            g.F1_PPM,
+            self.problemdata_json.carbonSeparation,
+            detect_ambiguity=True,
+        )
+        self.hmbc = self.snap(
+            self.hmbc,
+            self.h1.ppm.tolist(),
+            g.F2_PPM,
+            self.problemdata_json.protonSeparation,
+            detect_ambiguity=True,
+        )
 
-            self.hmbc.drop(self.hmbc[self.hmbc[g.F1_PPM + "_prob"] == 0].index, inplace=True)
-            self.hmbc.drop(self.hmbc[self.hmbc[g.F2_PPM + "_prob"] == 0].index, inplace=True)
+        self.hmbc = self.mark_excluded_rows(
+            self.hmbc,
+            self.hmbc[g.F1_PPM + "_ambiguous"],
+            self._ambiguous_reason(self.hmbc, g.F1_PPM, "carbon"),
+        )
+        self.hmbc = self.mark_excluded_rows(
+            self.hmbc,
+            self.hmbc[g.F1_PPM + "_prob"] == 0,
+            "no carbon within tolerance",
+        )
+        self.hmbc = self.mark_excluded_rows(
+            self.hmbc,
+            self.hmbc[g.F2_PPM + "_ambiguous"],
+            self._ambiguous_reason(self.hmbc, g.F2_PPM, "proton"),
+        )
+        self.hmbc = self.mark_excluded_rows(
+            self.hmbc,
+            self.hmbc[g.F2_PPM + "_prob"] == 0,
+            "no proton within tolerance",
+        )
+
+        # self.hmbc_all keeps every row (used and excluded alike) for
+        # reporting; self.hmbc itself stays filtered to active rows only,
+        # matching its previous (post-drop) shape, so every existing
+        # consumer of self.hmbc elsewhere in this file is unaffected
+        self.hmbc_all = self.hmbc
+        self.hmbc = self.active_rows(self.hmbc)
 
 
 
-        # HSQC
-        if not self.exact_ppm_values:
-            self.hsqc = self.snap(
-                self.hsqc,
-                self.c13.ppm.tolist(),
-                g.F1_PPM,
-                self.problemdata_json.carbonSeparation,
-            )
-            self.hsqc = self.snap(
-                self.hsqc,
-                self.h1.ppm.tolist(),
-                g.F2_PPM,
-                self.problemdata_json.protonSeparation,
-            )
+        # HSQC. No separate exact_ppm_values branch needed here either.
+        self.hsqc = self.snap(
+            self.hsqc,
+            self.c13.ppm.tolist(),
+            g.F1_PPM,
+            self.problemdata_json.carbonSeparation,
+        )
+        self.hsqc = self.snap(
+            self.hsqc,
+            self.h1.ppm.tolist(),
+            g.F2_PPM,
+            self.problemdata_json.protonSeparation,
+        )
 
-            # tidy up cosy H1 shifts
-            self.cosy = self.snap(
-                self.cosy,
-                self.h1.ppm.tolist(),
-                g.F1_PPM,
-                self.problemdata_json.protonSeparation,
-            )
-            self.cosy = self.snap(
-                self.cosy,
-                self.h1.ppm.tolist(),
-                g.F2_PPM,
-                self.problemdata_json.protonSeparation,
-            )
+        # tidy up cosy H1 shifts. Checked against self.hsqc's own proton
+        # set specifically, not the broader self.h1 list -- self.h1 is
+        # normally built from HSQC's own F2 column anyway, so this is a
+        # no-op in the common case; it only matters when an H1_1D/pureshift
+        # dataset was submitted alongside HSQC, since that can broaden
+        # self.h1 with protons (e.g. exchangeable OH/NH) HSQC never showed.
+        # A COSY correlation should only count if both protons are ones
+        # HSQC has already shown to be attached to a carbon.
+        self.cosy = self.snap(
+            self.cosy,
+            self.hsqc[g.F2_PPM].tolist(),
+            g.F1_PPM,
+            self.problemdata_json.protonSeparation,
+            detect_ambiguity=True,
+        )
+        self.cosy = self.snap(
+            self.cosy,
+            self.hsqc[g.F2_PPM].tolist(),
+            g.F2_PPM,
+            self.problemdata_json.protonSeparation,
+            detect_ambiguity=True,
+        )
 
-            # check if any probability equals zero and remove the row
-            # because it is likely that proton is not connected directly to carbon
-            self.cosy.drop(self.cosy[self.cosy.f1_ppm_prob == 0].index, inplace=True)
-            self.cosy.drop(self.cosy[self.cosy.f2_ppm_prob == 0].index, inplace=True)
+        # ambiguous rows first (own reason, naming the candidates), then
+        # the plain not-found case -- see the HMBC F2 check above for why
+        self.cosy = self.mark_excluded_rows(
+            self.cosy,
+            self.cosy[g.F1_PPM + "_ambiguous"],
+            self._ambiguous_reason(self.cosy, g.F1_PPM, "proton"),
+        )
+        self.cosy = self.mark_excluded_rows(
+            self.cosy,
+            self.cosy[g.F2_PPM + "_ambiguous"],
+            self._ambiguous_reason(self.cosy, g.F2_PPM, "proton"),
+        )
+
+        # mark (do not drop) rows where a proton is not connected
+        # directly to carbon within tolerance -- kept for reporting,
+        # excluded from the solution graph
+        self.cosy = self.mark_excluded_rows(
+            self.cosy,
+            self.cosy.f1_ppm_prob == 0,
+            "no proton within tolerance",
+        )
+        self.cosy = self.mark_excluded_rows(
+            self.cosy,
+            self.cosy.f2_ppm_prob == 0,
+            "no proton within tolerance",
+        )
+
+        # self.cosy_all keeps every row for reporting; self.cosy itself
+        # stays filtered to active rows only, matching its previous
+        # (post-drop) shape
+        self.cosy_all = self.cosy
+        self.cosy = self.active_rows(self.cosy)
 
 
 
@@ -2402,14 +2810,45 @@ class NMRsolution:
         self.hsqcH1labelC13index = dict(zip(self.hsqc.f2H_i, self.hsqc.f1_i))
         self.hsqcH1labelC13ppm = dict(zip(self.hsqc.f2H_i, self.hsqc[g.F1_PPM]))
 
-        if not self.exact_ppm_values:
-            # Snap ppm values and add index columns for downstream edge building
-            self.hsqc_clipcosy = self.tidyup_hsqc_clipcosy(
-                self.hsqc_clipcosy_df, self.c13, self.h1
-            )
-        else:
-            # Exact mode: ppm values are already canonical, no snapping needed
-            self.hsqc_clipcosy = self.hsqc_clipcosy_df.copy()
+        # Snap ppm values and add index columns for downstream edge
+        # building. No separate exact_ppm_values branch needed --
+        # tidyup_hsqc_clipcosy's own self.snap() calls handle that.
+        self.hsqc_clipcosy = self.tidyup_hsqc_clipcosy(
+            self.hsqc_clipcosy_df
+        )
+
+        # mark (do not drop) rows whose carbon or proton isn't genuinely
+        # within tolerance of HSQC's own values -- kept for reporting,
+        # excluded from the solution graph. Ambiguous rows first (own
+        # reason, naming the candidates), then the plain not-found case.
+        self.hsqc_clipcosy = self.mark_excluded_rows(
+            self.hsqc_clipcosy,
+            self.hsqc_clipcosy[g.F1_PPM + "_ambiguous"],
+            self._ambiguous_reason(self.hsqc_clipcosy, g.F1_PPM, "carbon"),
+        )
+        self.hsqc_clipcosy = self.mark_excluded_rows(
+            self.hsqc_clipcosy,
+            self.hsqc_clipcosy[g.F1_PPM + "_prob"] == 0,
+            "no carbon within tolerance",
+        )
+        self.hsqc_clipcosy = self.mark_excluded_rows(
+            self.hsqc_clipcosy,
+            self.hsqc_clipcosy[g.F2_PPM + "_ambiguous"],
+            self._ambiguous_reason(self.hsqc_clipcosy, g.F2_PPM, "proton"),
+        )
+        self.hsqc_clipcosy = self.mark_excluded_rows(
+            self.hsqc_clipcosy,
+            self.hsqc_clipcosy[g.F2_PPM + "_prob"] == 0,
+            "no proton within tolerance",
+        )
+
+        # self.hsqc_clipcosy_all keeps every row (used and excluded alike)
+        # for reporting; self.hsqc_clipcosy itself stays filtered to active
+        # rows only before process_hsqc_clipcosy's F1/F2 swap and index/
+        # label lookups below, so an excluded row's original values aren't
+        # further transformed
+        self.hsqc_clipcosy_all = self.hsqc_clipcosy
+        self.hsqc_clipcosy = self.active_rows(self.hsqc_clipcosy)
 
         self.hsqc_clipcosy = self.process_hsqc_clipcosy(self.hsqc_clipcosy, self.hsqc)
         # loguru.logger.debug(f"hsqc_clipcosy\n{self.hsqc_clipcosy}")
@@ -2418,20 +2857,55 @@ class NMRsolution:
         # process ddept_ch3_only
         self.ddept_ch3_only = self.ddept_ch3_only_df.copy()
 
-        if not self.exact_ppm_values:
-            self.ddept_ch3_only = self.snap(
-                self.ddept_ch3_only,
-                self.c13[g.PPM],
-                g.F1_PPM,
-                self.problemdata_json.carbonSeparation,
-            )
-            self.ddept_ch3_only = self.snap(
-                self.ddept_ch3_only,
-                self.h1[g.PPM],
-                g.F2_PPM,
-                self.problemdata_json.protonSeparation,
-            )
+        # No separate exact_ppm_values branch needed -- self.snap() already
+        # handles that internally.
+        self.ddept_ch3_only = self.snap(
+            self.ddept_ch3_only,
+            self.c13[g.PPM],
+            g.F1_PPM,
+            self.problemdata_json.carbonSeparation,
+            detect_ambiguity=True,
+        )
+        self.ddept_ch3_only = self.snap(
+            self.ddept_ch3_only,
+            self.h1[g.PPM],
+            g.F2_PPM,
+            self.problemdata_json.protonSeparation,
+            detect_ambiguity=True,
+        )
 
+        # mark (do not drop) rows that couldn't be matched -- ambiguous
+        # first (own reason, naming the candidates), then the plain
+        # not-found case
+        self.ddept_ch3_only = self.mark_excluded_rows(
+            self.ddept_ch3_only,
+            self.ddept_ch3_only[g.F1_PPM + "_ambiguous"],
+            self._ambiguous_reason(self.ddept_ch3_only, g.F1_PPM, "carbon"),
+        )
+        self.ddept_ch3_only = self.mark_excluded_rows(
+            self.ddept_ch3_only,
+            self.ddept_ch3_only[g.F1_PPM + "_prob"] == 0,
+            "no carbon within tolerance",
+        )
+        self.ddept_ch3_only = self.mark_excluded_rows(
+            self.ddept_ch3_only,
+            self.ddept_ch3_only[g.F2_PPM + "_ambiguous"],
+            self._ambiguous_reason(self.ddept_ch3_only, g.F2_PPM, "proton"),
+        )
+        self.ddept_ch3_only = self.mark_excluded_rows(
+            self.ddept_ch3_only,
+            self.ddept_ch3_only[g.F2_PPM + "_prob"] == 0,
+            "no proton within tolerance",
+        )
+
+        # self.ddept_ch3_only_all keeps every row (used and excluded alike)
+        # for reporting; self.ddept_ch3_only itself stays filtered to
+        # active rows only before process_ddept_ch3_only's index/label
+        # lookups below, so an excluded row's original values aren't
+        # further transformed, and an ambiguous/excluded DDEPT peak can no
+        # longer force a CH3 call in init_CH_CH3_HSQC_from_DDEPT_CH3_only
+        self.ddept_ch3_only_all = self.ddept_ch3_only
+        self.ddept_ch3_only = self.active_rows(self.ddept_ch3_only)
 
         self.ddept_ch3_only = self.process_ddept_ch3_only(
             self.ddept_ch3_only, self.hsqc
@@ -2620,18 +3094,20 @@ class NMRsolution:
     def tidyup_hsqc_clipcosy(
         self,
         hsqc_clipcosy_df: pd.DataFrame,
-        c13: pd.DataFrame,
-        h1: pd.DataFrame,
     ) -> pd.DataFrame:
         """
         Cleans and aligns the HSQC-CLIP-COSY DataFrame by filtering for negative intensity crosspeaks and adjusting ppm values.
 
-        This function filters the input DataFrame for negative intensity values, then aligns the chemical shift columns to the nearest values in the C13 and H1 DataFrames using specified tolerances.
+        This function filters the input DataFrame for negative intensity values, then aligns the chemical shift columns to HSQC's own values.
+
+        Checked against self.hsqc's own F1/F2 values specifically, not the
+        broader self.c13/self.h1 lists -- self.c13 can include quaternary
+        carbons pulled in via HMBC that HSQC never shows, and a CLIP-COSY
+        correlation should only count if the carbon side is one HSQC has
+        already shown to be protonated.
 
         Args:
             hsqc_clipcosy_df (pd.DataFrame): The HSQC-CLIP-COSY DataFrame to tidy.
-            c13 (pd.DataFrame): The C13 DataFrame for reference ppm values.
-            h1 (pd.DataFrame): The H1 DataFrame for reference ppm values.
 
         Returns:
             pd.DataFrame: The tidied HSQC-CLIP-COSY DataFrame with aligned ppm values.
@@ -2640,21 +3116,22 @@ class NMRsolution:
         # Filter the dataframe for intensity < 0
         hsqc_clipcosy = hsqc_clipcosy_df[hsqc_clipcosy_df.intensity < 0].copy()
 
-        if not self.exact_ppm_values:
-            # Tidy up ppm values
-            hsqc_clipcosy = self.snap(
-                hsqc_clipcosy,
-                c13[g.PPM],
-                g.F1_PPM,
-                self.problemdata_json.carbonSeparation,
-            )
-            hsqc_clipcosy = self.snap(
-                hsqc_clipcosy,
-                h1[g.PPM],
-                g.F2_PPM,
-                self.problemdata_json.protonSeparation,
-            )
-
+        # Tidy up ppm values. No separate exact_ppm_values branch needed --
+        # self.snap() already handles that internally.
+        hsqc_clipcosy = self.snap(
+            hsqc_clipcosy,
+            self.hsqc[g.F1_PPM].tolist(),
+            g.F1_PPM,
+            self.problemdata_json.carbonSeparation,
+            detect_ambiguity=True,
+        )
+        hsqc_clipcosy = self.snap(
+            hsqc_clipcosy,
+            self.hsqc[g.F2_PPM].tolist(),
+            g.F2_PPM,
+            self.problemdata_json.protonSeparation,
+            detect_ambiguity=True,
+        )
 
         return hsqc_clipcosy
 
@@ -2736,19 +3213,33 @@ class NMRsolution:
         refs,
         col: str,
         tol: float,
+        detect_ambiguity: bool = False,
     ) -> pd.DataFrame:
         """Snap a ppm column to the nearest canonical reference values.
 
-        In *exact_ppm_values* mode the DataFrame is returned unchanged, but
-        ``{col}_orig`` and ``{col}_prob`` columns are still added (prob=1.0)
-        so that any downstream ``df.drop(df[df.{col}_prob == 0].index)``
-        calls remain safe no-ops.
+        In *exact_ppm_values* mode this still runs through the same
+        tidyup_ppm_values machinery, but with a tolerance of 0.0 -- i.e. a
+        value is only treated as matched if it's genuinely, exactly present
+        in refs. Exact mode asserts that peak-picking already guaranteed
+        every coordinate lines up exactly across experiments, but that's a
+        claim about how the data *should* look, not a guarantee about any
+        one row -- a belt-and-braces check still catches the case it's
+        meant to (e.g. a real OH/NH HMBC correlation, whose proton was never
+        going to appear in HSQC regardless of how carefully everything else
+        was pre-snapped). A row that doesn't hold up gets excluded via the
+        normal mark_excluded_rows path elsewhere, not silently waved through.
+
+        detect_ambiguity: passed straight through to tidyup_ppm_values --
+        see its docstring. Used for the correlating spectra (HMBC, COSY,
+        HSQC-CLIPCOSY, DDEPT-CH3-only), never for HSQC's own snap.
         """
         if self.exact_ppm_values:
-            df[f"{col}_orig"] = df[col]
-            df[f"{col}_prob"] = 1.0
-            return df
-        return self.tidyup_ppm_values(df, refs, col, ppm_tolerance=tol)
+            return self.tidyup_ppm_values(
+                df, refs, col, ppm_tolerance=0.0, detect_ambiguity=detect_ambiguity
+            )
+        return self.tidyup_ppm_values(
+            df, refs, col, ppm_tolerance=tol, detect_ambiguity=detect_ambiguity
+        )
 
     # ── End Tier-1 helpers ────────────────────────────────────────────────────
     def find_nearest(self, array: list[float], value: float) -> float:

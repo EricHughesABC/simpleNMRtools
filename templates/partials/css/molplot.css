@@ -1,0 +1,489 @@
+/*
+ * Shared design tokens
+ * ─────────────────────────────────────────────────────────────────────
+ * Just the one value that's genuinely identical everywhere it appears
+ * (the tooltip/banner/modal font-family) — kept as a single source of
+ * truth rather than three separate literals. Their border-radius and
+ * box-shadow values look similar at a glance but actually differ
+ * per-element (5px/8px/10px/7px radius; four different shadow depths),
+ * reflecting real differences in role (a transient hover tooltip vs. a
+ * warning banner vs. a full modal), so those stay as separate literals
+ * rather than being forced into one shared value.
+ */
+:root {
+    --panel-font-family: Arial, sans-serif;
+}
+
+/*
+ * .plot-container — Fluid aspect-ratio wrapper for the molecule SVG
+ * ─────────────────────────────────────────────────────────────────────
+ * PROBLEM SOLVED: The original container used a fixed width and height
+ * (1000 px × 600 px).  On screens narrower than 1000 px the SVG was
+ * clipped, and on tablets rotating to portrait the layout broke entirely.
+ *
+ * APPROACH — "padding-bottom intrinsic ratio" technique:
+ *   Setting height:0 and using padding-bottom as a percentage of the
+ *   element's own *width* is the most cross-browser-compatible way to
+ *   lock an aspect ratio.  It works identically in Chrome, Firefox, and
+ *   Safari, unlike the newer CSS aspect-ratio property which Firefox and
+ *   Safari handle inconsistently when the child uses percentage heights.
+ *
+ *   padding-bottom: 60%  →  600 ÷ 1000 = 0.6  →  preserves 5:3 ratio.
+ *   At 800 px wide: padding-bottom = 480 px  (= 800 × 0.60) ✓
+ *   At 400 px wide: padding-bottom = 240 px  (= 400 × 0.60) ✓
+ *
+ * HEIGHT CAP with min():
+ *   On a default-size browser window the SVG alone could consume nearly
+ *   the full viewport height, pushing the button bar off screen.
+ *   min(60%, calc(100vh - 180px)) picks whichever value is smaller:
+ *     • 60%            — the natural aspect-ratio height
+ *     • 100vh - 180px  — leaves 180 px for the button bar, gaps, and
+ *                        the body top padding (two button rows ≈ 130 px,
+ *                        container padding/gaps ≈ 30 px, body top ≈ 20 px)
+ *   The SVG shrinks via preserveAspectRatio="xMidYMid meet" (set in JS)
+ *   when this cap is hit, so the molecule is never distorted.
+ *
+ * position:relative — makes this div the positioning context for the
+ *   absolutely-positioned SVG child (see svg {} rule below).
+ *
+ * max-width:1000px — prevents the container (and therefore the SVG)
+ *   from growing beyond the original design width on large monitors.
+ *
+ * overflow:hidden — clips any SVG content that extends outside the
+ *   container during pan/zoom operations.
+ */
+.plot-container {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    height: 0;
+    padding-bottom: min(60%, calc(100vh - 180px));
+    margin: 0 auto;
+    overflow: hidden;
+}
+/*
+ * body — Remove default browser margins; replace <br> spacers with CSS
+ * ─────────────────────────────────────────────────────────────────────
+ * The original template used two <br> tags above the SVG container and
+ * one below it to create visual breathing room.  Those ~80 px of extra
+ * height were invisible to the viewport budget calculation and caused
+ * the button bar to be pushed off screen.  Replacing them with a
+ * controlled padding value means the space is predictable and is
+ * accounted for in the 180 px constant used by the min() cap above.
+ *
+ * margin:0     — overrides the browser default (~8 px on all sides).
+ * padding-top  — 12 px of space above the SVG container.
+ * padding-bottom — 8 px of space below the button bar.
+ */
+body {
+    margin: 0;
+    padding: 12px 0 8px;
+}
+.tooltip {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 8px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    display: inline-block;
+    max-width: 800px; /* Set max-width for the tooltip */
+}
+
+/*
+ * .calculated-shift-banner — "showing calculated shifts" warning
+ * ─────────────────────────────────────────────────────────────────────
+ * Sits inside .plot-container (which is position:relative), so
+ * top/right here are relative to the molecule diagram itself rather
+ * than the page. Hidden by default; toggleCalculatedShifts() shows
+ * and hides it in step with the C keyboard shortcut.
+ */
+.calculated-shift-banner {
+    display: none;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: #fff3cd;
+    border: 1px solid #e0a800;
+    color: #7a4d00;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font: 13px var(--panel-font-family);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+    z-index: 5;
+}
+
+/*
+ * Modal dialogs (native <dialog> element)
+ * ─────────────────────────────────────────────────────────────────────
+ * .app-modal is the shared shell for both popups on this page (the
+ * controls reference and Solution Statistics) — each only overrides its
+ * own max-width below. Using <dialog> + .showModal() means the browser
+ * handles centering, the dimmed backdrop (::backdrop below), and
+ * Escape-to-close natively — see modals.js for the one thing that still
+ * needs JS: closing on a backdrop click.
+ */
+.app-modal {
+    position: relative;
+    background: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 24px 28px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    font: 14px var(--panel-font-family);
+}
+.app-modal::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+.app-modal h2 {
+    margin-top: 0;
+    font-size: 18px;
+}
+.app-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    color: #666;
+}
+.app-modal-close:hover {
+    color: #000;
+}
+
+#controls-modal {
+    max-width: 480px;
+    width: 90%;
+}
+.controls-modal-list dt {
+    font-weight: bold;
+    margin-top: 12px;
+}
+.controls-modal-list dt:first-child {
+    margin-top: 0;
+}
+.controls-modal-list dd {
+    margin: 2px 0 0 0;
+    color: #333;
+}
+
+/*
+ * svg — Absolutely fill the .plot-container intrinsic-ratio wrapper
+ * ─────────────────────────────────────────────────────────────────────
+ * PROBLEM SOLVED: Setting width/height to "100%" on an SVG works in
+ * Chrome when the parent has aspect-ratio set, but Firefox and Safari
+ * cannot resolve a percentage height when the parent's height is 0 (as
+ * it is with the padding-bottom technique).  The solution is to take the
+ * SVG out of normal flow with position:absolute and stretch it to fill
+ * the padding-area of the container, which has a concrete pixel height
+ * regardless of how it was created.
+ *
+ * position:absolute / top:0 / left:0 / width:100% / height:100%:
+ *   The SVG sits exactly over the padding area of .plot-container.
+ *   All three browsers (Chrome, Firefox, Safari) correctly resolve
+ *   100% width and 100% height for an absolutely-positioned child.
+ *
+ * display:block — removes the small baseline gap that inline-level SVGs
+ *   create beneath themselves.
+ *
+ * touch-action:none — tells the browser not to intercept touch events
+ *   (e.g. for page scrolling or zooming) while a pointer is inside the
+ *   SVG.  Without this, on iOS and Android the first touchmove inside
+ *   the SVG is consumed by the browser scroll handler, making node drag
+ *   unreliable on tablets.
+ */
+svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+}
+
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+    
+/*
+ * .container — Responsive button-bar wrapper
+ * ─────────────────────────────────────────────────────────────────────
+ * flex-wrap:wrap — allows the three button groups to wrap onto a second
+ *   line instead of overflowing the viewport when the window is narrow
+ *   (e.g. portrait tablet or phone).
+ *
+ * gap / padding use clamp() — see .color-box below for a full
+ *   explanation of the clamp() technique.  Here it keeps the spacing
+ *   between groups proportional: tight on small screens, comfortable
+ *   at full width, and capped so it doesn't grow excessively on very
+ *   large monitors.
+ *     clamp(4px, 0.6vw, 8px):  at 800 px → 4.8 px; at 1200 px → 7.2 px
+ */
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    margin: 0 auto;
+    gap:     clamp(4px, 0.6vw, 8px);
+    padding: clamp(4px, 0.6vw, 8px);
+}
+
+/*
+ * .group — Individual bordered button cluster
+ * ─────────────────────────────────────────────────────────────────────
+ * flex-wrap:wrap — if the viewport is so narrow that even a single
+ *   group's buttons don't fit on one line, they wrap rather than
+ *   overflow.
+ *
+ * gap / padding use clamp() — scale fluidly with viewport width.
+ *   clamp(3px, 0.5vw, 6px):  floor 3 px, cap 6 px, preferred ~0.5% vw
+ *   clamp(4px, 0.8vw, 10px): floor 4 px, cap 10 px, preferred ~0.8% vw
+ */
+.group {
+    border: 1px solid black;
+    border-radius: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap:     clamp(3px, 0.5vw, 6px);
+    padding: clamp(4px, 0.8vw, 10px);
+}
+
+.group:last-child {
+    /* gap on .container handles spacing between groups uniformly;
+       no margin override is needed on the last child. */
+}
+
+.color-container {
+    position: relative;
+    display: inline-block;
+    
+}
+
+/*
+ * .color-box — Individual assignment button
+ * ─────────────────────────────────────────────────────────────────────
+ * PROBLEM SOLVED: Fixed pixel dimensions (100 × 50 px) meant buttons
+ * were unchanged on small screens, pushing groups off the right edge,
+ * and could grow awkwardly large on monitors wider than 1000 px.
+ *
+ * APPROACH — CSS clamp(minimum, preferred, maximum):
+ *   clamp() picks a value that is never below the minimum nor above the
+ *   maximum, with the preferred value (in viewport-width units, vw)
+ *   scaling fluidly between them.  This removes the need for multiple
+ *   @media breakpoints that cause abrupt jumps.
+ *
+ *   width:  clamp(52px, 8.5vw, 100px)
+ *     • 52 px  — minimum: buttons remain tappable on narrow phones
+ *     • 8.5vw  — preferred: ≈ 1/12 of the viewport, so ~12 buttons
+ *                fill the full width at any screen size
+ *     • 100 px — maximum: original design size; never exceeded on large
+ *                monitors so the bar doesn't spread across the screen
+ *
+ *   height: clamp(36px, 4.5vw, 50px)
+ *     • Scales proportionally with width so buttons don't become
+ *       disproportionately tall or flat at extremes.
+ *
+ *   font-size: clamp(10px, 1.1vw, 14px)
+ *     • Text shrinks with the button so it always fits inside without
+ *       overflow or line-breaking.
+ */
+.color-box {
+    width:  clamp(52px, 8.5vw, 100px);
+    height: clamp(36px, 4.5vw,  50px);
+    font-size: clamp(10px, 1.1vw, 14px);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/*
+ * .striped-rectangle — Unassigned-carbon pattern swatch
+ * Uses the same fluid clamp() dimensions as .color-box so the swatch
+ * stays the same size as the colour buttons at every viewport width.
+ */
+.striped-rectangle {
+    width:  clamp(52px, 8.5vw, 100px);
+    height: clamp(36px, 4.5vw,  50px);
+    background: repeating-linear-gradient(90deg, #ccc, #ccc 10px, #fff 10px, #fff 20px);
+}
+
+.color-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: black; /* Adjust text color as needed */
+}
+
+
+
+
+.orange { background-color: #FFA500; }
+.green { background-color: #98FB98; }
+.yellow { background-color: yellow; }
+.cyan { background-color: #00FFFF; }
+.grey { background-color: #808080; }
+.blue { background-color: #ADD8E6; }
+.red { background-color: #FF0000; }
+.white { background-color: #FFFFFF; } 
+
+.buttontooltip {
+    /* add a border */
+    border: 1px solid black;
+    visibility: hidden;
+    background-color: white;
+    color: black;
+    text-align: left;
+    border-radius: 5px;
+    padding: 10px;
+    position: absolute;
+    font: 16px var(--panel-font-family);
+    z-index: 1;
+    bottom: 125%; /* Position above the button */
+    left: 25%;
+    margin-left: 5px; /* Center the tooltip */
+    opacity: 0; /* Hide by default */
+    transition: opacity 0.3s; /* Smooth transition */
+    max-width: 600px; /* Set max-width for the tooltip */
+}
+
+.action-button {
+    position: relative; /* Needed for absolute positioning of tooltip */
+}
+
+.action-button:hover .buttontooltip {
+    visibility: visible;
+    opacity: 1; /* Show the tooltip on hover */
+}
+
+       /* Normal button styles */
+       button.normal {
+    background-color: #ADD8E6;
+    color: black;
+    border: 2px solid #ADD8E6; 
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+/* Sunken (clicked) button styles */
+button.sunken {
+    background-color: #dae3e6;
+    box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.2);
+    transform: translateY(2px);
+}
+
+/* Solution Statistics popup — shell styling is shared via .app-modal above */
+button.stats-warning {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+    color: #58151c;
+}
+button.stats-warning:hover {
+    background-color: #f1aeb5;
+}
+#statsModal {
+    max-width: 720px;
+    width: 90%;
+}
+#statsModal h3 {
+    margin-bottom: 4px;
+}
+#statsModal table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 16px;
+}
+#statsModal th, #statsModal td {
+    border: 1px solid #ddd;
+    padding: 4px 8px;
+    text-align: left;
+    font-size: 13px;
+}
+#statsModal th {
+    background: #f2f2f2;
+}
+.stats-empty {
+    color: #666;
+    font-style: italic;
+}
+.stats-summary-line {
+    margin: 2px 0;
+}
+
+/*
+ * Touch / coarse-pointer override
+ * ─────────────────────────────────────────────────────────────────────
+ * (pointer: coarse) matches any device whose primary input is imprecise
+ * (finger on a touchscreen), regardless of screen size.  Tablets in
+ * both orientations and phones match; desktop mice do not.
+ *
+ * The clamp() rules on .color-box already handle continuous scaling
+ * across all viewport widths.  This rule does only one thing: raises
+ * the *minimum* button height from 36 px to 44 px, which is the
+ * Apple/Google recommended minimum tap-target size for touch UIs.
+ * Width and font-size are left to their existing clamp() values.
+ *
+ * Note: the touch-action:none on the svg element (above) is the other
+ * half of touch support — it prevents iOS/Android from swallowing the
+ * first touchmove for scroll instead of passing it to D3's drag handler.
+ */
+@media (pointer: coarse) {
+    .color-box {
+        height: clamp(44px, 4.5vw, 60px);
+    }
+}
+
+/*
+ * Zoom/rotation counter-scaling for node text and edge strokes
+ * ─────────────────────────────────────────────────────────────────────
+ * --inverse-scale and --counter-rotate are set once per zoom/pan/rotate
+ * tick on #svg-image (see render()/rotateSVG() in view.js) and inherit
+ * down to every node/link element below it. This replaces what used to
+ * be four separate selectAll().attr() passes over every node on every
+ * tick with a single custom-property update.
+ *
+ * 12px/8px below are the only source of truth for font-size and cosy/hmbc
+ * edge width now — there's no longer a JS constant for either (removed
+ * from constants.js as part of this change, since a constant nothing
+ * reads is worse than no constant — it looks editable but silently isn't).
+ * Both are fixed values (not touch-dependent), which is what makes them
+ * safe to hardcode directly in CSS.
+ *
+ * Deliberately NOT covered here: circle radius (r) and text dy offset.
+ * Radius has several competing states (resting/hovered/hovered-neighbour/
+ * isolated) set imperatively from interactions.js, and any CSS rule for
+ * `r` would always take priority over those (SVG presentation attributes
+ * lose to any stylesheet rule, even a plain type selector), which would
+ * silently break hover sizing. dy's CSS support for SVG text is less
+ * consistently implemented across browsers than font-size/stroke-width/
+ * transform. Both stay JS-driven in render(), same as before.
+ */
+#svg-image {
+    --inverse-scale: 1;
+    --counter-rotate: 0deg;
+}
+
+.node-text-atomNumber,
+.node-text-ppm {
+    font-size: calc(12px * var(--inverse-scale));
+    transform: rotate(var(--counter-rotate));
+}
+
+.cosy-link,
+.hmbc-link {
+    stroke-width: calc(8px * var(--inverse-scale));
+}

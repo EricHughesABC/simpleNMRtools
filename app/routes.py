@@ -36,6 +36,7 @@ import utils.json_utils as jsonUtils
 import core.expectedmolecule as expectedmolecule
 from app.pipelines import PipelineError
 from app.pipelines import prediction_pipeline, sync_pipeline
+from app.pipelines import strip_comments
 
 bp = Blueprint("main", __name__)
 
@@ -464,6 +465,17 @@ def simpleMNOVAfinalHTML():
         new_node["id"] = id_now_mapping_dict[node["id"]]
         nodes_moved_new.append(new_node)
 
+    # exclusion_summary was embedded inside oldjsondata by the original
+    # solve (see _build_jinja_context) so it survives this round-trip;
+    # defaults to empty if absent (e.g. data from before this feature, or
+    # a caller that never embedded it)
+    try:
+        exclusion_summary = json.loads(json_data.get("oldjsondata", "{}")).get(
+            "exclusion_summary", {}
+        )
+    except (TypeError, ValueError, json.JSONDecodeError):
+        exclusion_summary = {}
+
     rtn_html = render_template(
         "d3molplotmnova_template.html",
         graph_edges=links_moved,
@@ -482,10 +494,12 @@ def simpleMNOVAfinalHTML():
         oldjsondata=json_data["oldjsondata"],
         best_results=json_data["best_results"],
         number_of_hmbc_cosy_subgraphs=json_data.get("number_of_hmbc_cosy_subgraphs", 'unknown'),
+        exclusion_summary=exclusion_summary,
     )
 
     rtn_html = rtn_html.replace("True", "true")
     rtn_html = rtn_html.replace("False", "false")
+    rtn_html = strip_comments.maybe_strip_for_delivery(rtn_html)
 
     hostname = jsonUtils.extract_hostname(
         json_data["oldjsondata"]
@@ -792,11 +806,13 @@ def _render_and_save(
         oldjsondata=jinja_template["oldjsondata"],
         best_results=jinja_template["best_results"],
         number_of_hmbc_cosy_subgraphs=jinja_template.get("number_of_hmbc_cosy_subgraphs", 'unknown'),
+        exclusion_summary=jinja_template.get("exclusion_summary", {}),
     )
 
     rtn_html = rtn_html.replace("True", "true").replace("False", "false")
     rtn_html = re.sub(r"np\.float64\(([\d\.]+)\)", r"\1", rtn_html)
     rtn_html = re.sub(r"np\.int64\(([\d]+)\)", r"\1", rtn_html)
+    rtn_html = strip_comments.maybe_strip_for_delivery(rtn_html)
 
     if machine_learning_opt_in:
         _save_result_to_db(jinja_template, hostname)

@@ -67,6 +67,18 @@ def run(problemdata_json, json_data: dict) -> dict:
         "best_mae": 0.0,
         "best_lae": 0.0,
     }
+    # This path shows already-labeled/ground-truth data rather than a
+    # solved prediction -- there's no snap/exclusion pipeline run here to
+    # report on, so the popup gets an empty-but-valid structure rather
+    # than nothing at all.
+    jinja_template.setdefault(
+        "exclusion_summary",
+        {
+            "hmbc": {"total": 0, "used": 0, "excluded": []},
+            "cosy": {"total": 0, "used": 0, "excluded": []},
+            "hsqc_clipcosy": {"total": 0, "used": 0, "excluded": []},
+        },
+    )
 
     logger.info("sync_pipeline: complete")
     return jinja_template

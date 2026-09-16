@@ -99,6 +99,27 @@ RANGE = "range"  # Range of the signal (start and end ppm)
 SIGNALTYPE = "signaltype"  # Type of signal (e.g., multiplet, singlet)
 COMPOUND = "Compound"  # Compound signal type
 
+# The old prob==0 accept/reject gate (scipy.stats.norm.pdf(...) reaching
+# literal float 0.0) never actually fired at the declared carbonSeparation/
+# protonSeparation value -- it fired at ~38.5755 standard deviations out,
+# empirically confirmed stable across scale=0.0025 to scale=1.0 (see
+# session notes). Every declared tolerance value in existing datasets was
+# tuned, knowingly or not, against that much wider *effective* boundary.
+# Applied inside within_tolerance() so the new explicit check reproduces the
+# old algorithm's actual results for any already-declared tolerance value,
+# without needing every dataset's carbonSeparation/protonSeparation to be
+# re-tuned. If those values are later set to realistic, honestly-intended
+# ppm windows instead, this multiplier should be revisited (likely reduced
+# toward 1.0) at the same time.
+EFFECTIVE_TOLERANCE_MULTIPLIER = 38.5755
+
+# Non-destructive exclusion tracking (snap/tidy stage): a correlation that
+# fails a tolerance/exact check is annotated and excluded from the solution
+# graph, never dropped from its table -- the original picked value and the
+# reason for exclusion stay queryable for reporting.
+USED_IN_SOLUTION = "used_in_solution"  # bool: participates in the solution graph
+EXCLUSION_REASON = "exclusion_reason"  # str: why not, when used_in_solution is False
+
 
 ATOMNUMBER = "atomNumber"  # Atom number in the molecule
 SYM_ATOMNUMBER = "sym_atomNumber"  # Symmetric atom number in the molecule

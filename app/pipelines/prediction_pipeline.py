@@ -281,7 +281,8 @@ def _build_jinja_context(
         ``d3molplotmnova_template.html``.
     """
     catoms_str = json.dumps(catoms_df.to_dict(orient="records"), indent=4)
-    json_data_str = json.dumps(json_data, indent=4)
+    exclusion_summary = solution.build_exclusion_summary()
+    json_data_str = json.dumps({**json_data, "exclusion_summary": exclusion_summary}, indent=4)
     dataFrom = (
         "nmrshiftdb2" if problemdata_json.prediction_from_nmrshiftdb2() else "mnova"
     )
@@ -307,6 +308,7 @@ def _build_jinja_context(
         "oldjsondata": json_data_str,
         "best_results": best_results,
         "number_of_hmbc_cosy_subgraphs": number_of_hmbc_cosy_subgraphs,
+        "exclusion_summary": exclusion_summary,
     }
 
 

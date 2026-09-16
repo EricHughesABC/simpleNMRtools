@@ -1,19 +1,28 @@
-"""
-Local development entry point.
+import argparse
+import os
 
-    python run.py
+from app import create_app
 
-Do NOT use this for PythonAnywhere — use wsgi.py there.
-"""
+app = create_app()
 
-from log_setup import setup_logging
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Run the simpleNMR Flask dev server.")
+    parser.add_argument(
+        "--debug-html",
+        action="store_true",
+        help=(
+            "Serve rendered HTML (d3molplotmnova_template.html) uncompressed, "
+            "with comments intact, for easier debugging in an editor/DevTools. "
+            "Sets SIMPLENMR_STRIP_HTML_COMMENTS=false for this process."
+        ),
+    )
+    args = parser.parse_args()
+    print(f"[run.py] args.debug_html = {args.debug_html}")
 
-setup_logging(log_level="DEBUG")
+    if args.debug_html:
+        os.environ["SIMPLENMR_STRIP_HTML_COMMENTS"] = "false"
 
-from app import create_app  # noqa: E402
-from app.config import DevelopmentConfig
+    print(f"[run.py] env var right before app.run() = {os.environ.get('SIMPLENMR_STRIP_HTML_COMMENTS')!r}")
 
-app = create_app(DevelopmentConfig)
-
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, use_reloader=False)
+        
