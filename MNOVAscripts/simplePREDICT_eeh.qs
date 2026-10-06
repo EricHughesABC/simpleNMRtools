@@ -85,6 +85,77 @@ function simplePREDICT_eeh(){
         return jsonobj;
     }
 
+    // Look for a previous export file (written by the "Export" button in
+    // the HTML page -- see exportToMnova() in export.js) sitting next to
+    // the mnova document, and pull out the "which experimental peak is
+    // attached to which fixed atom slot" state (nodes_now) at export time.
+    // atomNumber/x/y are fixed structural properties of the molecule
+    // (from the molfile and its RDKit depiction, same every run); what
+    // varies run to run is which experimental ppm gets attached to a
+    // given atomNumber -- decided fresh each time by the server's
+    // peak-to-atom matching, with no memory of a previous run unless we
+    // feed it back in here. The path is constructed the same way the HTML
+    // page names the file (workingDirectory + workingFilename +
+    // "_assignments_from_simplemnova.json"), so no extra input from the
+    // user is needed to find it.
+    //
+    // Returns an array of {atomNumber, ppm, x, y} objects (x/y are carried
+    // along for completeness but not needed server-side, since they
+    // follow deterministically from atomNumber) -- empty if no previous
+    // export is found, or if it cannot be read/parsed.
+    function readPreviousNodePositions(directoryPath, name) {
+
+        var positions = [];
+        var previousExportFilename = directoryPath + "/" + name + "_assignments_from_simplemnova.json";
+        var previousExportPath = new Dir(previousExportFilename);
+
+        if (!previousExportPath.fileExists(previousExportFilename)) {
+            print("No previous export file found at " + previousExportFilename);
+            return positions;
+        }
+
+        var fin = new File(previousExportFilename);
+        if (!fin.open(File.ReadOnly)) {
+            print("Could not open previous export file " + previousExportFilename);
+            return positions;
+        }
+
+        var sin = new TextStream(fin, 'UTF-8');
+        var jsonstr = sin.readAll();
+        fin.close();
+
+        var previousExport = {};
+        try {
+            previousExport = JSON.parse(jsonstr);
+        }
+        catch (e) {
+            print("Could not parse previous export file " + previousExportFilename);
+            print(e);
+            return positions;
+        }
+
+        var nodesNow = previousExport["nodes_now"];
+        if (nodesNow === undefined) {
+            print("Previous export file has no nodes_now entry");
+            return positions;
+        }
+
+        for (var i = 0; i < nodesNow.length; i++) {
+            var node = nodesNow[i];
+            if (node["atomNumber"] === undefined || node["ppm"] === undefined) {
+                continue;
+            }
+            positions.push({
+                "atomNumber": node["atomNumber"],
+                "ppm": node["ppm"],
+                "x": node["x"],
+                "y": node["y"]
+            });
+        }
+
+        return positions;
+    }
+
 
 
     // iterate through pages and print out what is on the page
@@ -674,6 +745,7 @@ function simplePREDICT_eeh(){
 
     dialogParams["calcSimpleNMR"] = chosen_spectra["calcSimpleNMR"];
     dialogParams["calcSimpleMNOVA"] = chosen_spectra["calcSimpleMNOVA"];
+    dialogParams["usePreviousPositions"] = chosen_spectra["usePreviousPositions"];
 
     var fout = new File(dialogParametersJsonFilename);
     if (fout.open(File.WriteOnly)) {
@@ -716,6 +788,28 @@ function simplePREDICT_eeh(){
     for( var i=0; i<spectra_with_peaks.length; i++){
         spectra["spectraWithPeaks"]["data"][i] = spectra_with_peaks[i];
 
+    }
+
+    // optionally carry forward the previous iteration's peak-to-atom
+    // assignment (which experimental ppm was attached to which fixed atom
+    // slot) so the server can restore it, ahead of its normal matching --
+    // see readPreviousNodePositions() above and _apply_previous_atom_assignments
+    // in core/nmrsolution.py
+    if (chosen_spectra["usePreviousPositions"]) {
+        var previousPositions = readPreviousNodePositions(result.directoryPath, result.name);
+
+        if (previousPositions.length > 0) {
+            spectra["previousNodePositions"] = {};
+            spectra["previousNodePositions"]["datatype"] = "previousNodePositions";
+            spectra["previousNodePositions"]["count"] = previousPositions.length;
+            spectra["previousNodePositions"]["data"] = {};
+            for (var i = 0; i < previousPositions.length; i++) {
+                spectra["previousNodePositions"]["data"][i] = previousPositions[i];
+            }
+        }
+        else {
+            MessageBox.warning("No previous node positions found to reuse - continuing without them.");
+        }
     }
 
     if( isObjectEmpty(spectra) ){

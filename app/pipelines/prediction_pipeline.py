@@ -107,8 +107,15 @@ def _transfer_hsqc_info(solution) -> None:
     solution.transfer_hsqc_info_to_h1()
 
 
-def _assign_carbons(solution) -> None:
+def _assign_carbons(solution, previous_positions: dict) -> None:
     """Initialise and run the C13 carbon-assignment step.
+
+    ``previous_positions`` (``{atomNumber: ppm}``, see
+    ``_previous_atom_assignments_lookup``) is threaded through to
+    ``attempt_assignment_CH3_CH2_CH1_to_C13_table``, which -- if the user
+    opted to reuse a previous iteration's positions -- force-assigns each
+    matching experimental peak back onto the same fixed atom slot it had
+    last time, ahead of the normal Hungarian/nearest-ppm matching.
 
     Raises
     ------
@@ -119,11 +126,63 @@ def _assign_carbons(solution) -> None:
     if rtn_msg != "ok":
         raise PipelineError(rtn_msg, rtn_num)
 
-    rtn_msg, rtn_num = solution.attempt_assignment_CH3_CH2_CH1_to_C13_table()
+    rtn_msg, rtn_num = solution.attempt_assignment_CH3_CH2_CH1_to_C13_table(
+        previous_positions=previous_positions
+    )
     if rtn_msg != "ok":
         raise PipelineError(rtn_msg, rtn_num)
 
     solution.update_assignments_expt_dataframes()
+
+
+def _previous_atom_assignments_lookup(json_data: dict) -> dict:
+    """Parse the optional ``previousNodePositions`` block into a lookup.
+
+    ``json_data`` may carry this block in the same ``{datatype, count,
+    data}`` shape used elsewhere in the mnova payload, where each ``data``
+    entry is ``{"atomNumber": ..., "ppm": ...}``. This is the "which
+    experimental peak is currently attached to which fixed atom slot"
+    state exported from a previous iteration's HTML (``exportToMnova`` in
+    export.js) and fed back in by ``simplePREDICT_eeh.qs``
+    (``readPreviousNodePositions``).
+
+    Why atomNumber, not ppm, is the key here (the reverse of an earlier,
+    incorrect attempt at this feature): atomNumber/x/y/ppm_calculated are
+    fixed structural properties of the molecule, straight from the molfile
+    and its RDKit depiction -- the same every run. What varies is which
+    experimental peak (ppm) gets *attached* to a given atom slot, decided
+    fresh each run by attempt_assignment_CH3_CH2_CH1_to_C13_table's
+    Hungarian/nearest-ppm matching, with no memory of a previous run. This
+    mirrors exactly what dragging a node onto another and clicking
+    "Update" does client-side (see updateMovedAtoms/commitMoves in
+    templates/partials/js/moves.js): it moves ppm/H1_ppm/jCouplingVals
+    onto the destination slot, while that slot's atomNumber/x/y/
+    ppm_calculated never change. So "atom slot K had experimental peak P
+    attached" is the stable, meaningful thing to replay -- not "peak P was
+    drawn at position (x, y)".
+
+    Returns
+    -------
+    dict
+        ``{atomNumber: ppm}``, empty if the block is absent/empty or
+        malformed. atomNumber is left as whatever type it arrives as
+        (typically a str); matching against it is done downstream.
+    """
+    block = json_data.get("previousNodePositions")
+    if not block or not block.get("data"):
+        return {}
+
+    positions = {}
+    for entry in block["data"].values():
+        atom_number = entry.get("atomNumber")
+        if atom_number is None:
+            continue
+        try:
+            positions[atom_number] = float(entry["ppm"])
+        except (KeyError, TypeError, ValueError):
+            continue
+
+    return positions
 
 
 def _build_graph(solution, json_data) -> tuple:
@@ -208,7 +267,10 @@ def _run_simulated_annealing(solution, json_data, jsonGraphData, catoms_df) -> t
     """Run (or skip) simulated annealing and copy optimised values back.
 
     Simulated annealing is skipped when either the SA flag in the JSON data
-    is False or the predicted weight is zero.
+    is False or the predicted weight is zero. Per Eric: this always runs
+    from whatever assignment it's handed (including one seeded by
+    _assign_carbons's previous_positions) and is free to change any node --
+    no special pinning of previously-restored peaks against SA reassignment.
 
     Returns
     -------
@@ -346,7 +408,9 @@ def run(problemdata_json, json_data: dict) -> dict:
     _transfer_hsqc_info(solution)
     logger.debug("prediction_pipeline: HSQC info transferred")
 
-    _assign_carbons(solution)
+    previous_positions = _previous_atom_assignments_lookup(json_data)
+
+    _assign_carbons(solution, previous_positions)
     logger.debug("prediction_pipeline: carbons assigned")
 
     jsonGraphData, jsonGraphData_mol, shortest_paths, number_of_hmbc_cosy_subgraphs = _build_graph(solution, json_data)

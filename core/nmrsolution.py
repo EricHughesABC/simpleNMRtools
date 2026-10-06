@@ -602,7 +602,86 @@ class NMRsolution:
             tab_headings=tab_headings,
         )
 
-    def attempt_assignment_CH3_CH2_CH1_to_C13_table(self):
+    def _apply_previous_atom_assignments(self, c13, previous_positions, consumed_atomidx, consumed_c13_idx, tolerance=1e-3):
+        """Force experimental peaks back onto the same fixed atom slot they
+        were assigned to in a previous iteration's exported HTML.
+
+        ``previous_positions`` is ``{atomNumber: ppm}`` -- see
+        ``app.pipelines.prediction_pipeline._previous_atom_assignments_lookup``.
+        This mirrors, server-side, exactly what dragging a node onto another
+        and clicking "Update" does client-side (``updateMovedAtoms``/
+        ``commitMoves`` in templates/partials/js/moves.js): the destination
+        slot's atomNumber/x/y/ppm_calculated are untouched -- only the
+        experimental ppm (and its associated H1/jCoupling data, handled
+        elsewhere once atom_idx is set) moves onto it.
+
+        Only called when the user has opted in to reusing previous
+        positions -- so a match here always takes priority over what the
+        Hungarian/nearest-ppm matching below would otherwise pick (updates
+        ``consumed_atomidx``/``consumed_c13_idx`` so it leaves these rows
+        alone). Matching requires the same numProtons (CH-type) as a basic
+        sanity check; a peak whose CH-type classification has genuinely
+        changed since the previous export is left for the normal matching
+        instead of being force-fit onto a slot it may no longer belong to.
+
+        Mutates ``c13``, ``consumed_atomidx`` and ``consumed_c13_idx`` in
+        place. Simulated annealing (if it subsequently runs) is free to
+        reassign these rows again -- no pinning against SA is done here.
+        """
+        if not previous_positions:
+            return
+
+        molprops_df = self.molprops_df
+        # Map atomNumber (normalized to str) -> the row's own DataFrame
+        # index, via a vectorized column op -- not iterrows()/a single-row
+        # .loc[]/.iloc[] lookup, either of which would materialize the row
+        # as a pandas Series and upcast it to one common dtype when other
+        # columns in that row are floats (atomNumber 37 silently becomes
+        # 37.0), breaking string-key matching against previous_positions
+        # (clean ints/strings from JSON). Every field read below uses
+        # .at[row_idx, col] instead, which reads a single scalar straight
+        # from its own column's dtype -- no row-level upcast possible.
+        atomnumber_str = molprops_df[g.ATOMNUMBER].astype(str)
+        index_by_atomnumber = dict(zip(atomnumber_str, molprops_df.index))
+
+        for atom_number, prev_ppm in previous_positions.items():
+            key = str(atom_number)
+            if key not in index_by_atomnumber:
+                continue
+
+            row_idx = index_by_atomnumber[key]
+            atom_idx = molprops_df.at[row_idx, g.ATOMIDX]
+            if atom_idx in consumed_atomidx:
+                continue  # slot already spoken for this run
+
+            candidates = c13[
+                (~c13.index.isin(consumed_c13_idx))
+                & (c13[g.NUMPROTONS] == molprops_df.at[row_idx, g.NUMPROTONS])
+                & ((c13[g.PPM] - prev_ppm).abs() <= tolerance)
+            ]
+            if candidates.empty:
+                continue
+
+            c13_idx = candidates.index[0]
+
+            c13.at[c13_idx, g.ATOMIDX] = molprops_df.at[row_idx, g.ATOMIDX]
+            c13.at[c13_idx, g.SYM_ATOMIDX] = molprops_df.at[row_idx, g.SYM_ATOMIDX]
+            c13.at[c13_idx, g.ATOMNUMBER] = molprops_df.at[row_idx, g.ATOMNUMBER]
+            c13.at[c13_idx, g.SYM_ATOMNUMBER] = molprops_df.at[row_idx, g.SYM_ATOMNUMBER]
+            c13.at[c13_idx, g.X] = molprops_df.at[row_idx, g.X]
+            c13.at[c13_idx, g.Y] = molprops_df.at[row_idx, g.Y]
+            c13.at[c13_idx, g.PPM_CALCULATED] = molprops_df.at[row_idx, g.PPM]
+
+            consumed_atomidx.add(atom_idx)
+            consumed_c13_idx.add(c13_idx)
+
+        if consumed_c13_idx:
+            logger.info(
+                f"attempt_assignment_CH3_CH2_CH1_to_C13_table: restored "
+                f"{len(consumed_c13_idx)} previous atom assignment(s)"
+            )
+
+    def attempt_assignment_CH3_CH2_CH1_to_C13_table(self, previous_positions=None):
         """
         Attempts to assign CH3, CH2, CH1, and CH0 groups from the molecular properties DataFrame
         (`molprops_df`) to the C13 table (`c13`) based on the number of protons and chemical shift (ppm)
@@ -610,11 +689,28 @@ class NMRsolution:
         optimal assignment (Hungarian algorithm) or nearest-neighbor matching, and updates the C13 table
         with corresponding atom indices and properties. If the assignment cannot be completed due to
         mismatched row counts, an error table is rendered for debugging.
+
+        ``previous_positions`` (optional ``{atomNumber: ppm}``): when the
+        user has opted to reuse a previous iteration's positions, matching
+        experimental peaks are force-assigned back onto the same atom slot
+        ahead of everything below -- see ``_apply_previous_atom_assignments``.
+
         Returns:
             tuple: ("ok", 200) if assignment is successful, or (rendered_html, 400) if an error occurs.
         """
 
         c13 = self.c13
+
+        # Rows pre-decided ahead of the group matching below: evidence-based
+        # CH3/CH1 rows (existing behaviour) plus, if the user opted in,
+        # rows restored from a previous iteration's export (new -- always
+        # takes precedence, applied first).
+        consumed_atomidx = set()
+        consumed_c13_idx = set()
+
+        self._apply_previous_atom_assignments(
+            c13, previous_positions, consumed_atomidx, consumed_c13_idx
+        )
 
         # Group definitions are normally four independent CHn buckets. But if
         # CH3/CH1 needed pooling during symmetry reconciliation (no genuine
@@ -640,19 +736,22 @@ class NMRsolution:
         # and CH1 rows strictly, within their own exact type, first -- and
         # remove the atoms/rows they consume from the pool before any
         # pooled matching happens for the remaining (non-evidence) rows.
-        consumed_atomidx = set()
-        consumed_c13_idx = set()
         if pool_ch3_ch1 and "evidence_based" in c13.columns:
             for exact_label, mask_fn, nProtons in (
                 (g.CH3, lambda df: df[g.CH3], 3),
                 (g.CH1, lambda df: df[g.CH1], 1),
             ):
                 evidence_c13 = c13[
-                    (c13[g.NUMPROTONS] == nProtons) & (c13["evidence_based"])
+                    (c13[g.NUMPROTONS] == nProtons)
+                    & (c13["evidence_based"])
+                    & (~c13.index.isin(consumed_c13_idx))
                 ]
                 if evidence_c13.empty:
                     continue
-                df_exact = self.molprops_df[mask_fn(self.molprops_df)]
+                df_exact = self.molprops_df[
+                    mask_fn(self.molprops_df)
+                    & (~self.molprops_df[g.ATOMIDX].isin(consumed_atomidx))
+                ]
                 try:
                     newly_consumed = self._match_CHn_group(df_exact, evidence_c13)
                 except ValueError:
@@ -671,12 +770,7 @@ class NMRsolution:
 
         if pool_ch3_ch1:
             groups = [
-                (
-                    g.CH3plusCH1,
-                    lambda df: (df[g.CH3] | df[g.CH1])
-                    & (~df[g.ATOMIDX].isin(consumed_atomidx)),
-                    [3, 1],
-                ),
+                (g.CH3plusCH1, lambda df: (df[g.CH3] | df[g.CH1]), [3, 1]),
                 (g.CH2, lambda df: df[g.CH2], [2]),
                 (g.CH0, lambda df: df[g.CH0], [0]),
             ]
@@ -690,11 +784,19 @@ class NMRsolution:
 
         for CHn, mask_fn, nProtons_list in groups:
 
-            df_CHn = self.molprops_df[mask_fn(self.molprops_df)]
-            c13_CHn = c13[c13[g.NUMPROTONS].isin(nProtons_list)]
-            if CHn == g.CH3plusCH1 and consumed_c13_idx:
-                # already matched strictly, above -- don't reprocess
-                c13_CHn = c13_CHn[~c13_CHn.index.isin(consumed_c13_idx)]
+            # consumed_atomidx/consumed_c13_idx exclusion now applies to
+            # every group uniformly (previously only CH3plusCH1 excluded
+            # them, since only the evidence-based pass populated them; now
+            # the previous-positions pass above can populate them ahead of
+            # any group, CH0 included).
+            df_CHn = self.molprops_df[
+                mask_fn(self.molprops_df)
+                & (~self.molprops_df[g.ATOMIDX].isin(consumed_atomidx))
+            ]
+            c13_CHn = c13[
+                c13[g.NUMPROTONS].isin(nProtons_list)
+                & (~c13.index.isin(consumed_c13_idx))
+            ]
 
             if c13_CHn.empty:
                 logger.debug(f"{CHn}: no experimental peaks, skipping")

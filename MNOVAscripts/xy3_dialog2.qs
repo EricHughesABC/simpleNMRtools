@@ -22,17 +22,8 @@ function xy3_dialog2(spectra_available, exptIdentifierIndex, dialogParameters, e
     var checkboxes1 = {};
     var comboboxes1 = {};
 
-    var NMRexpts = ["SKIP", 
-                    "H1_1D", 
-                    "C13_1D", 
-                    "DEPT135", 
-                    "PureShift", 
-                    "COSY", 
-                    "HSQC", 
-                    "HMBC", 
-                    "HSQC_CLIPCOSY", 
-                    "DDEPTCH3ONLY", 
-                    "NOESY"];
+    // var NMRexpts = ["SKIP", "H1_1D", "C13_1D", "DEPT135", "PureShift", "COSY", "HSQC", "HMBC", "HSQC_CLIPCOSY", "DDEPT_CH3_ONLY", "NOESY"];
+    var NMRexpts = ["SKIP", "H1_1D", "C13_1D", "DEPT135", "PureShift", "COSY", "HSQC", "HMBC", "HSQC_CLIPCOSY", "DDEPTCH3ONLY", "NOESY"];
 
     // create checkboxes for each spectrum in the list spectra_available
     for (var i = 0; i < spectra_available.length; i++) {
@@ -45,6 +36,17 @@ function xy3_dialog2(spectra_available, exptIdentifierIndex, dialogParameters, e
         }            
     }
 
+    // for (var i = 0; i < spectra_available.length; i++) {
+    //     checkboxes1[spectra_available[i]] = new LineEdit();
+    //     checkboxes1[spectra_available[i]].text = spectra_available[i];
+    //     checkboxes1[spectra_available[i]].enabled = false;   // read-only, greyed, not editable
+
+    //     comboboxes1[spectra_available[i]] = new ComboBox();
+    //     for( var j = 0; j < NMRexpts.length; j++ ){        
+    //         comboboxes1[spectra_available[i]].addItem(NMRexpts[j]);                           
+    //     }            
+    // }
+
     // set the expt identifier to the combo box
 
     if ( exptIdentifierIndex.length == spectra_available.length ){
@@ -54,8 +56,12 @@ function xy3_dialog2(spectra_available, exptIdentifierIndex, dialogParameters, e
     }
 
     // create a groupbox and add the checkboxes to it
+    // var gbSpectra = new GroupBox();
+    // gbSpectra.title = "Choose Spectra to use in Analysis";
+
+    // idspectra_dialog.qs
     var gbSpectra = new GroupBox();
-    gbSpectra.title = "Choose Spectra to use in Analysis";
+    gbSpectra.title = "Choose Spectra to use in the Analysis via dropdowns. Leave  the checkboxes ticked";
 
     for (var key in checkboxes1) {
         gbSpectra.add(checkboxes1[key], comboboxes1[key]);
@@ -63,17 +69,21 @@ function xy3_dialog2(spectra_available, exptIdentifierIndex, dialogParameters, e
 
     dialog.add(gbSpectra);
 
-    // set the default values for the checkboxes based on  the list of spectra  in the document
+    // // set the default values for the checkboxes based on  the list of spectra  in the document
 
+
+    // for (var key in checkboxes1) {
+    //     if (spectra_available.indexOf(key) != -1) {
+    //         checkboxes1[key].checked = true;
+    //     } else {
+    //         checkboxes1[key].checked = false;
+    //         // set enabled to false
+    //         checkboxes1[key].enabled = false;
+    //     }
+    // }
 
     for (var key in checkboxes1) {
-        if (spectra_available.indexOf(key) != -1) {
-            checkboxes1[key].checked = true;
-        } else {
-            checkboxes1[key].checked = false;
-            // set enabled to false
-            checkboxes1[key].enabled = false;
-        }
+        checkboxes1[key].checked = true;
     }
 
     // add a radio button group to predict the assignment of the peaks
@@ -161,6 +171,25 @@ function xy3_dialog2(spectra_available, exptIdentifierIndex, dialogParameters, e
     // add the group box to the dialog
     dialog.add(GroupBox_MachineLearningKeep);
 
+    // add a group box to let the user carry forward manually-moved node
+    // positions from a previous iteration's exported HTML (see
+    // exportToMnova() in export.js, and readPreviousNodePositions() in
+    // simplePREDICT_eeh.qs). This is only ever used as a starting-position
+    // hint for the layout -- it has no effect on assignment/solving.
+    var GroupBox_UsePreviousPositions = new GroupBox();
+    var tickButton_UsePreviousPositions = new CheckBox();
+    tickButton_UsePreviousPositions.text = "Use node positions from previous export, if found (starting hint only)";
+
+    // set the checked property from the saved dialog parameters
+    if (dialogParameters["usePreviousPositions"]) {
+        tickButton_UsePreviousPositions.checked = true;
+    } else {
+        tickButton_UsePreviousPositions.checked = false;
+    }
+
+    GroupBox_UsePreviousPositions.add(tickButton_UsePreviousPositions);
+    dialog.add(GroupBox_UsePreviousPositions);
+
     // display the dialog and return the list of checked checkboxes
     if (!dialog.exec()) {
         return undefined;
@@ -195,6 +224,7 @@ function xy3_dialog2(spectra_available, exptIdentifierIndex, dialogParameters, e
         // return the simulated annealing boolean value
         rtn_dict["simulatedAnnealing"] = tickButton_SimulatedAnnealing.checked;
         rtn_dict["ml_consent"] = tickButton_MachineLearningKeep.checked;
+        rtn_dict["usePreviousPositions"] = tickButton_UsePreviousPositions.checked;
 
         print(rtn_dict);
         return rtn_dict;
