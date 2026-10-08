@@ -206,6 +206,8 @@
     var best_results = {{best_results}};
     // number_of_hmbc_cosy_subgraphs
     var number_of_hmbc_cosy_subgraphs = {{number_of_hmbc_cosy_subgraphs}};
+    // peak_map: JASON peak IDs per carbon group and correlation (null unless the data came from JASON)
+    var peak_map = {{ peak_map | default('null') }};
 
     var svg_bckgrnd_image_str = `{{svg_container}}`;
     {% endautoescape %}

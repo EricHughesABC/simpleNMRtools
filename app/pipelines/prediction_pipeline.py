@@ -21,6 +21,7 @@ Public API
 
 import copy
 import json
+import math
 
 import networkx as nx
 from networkx.readwrite import json_graph
@@ -31,6 +32,7 @@ from config.globals import SVG_DIMENSIONS as svgDimensions
 from core.simulated_annealing_claude import SimulatedAnnealing2
 from app.pipelines import PipelineError
 from config.globals import SIMULATED_ANNEALING_RUNS, SIMULATED_ANNEALING_COOLING_RATE
+import config.globals as g
 
 
 # ── Internal utilities ────────────────────────────────────────────────────────
@@ -323,6 +325,94 @@ def _run_simulated_annealing(solution, json_data, jsonGraphData, catoms_df) -> t
     return jsonGraphData, best_results
 
 
+def _jason_id(row):
+    """The row's JEOL universal ID, or None (non-JASON input, or no ID)."""
+    value = row.get(g.JASON_ID) if g.JASON_ID in row.index else None
+    return None if value is None or (isinstance(value, float) and math.isnan(value)) else str(value)
+
+
+def _build_peak_map(solution, nodes_before, nodes_after):
+    """Link each displayed carbon group, and each correlation, to its JASON peaks.
+
+    Only for JASON input: returns None unless the input peaks carry JEOL
+    universal IDs, so MNOVA / TopSpin / NMRium results are unchanged.
+
+    The map is keyed by the node ``id`` the viewer exports (the atom a carbon
+    group sits on after simulated annealing; it travels with the group when
+    the user moves a shift)::
+
+        {"nodes": {"<node id>": {"c13_ppm": float,
+                                 "c13_1d": jason_id | None,       # 1D 13C peak
+                                 "hsqc": [{"jason_id", "h_ppm", "c_ppm"}]}},
+         "correlations": [{"kind": "HMBC" | "COSY", "jason_id",
+                           "delta2_node", "delta1_node",          # node at each end
+                           "delta2", "delta1"}]}                  # snapped positions
+
+    ``delta2`` / ``delta1`` use the names of the input JSON, i.e. JASON's
+    Pos[0] / Pos[1]. They are simpleNMR's snapped positions: where the
+    client moves each HMBC/COSY peak so JASON draws the correlation.
+    """
+    tables = (solution.c13, solution.hsqc, solution.hmbc, solution.cosy)
+    if not any(g.JASON_ID in t.columns and t[g.JASON_ID].notna().any() for t in tables):
+        return None
+
+    # The peak tables refer to atoms as assigned before simulated annealing;
+    # the viewer uses the atoms after it. nodes_before is a copy of the graph
+    # nodes taken before annealing (process_results overwrites
+    # jsonGraphData["nodes"] with the annealed nodes). The annealed list is
+    # built in the same order and each moved node keeps its group's ppm, so
+    # pair them by position and check the ppm.
+    nodes, moved = nodes_before, nodes_after
+    if len(nodes) != len(moved):
+        logger.warning("peak map skipped: nodes and moved_nodes differ in length")
+        return None
+    to_node = {}
+    for before, after in zip(nodes, moved):
+        if not math.isclose(float(before["ppm"]), float(after["ppm"]), abs_tol=1e-6):
+            logger.warning(f"peak map skipped: node {before['id']} and moved node "
+                           f"{after['id']} have different ppm")
+            return None
+        to_node[int(before["id"])] = str(int(after["id"]))
+
+    def node_of(atom_idx):
+        if atom_idx is None or (isinstance(atom_idx, float) and math.isnan(atom_idx)):
+            return None
+        return to_node.get(int(atom_idx))
+
+    hsqc = solution.active_rows(solution.hsqc)
+    peak_nodes = {}
+    for _, row in solution.c13.iterrows():
+        node = node_of(row.get("atom_idx"))
+        if node is None:
+            continue
+        peak_nodes[node] = {
+            "c13_ppm": float(row["ppm"]),
+            "c13_1d": _jason_id(row),          # None when there is no 1D 13C
+            "hsqc": [
+                {"jason_id": _jason_id(h), "h_ppm": float(h[g.F2_PPM]), "c_ppm": float(h[g.F1_PPM])}
+                for _, h in hsqc[hsqc["f1_i"] == row["f1_i"]].iterrows()
+            ],
+        }
+
+    correlations = []
+    for kind, table in (("HMBC", solution.hmbc), ("COSY", solution.cosy)):
+        for _, row in solution.active_rows(table).iterrows():
+            delta2_node = node_of(row.get("f2_atom_idx"))   # HMBC: the proton's carbon
+            delta1_node = node_of(row.get("f1_atom_idx"))   # HMBC: the carbon
+            if delta2_node is None or delta1_node is None or _jason_id(row) is None:
+                continue
+            correlations.append({
+                "kind": kind,
+                "jason_id": _jason_id(row),
+                "delta2_node": delta2_node,
+                "delta1_node": delta1_node,
+                "delta2": float(row[g.F2_PPM]),
+                "delta1": float(row[g.F1_PPM]),
+            })
+
+    return {"nodes": peak_nodes, "correlations": correlations}
+
+
 def _build_jinja_context(
     solution,
     problemdata_json,
@@ -333,6 +423,7 @@ def _build_jinja_context(
     catoms_df,
     best_results,
     number_of_hmbc_cosy_subgraphs,
+    nodes_before_annealing=None,
 ) -> dict:
     """Assemble the Jinja2 template context dict from all pipeline outputs.
 
@@ -371,6 +462,11 @@ def _build_jinja_context(
         "best_results": best_results,
         "number_of_hmbc_cosy_subgraphs": number_of_hmbc_cosy_subgraphs,
         "exclusion_summary": exclusion_summary,
+        # JSON text; "null" unless the input came from JASON
+        "peak_map": json.dumps(
+            _build_peak_map(solution, nodes_before_annealing, jsonGraphData["moved_nodes"])
+            if nodes_before_annealing is not None else None
+        ),
     }
 
 
@@ -419,6 +515,11 @@ def run(problemdata_json, json_data: dict) -> dict:
     catoms_df = _build_catoms_df(solution)
     logger.debug("prediction_pipeline: catoms_df prepared")
 
+    # Copy of the graph nodes before annealing: the peak map translates the
+    # peak tables' atoms (pre-annealing) to the final node ids, and
+    # process_results replaces jsonGraphData["nodes"] with the annealed nodes.
+    nodes_before_annealing = copy.deepcopy(jsonGraphData["nodes"])
+
     jsonGraphData, best_results = _run_simulated_annealing(
         solution, json_data, jsonGraphData, catoms_df
     )
@@ -434,6 +535,7 @@ def run(problemdata_json, json_data: dict) -> dict:
         catoms_df,
         best_results,
         number_of_hmbc_cosy_subgraphs,
+        nodes_before_annealing,
     )
     logger.info("prediction_pipeline: complete")
     return context

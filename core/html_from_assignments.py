@@ -305,6 +305,7 @@ def get_2D_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
         - 'Intensity': Peak intensity.
         - 'Type': Peak type.
         - 'Annotation': Peak annotation.
+        - 'jason_id': JEOL universal ID of the peak (None unless the input came from JASON).
     Notes
     -----
     - Only peaks present in the JSON data are included.
@@ -354,11 +355,14 @@ def get_2D_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
                 json_data[technique][g.PEAKS][g.DATA][str(i)][g.INTENSITY],
                 json_data[technique][g.PEAKS][g.DATA][str(i)][g.TYPE],
                 annotation,
+                # JEOL universal ID of the peak; only JASON input carries one
+                json_data[technique][g.PEAKS][g.DATA][str(i)].get(g.JASON_ID),
             ]
         )
 
     df = pd.DataFrame(
-        df_data, columns=["f2 (ppm)", "f1 (ppm)", "Intensity", "Type", "Annotation"]
+        df_data,
+        columns=["f2 (ppm)", "f1 (ppm)", "Intensity", "Type", "Annotation", g.JASON_ID],
     )
 
     # sort the dataframe by f2 (ppm), descending order, reset the index and start the index at 1
@@ -395,10 +399,11 @@ def get_1d_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
                         pks_data[pk][g.DELTA1],
                         pks_data[pk][g.INTENSITY],
                         pks_data[pk][g.TYPE],
+                        pks_data[pk].get(g.JASON_ID),  # JEOL universal ID (JASON input only)
                     ]
                 )
 
-        df = pd.DataFrame(df_data, columns=["ppm", "Intensity", "Type"])
+        df = pd.DataFrame(df_data, columns=["ppm", "Intensity", "Type", g.JASON_ID])
 
         # print(f"\nget_1d_dataframe_from_json {technique}:\n\n {df}\n")
 
@@ -416,15 +421,19 @@ def get_1d_dataframe_from_json(json_data: dict, technique: str) -> pd.DataFrame:
                     json_data[technique][g.MULTIPLETS][g.DATA][i]["nH"],
                     json_data[technique][g.MULTIPLETS][g.DATA][i]["category"],
                 ]
+                jason_id = json_data[technique][g.MULTIPLETS][g.DATA][i].get(g.JASON_ID)
 
                 # create a string from the list of J values and add it to df_data
                 j_values = json_data[technique][g.MULTIPLETS][g.DATA][i]["jvals"]
                 j_string = ", ".join([f"{j:1.3}" for j in j_values])
                 j_string = f"{j_string}"
                 row.append(j_string)
+                row.append(jason_id)
                 df_data.append(row)
 
-        df = pd.DataFrame(df_data, columns=["ppm", "Integral", "H's", "Class", "J's"])
+        df = pd.DataFrame(
+            df_data, columns=["ppm", "Integral", "H's", "Class", "J's", g.JASON_ID]
+        )
         df["Integral"] = df["Integral"] / normValue
 
     # sort the dataframe by f2 (ppm), descending order, reset the index and start the index at 1

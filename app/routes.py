@@ -807,6 +807,7 @@ def _render_and_save(
         best_results=jinja_template["best_results"],
         number_of_hmbc_cosy_subgraphs=jinja_template.get("number_of_hmbc_cosy_subgraphs", 'unknown'),
         exclusion_summary=jinja_template.get("exclusion_summary", {}),
+        peak_map=jinja_template.get("peak_map", "null"),
     )
 
     rtn_html = rtn_html.replace("True", "true").replace("False", "false")

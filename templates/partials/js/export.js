@@ -80,6 +80,10 @@ function exportToMnova() {
     nodes_data['workingFilename']  = workingFilename;
     nodes_data['title']            = title;
     nodes_data['number_of_hmbc_cosy_subgraphs'] = number_of_hmbc_cosy_subgraphs;   
+    // JASON only: which JASON peaks belong to each carbon group and correlation
+    if (typeof peak_map !== 'undefined' && peak_map !== null) {
+        nodes_data['peak_map'] = peak_map;
+    }
 
     // Copy working directory to clipboard. Fire-and-forget: do NOT await
     // this. Some embedding environments (e.g. a QWebEngineView with no

@@ -97,6 +97,7 @@ J_COUPLING_CLASS = "jCouplingClass"  # J-coupling class (e.g., doublet, triplet)
 J_COUPLING_VALS = "jCouplingVals"  # J-coupling
 RANGE = "range"  # Range of the signal (start and end ppm)
 SIGNALTYPE = "signaltype"  # Type of signal (e.g., multiplet, singlet)
+JASON_ID = "jason_id"  # JEOL universal ID of the peak/multiplet (JASON input only; None otherwise)
 COMPOUND = "Compound"  # Compound signal type
 
 # The old prob==0 accept/reject gate (scipy.stats.norm.pdf(...) reaching

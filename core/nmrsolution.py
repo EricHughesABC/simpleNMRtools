@@ -26,6 +26,15 @@ def warning_dialog(return_message, title_message, qstarted=True):
     logger.warning(return_message)
 
 
+def _keep_jason_id(source: pd.DataFrame, columns: list) -> list:
+    """Column list plus g.JASON_ID when the source table has it (JASON input).
+
+    Used wherever a working table is cut down to a few named columns, so the
+    JEOL universal ID of each peak travels with its row.
+    """
+    return list(columns) + ([g.JASON_ID] if g.JASON_ID in source.columns else [])
+
+
 class NMRsolution:
     """
     Represents a solution for NMR experiment data analysis and assignment.
@@ -1171,6 +1180,9 @@ class NMRsolution:
         )
         self.h1_df[g.PPM] = self.hsqc_df[g.F2_PPM].copy()
         self.h1_df[g.SIGNALTYPE] = self.hsqc_df[g.SIGNALTYPE].copy()
+        if g.JASON_ID in self.hsqc_df.columns:
+            # the proton's signal is its HSQC peak
+            self.h1_df[g.JASON_ID] = self.hsqc_df[g.JASON_ID].copy()
 
         # keep only rows where signaltype is 'Compound' or "" (empty)
         self.h1_df = self.h1_df[
@@ -1638,11 +1650,11 @@ class NMRsolution:
             self.h1 = self.pureshift_df[
                 (self.pureshift_df[g.SIGNALTYPE] == g.COMPOUND)
                 | (self.pureshift_df[g.SIGNALTYPE] == 0)
-            ][[g.PPM]].copy()
+            ][_keep_jason_id(self.pureshift_df, [g.PPM])].copy()
             if self.h1.empty:
                 # maybe user forgot to set type to compound so search for "" in Type column
                 self.h1 = self.pureshift_df[self.pureshift_df[g.SIGNALTYPE] == ""][
-                    [g.PPM]
+                    _keep_jason_id(self.pureshift_df, [g.PPM])
                 ].copy()
                 self.h1[g.SIGNALTYPE] = g.COMPOUND
             if self.h1.empty:
@@ -1651,7 +1663,7 @@ class NMRsolution:
                 )
                 return False, "h1 is empty"
         elif not self.h1_df.empty:
-            self.h1 = self.h1_df[[g.PPM]].copy()
+            self.h1 = self.h1_df[_keep_jason_id(self.h1_df, [g.PPM])].copy()
         else:
             warning_dialog(
                 "H1_df or pureshift_df excel sheet is empty",
@@ -1681,10 +1693,12 @@ class NMRsolution:
         else:
             self.c13 = self.c13_df[
                 (self.c13_df[g.SIGNALTYPE] == g.COMPOUND) | (self.c13_df[g.SIGNALTYPE] == 0)
-            ][[g.PPM]].copy()
+            ][_keep_jason_id(self.c13_df, [g.PPM])].copy()
             if self.c13.empty:
                 # maybe user forgot to set type to compound so search for "" in Type column
-                self.c13 = self.c13_df[self.c13_df[g.SIGNALTYPE] == ""][[g.PPM]].copy()
+                self.c13 = self.c13_df[self.c13_df[g.SIGNALTYPE] == ""][
+                    _keep_jason_id(self.c13_df, [g.PPM])
+                ].copy()
                 self.c13[g.SIGNALTYPE] = g.COMPOUND
             if self.c13.empty:
                 warning_dialog(
@@ -1746,12 +1760,20 @@ class NMRsolution:
             # copy rows where signaltype is Compound or 0
             self.hsqc = self.hsqc_df[
                 (self.hsqc_df[g.SIGNALTYPE] == g.COMPOUND) | (self.hsqc_df[g.SIGNALTYPE] == 0)
-            ][[g.F2_PPM, g.F1_PPM, g.INTENSITY, g.SIGNALTYPE, "Annotation"]].copy()
+            ][
+                _keep_jason_id(
+                    self.hsqc_df,
+                    [g.F2_PPM, g.F1_PPM, g.INTENSITY, g.SIGNALTYPE, "Annotation"],
+                )
+            ].copy()
 
         if self.hsqc.empty:
             # maybe user forgot to set type to compound so search for "" in Type column
             self.hsqc = self.hsqc_df[self.hsqc_df[g.SIGNALTYPE] == ""][
-                [g.F2_PPM, g.F1_PPM, g.INTENSITY, g.SIGNALTYPE, "Annotation"]
+                _keep_jason_id(
+                    self.hsqc_df,
+                    [g.F2_PPM, g.F1_PPM, g.INTENSITY, g.SIGNALTYPE, "Annotation"],
+                )
             ].copy()
             self.hsqc[g.SIGNALTYPE] = g.COMPOUND
 
@@ -2702,7 +2724,9 @@ class NMRsolution:
         # working hmbc table here -- an already-excluded row doesn't get a
         # second chance to re-enter via this stage's own (differently
         # referenced) snap/check below
-        self.hmbc = self.active_rows(self.hmbc_df)[[g.F1_PPM, g.F2_PPM, g.INTENSITY]].copy()
+        self.hmbc = self.active_rows(self.hmbc_df)[
+            _keep_jason_id(self.hmbc_df, [g.F1_PPM, g.F2_PPM, g.INTENSITY])
+        ].copy()
         self.hmbc["f2p_ppm"] = 0.0
         self.hmbc["f1_i"] = 0
         self.hmbc["f2_i"] = 0
@@ -2710,7 +2734,9 @@ class NMRsolution:
 
         self.pureshift = self.pureshift_df.copy()
 
-        self.cosy = self.cosy_df[[g.F1_PPM, g.F2_PPM, g.INTENSITY]].copy()
+        self.cosy = self.cosy_df[
+            _keep_jason_id(self.cosy_df, [g.F1_PPM, g.F2_PPM, g.INTENSITY])
+        ].copy()
         self.cosy = self.cosy.assign(f1_i=lambda x: 0)
         self.cosy = self.cosy.assign(f1p_i=lambda x: 0)
         self.cosy = self.cosy.assign(f2_i=lambda x: 0)
