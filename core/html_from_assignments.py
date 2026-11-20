@@ -825,7 +825,7 @@ def create_network_graph(c13, h1):
         idx = i
         G2.add_node(idx)
         G2.nodes[idx]["symbol"] = "C"
-        G2.nodes[idx]["atomNumber"] = atomNumber
+        G2.nodes[idx]["atomNumber"] = str(atomNumber)
         G2.nodes[idx]["ppm"] = ppm
         G2.nodes[idx]["ppm_calculated"] = ppm_calculated
         G2.nodes[idx]["numProtons"] = numProtons

@@ -1,0 +1,3183 @@
+{
+  "nodes_orig": [
+    {
+      "ppm_calculated": 119.3573,
+      "id": 0,
+      "atomNumber": 1,
+      "numProtons": 1,
+      "x": 0.8190381618840841,
+      "y": 0.10843317429805509,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 119.54294508953923,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        6.953212876485612
+      ]
+    },
+    {
+      "ppm_calculated": 135.5013,
+      "id": 1,
+      "atomNumber": "2",
+      "numProtons": 1,
+      "x": 0.938615404627235,
+      "y": 0.22411405272595677,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 136.4302474502244,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.551911069351591
+      ]
+    },
+    {
+      "ppm_calculated": 116.9347,
+      "id": 2,
+      "atomNumber": 3,
+      "numProtons": 1,
+      "x": 0.938615404627235,
+      "y": 0.45409289411938253,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 117.69712488929049,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.050461138862014
+      ]
+    },
+    {
+      "ppm_calculated": 161.9101,
+      "id": 3,
+      "atomNumber": 4,
+      "numProtons": 0,
+      "x": 0.8190381618840841,
+      "y": 0.5683735706416266,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 161.9487823156495,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 113.439,
+      "id": 4,
+      "atomNumber": 5,
+      "numProtons": 0,
+      "x": 0.699450547274965,
+      "y": 0.45409289411938253,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 111.92148933149745,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 130.8272,
+      "id": 5,
+      "atomNumber": 6,
+      "numProtons": 1,
+      "x": 0.699450547274965,
+      "y": 0.22411405272595677,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 130.7226151682302,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        8.091320864373053
+      ]
+    },
+    {
+      "ppm_calculated": 167.9121,
+      "id": 6,
+      "atomNumber": "7",
+      "numProtons": 0,
+      "x": 0.5798629326658462,
+      "y": 0.5683735706416266,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 168.77520076212957,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 152.925,
+      "id": 9,
+      "atomNumber": 10,
+      "numProtons": 0,
+      "x": 0.3415278245910028,
+      "y": 0.5683735706416266,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 150.40680985199123,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 120.2194,
+      "id": 10,
+      "atomNumber": 11,
+      "numProtons": 1,
+      "x": 0.3415278245910028,
+      "y": 0.7983524120350521,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 124.05149346208572,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.282009279431336
+      ]
+    },
+    {
+      "ppm_calculated": 140.1317,
+      "id": 11,
+      "atomNumber": "12",
+      "numProtons": 1,
+      "x": 0.22194020998188388,
+      "y": 0.9140332904629541,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 134.88838051467386,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.697254512019357
+      ]
+    },
+    {
+      "ppm_calculated": 125.6088,
+      "id": 12,
+      "atomNumber": 13,
+      "numProtons": 1,
+      "x": 0.1023525953727649,
+      "y": 0.7997526139407097,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 126.63711921931184,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.432746404007601
+      ]
+    },
+    {
+      "ppm_calculated": 131.0117,
+      "id": 13,
+      "atomNumber": 14,
+      "numProtons": 1,
+      "x": 0.1023525953727649,
+      "y": 0.5697737725472841,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 132.73242135114967,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        8.162338737250508
+      ]
+    },
+    {
+      "ppm_calculated": 121.8443,
+      "id": 14,
+      "atomNumber": 15,
+      "numProtons": 0,
+      "x": 0.22194020998188388,
+      "y": 0.45409289411938253,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 122.47161638119225,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 168.5191,
+      "id": 15,
+      "atomNumber": "16",
+      "numProtons": 0,
+      "x": 0.22194020998188388,
+      "y": 0.22411405272595677,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 169.2377413312082,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    }
+  ],
+  "nodes_now": [
+    {
+      "ppm_calculated": 119.3573,
+      "id": 0,
+      "atomNumber": "1",
+      "numProtons": 1,
+      "x": 0.8190381618840841,
+      "y": 0.10843317429805509,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 119.54294508953923,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        6.953212876485612
+      ]
+    },
+    {
+      "ppm_calculated": 135.5013,
+      "id": 1,
+      "atomNumber": "2",
+      "numProtons": 1,
+      "x": 0.938615404627235,
+      "y": 0.22411405272595677,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 136.4302474502244,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.551911069351591
+      ]
+    },
+    {
+      "ppm_calculated": 116.9347,
+      "id": 2,
+      "atomNumber": "3",
+      "numProtons": 1,
+      "x": 0.938615404627235,
+      "y": 0.45409289411938253,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 117.69712488929049,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.050461138862014
+      ]
+    },
+    {
+      "ppm_calculated": 161.9101,
+      "id": 3,
+      "atomNumber": "4",
+      "numProtons": 0,
+      "x": 0.8190381618840841,
+      "y": 0.5683735706416266,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 161.9487823156495,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 113.439,
+      "id": 4,
+      "atomNumber": "5",
+      "numProtons": 0,
+      "x": 0.699450547274965,
+      "y": 0.45409289411938253,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 111.92148933149745,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 130.8272,
+      "id": 5,
+      "atomNumber": "6",
+      "numProtons": 1,
+      "x": 0.699450547274965,
+      "y": 0.22411405272595677,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 130.7226151682302,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        8.091320864373053
+      ]
+    },
+    {
+      "ppm_calculated": 167.9121,
+      "id": 6,
+      "atomNumber": "7",
+      "numProtons": 0,
+      "x": 0.5798629326658462,
+      "y": 0.5683735706416266,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 168.77520076212957,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 152.925,
+      "id": 9,
+      "atomNumber": "10",
+      "numProtons": 0,
+      "x": 0.3415278245910028,
+      "y": 0.5683735706416266,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 150.40680985199123,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 120.2194,
+      "id": 10,
+      "atomNumber": "11",
+      "numProtons": 1,
+      "x": 0.3415278245910028,
+      "y": 0.7983524120350521,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 124.05149346208572,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.282009279431336
+      ]
+    },
+    {
+      "ppm_calculated": 140.1317,
+      "id": 11,
+      "atomNumber": "12",
+      "numProtons": 1,
+      "x": 0.22194020998188388,
+      "y": 0.9140332904629541,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 134.88838051467386,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.697254512019357
+      ]
+    },
+    {
+      "ppm_calculated": 125.6088,
+      "id": 12,
+      "atomNumber": "13",
+      "numProtons": 1,
+      "x": 0.1023525953727649,
+      "y": 0.7997526139407097,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 126.63711921931184,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.432746404007601
+      ]
+    },
+    {
+      "ppm_calculated": 131.0117,
+      "id": 13,
+      "atomNumber": "14",
+      "numProtons": 1,
+      "x": 0.1023525953727649,
+      "y": 0.5697737725472841,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 132.73242135114967,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        8.162338737250508
+      ]
+    },
+    {
+      "ppm_calculated": 121.8443,
+      "id": 14,
+      "atomNumber": "15",
+      "numProtons": 0,
+      "x": 0.22194020998188388,
+      "y": 0.45409289411938253,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 122.47161638119225,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 168.5191,
+      "id": 15,
+      "atomNumber": "16",
+      "numProtons": 0,
+      "x": 0.22194020998188388,
+      "y": 0.22411405272595677,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 169.2377413312082,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    }
+  ],
+  "links": [
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 15,
+      "target": 13
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 6,
+      "target": 5
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 3,
+      "target": 5
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 3,
+      "target": 1
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 3,
+      "target": 2
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 9,
+      "target": 13
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 9,
+      "target": 11
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 9,
+      "target": 10
+    },
+    {
+      "cosy": true,
+      "source": 1,
+      "target": 2,
+      "weight": 1
+    },
+    {
+      "cosy": true,
+      "source": 1,
+      "target": 0,
+      "weight": 1
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 1,
+      "target": 5
+    },
+    {
+      "cosy": true,
+      "source": 11,
+      "target": 12,
+      "weight": 1
+    },
+    {
+      "cosy": true,
+      "source": 11,
+      "target": 10,
+      "weight": 1
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 11,
+      "target": 13
+    },
+    {
+      "cosy": true,
+      "source": 13,
+      "target": 12,
+      "weight": 1
+    },
+    {
+      "cosy": true,
+      "source": 5,
+      "target": 0,
+      "weight": 1
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 12,
+      "target": 10
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 12,
+      "target": 14
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 10,
+      "target": 14
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 0,
+      "target": 2
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 0,
+      "target": 4
+    },
+    {
+      "weight": 1,
+      "hmbc": true,
+      "source": 2,
+      "target": 4
+    }
+  ],
+  "smilesString": "Oc1ccccc1C(=O)Oc1ccccc1C(=O)O",
+  "molfile": "\n  ACD/Labs03221914022D\n\n 19 20  0  0  0  0  0  0  0  0999 V2000\n    6.9099    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    8.0628   -0.6692    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    8.0628   -1.9996    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    6.9099   -2.6607    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    5.7569   -1.9996    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    5.7569   -0.6692    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    4.6039   -2.6607    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    4.6119   -3.9911    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    3.4590   -1.9996    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    2.3060   -2.6607    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    2.3060   -3.9911    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.1530   -4.6603    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.0000   -3.9992    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.0000   -2.6688    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.1530   -1.9996    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.1530   -0.6692    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    2.3060   -0.0081    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    0.0000   -0.0081    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    6.9099   -3.9911    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n  1  2  2  0  0  0  0\n  1  6  1  0  0  0  0\n  2  3  1  0  0  0  0\n  3  4  2  0  0  0  0\n  4  5  1  0  0  0  0\n  4 19  1  0  0  0  0\n  5  6  2  0  0  0  0\n  5  7  1  0  0  0  0\n  7  8  2  0  0  0  0\n  7  9  1  0  0  0  0\n  9 10  1  0  0  0  0\n 10 11  2  0  0  0  0\n 10 15  1  0  0  0  0\n 11 12  1  0  0  0  0\n 12 13  2  0  0  0  0\n 13 14  1  0  0  0  0\n 14 15  2  0  0  0  0\n 15 16  1  0  0  0  0\n 16 17  2  0  0  0  0\n 16 18  1  0  0  0  0\nM  END\n",
+  "dataFrom": "mnova",
+  "oldjsondata": {
+    "smiles": {
+      "datatype": "smiles",
+      "count": 1,
+      "data": {
+        "0": "Oc1ccccc1C(=O)Oc1ccccc1C(=O)O"
+      }
+    },
+    "molfile": {
+      "datatype": "molfile",
+      "count": 1,
+      "data": {
+        "0": "\r\n  ACD/Labs03221914022D\r\n\r\n 19 20  0  0  0  0  0  0  0  0999 V2000\r\n    6.9099    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    8.0628   -0.6692    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    8.0628   -1.9996    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    6.9099   -2.6607    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    5.7569   -1.9996    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    5.7569   -0.6692    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    4.6039   -2.6607    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    4.6119   -3.9911    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n    3.4590   -1.9996    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n    2.3060   -2.6607    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    2.3060   -3.9911    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    1.1530   -4.6603    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    0.0000   -3.9992    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    0.0000   -2.6688    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    1.1530   -1.9996    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    1.1530   -0.6692    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\r\n    2.3060   -0.0081    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n    0.0000   -0.0081    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n    6.9099   -3.9911    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\r\n  1  2  2  0  0  0  0\r\n  1  6  1  0  0  0  0\r\n  2  3  1  0  0  0  0\r\n  3  4  2  0  0  0  0\r\n  4  5  1  0  0  0  0\r\n  4 19  1  0  0  0  0\r\n  5  6  2  0  0  0  0\r\n  5  7  1  0  0  0  0\r\n  7  8  2  0  0  0  0\r\n  7  9  1  0  0  0  0\r\n  9 10  1  0  0  0  0\r\n 10 11  2  0  0  0  0\r\n 10 15  1  0  0  0  0\r\n 11 12  1  0  0  0  0\r\n 12 13  2  0  0  0  0\r\n 13 14  1  0  0  0  0\r\n 14 15  2  0  0  0  0\r\n 15 16  1  0  0  0  0\r\n 16 17  2  0  0  0  0\r\n 16 18  1  0  0  0  0\r\nM  END\r\n"
+      }
+    },
+    "hostname": {
+      "datatype": "hostname",
+      "count": 1,
+      "data": {
+        "0": "Z49BR-HKPP041Y-42DHS-ANANTMPA"
+      }
+    },
+    "allAtomsInfo": {
+      "datatype": "allAtomsInfo",
+      "data": {
+        "0": {
+          "atom_idx": 0,
+          "id": 0,
+          "atomNumber": "1",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "1": {
+          "atom_idx": 1,
+          "id": 1,
+          "atomNumber": "2",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "2": {
+          "atom_idx": 2,
+          "id": 2,
+          "atomNumber": "3",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "3": {
+          "atom_idx": 3,
+          "id": 3,
+          "atomNumber": "4",
+          "symbol": "C",
+          "numProtons": 0
+        },
+        "4": {
+          "atom_idx": 4,
+          "id": 4,
+          "atomNumber": "5",
+          "symbol": "C",
+          "numProtons": 0
+        },
+        "5": {
+          "atom_idx": 5,
+          "id": 5,
+          "atomNumber": "6",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "6": {
+          "atom_idx": 6,
+          "id": 6,
+          "atomNumber": "7",
+          "symbol": "C",
+          "numProtons": 0
+        },
+        "7": {
+          "atom_idx": 7,
+          "id": 7,
+          "atomNumber": "8",
+          "symbol": "O",
+          "numProtons": 0
+        },
+        "8": {
+          "atom_idx": 8,
+          "id": 8,
+          "atomNumber": "9",
+          "symbol": "O",
+          "numProtons": 0
+        },
+        "9": {
+          "atom_idx": 9,
+          "id": 9,
+          "atomNumber": "10",
+          "symbol": "C",
+          "numProtons": 0
+        },
+        "10": {
+          "atom_idx": 10,
+          "id": 10,
+          "atomNumber": "11",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "11": {
+          "atom_idx": 11,
+          "id": 11,
+          "atomNumber": "12",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "12": {
+          "atom_idx": 12,
+          "id": 12,
+          "atomNumber": "13",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "13": {
+          "atom_idx": 13,
+          "id": 13,
+          "atomNumber": "14",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "14": {
+          "atom_idx": 14,
+          "id": 14,
+          "atomNumber": "15",
+          "symbol": "C",
+          "numProtons": 0
+        },
+        "15": {
+          "atom_idx": 15,
+          "id": 15,
+          "atomNumber": "16",
+          "symbol": "C",
+          "numProtons": 0
+        },
+        "16": {
+          "atom_idx": 16,
+          "id": 16,
+          "atomNumber": "17",
+          "symbol": "O",
+          "numProtons": 0
+        },
+        "17": {
+          "atom_idx": 17,
+          "id": 17,
+          "atomNumber": "18",
+          "symbol": "O",
+          "numProtons": 1
+        },
+        "18": {
+          "atom_idx": 18,
+          "id": 18,
+          "atomNumber": "19",
+          "symbol": "O",
+          "numProtons": 1
+        }
+      },
+      "count": 19
+    },
+    "carbonAtomsInfo": {
+      "datatype": "carbonAtomsInfo",
+      "data": {
+        "0": {
+          "atom_idx": 0,
+          "id": 0,
+          "atomNumber": "1",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "1": {
+          "atom_idx": 1,
+          "id": 1,
+          "atomNumber": "2",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "2": {
+          "atom_idx": 2,
+          "id": 2,
+          "atomNumber": "3",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "3": {
+          "atom_idx": 3,
+          "id": 3,
+          "atomNumber": "4",
+          "symbol": "C",
+          "numProtons": 0
+        },
+        "4": {
+          "atom_idx": 4,
+          "id": 4,
+          "atomNumber": "5",
+          "symbol": "C",
+          "numProtons": 0
+        },
+        "5": {
+          "atom_idx": 5,
+          "id": 5,
+          "atomNumber": "6",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "6": {
+          "atom_idx": 6,
+          "id": 6,
+          "atomNumber": "7",
+          "symbol": "C",
+          "numProtons": 0
+        },
+        "9": {
+          "atom_idx": 9,
+          "id": 9,
+          "atomNumber": "10",
+          "symbol": "C",
+          "numProtons": 0
+        },
+        "10": {
+          "atom_idx": 10,
+          "id": 10,
+          "atomNumber": "11",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "11": {
+          "atom_idx": 11,
+          "id": 11,
+          "atomNumber": "12",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "12": {
+          "atom_idx": 12,
+          "id": 12,
+          "atomNumber": "13",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "13": {
+          "atom_idx": 13,
+          "id": 13,
+          "atomNumber": "14",
+          "symbol": "C",
+          "numProtons": 1
+        },
+        "14": {
+          "atom_idx": 14,
+          "id": 14,
+          "atomNumber": "15",
+          "symbol": "C",
+          "numProtons": 0
+        },
+        "15": {
+          "atom_idx": 15,
+          "id": 15,
+          "atomNumber": "16",
+          "symbol": "C",
+          "numProtons": 0
+        }
+      },
+      "count": 14
+    },
+    "nmrAssignments": {
+      "datatype": "nmrAssignments",
+      "count": 0,
+      "data": {}
+    },
+    "c13predictions": {
+      "datatype": "c13predictions",
+      "count": 14,
+      "data": {
+        "0": {
+          "atom_idx": 0,
+          "atomNumber": "1",
+          "numProtons": 1,
+          "ppm": 119.3573
+        },
+        "1": {
+          "atom_idx": 1,
+          "atomNumber": "2",
+          "numProtons": 1,
+          "ppm": 135.5013
+        },
+        "2": {
+          "atom_idx": 2,
+          "atomNumber": "3",
+          "numProtons": 1,
+          "ppm": 116.9347
+        },
+        "3": {
+          "atom_idx": 3,
+          "atomNumber": "4",
+          "numProtons": 0,
+          "ppm": 161.9101
+        },
+        "4": {
+          "atom_idx": 4,
+          "atomNumber": "5",
+          "numProtons": 0,
+          "ppm": 113.439
+        },
+        "5": {
+          "atom_idx": 5,
+          "atomNumber": "6",
+          "numProtons": 1,
+          "ppm": 130.8272
+        },
+        "6": {
+          "atom_idx": 6,
+          "atomNumber": "7",
+          "numProtons": 0,
+          "ppm": 167.9121
+        },
+        "7": {
+          "atom_idx": 9,
+          "atomNumber": "10",
+          "numProtons": 0,
+          "ppm": 152.925
+        },
+        "8": {
+          "atom_idx": 10,
+          "atomNumber": "11",
+          "numProtons": 1,
+          "ppm": 120.2194
+        },
+        "9": {
+          "atom_idx": 11,
+          "atomNumber": "12",
+          "numProtons": 1,
+          "ppm": 140.1317
+        },
+        "10": {
+          "atom_idx": 12,
+          "atomNumber": "13",
+          "numProtons": 1,
+          "ppm": 125.6088
+        },
+        "11": {
+          "atom_idx": 13,
+          "atomNumber": "14",
+          "numProtons": 1,
+          "ppm": 131.0117
+        },
+        "12": {
+          "atom_idx": 14,
+          "atomNumber": "15",
+          "numProtons": 0,
+          "ppm": 121.8443
+        },
+        "13": {
+          "atom_idx": 15,
+          "atomNumber": "16",
+          "numProtons": 0,
+          "ppm": 168.5191
+        }
+      }
+    },
+    "Predicted_13C_NMR_Spectrum_0": {
+      "datatype": "nmrspectrum",
+      "origin": "Predictor",
+      "type": "1D",
+      "subtype": "predicted, 13C",
+      "experimenttype": "1D",
+      "experiment": "1D",
+      "class": "",
+      "spectype": "",
+      "pulsesequence": "",
+      "intrument": "",
+      "probe": "",
+      "datafilename": "",
+      "nucleus": "13C",
+      "specfrequency": 175,
+      "solvent": "Chloroform-d",
+      "temperature": "",
+      "multiplets": {
+        "datatype": "multiplets",
+        "normValue": 1,
+        "data": {},
+        "count": 0
+      },
+      "peaks": {
+        "datatype": "peaks",
+        "data": {},
+        "count": 0
+      },
+      "integrals": {
+        "datatype": "integrals",
+        "count": 0,
+        "normValue": 1,
+        "data": {}
+      }
+    },
+    "17141011.10.fid_1": {
+      "datatype": "nmrspectrum",
+      "origin": "Bruker XWIN-NMR",
+      "type": "1D",
+      "subtype": "1H",
+      "experimenttype": "1D",
+      "experiment": "1D",
+      "class": "",
+      "spectype": "",
+      "pulsesequence": "zg",
+      "intrument": "Avance",
+      "probe": "Z168774_0002 (CPP1.1 BBO 700S3 BB-H&F-05 Z XT)",
+      "datafilename": "/Users/dch1amk/Desktop/NOAH_tests/Salicylsalicylic_acid/17141011/10/fid",
+      "nucleus": "1H",
+      "specfrequency": 699.744320894,
+      "solvent": "CDCl3",
+      "temperature": 298.1003,
+      "multiplets": {
+        "datatype": "multiplets",
+        "normValue": 1,
+        "data": {},
+        "count": 0
+      },
+      "peaks": {
+        "datatype": "peaks",
+        "data": {},
+        "count": 0
+      },
+      "integrals": {
+        "datatype": "integrals",
+        "count": 9,
+        "normValue": 223661.80740387458,
+        "data": {
+          "0": {
+            "intensity": 223661.80740387458,
+            "rangeMin1": 6.916761397102052,
+            "rangeMin2": 0,
+            "rangeMax1": 6.98944413629245,
+            "rangeMax2": 0,
+            "delta1": 6.953102766697251,
+            "delta2": 0,
+            "type": 0
+          },
+          "1": {
+            "intensity": 226570.99108290672,
+            "rangeMin1": 7.017178339404572,
+            "rangeMin2": 0,
+            "rangeMax1": 7.085079319437706,
+            "rangeMax2": 0,
+            "delta1": 7.051128829421139,
+            "delta2": 0,
+            "type": 0
+          },
+          "2": {
+            "intensity": 277145.11149278283,
+            "rangeMin1": 7.253397241773364,
+            "rangeMin2": 0,
+            "rangeMax1": 7.313647407154881,
+            "rangeMax2": 0,
+            "delta1": 7.283522324464123,
+            "delta2": 0,
+            "type": 0
+          },
+          "3": {
+            "intensity": 230015.51732707024,
+            "rangeMin1": 7.389199201839637,
+            "rangeMin2": 0,
+            "rangeMax1": 7.477183570333274,
+            "rangeMax2": 0,
+            "delta1": 7.433191386086456,
+            "delta2": 0,
+            "type": 0
+          },
+          "4": {
+            "intensity": 231480.6282863617,
+            "rangeMin1": 7.513524939928474,
+            "rangeMin2": 0,
+            "rangeMax1": 7.593858493770492,
+            "rangeMax2": 0,
+            "delta1": 7.5536917168494835,
+            "delta2": 0,
+            "type": 0
+          },
+          "5": {
+            "intensity": 227982.976937294,
+            "rangeMin1": 7.665584881129437,
+            "rangeMin2": 0,
+            "rangeMax1": 7.729660453836763,
+            "rangeMax2": 0,
+            "delta1": 7.6976226674831,
+            "delta2": 0,
+            "type": 0
+          },
+          "6": {
+            "intensity": 226850.23009259254,
+            "rangeMin1": 8.062470891182269,
+            "rangeMin2": 0,
+            "rangeMax1": 8.134197278541214,
+            "rangeMax2": 0,
+            "delta1": 8.09833408486174,
+            "delta2": 0,
+            "type": 0
+          },
+          "7": {
+            "intensity": 232128.07056617737,
+            "rangeMin1": 8.134197278541214,
+            "rangeMin2": 0,
+            "rangeMax1": 8.205923665900158,
+            "rangeMax2": 0,
+            "delta1": 8.170060472220687,
+            "delta2": 0,
+            "type": 0
+          },
+          "8": {
+            "intensity": 223368.32823267358,
+            "rangeMin1": 10.154449062145316,
+            "rangeMin2": 0,
+            "rangeMax1": 10.408451686142913,
+            "rangeMax2": 0,
+            "delta1": 10.281450374144114,
+            "delta2": 0,
+            "type": 0
+          }
+        }
+      }
+    },
+    "chosenSpectra": {
+      "datatype": "chosenSpectra",
+      "count": 5,
+      "data": {
+        "0": "1H 1D reset_psychetse.ptg 17141011.11.1.1r_2 SKIP",
+        "1": "13C 1D zgpg30 17141011.20.fid_3 C13_1D",
+        "2": "[13C, 1H] Unknown gns_noah3-BSScc.eeh 17141011.15002.ser_4 HSQC",
+        "3": "[13C, 1H] Unknown gns_noah3-BSScc.eeh 17141011.15001.ser_5 HMBC",
+        "4": "[13C, 1H] Unknown gns_noah3-BSScc.eeh 17141011.15003.ser_6 HSQC_CLIPCOSY"
+      }
+    },
+    "SKIP_0": {
+      "datatype": "nmrspectrum",
+      "origin": "Bruker XWIN-NMR",
+      "type": "1D",
+      "subtype": "1H",
+      "experimenttype": "1D",
+      "experiment": "1D",
+      "class": "",
+      "spectype": "",
+      "pulsesequence": "reset_psychetse.ptg",
+      "intrument": "Avance",
+      "probe": "Z168774_0002 (CPP1.1 BBO 700S3 BB-H&F-05 Z XT)",
+      "datafilename": "/Users/dch1amk/Desktop/NOAH_tests/Salicylsalicylic_acid/17141011/11/pdata/1/1r",
+      "nucleus": "1H",
+      "specfrequency": 699.743148827593,
+      "solvent": "CDCl3",
+      "temperature": 298.1026,
+      "multiplets": {
+        "datatype": "multiplets",
+        "normValue": 1,
+        "data": {},
+        "count": 0
+      },
+      "peaks": {
+        "datatype": "peaks",
+        "data": {
+          "0": {
+            "delta1": 8.162338737250508,
+            "delta2": 0,
+            "intensity": 20631362.82556742,
+            "type": 0,
+            "annotation": ""
+          },
+          "1": {
+            "delta1": 8.091320864373053,
+            "delta2": 0,
+            "intensity": 20809272.331141196,
+            "type": 0,
+            "annotation": ""
+          },
+          "2": {
+            "delta1": 7.697254512019357,
+            "delta2": 0,
+            "intensity": 23574987.185268912,
+            "type": 0,
+            "annotation": ""
+          },
+          "3": {
+            "delta1": 7.551911069351591,
+            "delta2": 0,
+            "intensity": 23877566.801029764,
+            "type": 0,
+            "annotation": ""
+          },
+          "4": {
+            "delta1": 7.432746404007601,
+            "delta2": 0,
+            "intensity": 26557232.384133622,
+            "type": 0,
+            "annotation": ""
+          },
+          "5": {
+            "delta1": 7.282009279431336,
+            "delta2": 0,
+            "intensity": 26017023.642610874,
+            "type": 0,
+            "annotation": ""
+          },
+          "6": {
+            "delta1": 7.050461138862014,
+            "delta2": 0,
+            "intensity": 23408863.1277313,
+            "type": 0,
+            "annotation": ""
+          },
+          "7": {
+            "delta1": 6.953212876485612,
+            "delta2": 0,
+            "intensity": 27021465.618778024,
+            "type": 0,
+            "annotation": ""
+          }
+        },
+        "count": 8
+      },
+      "integrals": {
+        "datatype": "integrals",
+        "count": 0,
+        "normValue": 1,
+        "data": {}
+      },
+      "filename": "17141011.11.1.1r_2"
+    },
+    "C13_1D_0": {
+      "datatype": "nmrspectrum",
+      "origin": "Bruker XWIN-NMR",
+      "type": "1D",
+      "subtype": "13C",
+      "experimenttype": "1D",
+      "experiment": "1D",
+      "class": "",
+      "spectype": "",
+      "pulsesequence": "zgpg30",
+      "intrument": "Avance",
+      "probe": "Z168774_0002 (CPP1.1 BBO 700S3 BB-H&F-05 Z XT)",
+      "datafilename": "/Users/dch1amk/Desktop/NOAH_tests/Salicylsalicylic_acid/17141011/20/fid",
+      "nucleus": "13C",
+      "specfrequency": 175.967357925,
+      "solvent": "CDCl3",
+      "temperature": 298.1003,
+      "multiplets": {
+        "datatype": "multiplets",
+        "normValue": 1,
+        "data": {},
+        "count": 0
+      },
+      "peaks": {
+        "datatype": "peaks",
+        "data": {
+          "0": {
+            "delta1": 169.2377413312082,
+            "delta2": 0,
+            "intensity": 3.619466246218152,
+            "type": 0,
+            "annotation": ""
+          },
+          "1": {
+            "delta1": 168.77520076212957,
+            "delta2": 0,
+            "intensity": 7.801188161128704,
+            "type": 0,
+            "annotation": ""
+          },
+          "2": {
+            "delta1": 161.9487823156495,
+            "delta2": 0,
+            "intensity": 9.556504210202558,
+            "type": 0,
+            "annotation": ""
+          },
+          "3": {
+            "delta1": 150.40680985199123,
+            "delta2": 0,
+            "intensity": 8.127865696587886,
+            "type": 0,
+            "annotation": ""
+          },
+          "4": {
+            "delta1": 136.4302474502244,
+            "delta2": 0,
+            "intensity": 10.834053067392325,
+            "type": 0,
+            "annotation": ""
+          },
+          "5": {
+            "delta1": 134.88838051467386,
+            "delta2": 0,
+            "intensity": 9.886854809094428,
+            "type": 0,
+            "annotation": ""
+          },
+          "6": {
+            "delta1": 132.73242135114967,
+            "delta2": 0,
+            "intensity": 11.189755139856139,
+            "type": 0,
+            "annotation": ""
+          },
+          "7": {
+            "delta1": 130.7226151682302,
+            "delta2": 0,
+            "intensity": 12.332919387204663,
+            "type": 0,
+            "annotation": ""
+          },
+          "8": {
+            "delta1": 126.63711921931184,
+            "delta2": 0,
+            "intensity": 11.151181221177728,
+            "type": 0,
+            "annotation": ""
+          },
+          "9": {
+            "delta1": 124.05149346208572,
+            "delta2": 0,
+            "intensity": 11.977077933791184,
+            "type": 0,
+            "annotation": ""
+          },
+          "10": {
+            "delta1": 122.47161638119225,
+            "delta2": 0,
+            "intensity": 7.65105820002391,
+            "type": 0,
+            "annotation": ""
+          },
+          "11": {
+            "delta1": 119.54294508953923,
+            "delta2": 0,
+            "intensity": 12.701053662461156,
+            "type": 0,
+            "annotation": ""
+          },
+          "12": {
+            "delta1": 117.69712488929049,
+            "delta2": 0,
+            "intensity": 13.61739583250266,
+            "type": 0,
+            "annotation": ""
+          },
+          "13": {
+            "delta1": 111.92148933149745,
+            "delta2": 0,
+            "intensity": 7.562284580197035,
+            "type": 0,
+            "annotation": ""
+          }
+        },
+        "count": 14
+      },
+      "integrals": {
+        "datatype": "integrals",
+        "count": 0,
+        "normValue": 1,
+        "data": {}
+      },
+      "filename": "17141011.20.fid_3"
+    },
+    "HSQC_0": {
+      "datatype": "nmrspectrum",
+      "origin": "Bruker XWIN-NMR",
+      "type": "2D",
+      "subtype": "1H13C, Unknown",
+      "experimenttype": "Unknown",
+      "experiment": "Unknown",
+      "class": "",
+      "spectype": "",
+      "pulsesequence": "gns_noah3-BSScc.eeh",
+      "intrument": "Avance",
+      "probe": "Z168774_0002 (CPP1.1 BBO 700S3 BB-H&F-05 Z XT)",
+      "datafilename": "/Users/dch1amk/Desktop/NOAH_tests/Salicylsalicylic_acid/17141011/15002/ser",
+      "nucleus": "[13C, 1H]",
+      "specfrequency": "[175.967357924, 699.743288778]",
+      "solvent": "CDCl3",
+      "temperature": 298.103,
+      "multiplets": {
+        "datatype": "multiplets",
+        "normValue": 1,
+        "data": {},
+        "count": 0
+      },
+      "peaks": {
+        "datatype": "peaks",
+        "data": {
+          "0": {
+            "delta1": 136.4302474502244,
+            "delta2": 7.551911069351591,
+            "intensity": 208.25925298035145,
+            "type": 0,
+            "annotation": ""
+          },
+          "1": {
+            "delta1": 134.88838051467386,
+            "delta2": 7.697254512019357,
+            "intensity": 207.90016271173954,
+            "type": 0,
+            "annotation": ""
+          },
+          "2": {
+            "delta1": 132.73242135114967,
+            "delta2": 8.162338737250508,
+            "intensity": 236.02593798935413,
+            "type": 0,
+            "annotation": ""
+          },
+          "3": {
+            "delta1": 130.7226151682302,
+            "delta2": 8.091320864373053,
+            "intensity": 221.27513541281223,
+            "type": 0,
+            "annotation": ""
+          },
+          "4": {
+            "delta1": 126.63711921931184,
+            "delta2": 7.432746404007601,
+            "intensity": 236.57919289171696,
+            "type": 0,
+            "annotation": ""
+          },
+          "5": {
+            "delta1": 124.05149346208572,
+            "delta2": 7.282009279431336,
+            "intensity": 268.0631962493062,
+            "type": 0,
+            "annotation": ""
+          },
+          "6": {
+            "delta1": 119.54294508953923,
+            "delta2": 6.953212876485612,
+            "intensity": 192.8899867273867,
+            "type": 0,
+            "annotation": ""
+          },
+          "7": {
+            "delta1": 117.69712488929049,
+            "delta2": 7.050461138862014,
+            "intensity": 217.73797503113747,
+            "type": 0,
+            "annotation": ""
+          }
+        },
+        "count": 8
+      },
+      "integrals": {
+        "datatype": "integrals",
+        "count": 8,
+        "normValue": 1,
+        "data": {
+          "0": {
+            "intensity": 208.25925298035145,
+            "rangeMin1": 136.6802474502244,
+            "rangeMin2": 7.52691106935159,
+            "rangeMax1": 136.1802474502244,
+            "rangeMax2": 7.576911069351591,
+            "delta1": 136.4302474502244,
+            "delta2": 7.551911069351591,
+            "type": 0
+          },
+          "1": {
+            "intensity": 207.90016271173954,
+            "rangeMin1": 135.13838051467386,
+            "rangeMin2": 7.672254512019356,
+            "rangeMax1": 134.63838051467386,
+            "rangeMax2": 7.722254512019357,
+            "delta1": 134.88838051467386,
+            "delta2": 7.697254512019357,
+            "type": 0
+          },
+          "2": {
+            "intensity": 236.02593798935413,
+            "rangeMin1": 132.98242135114967,
+            "rangeMin2": 8.137338737250507,
+            "rangeMax1": 132.48242135114967,
+            "rangeMax2": 8.187338737250508,
+            "delta1": 132.73242135114967,
+            "delta2": 8.162338737250508,
+            "type": 0
+          },
+          "3": {
+            "intensity": 221.27513541281223,
+            "rangeMin1": 130.9726151682302,
+            "rangeMin2": 8.066320864373052,
+            "rangeMax1": 130.4726151682302,
+            "rangeMax2": 8.116320864373053,
+            "delta1": 130.7226151682302,
+            "delta2": 8.091320864373053,
+            "type": 0
+          },
+          "4": {
+            "intensity": 236.57919289171696,
+            "rangeMin1": 126.88711921931184,
+            "rangeMin2": 7.4077464040076,
+            "rangeMax1": 126.38711921931184,
+            "rangeMax2": 7.457746404007601,
+            "delta1": 126.63711921931184,
+            "delta2": 7.432746404007601,
+            "type": 0
+          },
+          "5": {
+            "intensity": 268.0631962493062,
+            "rangeMin1": 124.30149346208572,
+            "rangeMin2": 7.257009279431336,
+            "rangeMax1": 123.80149346208572,
+            "rangeMax2": 7.307009279431337,
+            "delta1": 124.05149346208572,
+            "delta2": 7.282009279431336,
+            "type": 0
+          },
+          "6": {
+            "intensity": 192.8899867273867,
+            "rangeMin1": 119.79294508953923,
+            "rangeMin2": 6.9282128764856115,
+            "rangeMax1": 119.29294508953923,
+            "rangeMax2": 6.978212876485612,
+            "delta1": 119.54294508953923,
+            "delta2": 6.953212876485612,
+            "type": 0
+          },
+          "7": {
+            "intensity": 217.73797503113747,
+            "rangeMin1": 117.94712488929049,
+            "rangeMin2": 7.025461138862013,
+            "rangeMax1": 117.44712488929049,
+            "rangeMax2": 7.075461138862014,
+            "delta1": 117.69712488929049,
+            "delta2": 7.050461138862014,
+            "type": 0
+          }
+        }
+      },
+      "filename": "17141011.15002.ser_4"
+    },
+    "HMBC_0": {
+      "datatype": "nmrspectrum",
+      "origin": "Bruker XWIN-NMR",
+      "type": "2D",
+      "subtype": "1H13C, Unknown",
+      "experimenttype": "Unknown",
+      "experiment": "Unknown",
+      "class": "",
+      "spectype": "",
+      "pulsesequence": "gns_noah3-BSScc.eeh",
+      "intrument": "Avance",
+      "probe": "Z168774_0002 (CPP1.1 BBO 700S3 BB-H&F-05 Z XT)",
+      "datafilename": "/Users/dch1amk/Desktop/NOAH_tests/Salicylsalicylic_acid/17141011/15001/ser",
+      "nucleus": "[13C, 1H]",
+      "specfrequency": "[175.967357924, 699.743288778]",
+      "solvent": "CDCl3",
+      "temperature": 298.103,
+      "multiplets": {
+        "datatype": "multiplets",
+        "normValue": 1,
+        "data": {},
+        "count": 0
+      },
+      "peaks": {
+        "datatype": "peaks",
+        "data": {
+          "0": {
+            "delta1": 169.2377413312082,
+            "delta2": 8.162338737250508,
+            "intensity": 5.991941928863525,
+            "type": 0,
+            "annotation": ""
+          },
+          "1": {
+            "delta1": 168.77520076212957,
+            "delta2": 8.091320864373053,
+            "intensity": 5.774491310119629,
+            "type": 0,
+            "annotation": ""
+          },
+          "2": {
+            "delta1": 161.95284038852958,
+            "delta2": 10.294672758341445,
+            "intensity": 1.4739866256713867,
+            "type": 0,
+            "annotation": ""
+          },
+          "3": {
+            "delta1": 161.9487823156495,
+            "delta2": 8.091320864373053,
+            "intensity": 10.144290924072266,
+            "type": 0,
+            "annotation": ""
+          },
+          "4": {
+            "delta1": 161.9487823156495,
+            "delta2": 7.551911069351591,
+            "intensity": 7.305356025695801,
+            "type": 0,
+            "annotation": ""
+          },
+          "5": {
+            "delta1": 161.9487823156495,
+            "delta2": 7.050461138862014,
+            "intensity": 2.0701205730438232,
+            "type": 0,
+            "annotation": ""
+          },
+          "6": {
+            "delta1": 150.40680985199123,
+            "delta2": 8.162338737250508,
+            "intensity": 11.270840644836426,
+            "type": 0,
+            "annotation": ""
+          },
+          "7": {
+            "delta1": 150.40680985199123,
+            "delta2": 7.697254512019357,
+            "intensity": 8.392358779907227,
+            "type": 0,
+            "annotation": ""
+          },
+          "8": {
+            "delta1": 150.40680985199123,
+            "delta2": 7.282009279431336,
+            "intensity": 6.164781093597412,
+            "type": 0,
+            "annotation": ""
+          },
+          "9": {
+            "delta1": 136.4302474502244,
+            "delta2": 8.091320864373053,
+            "intensity": 10.176617622375488,
+            "type": 0,
+            "annotation": ""
+          },
+          "10": {
+            "delta1": 134.88838051467386,
+            "delta2": 8.162338737250508,
+            "intensity": 10.158272743225098,
+            "type": 0,
+            "annotation": ""
+          },
+          "11": {
+            "delta1": 132.73242135114967,
+            "delta2": 7.697254512019357,
+            "intensity": 8.106612205505371,
+            "type": 0,
+            "annotation": ""
+          },
+          "12": {
+            "delta1": 130.7226151682302,
+            "delta2": 7.551911069351591,
+            "intensity": 7.468614101409912,
+            "type": 0,
+            "annotation": ""
+          },
+          "13": {
+            "delta1": 126.63711921931184,
+            "delta2": 7.282009279431336,
+            "intensity": 12.804963111877441,
+            "type": 0,
+            "annotation": ""
+          },
+          "14": {
+            "delta1": 124.05149346208572,
+            "delta2": 7.432746404007601,
+            "intensity": 10.758777618408203,
+            "type": 0,
+            "annotation": ""
+          },
+          "15": {
+            "delta1": 122.47161638119225,
+            "delta2": 7.432746404007601,
+            "intensity": 11.83847713470459,
+            "type": 0,
+            "annotation": ""
+          },
+          "16": {
+            "delta1": 122.47161638119225,
+            "delta2": 7.282009279431336,
+            "intensity": 8.844856262207031,
+            "type": 0,
+            "annotation": ""
+          },
+          "17": {
+            "delta1": 119.54294508953923,
+            "delta2": 7.050461138862014,
+            "intensity": 9.941662788391113,
+            "type": 0,
+            "annotation": ""
+          },
+          "18": {
+            "delta1": 117.70531437857,
+            "delta2": 10.294192357430585,
+            "intensity": 2.515113115310669,
+            "type": 0,
+            "annotation": ""
+          },
+          "19": {
+            "delta1": 117.69712488929049,
+            "delta2": 6.953212876485612,
+            "intensity": 8.152544975280762,
+            "type": 0,
+            "annotation": ""
+          },
+          "20": {
+            "delta1": 111.94374126398367,
+            "delta2": 10.294824660640904,
+            "intensity": 0.9816164970397949,
+            "type": 0,
+            "annotation": ""
+          },
+          "21": {
+            "delta1": 111.92148933149745,
+            "delta2": 7.050461138862014,
+            "intensity": 6.5006866455078125,
+            "type": 0,
+            "annotation": ""
+          },
+          "22": {
+            "delta1": 111.92148933149745,
+            "delta2": 6.953212876485612,
+            "intensity": 8.726550102233887,
+            "type": 0,
+            "annotation": ""
+          }
+        },
+        "count": 23
+      },
+      "integrals": {
+        "datatype": "integrals",
+        "count": 0,
+        "normValue": 1,
+        "data": {}
+      },
+      "filename": "17141011.15001.ser_5"
+    },
+    "HSQC_CLIPCOSY_0": {
+      "datatype": "nmrspectrum",
+      "origin": "Bruker XWIN-NMR",
+      "type": "2D",
+      "subtype": "1H13C, Unknown",
+      "experimenttype": "Unknown",
+      "experiment": "Unknown",
+      "class": "",
+      "spectype": "",
+      "pulsesequence": "gns_noah3-BSScc.eeh",
+      "intrument": "Avance",
+      "probe": "Z168774_0002 (CPP1.1 BBO 700S3 BB-H&F-05 Z XT)",
+      "datafilename": "/Users/dch1amk/Desktop/NOAH_tests/Salicylsalicylic_acid/17141011/15003/ser",
+      "nucleus": "[13C, 1H]",
+      "specfrequency": "[175.967357924, 699.743288778]",
+      "solvent": "CDCl3",
+      "temperature": 298.103,
+      "multiplets": {
+        "datatype": "multiplets",
+        "normValue": 1,
+        "data": {},
+        "count": 0
+      },
+      "peaks": {
+        "datatype": "peaks",
+        "data": {
+          "0": {
+            "delta1": 136.4302474502244,
+            "delta2": 7.050461138862014,
+            "intensity": -1.1155273914337158,
+            "type": 0,
+            "annotation": ""
+          },
+          "1": {
+            "delta1": 136.4302474502244,
+            "delta2": 6.953212876485612,
+            "intensity": -0.5319364666938782,
+            "type": 0,
+            "annotation": ""
+          },
+          "2": {
+            "delta1": 130.7226151682302,
+            "delta2": 6.953212876485612,
+            "intensity": -0.9321643710136414,
+            "type": 0,
+            "annotation": ""
+          },
+          "3": {
+            "delta1": 126.63711921931184,
+            "delta2": 8.162338737250508,
+            "intensity": -0.5455610156059265,
+            "type": 0,
+            "annotation": ""
+          },
+          "4": {
+            "delta1": 126.63711921931184,
+            "delta2": 7.697254512019357,
+            "intensity": -0.4958708584308624,
+            "type": 0,
+            "annotation": ""
+          },
+          "5": {
+            "delta1": 124.05149346208572,
+            "delta2": 7.697254512019357,
+            "intensity": -0.7283180952072144,
+            "type": 0,
+            "annotation": ""
+          },
+          "6": {
+            "delta1": 119.54294508953923,
+            "delta2": 8.091320864373053,
+            "intensity": -0.5142962336540222,
+            "type": 0,
+            "annotation": ""
+          },
+          "7": {
+            "delta1": 117.69712488929049,
+            "delta2": 7.551911069351591,
+            "intensity": -0.609174370765686,
+            "type": 0,
+            "annotation": ""
+          }
+        },
+        "count": 8
+      },
+      "integrals": {
+        "datatype": "integrals",
+        "count": 0,
+        "normValue": 1,
+        "data": {}
+      },
+      "filename": "17141011.15003.ser_6"
+    },
+    "MNOVAcalcMethod": {
+      "datatype": "MNOVAcalcMethod",
+      "count": 1,
+      "data": {
+        "0": "MNOVA Predict"
+      }
+    },
+    "exptIdentifiers": {
+      "count": 5,
+      "datatype": "exptIdentifiers",
+      "data": {
+        "0": "SKIP",
+        "1": "C13_1D",
+        "2": "HSQC",
+        "3": "HMBC",
+        "4": "HSQC_CLIPCOSY"
+      }
+    },
+    "workingDirectory": {
+      "datatype": "workingDirectory",
+      "count": 1,
+      "data": {
+        "0": "/Users/vsmw51/Library/CloudStorage/Dropbox/4Eric/salicylsalicylic_acid_az"
+      }
+    },
+    "workingFilename": {
+      "datatype": "workingFilename",
+      "count": 1,
+      "data": {
+        "0": "salicylsalicylic_acid_az_nopeaks"
+      }
+    },
+    "simulatedAnnealing": {
+      "datatype": "simulatedAnnealing",
+      "count": 1,
+      "data": {
+        "0": true
+      }
+    },
+    "ml_consent": {
+      "datatype": "ml_consent",
+      "count": 1,
+      "data": {
+        "0": false
+      }
+    },
+    "spectraWithPeaks": {
+      "datatype": "spectraWithPeaks",
+      "count": 5,
+      "data": {
+        "0": "1H 1D reset_psychetse.ptg 17141011.11.1.1r_2",
+        "1": "13C 1D zgpg30 17141011.20.fid_3",
+        "2": "[13C, 1H] Unknown gns_noah3-BSScc.eeh 17141011.15002.ser_4",
+        "3": "[13C, 1H] Unknown gns_noah3-BSScc.eeh 17141011.15001.ser_5",
+        "4": "[13C, 1H] Unknown gns_noah3-BSScc.eeh 17141011.15003.ser_6"
+      }
+    },
+    "exclusion_summary": {
+      "hmbc": {
+        "total": 23,
+        "used": 20,
+        "excluded": [
+          {
+            "f1_ppm": 111.9437,
+            "f2_ppm": 10.2948,
+            "reason": "no proton within tolerance"
+          },
+          {
+            "f1_ppm": 161.9528,
+            "f2_ppm": 10.2947,
+            "reason": "no proton within tolerance"
+          },
+          {
+            "f1_ppm": 117.7053,
+            "f2_ppm": 10.2942,
+            "reason": "no proton within tolerance"
+          }
+        ]
+      },
+      "cosy": {
+        "total": 0,
+        "used": 0,
+        "excluded": []
+      },
+      "hsqc_clipcosy": {
+        "total": 8,
+        "used": 8,
+        "excluded": []
+      },
+      "ddept_ch3_only": {
+        "total": 0,
+        "used": 0,
+        "excluded": []
+      }
+    }
+  },
+  "molgraph": {
+    "directed": false,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 1,
+        "id0": 0,
+        "x": 0.8190381618840841,
+        "y": 0.10843317429805509,
+        "ppm": 119.54294508953923,
+        "atomNumber": 1,
+        "id": 0
+      },
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 1,
+        "id0": 1,
+        "x": 0.938615404627235,
+        "y": 0.22411405272595677,
+        "ppm": 134.88838051467386,
+        "atomNumber": 2,
+        "id": 1
+      },
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 1,
+        "id0": 2,
+        "x": 0.938615404627235,
+        "y": 0.45409289411938253,
+        "ppm": 117.69712488929049,
+        "atomNumber": 3,
+        "id": 2
+      },
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 0,
+        "id0": 3,
+        "x": 0.8190381618840841,
+        "y": 0.5683735706416266,
+        "ppm": 161.9487823156495,
+        "atomNumber": 4,
+        "id": 3
+      },
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 0,
+        "id0": 4,
+        "x": 0.699450547274965,
+        "y": 0.45409289411938253,
+        "ppm": 111.92148933149745,
+        "atomNumber": 5,
+        "id": 4
+      },
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 1,
+        "id0": 5,
+        "x": 0.699450547274965,
+        "y": 0.22411405272595677,
+        "ppm": 130.7226151682302,
+        "atomNumber": 6,
+        "id": 5
+      },
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 0,
+        "id0": 6,
+        "x": 0.5798629326658462,
+        "y": 0.5683735706416266,
+        "ppm": 169.2377413312082,
+        "atomNumber": 7,
+        "id": 6
+      },
+      {
+        "symbol": "O",
+        "atom_number": 8,
+        "numProtons": 0,
+        "id0": 7,
+        "x": 0.5806926819432728,
+        "y": 0.7983524120350521,
+        "ppm": 10000,
+        "id": 7
+      },
+      {
+        "symbol": "O",
+        "atom_number": 8,
+        "numProtons": 0,
+        "id0": 8,
+        "x": 0.46111543920012177,
+        "y": 0.45409289411938253,
+        "ppm": 10000,
+        "id": 8
+      },
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 0,
+        "id0": 9,
+        "x": 0.3415278245910028,
+        "y": 0.5683735706416266,
+        "ppm": 150.40680985199123,
+        "atomNumber": 10,
+        "id": 9
+      },
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 1,
+        "id0": 10,
+        "x": 0.3415278245910028,
+        "y": 0.7983524120350521,
+        "ppm": 124.05149346208572,
+        "atomNumber": 11,
+        "id": 10
+      },
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 1,
+        "id0": 11,
+        "x": 0.22194020998188388,
+        "y": 0.9140332904629541,
+        "ppm": 136.4302474502244,
+        "atomNumber": 12,
+        "id": 11
+      },
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 1,
+        "id0": 12,
+        "x": 0.1023525953727649,
+        "y": 0.7997526139407097,
+        "ppm": 126.63711921931184,
+        "atomNumber": 13,
+        "id": 12
+      },
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 1,
+        "id0": 13,
+        "x": 0.1023525953727649,
+        "y": 0.5697737725472841,
+        "ppm": 132.73242135114967,
+        "atomNumber": 14,
+        "id": 13
+      },
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 0,
+        "id0": 14,
+        "x": 0.22194020998188388,
+        "y": 0.45409289411938253,
+        "ppm": 122.47161638119225,
+        "atomNumber": 15,
+        "id": 14
+      },
+      {
+        "symbol": "C",
+        "atom_number": 6,
+        "numProtons": 0,
+        "id0": 15,
+        "x": 0.22194020998188388,
+        "y": 0.22411405272595677,
+        "ppm": 168.77520076212957,
+        "atomNumber": 16,
+        "id": 15
+      },
+      {
+        "symbol": "O",
+        "atom_number": 8,
+        "numProtons": 0,
+        "id0": 16,
+        "x": 0.3415278245910028,
+        "y": 0.10983337620371258,
+        "ppm": 10000,
+        "id": 16
+      },
+      {
+        "symbol": "O",
+        "atom_number": 8,
+        "numProtons": 1,
+        "id0": 17,
+        "x": 0.1023525953727649,
+        "y": 0.10983337620371258,
+        "ppm": 10000,
+        "id": 17
+      },
+      {
+        "symbol": "O",
+        "atom_number": 8,
+        "numProtons": 1,
+        "id0": 18,
+        "x": 0.8190381618840841,
+        "y": 0.7983524120350521,
+        "ppm": 10000,
+        "id": 18
+      }
+    ],
+    "links": [
+      {
+        "source": 0,
+        "target": 1
+      },
+      {
+        "source": 0,
+        "target": 5
+      },
+      {
+        "source": 1,
+        "target": 2
+      },
+      {
+        "source": 2,
+        "target": 3
+      },
+      {
+        "source": 3,
+        "target": 4
+      },
+      {
+        "source": 3,
+        "target": 18
+      },
+      {
+        "source": 4,
+        "target": 5
+      },
+      {
+        "source": 4,
+        "target": 6
+      },
+      {
+        "source": 6,
+        "target": 7
+      },
+      {
+        "source": 6,
+        "target": 8
+      },
+      {
+        "source": 8,
+        "target": 9
+      },
+      {
+        "source": 9,
+        "target": 10
+      },
+      {
+        "source": 9,
+        "target": 14
+      },
+      {
+        "source": 10,
+        "target": 11
+      },
+      {
+        "source": 11,
+        "target": 12
+      },
+      {
+        "source": 12,
+        "target": 13
+      },
+      {
+        "source": 13,
+        "target": 14
+      },
+      {
+        "source": 14,
+        "target": 15
+      },
+      {
+        "source": 15,
+        "target": 16
+      },
+      {
+        "source": 15,
+        "target": 17
+      }
+    ]
+  },
+  "shortest_paths": {
+    "0": {
+      "0": 0,
+      "1": 1,
+      "2": 2,
+      "3": 3,
+      "4": 2,
+      "5": 1,
+      "6": 3,
+      "7": 4,
+      "8": 4,
+      "9": 5,
+      "10": 6,
+      "11": 7,
+      "12": 8,
+      "13": 7,
+      "14": 6,
+      "15": 7,
+      "16": 8,
+      "17": 8,
+      "18": 4
+    },
+    "1": {
+      "0": 1,
+      "1": 0,
+      "2": 1,
+      "3": 2,
+      "4": 3,
+      "5": 2,
+      "6": 4,
+      "7": 5,
+      "8": 5,
+      "9": 6,
+      "10": 7,
+      "11": 8,
+      "12": 9,
+      "13": 8,
+      "14": 7,
+      "15": 8,
+      "16": 9,
+      "17": 9,
+      "18": 3
+    },
+    "2": {
+      "0": 2,
+      "1": 1,
+      "2": 0,
+      "3": 1,
+      "4": 2,
+      "5": 3,
+      "6": 3,
+      "7": 4,
+      "8": 4,
+      "9": 5,
+      "10": 6,
+      "11": 7,
+      "12": 8,
+      "13": 7,
+      "14": 6,
+      "15": 7,
+      "16": 8,
+      "17": 8,
+      "18": 2
+    },
+    "3": {
+      "0": 3,
+      "1": 2,
+      "2": 1,
+      "3": 0,
+      "4": 1,
+      "5": 2,
+      "6": 2,
+      "7": 3,
+      "8": 3,
+      "9": 4,
+      "10": 5,
+      "11": 6,
+      "12": 7,
+      "13": 6,
+      "14": 5,
+      "15": 6,
+      "16": 7,
+      "17": 7,
+      "18": 1
+    },
+    "4": {
+      "0": 2,
+      "1": 3,
+      "2": 2,
+      "3": 1,
+      "4": 0,
+      "5": 1,
+      "6": 1,
+      "7": 2,
+      "8": 2,
+      "9": 3,
+      "10": 4,
+      "11": 5,
+      "12": 6,
+      "13": 5,
+      "14": 4,
+      "15": 5,
+      "16": 6,
+      "17": 6,
+      "18": 2
+    },
+    "5": {
+      "0": 1,
+      "1": 2,
+      "2": 3,
+      "3": 2,
+      "4": 1,
+      "5": 0,
+      "6": 2,
+      "7": 3,
+      "8": 3,
+      "9": 4,
+      "10": 5,
+      "11": 6,
+      "12": 7,
+      "13": 6,
+      "14": 5,
+      "15": 6,
+      "16": 7,
+      "17": 7,
+      "18": 3
+    },
+    "6": {
+      "0": 3,
+      "1": 4,
+      "2": 3,
+      "3": 2,
+      "4": 1,
+      "5": 2,
+      "6": 0,
+      "7": 1,
+      "8": 1,
+      "9": 2,
+      "10": 3,
+      "11": 4,
+      "12": 5,
+      "13": 4,
+      "14": 3,
+      "15": 4,
+      "16": 5,
+      "17": 5,
+      "18": 3
+    },
+    "7": {
+      "0": 4,
+      "1": 5,
+      "2": 4,
+      "3": 3,
+      "4": 2,
+      "5": 3,
+      "6": 1,
+      "7": 0,
+      "8": 2,
+      "9": 3,
+      "10": 4,
+      "11": 5,
+      "12": 6,
+      "13": 5,
+      "14": 4,
+      "15": 5,
+      "16": 6,
+      "17": 6,
+      "18": 4
+    },
+    "8": {
+      "0": 4,
+      "1": 5,
+      "2": 4,
+      "3": 3,
+      "4": 2,
+      "5": 3,
+      "6": 1,
+      "7": 2,
+      "8": 0,
+      "9": 1,
+      "10": 2,
+      "11": 3,
+      "12": 4,
+      "13": 3,
+      "14": 2,
+      "15": 3,
+      "16": 4,
+      "17": 4,
+      "18": 4
+    },
+    "9": {
+      "0": 5,
+      "1": 6,
+      "2": 5,
+      "3": 4,
+      "4": 3,
+      "5": 4,
+      "6": 2,
+      "7": 3,
+      "8": 1,
+      "9": 0,
+      "10": 1,
+      "11": 2,
+      "12": 3,
+      "13": 2,
+      "14": 1,
+      "15": 2,
+      "16": 3,
+      "17": 3,
+      "18": 5
+    },
+    "10": {
+      "0": 6,
+      "1": 7,
+      "2": 6,
+      "3": 5,
+      "4": 4,
+      "5": 5,
+      "6": 3,
+      "7": 4,
+      "8": 2,
+      "9": 1,
+      "10": 0,
+      "11": 1,
+      "12": 2,
+      "13": 3,
+      "14": 2,
+      "15": 3,
+      "16": 4,
+      "17": 4,
+      "18": 6
+    },
+    "11": {
+      "0": 7,
+      "1": 8,
+      "2": 7,
+      "3": 6,
+      "4": 5,
+      "5": 6,
+      "6": 4,
+      "7": 5,
+      "8": 3,
+      "9": 2,
+      "10": 1,
+      "11": 0,
+      "12": 1,
+      "13": 2,
+      "14": 3,
+      "15": 4,
+      "16": 5,
+      "17": 5,
+      "18": 7
+    },
+    "12": {
+      "0": 8,
+      "1": 9,
+      "2": 8,
+      "3": 7,
+      "4": 6,
+      "5": 7,
+      "6": 5,
+      "7": 6,
+      "8": 4,
+      "9": 3,
+      "10": 2,
+      "11": 1,
+      "12": 0,
+      "13": 1,
+      "14": 2,
+      "15": 3,
+      "16": 4,
+      "17": 4,
+      "18": 8
+    },
+    "13": {
+      "0": 7,
+      "1": 8,
+      "2": 7,
+      "3": 6,
+      "4": 5,
+      "5": 6,
+      "6": 4,
+      "7": 5,
+      "8": 3,
+      "9": 2,
+      "10": 3,
+      "11": 2,
+      "12": 1,
+      "13": 0,
+      "14": 1,
+      "15": 2,
+      "16": 3,
+      "17": 3,
+      "18": 7
+    },
+    "14": {
+      "0": 6,
+      "1": 7,
+      "2": 6,
+      "3": 5,
+      "4": 4,
+      "5": 5,
+      "6": 3,
+      "7": 4,
+      "8": 2,
+      "9": 1,
+      "10": 2,
+      "11": 3,
+      "12": 2,
+      "13": 1,
+      "14": 0,
+      "15": 1,
+      "16": 2,
+      "17": 2,
+      "18": 6
+    },
+    "15": {
+      "0": 7,
+      "1": 8,
+      "2": 7,
+      "3": 6,
+      "4": 5,
+      "5": 6,
+      "6": 4,
+      "7": 5,
+      "8": 3,
+      "9": 2,
+      "10": 3,
+      "11": 4,
+      "12": 3,
+      "13": 2,
+      "14": 1,
+      "15": 0,
+      "16": 1,
+      "17": 1,
+      "18": 7
+    },
+    "16": {
+      "0": 8,
+      "1": 9,
+      "2": 8,
+      "3": 7,
+      "4": 6,
+      "5": 7,
+      "6": 5,
+      "7": 6,
+      "8": 4,
+      "9": 3,
+      "10": 4,
+      "11": 5,
+      "12": 4,
+      "13": 3,
+      "14": 2,
+      "15": 1,
+      "16": 0,
+      "17": 2,
+      "18": 8
+    },
+    "17": {
+      "0": 8,
+      "1": 9,
+      "2": 8,
+      "3": 7,
+      "4": 6,
+      "5": 7,
+      "6": 5,
+      "7": 6,
+      "8": 4,
+      "9": 3,
+      "10": 4,
+      "11": 5,
+      "12": 4,
+      "13": 3,
+      "14": 2,
+      "15": 1,
+      "16": 2,
+      "17": 0,
+      "18": 8
+    },
+    "18": {
+      "0": 4,
+      "1": 3,
+      "2": 2,
+      "3": 1,
+      "4": 2,
+      "5": 3,
+      "6": 3,
+      "7": 4,
+      "8": 4,
+      "9": 5,
+      "10": 6,
+      "11": 7,
+      "12": 8,
+      "13": 7,
+      "14": 6,
+      "15": 7,
+      "16": 8,
+      "17": 8,
+      "18": 0
+    }
+  },
+  "svg": "<?xml version='1.0' encoding='iso-8859-1'?>\n<svg class=\"center\" version='1.1' baseProfile='full'\n              xmlns='http://www.w3.org/2000/svg'\n                      xmlns:rdkit='http://www.rdkit.org/xml'\n                      xmlns:xlink='http://www.w3.org/1999/xlink'\n                  xml:space='preserve'\nwidth=1000 height=600 viewBox='0 0 1000 600'>\n\n<g transform='translate(0, 0)'>\n<rect style='opacity:1.0;fill:none;stroke:none' width='1000.0' height='600.0' x='0.0' y='0.0'> </rect>\n<path class='bond-0 atom-0 atom-1' d='M 819.0,65.1 L 938.6,134.5' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-0 atom-0 atom-1' d='M 819.0,89.0 L 917.9,146.4' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-1 atom-0 atom-5' d='M 819.0,65.1 L 699.5,134.5' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-2 atom-1 atom-2' d='M 938.6,134.5 L 938.6,272.5' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-3 atom-2 atom-3' d='M 938.6,272.5 L 819.0,341.0' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-3 atom-2 atom-3' d='M 917.9,260.5 L 819.0,317.2' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-4 atom-3 atom-4' d='M 819.0,341.0 L 699.5,272.5' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-5 atom-3 atom-18' d='M 819.0,341.0 L 819.0,400.6' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-5 atom-3 atom-18' d='M 819.0,400.6 L 819.0,460.1' style='fill:none;fill-rule:evenodd;stroke:#FF0000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-6 atom-4 atom-5' d='M 699.5,272.5 L 699.5,134.5' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-6 atom-4 atom-5' d='M 720.1,260.5 L 720.1,146.4' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-7 atom-4 atom-6' d='M 699.5,272.5 L 579.9,341.0' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-8 atom-6 atom-7' d='M 569.5,335.0 L 569.9,397.6' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-8 atom-6 atom-7' d='M 569.9,397.6 L 570.2,460.2' style='fill:none;fill-rule:evenodd;stroke:#FF0000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-8 atom-6 atom-7' d='M 590.2,335.1 L 590.5,397.6' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-8 atom-6 atom-7' d='M 590.5,397.6 L 590.9,460.1' style='fill:none;fill-rule:evenodd;stroke:#FF0000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-9 atom-6 atom-8' d='M 579.9,341.0 L 529.3,311.8' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-9 atom-6 atom-8' d='M 529.3,311.8 L 478.7,282.6' style='fill:none;fill-rule:evenodd;stroke:#FF0000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-10 atom-8 atom-9' d='M 443.6,282.5 L 392.5,311.8' style='fill:none;fill-rule:evenodd;stroke:#FF0000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-10 atom-8 atom-9' d='M 392.5,311.8 L 341.5,341.0' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-11 atom-9 atom-10' d='M 341.5,341.0 L 341.5,479.0' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-11 atom-9 atom-10' d='M 320.8,353.0 L 320.8,467.1' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-12 atom-9 atom-14' d='M 341.5,341.0 L 221.9,272.5' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-13 atom-10 atom-11' d='M 341.5,479.0 L 221.9,548.4' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-14 atom-11 atom-12' d='M 221.9,548.4 L 102.4,479.9' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-14 atom-11 atom-12' d='M 221.9,524.5 L 123.0,467.9' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-15 atom-12 atom-13' d='M 102.4,479.9 L 102.4,341.9' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-16 atom-13 atom-14' d='M 102.4,341.9 L 221.9,272.5' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-16 atom-13 atom-14' d='M 123.0,353.8 L 222.0,296.3' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-17 atom-14 atom-15' d='M 221.9,272.5 L 221.9,134.5' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-18 atom-15 atom-16' d='M 221.9,146.4 L 275.5,115.7' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-18 atom-15 atom-16' d='M 275.5,115.7 L 329.1,84.9' style='fill:none;fill-rule:evenodd;stroke:#FF0000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-18 atom-15 atom-16' d='M 211.5,128.5 L 265.2,97.7' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-18 atom-15 atom-16' d='M 265.2,97.7 L 318.8,67.0' style='fill:none;fill-rule:evenodd;stroke:#FF0000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-19 atom-15 atom-17' d='M 221.9,134.5 L 170.9,105.2' style='fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path class='bond-19 atom-15 atom-17' d='M 170.9,105.2 L 119.9,76.0' style='fill:none;fill-rule:evenodd;stroke:#FF0000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />\n<path d='M 825.0,68.5 L 819.0,65.1 L 813.1,68.5' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />\n<path d='M 932.6,131.0 L 938.6,134.5 L 938.6,141.4' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />\n<path d='M 938.6,265.6 L 938.6,272.5 L 932.6,275.9' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />\n<path d='M 705.4,131.0 L 699.5,134.5 L 699.5,141.4' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />\n<path d='M 585.8,337.6 L 579.9,341.0 L 577.3,339.6' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />\n<path d='M 341.5,472.1 L 341.5,479.0 L 335.5,482.5' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />\n<path d='M 227.9,544.9 L 221.9,548.4 L 216.0,545.0' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />\n<path d='M 108.3,483.3 L 102.4,479.9 L 102.4,473.0' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />\n<path d='M 102.4,348.8 L 102.4,341.9 L 108.3,338.4' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />\n<path d='M 221.9,141.4 L 221.9,134.5 L 219.4,133.0' style='fill:none;stroke:#000000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;' />\n<path class='atom-7' d='M 567.7 479.1\nQ 567.7 472.3, 571.1 468.5\nQ 574.4 464.7, 580.7 464.7\nQ 587.0 464.7, 590.3 468.5\nQ 593.7 472.3, 593.7 479.1\nQ 593.7 486.0, 590.3 489.9\nQ 586.9 493.8, 580.7 493.8\nQ 574.5 493.8, 571.1 489.9\nQ 567.7 486.0, 567.7 479.1\nM 580.7 490.6\nQ 585.0 490.6, 587.3 487.7\nQ 589.7 484.8, 589.7 479.1\nQ 589.7 473.5, 587.3 470.7\nQ 585.0 467.9, 580.7 467.9\nQ 576.4 467.9, 574.0 470.7\nQ 571.7 473.5, 571.7 479.1\nQ 571.7 484.8, 574.0 487.7\nQ 576.4 490.6, 580.7 490.6\n' fill='#FF0000'/>\n<path class='atom-8' d='M 448.1 272.5\nQ 448.1 265.7, 451.5 261.9\nQ 454.8 258.1, 461.1 258.1\nQ 467.4 258.1, 470.8 261.9\nQ 474.1 265.7, 474.1 272.5\nQ 474.1 279.4, 470.7 283.3\nQ 467.3 287.2, 461.1 287.2\nQ 454.9 287.2, 451.5 283.3\nQ 448.1 279.5, 448.1 272.5\nM 461.1 284.0\nQ 465.4 284.0, 467.8 281.1\nQ 470.1 278.2, 470.1 272.5\nQ 470.1 267.0, 467.8 264.2\nQ 465.4 261.3, 461.1 261.3\nQ 456.8 261.3, 454.4 264.1\nQ 452.1 266.9, 452.1 272.5\nQ 452.1 278.3, 454.4 281.1\nQ 456.8 284.0, 461.1 284.0\n' fill='#FF0000'/>\n<path class='atom-16' d='M 328.5 66.0\nQ 328.5 59.2, 331.9 55.4\nQ 335.2 51.6, 341.5 51.6\nQ 347.8 51.6, 351.2 55.4\nQ 354.5 59.2, 354.5 66.0\nQ 354.5 72.9, 351.1 76.8\nQ 347.7 80.7, 341.5 80.7\nQ 335.3 80.7, 331.9 76.8\nQ 328.5 72.9, 328.5 66.0\nM 341.5 77.5\nQ 345.8 77.5, 348.2 74.6\nQ 350.5 71.7, 350.5 66.0\nQ 350.5 60.4, 348.2 57.6\nQ 345.8 54.8, 341.5 54.8\nQ 337.2 54.8, 334.8 57.6\nQ 332.5 60.4, 332.5 66.0\nQ 332.5 71.7, 334.8 74.6\nQ 337.2 77.5, 341.5 77.5\n' fill='#FF0000'/>\n<path class='atom-17' d='M 61.4 51.9\nL 65.2 51.9\nL 65.2 63.9\nL 79.7 63.9\nL 79.7 51.9\nL 83.5 51.9\nL 83.5 80.2\nL 79.7 80.2\nL 79.7 67.1\nL 65.2 67.1\nL 65.2 80.2\nL 61.4 80.2\nL 61.4 51.9\n' fill='#FF0000'/>\n<path class='atom-17' d='M 89.4 66.0\nQ 89.4 59.2, 92.7 55.4\nQ 96.1 51.6, 102.4 51.6\nQ 108.6 51.6, 112.0 55.4\nQ 115.4 59.2, 115.4 66.0\nQ 115.4 72.9, 112.0 76.8\nQ 108.6 80.7, 102.4 80.7\nQ 96.1 80.7, 92.7 76.8\nQ 89.4 72.9, 89.4 66.0\nM 102.4 77.5\nQ 106.7 77.5, 109.0 74.6\nQ 111.4 71.7, 111.4 66.0\nQ 111.4 60.4, 109.0 57.6\nQ 106.7 54.8, 102.4 54.8\nQ 98.0 54.8, 95.7 57.6\nQ 93.4 60.4, 93.4 66.0\nQ 93.4 71.7, 95.7 74.6\nQ 98.0 77.5, 102.4 77.5\n' fill='#FF0000'/>\n<path class='atom-18' d='M 806.0 479.1\nQ 806.0 472.3, 809.4 468.5\nQ 812.8 464.7, 819.0 464.7\nQ 825.3 464.7, 828.7 468.5\nQ 832.0 472.3, 832.0 479.1\nQ 832.0 486.0, 828.6 489.9\nQ 825.2 493.8, 819.0 493.8\nQ 812.8 493.8, 809.4 489.9\nQ 806.0 486.0, 806.0 479.1\nM 819.0 490.6\nQ 823.4 490.6, 825.7 487.7\nQ 828.0 484.8, 828.0 479.1\nQ 828.0 473.5, 825.7 470.7\nQ 823.4 467.9, 819.0 467.9\nQ 814.7 467.9, 812.4 470.7\nQ 810.0 473.5, 810.0 479.1\nQ 810.0 484.8, 812.4 487.7\nQ 814.7 490.6, 819.0 490.6\n' fill='#FF0000'/>\n<path class='atom-18' d='M 836.4 465.0\nL 840.3 465.0\nL 840.3 477.1\nL 854.8 477.1\nL 854.8 465.0\nL 858.6 465.0\nL 858.6 493.3\nL 854.8 493.3\nL 854.8 480.3\nL 840.3 480.3\nL 840.3 493.3\nL 836.4 493.3\nL 836.4 465.0\n' fill='#FF0000'/>\n<path  d='M 819.0,65.1 L 938.6,134.5' class='bond-selector bond-0 atom-0 atom-1' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 819.0,65.1 L 699.5,134.5' class='bond-selector bond-1 atom-0 atom-5' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 938.6,134.5 L 938.6,272.5' class='bond-selector bond-2 atom-1 atom-2' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 938.6,272.5 L 819.0,341.0' class='bond-selector bond-3 atom-2 atom-3' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 819.0,341.0 L 699.5,272.5' class='bond-selector bond-4 atom-3 atom-4' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 819.0,341.0 L 819.0,479.0' class='bond-selector bond-5 atom-3 atom-18' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 699.5,272.5 L 699.5,134.5' class='bond-selector bond-6 atom-4 atom-5' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 699.5,272.5 L 579.9,341.0' class='bond-selector bond-7 atom-4 atom-6' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 579.9,341.0 L 580.7,479.0' class='bond-selector bond-8 atom-6 atom-7' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 579.9,341.0 L 461.1,272.5' class='bond-selector bond-9 atom-6 atom-8' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 461.1,272.5 L 341.5,341.0' class='bond-selector bond-10 atom-8 atom-9' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 341.5,341.0 L 341.5,479.0' class='bond-selector bond-11 atom-9 atom-10' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 341.5,341.0 L 221.9,272.5' class='bond-selector bond-12 atom-9 atom-14' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 341.5,479.0 L 221.9,548.4' class='bond-selector bond-13 atom-10 atom-11' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 221.9,548.4 L 102.4,479.9' class='bond-selector bond-14 atom-11 atom-12' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 102.4,479.9 L 102.4,341.9' class='bond-selector bond-15 atom-12 atom-13' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 102.4,341.9 L 221.9,272.5' class='bond-selector bond-16 atom-13 atom-14' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 221.9,272.5 L 221.9,134.5' class='bond-selector bond-17 atom-14 atom-15' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 221.9,134.5 L 341.5,65.9' class='bond-selector bond-18 atom-15 atom-16' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<path  d='M 221.9,134.5 L 102.4,65.9' class='bond-selector bond-19 atom-15 atom-17' style='fill:#fff;stroke:#fff;stroke-width:4.0px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='819.0' cy='65.1' r='20.7' class='atom-selector atom-0' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='938.6' cy='134.5' r='20.7' class='atom-selector atom-1' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='938.6' cy='272.5' r='20.7' class='atom-selector atom-2' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='819.0' cy='341.0' r='20.7' class='atom-selector atom-3' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='699.5' cy='272.5' r='20.7' class='atom-selector atom-4' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='699.5' cy='134.5' r='20.7' class='atom-selector atom-5' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='579.9' cy='341.0' r='20.7' class='atom-selector atom-6' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='580.7' cy='479.0' r='20.7' class='atom-selector atom-7' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='461.1' cy='272.5' r='20.7' class='atom-selector atom-8' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='341.5' cy='341.0' r='20.7' class='atom-selector atom-9' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='341.5' cy='479.0' r='20.7' class='atom-selector atom-10' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='221.9' cy='548.4' r='20.7' class='atom-selector atom-11' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='102.4' cy='479.9' r='20.7' class='atom-selector atom-12' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='102.4' cy='341.9' r='20.7' class='atom-selector atom-13' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='221.9' cy='272.5' r='20.7' class='atom-selector atom-14' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='221.9' cy='134.5' r='20.7' class='atom-selector atom-15' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='341.5' cy='65.9' r='20.7' class='atom-selector atom-16' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='102.4' cy='65.9' r='20.7' class='atom-selector atom-17' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n<circle  cx='819.0' cy='479.0' r='20.7' class='atom-selector atom-18' style='fill:#fff;stroke:#fff;stroke-width:1px;fill-opacity:0;stroke-opacity:0' />\n</g>\n</svg>\n",
+  "catoms": [
+    {
+      "ppm_calculated": 119.3573,
+      "id": 0,
+      "atomNumber": 1,
+      "numProtons": 1,
+      "x": 0.8190381618840841,
+      "y": 0.10843317429805509,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 119.54294508953923,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        6.953212876485612
+      ]
+    },
+    {
+      "ppm_calculated": 135.5013,
+      "id": 1,
+      "atomNumber": "2",
+      "numProtons": 1,
+      "x": 0.938615404627235,
+      "y": 0.22411405272595677,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 136.4302474502244,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.551911069351591
+      ]
+    },
+    {
+      "ppm_calculated": 116.9347,
+      "id": 2,
+      "atomNumber": 3,
+      "numProtons": 1,
+      "x": 0.938615404627235,
+      "y": 0.45409289411938253,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 117.69712488929049,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.050461138862014
+      ]
+    },
+    {
+      "ppm_calculated": 161.9101,
+      "id": 3,
+      "atomNumber": 4,
+      "numProtons": 0,
+      "x": 0.8190381618840841,
+      "y": 0.5683735706416266,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 161.9487823156495,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 113.439,
+      "id": 4,
+      "atomNumber": 5,
+      "numProtons": 0,
+      "x": 0.699450547274965,
+      "y": 0.45409289411938253,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 111.92148933149745,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 130.8272,
+      "id": 5,
+      "atomNumber": 6,
+      "numProtons": 1,
+      "x": 0.699450547274965,
+      "y": 0.22411405272595677,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 130.7226151682302,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        8.091320864373053
+      ]
+    },
+    {
+      "ppm_calculated": 167.9121,
+      "id": 6,
+      "atomNumber": "7",
+      "numProtons": 0,
+      "x": 0.5798629326658462,
+      "y": 0.5683735706416266,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 168.77520076212957,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 152.925,
+      "id": 9,
+      "atomNumber": 10,
+      "numProtons": 0,
+      "x": 0.3415278245910028,
+      "y": 0.5683735706416266,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 150.40680985199123,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 120.2194,
+      "id": 10,
+      "atomNumber": 11,
+      "numProtons": 1,
+      "x": 0.3415278245910028,
+      "y": 0.7983524120350521,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 124.05149346208572,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.282009279431336
+      ]
+    },
+    {
+      "ppm_calculated": 140.1317,
+      "id": 11,
+      "atomNumber": "12",
+      "numProtons": 1,
+      "x": 0.22194020998188388,
+      "y": 0.9140332904629541,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 134.88838051467386,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.697254512019357
+      ]
+    },
+    {
+      "ppm_calculated": 125.6088,
+      "id": 12,
+      "atomNumber": 13,
+      "numProtons": 1,
+      "x": 0.1023525953727649,
+      "y": 0.7997526139407097,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 126.63711921931184,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.432746404007601
+      ]
+    },
+    {
+      "ppm_calculated": 131.0117,
+      "id": 13,
+      "atomNumber": 14,
+      "numProtons": 1,
+      "x": 0.1023525953727649,
+      "y": 0.5697737725472841,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 132.73242135114967,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        8.162338737250508
+      ]
+    },
+    {
+      "ppm_calculated": 121.8443,
+      "id": 14,
+      "atomNumber": 15,
+      "numProtons": 0,
+      "x": 0.22194020998188388,
+      "y": 0.45409289411938253,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 122.47161638119225,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 168.5191,
+      "id": 15,
+      "atomNumber": "16",
+      "numProtons": 0,
+      "x": 0.22194020998188388,
+      "y": 0.22411405272595677,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 169.2377413312082,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    }
+  ],
+  "catoms_orig": [
+    {
+      "ppm_calculated": 119.3573,
+      "id": 0,
+      "atomNumber": 1,
+      "numProtons": 1,
+      "x": 0.8190381618840841,
+      "y": 0.10843317429805509,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 119.54294508953923,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        6.953212876485612
+      ]
+    },
+    {
+      "ppm_calculated": 135.5013,
+      "id": 1,
+      "atomNumber": "2",
+      "numProtons": 1,
+      "x": 0.938615404627235,
+      "y": 0.22411405272595677,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 136.4302474502244,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.551911069351591
+      ]
+    },
+    {
+      "ppm_calculated": 116.9347,
+      "id": 2,
+      "atomNumber": 3,
+      "numProtons": 1,
+      "x": 0.938615404627235,
+      "y": 0.45409289411938253,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 117.69712488929049,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.050461138862014
+      ]
+    },
+    {
+      "ppm_calculated": 161.9101,
+      "id": 3,
+      "atomNumber": 4,
+      "numProtons": 0,
+      "x": 0.8190381618840841,
+      "y": 0.5683735706416266,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 161.9487823156495,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 113.439,
+      "id": 4,
+      "atomNumber": 5,
+      "numProtons": 0,
+      "x": 0.699450547274965,
+      "y": 0.45409289411938253,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 111.92148933149745,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 130.8272,
+      "id": 5,
+      "atomNumber": 6,
+      "numProtons": 1,
+      "x": 0.699450547274965,
+      "y": 0.22411405272595677,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 130.7226151682302,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        8.091320864373053
+      ]
+    },
+    {
+      "ppm_calculated": 167.9121,
+      "id": 6,
+      "atomNumber": "7",
+      "numProtons": 0,
+      "x": 0.5798629326658462,
+      "y": 0.5683735706416266,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 168.77520076212957,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 152.925,
+      "id": 9,
+      "atomNumber": 10,
+      "numProtons": 0,
+      "x": 0.3415278245910028,
+      "y": 0.5683735706416266,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 150.40680985199123,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 120.2194,
+      "id": 10,
+      "atomNumber": 11,
+      "numProtons": 1,
+      "x": 0.3415278245910028,
+      "y": 0.7983524120350521,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 124.05149346208572,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.282009279431336
+      ]
+    },
+    {
+      "ppm_calculated": 140.1317,
+      "id": 11,
+      "atomNumber": "12",
+      "numProtons": 1,
+      "x": 0.22194020998188388,
+      "y": 0.9140332904629541,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 134.88838051467386,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.697254512019357
+      ]
+    },
+    {
+      "ppm_calculated": 125.6088,
+      "id": 12,
+      "atomNumber": 13,
+      "numProtons": 1,
+      "x": 0.1023525953727649,
+      "y": 0.7997526139407097,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 126.63711921931184,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        7.432746404007601
+      ]
+    },
+    {
+      "ppm_calculated": 131.0117,
+      "id": 13,
+      "atomNumber": 14,
+      "numProtons": 1,
+      "x": 0.1023525953727649,
+      "y": 0.5697737725472841,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 132.73242135114967,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": "",
+      "H1_ppm": [
+        8.162338737250508
+      ]
+    },
+    {
+      "ppm_calculated": 121.8443,
+      "id": 14,
+      "atomNumber": 15,
+      "numProtons": 0,
+      "x": 0.22194020998188388,
+      "y": 0.45409289411938253,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 122.47161638119225,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    },
+    {
+      "ppm_calculated": 168.5191,
+      "id": 15,
+      "atomNumber": "16",
+      "numProtons": 0,
+      "x": 0.22194020998188388,
+      "y": 0.22411405272595677,
+      "sym_atom_idx": "",
+      "sym_atomNumber": "",
+      "ppm": 169.2377413312082,
+      "jCouplingVals": "",
+      "jCouplingClass": "",
+      "visible": true,
+      "symbol": "C",
+      "iupacLabel": ""
+    }
+  ],
+  "best_results": {
+    "best_weight": 0,
+    "best_mae": 1.4349640989562988,
+    "best_lae": 5.24331948532614,
+    "best_lae_atomNumber": "12"
+  },
+  "workingDirectory": "/Users/vsmw51/Library/CloudStorage/Dropbox/4Eric/salicylsalicylic_acid_az",
+  "workingFilename": "salicylsalicylic_acid_az_nopeaks",
+  "title": "dummy_title",
+  "number_of_hmbc_cosy_subgraphs": 2,
+  "possible_symmetry": false,
+  "orig_nodes_displayed": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "pool_ch3_ch1": false
+}

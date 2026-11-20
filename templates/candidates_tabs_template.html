@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>simpleNMR – candidate structures</title>
+<style>
+  :root { --fg:#1d1d1f; --muted:#6e6e73; --line:#d2d2d7; --accent:#0a6ebd; --bg:#fafafa;
+          --high:#1b7f3b; --medium:#b26a00; --low:#b3261e; }
+  body { margin:0; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         color:var(--fg); background:var(--bg); }
+  header { padding:14px 20px 8px; border-bottom:1px solid var(--line); background:#fff; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header .summary { font-size:13px; color:var(--muted); }
+  .conf { font-weight:600; text-transform:uppercase; letter-spacing:.03em; }
+  .conf.high { color:var(--high); } .conf.medium { color:var(--medium); }
+  .conf.low, .conf.none { color:var(--low); }
+  .warnings { margin:6px 0 0; padding-left:18px; font-size:12px; color:var(--medium); }
+  nav { display:flex; gap:4px; padding:8px 20px 0; background:#fff; border-bottom:1px solid var(--line);
+        overflow-x:auto; }
+  nav button { border:1px solid var(--line); border-bottom:none; background:#f2f2f4; cursor:pointer;
+               padding:8px 14px; border-radius:8px 8px 0 0; font-size:13px; text-align:left; white-space:nowrap; }
+  nav button .score { display:block; font-size:11px; color:var(--muted); }
+  nav button.active { background:#fff; border-color:var(--accent); color:var(--accent); font-weight:600; }
+  section { display:none; height:calc(100vh - 150px); }
+  section.active { display:block; }
+  section iframe { width:100%; height:100%; border:0; background:#fff; }
+  .error { padding:20px; color:var(--low); }
+  .smiles { font-family: ui-monospace, Menlo, monospace; font-size:12px; color:var(--muted);
+            padding:6px 20px; background:#fff; border-bottom:1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Candidate structures{% if title %} – {{ title }}{% endif %}</h1>
+  <div class="summary">
+    simplecasenmr confidence: <span class="conf {{ info.confidence }}">{{ info.confidence }}</span>
+    &nbsp;·&nbsp; stage: {{ info.stage }} &nbsp;·&nbsp; {{ info.seconds }} s
+    &nbsp;·&nbsp; ranked by HMBC/COSY fit, then 13C shift fit
+  </div>
+  {% if info.reader_warnings %}
+  <ul class="warnings">{% for w in info.reader_warnings %}<li>{{ w }}</li>{% endfor %}</ul>
+  {% endif %}
+</header>
+<nav>
+  {% for c in candidates %}
+  <button class="{% if loop.first %}active{% endif %}" data-tab="{{ loop.index0 }}">
+    #{{ c.meta.rank }}
+    <span class="score">score {{ c.meta.combined }} · ΔδC {{ c.meta.shift_mae }} ppm · penalty {{ c.meta.corr_penalty }}</span>
+  </button>
+  {% endfor %}
+</nav>
+{% for c in candidates %}
+<section class="{% if loop.first %}active{% endif %}" id="tab-{{ loop.index0 }}">
+  <div class="smiles">{{ c.meta.smiles }}</div>
+  {% if c.html %}
+  <!-- each solution is a complete simpleNMR page; an iframe keeps their scripts apart -->
+  <iframe srcdoc="{{ c.html | e }}" loading="lazy"></iframe>
+  {% else %}
+  <div class="error">simpleNMR could not build this candidate: {{ c.error }}</div>
+  {% endif %}
+</section>
+{% endfor %}
+<script>
+  document.querySelectorAll("nav button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll("nav button").forEach(function (x) { x.classList.remove("active"); });
+      document.querySelectorAll("section").forEach(function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      document.getElementById("tab-" + b.dataset.tab).classList.add("active");
+    });
+  });
+</script>
+</body>
+</html>

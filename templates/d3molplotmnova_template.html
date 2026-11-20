@@ -208,6 +208,11 @@
     var number_of_hmbc_cosy_subgraphs = {{number_of_hmbc_cosy_subgraphs}};
     // peak_map: JASON peak IDs per carbon group and correlation (null unless the data came from JASON)
     var peak_map = {{ peak_map | default('null') }};
+    // SA / CP-SAT solver inputs — written into the exported JSON by exportToMnova()
+    // default values ensure the page renders correctly even before prediction_pipeline.py is updated
+    var possible_symmetry    = {{possible_symmetry    | default('false')}};
+    var orig_nodes_displayed = {{orig_nodes_displayed | default('[]')}};
+    var pool_ch3_ch1         = {{pool_ch3_ch1         | default('false')}};
 
     var svg_bckgrnd_image_str = `{{svg_container}}`;
     {% endautoescape %}

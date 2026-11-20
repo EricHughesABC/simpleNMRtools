@@ -57,6 +57,14 @@ function exportToMnova() {
 
     var nodes_export = JSON.parse(JSON.stringify(nodes));
 
+    // Ensure atomNumber is always a string — Python can return int or str
+    // depending on the code path; normalise here before writing to JSON.
+    nodes_export.forEach(function(n) {
+        if (n.atomNumber !== undefined && n.atomNumber !== null) {
+            n.atomNumber = String(n.atomNumber);
+        }
+    });
+
     unscaleNodes(nodes_export);
     unscaleNodes(catoms_orig);
     unscaleNodes(catoms);
@@ -79,7 +87,11 @@ function exportToMnova() {
     nodes_data['workingDirectory'] = workingDirectory;
     nodes_data['workingFilename']  = workingFilename;
     nodes_data['title']            = title;
-    nodes_data['number_of_hmbc_cosy_subgraphs'] = number_of_hmbc_cosy_subgraphs;   
+    nodes_data['number_of_hmbc_cosy_subgraphs'] = number_of_hmbc_cosy_subgraphs;
+    // SA / CP-SAT solver inputs
+    nodes_data['possible_symmetry']    = possible_symmetry;
+    nodes_data['orig_nodes_displayed'] = orig_nodes_displayed;
+    nodes_data['pool_ch3_ch1']         = pool_ch3_ch1;
     // JASON only: which JASON peaks belong to each carbon group and correlation
     if (typeof peak_map !== 'undefined' && peak_map !== null) {
         nodes_data['peak_map'] = peak_map;

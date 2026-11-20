@@ -954,14 +954,42 @@ function simplePREDICT_eeh(){
         }
         fout.close();
 
+        // // open html file in browser
+        // if (typeof Application.openUrl === 'function') {
+        //     if (SysInfo.isWin) {
+        //         Application.openUrl(htmlfilename);
+        //     }
+        //     else if (SysInfo.isMac) {
+        //         Application.openUrl("file://" + htmlfilename);
+        //     }
+        // }
+        // else {
+        //     print("Application.openUrl is not a function");
+        // }
+
+        // Convert a local file path to a file:// URL that tolerates spaces etc.
+        function pathToFileUrl(path) {
+            var p = String(path).replace(/\\/g, "/");   // backslashes -> forward slashes
+            var parts = p.split("/");
+            for (var i = 0; i < parts.length; i++) {
+                // leave a Windows drive letter such as "C:" unencoded
+                if (i === 0 && /^[A-Za-z]:$/.test(parts[i])) {
+                    continue;
+                }
+                parts[i] = encodeURIComponent(parts[i]);  // space -> %20, # -> %23, etc.
+            }
+            p = parts.join("/");
+            if (p.charAt(0) === "/") {
+                return "file://" + p;      // Mac/Linux: /Users/... -> file:///Users/...
+            }
+            return "file:///" + p;         // Windows: C:/... -> file:///C:/...
+        }
+
         // open html file in browser
         if (typeof Application.openUrl === 'function') {
-            if (SysInfo.isWin) {
-                Application.openUrl(htmlfilename);
-            }
-            else if (SysInfo.isMac) {
-                Application.openUrl("file://" + htmlfilename);
-            }
+            var url = pathToFileUrl(htmlfilename);
+            print("Opening: " + url);
+            Application.openUrl(url);
         }
         else {
             print("Application.openUrl is not a function");

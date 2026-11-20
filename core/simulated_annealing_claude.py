@@ -492,7 +492,7 @@ class SimulatedAnnealing2:
         graph_df["ppm"] = graph_df["ppm"].fillna("")
         graph_df["ppm_calculated"] = graph_df["ppm_calculated"].fillna("")
         if "visible" in graph_df.columns:
-            graph_df["visible"] = graph_df["visible"].fillna(True)
+            graph_df["visible"] = graph_df["visible"].map(lambda v: True if pd.isna(v) else v)
         else:
             graph_df["visible"] = True
 
@@ -797,7 +797,8 @@ class SimulatedAnnealing2:
 
                 if orig_id != moved_id:
                     moved_node["id"] = moved_id
-                    moved_node["atomNumber"] = catoms_df.loc[moved_id, "atomNumber"]
+                    # moved_node["atomNumber"] = catoms_df.loc[moved_id, "atomNumber"]
+                    moved_node["atomNumber"] = str(catoms_df.loc[moved_id, "atomNumber"])
                     moved_node["ppm_calculated"] = catoms_df.loc[
                         moved_id, "ppm_calculated"
                     ]

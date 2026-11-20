@@ -292,6 +292,10 @@ def _run_simulated_annealing(solution, json_data, jsonGraphData, catoms_df) -> t
     # and ch3_ch1_evidence_based was set by _assign_proton_types -- neither
     # is recomputed here.
     orig_nodes_displayed = solution.expected_molecule.sym_molprops_df["atom_idx"].tolist()
+    # print the length with some text to identify it in the logs
+    print(f"Number of original nodes displayed: {len(orig_nodes_displayed)}")
+    print(f"Original nodes displayed: {orig_nodes_displayed}")
+    
     pool_ch3_ch1 = not getattr(solution, "ch3_ch1_evidence_based", False)
 
     simAnneal = SimulatedAnnealing2.from_params(
@@ -322,7 +326,11 @@ def _run_simulated_annealing(solution, json_data, jsonGraphData, catoms_df) -> t
                 catoms_df.loc[idx, "ppm_calculated"] = node["ppm_calculated"]
                 catoms_df.loc[idx, "atomNumber"] = node["atomNumber"]
 
-    return jsonGraphData, best_results
+    # print contents of original nodes displayed
+    print("_run_simulated_annealing finished")
+    print(f"Contents of original nodes displayed: {orig_nodes_displayed}")
+
+    return jsonGraphData, best_results, possible_symmetry, orig_nodes_displayed, pool_ch3_ch1
 
 
 def _jason_id(row):
@@ -424,6 +432,9 @@ def _build_jinja_context(
     best_results,
     number_of_hmbc_cosy_subgraphs,
     nodes_before_annealing=None,
+    possible_symmetry=False,
+    orig_nodes_displayed=None,
+    pool_ch3_ch1=False,
 ) -> dict:
     """Assemble the Jinja2 template context dict from all pipeline outputs.
 
@@ -439,6 +450,8 @@ def _build_jinja_context(
     dataFrom = (
         "nmrshiftdb2" if problemdata_json.prediction_from_nmrshiftdb2() else "mnova"
     )
+
+    print(f"_build_jinja_context :: Original nodes displayed: {orig_nodes_displayed}")
 
     return {
         "svg_container": solution.expected_molecule.svg_str,
@@ -467,6 +480,12 @@ def _build_jinja_context(
             _build_peak_map(solution, nodes_before_annealing, jsonGraphData["moved_nodes"])
             if nodes_before_annealing is not None else None
         ),
+        # SA / CP-SAT solver inputs — included so the exported JSON can be
+        # fed directly to cpsat_nmr_v2.py without any patching step.
+        "possible_symmetry":    json.dumps(possible_symmetry),
+        # "orig_nodes_displayed": json.dumps(orig_nodes_displayed if orig_nodes_displayed is not None else []),
+        "orig_nodes_displayed": json.dumps(orig_nodes_displayed),
+        "pool_ch3_ch1":         json.dumps(pool_ch3_ch1),
     }
 
 
@@ -520,9 +539,10 @@ def run(problemdata_json, json_data: dict) -> dict:
     # process_results replaces jsonGraphData["nodes"] with the annealed nodes.
     nodes_before_annealing = copy.deepcopy(jsonGraphData["nodes"])
 
-    jsonGraphData, best_results = _run_simulated_annealing(
-        solution, json_data, jsonGraphData, catoms_df
-    )
+    jsonGraphData, best_results, possible_symmetry, orig_nodes_displayed, pool_ch3_ch1 = \
+        _run_simulated_annealing(solution, json_data, jsonGraphData, catoms_df)
+
+    print(f"Original nodes displayed: {orig_nodes_displayed}")
     logger.debug(f"prediction_pipeline: SA complete, best_weight={best_results.get('best_weight')}")
 
     context = _build_jinja_context(
@@ -536,6 +556,11 @@ def run(problemdata_json, json_data: dict) -> dict:
         best_results,
         number_of_hmbc_cosy_subgraphs,
         nodes_before_annealing,
+        possible_symmetry,
+        orig_nodes_displayed,
+        pool_ch3_ch1,
     )
+    print(f"Context: {context}")
     logger.info("prediction_pipeline: complete")
+    print(context)
     return context

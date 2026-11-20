@@ -430,17 +430,23 @@ def simpleMNOVAfinalHTML():
     id_now_mapping_dict = {}
 
     # Create a dictionary for quick lookup of catoms_orig by atomNumber
+    # atomNumber may arrive as int or str depending on where the JSON was
+    # produced (older exports, the MNova script, export.js), so compare as strings
     catoms_orig_lookup = {
-        node["atomNumber"]: node["id"] for node in json_data["catoms_orig"]
+        str(node["atomNumber"]): node["id"] for node in json_data["catoms_orig"]
     }
 
     # Iterate through nodes_now and create the mapping
     for node in json_data["nodes_now"]:
-        atom_number = node["atomNumber"]
+        atom_number = str(node["atomNumber"])
         if atom_number in catoms_orig_lookup:
             id_now_mapping_dict[node["id"]] = catoms_orig_lookup[atom_number]
         else:
             logger.warning(f"atomNumber {atom_number} not found in catoms_orig_lookup")
+
+    if not id_now_mapping_dict:
+        logger.error("No atoms matched between nodes_now and catoms_orig")
+        return "Could not match any atoms between nodes_now and catoms_orig", 400
 
     catoms_orig_dict = {}
 
@@ -807,7 +813,9 @@ def _render_and_save(
         best_results=jinja_template["best_results"],
         number_of_hmbc_cosy_subgraphs=jinja_template.get("number_of_hmbc_cosy_subgraphs", 'unknown'),
         exclusion_summary=jinja_template.get("exclusion_summary", {}),
-        peak_map=jinja_template.get("peak_map", "null"),
+        possible_symmetry=jinja_template.get("possible_symmetry", "false"),
+        orig_nodes_displayed=jinja_template.get("orig_nodes_displayed", "[]"),
+        pool_ch3_ch1=jinja_template.get("pool_ch3_ch1", "false"),
     )
 
     rtn_html = rtn_html.replace("True", "true").replace("False", "false")
