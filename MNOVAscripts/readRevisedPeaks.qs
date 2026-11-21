@@ -1,4 +1,107 @@
+// Read the refined peaks (simpleNMRclaudePeakRefine output) back into Mnova.
+//
+// Before anything is changed, the current peaks of every spectrum that will be
+// replaced are saved to <document>_peaksBeforeRefine.json next to the Mnova document
+// (see savePeaksBeforeRefine below).  undoRefinedPeaks.qs restores them.  The snapshot
+// is only created when there is none, so reading refined peaks several times in a row
+// still keeps the original, unrefined peaks; spectra not yet in the snapshot are added.
+
 function readRevisedPeaks() {
+
+    // keys of the refined JSON whose spectra this script replaces
+    var REPLACED_KEYS = ["HSQC_0", "HMBC_0", "C13_1D_0", "H1_1D_0", "PureShift_0", "H1_pureshift_0",
+                         "DDEPTCH3ONLY_0", "HSQC_CLIPCOSY_0", "COSY_0"];
+
+    function readJson(filename) {
+        var fin = new File(filename);
+        var txt = "";
+        if (fin.open(File.ReadOnly)) {
+            var sin = new TextStream(fin, 'UTF-8');
+            txt = sin.readAll();
+        }
+        fin.close();
+        try {
+            return JSON.parse(txt);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function writeJson(filename, obj) {
+        var fout = new File(filename);
+        if (fout.open(File.WriteOnly)) {
+            var sout = new TextStream(fout, 'UTF-8');
+            sout.writeln(JSON.stringify(obj, null, 2));
+            fout.close();
+            return true;
+        }
+        return false;
+    }
+
+    // all peaks of one Mnova spectrum, with every attribute needed to restore them
+    function peaksOf(spec) {
+        var out = [];
+        var pks = spec.peaks();
+        var twoD = spec.dimCount == 2 || String(spec.getParam("Nucleus")).indexOf(",") != -1;
+        for (var p = 0; p < pks.count; p++) {
+            var pk = pks.at(p);
+            out.push({
+                "delta1": pk.delta(1),
+                "delta2": twoD ? pk.delta(2) : 0,
+                "intensity": pk.intensity,
+                "type": pk.type,
+                "kind": pk.kind,
+                "flags": pk.flags,
+                "annotation": pk.annotation
+            });
+        }
+        return out;
+    }
+
+    // Save the current peaks of the spectra about to be replaced (matched by data file name).
+    function savePeaksBeforeRefine(doc, refined, snapshotFilename) {
+        var dfs = {};
+        for (var r = 0; r < REPLACED_KEYS.length; r++) {
+            var blk = refined[REPLACED_KEYS[r]];
+            if (blk && blk.datafilename) {
+                dfs[blk.datafilename] = REPLACED_KEYS[r];
+            }
+        }
+        var snap = null;
+        if (new Dir(snapshotFilename).fileExists(snapshotFilename)) {
+            snap = readJson(snapshotFilename);
+            if (snap && snap.restored) {
+                snap = null;            // already undone: start a fresh snapshot
+            }
+        }
+        if (!snap) {
+            snap = {"datatype": "peaksBeforeRefine", "version": 1, "document": doc.name,
+                    "created": new Date().toString(), "restored": false, "spectra": {}};
+        }
+        var added = 0;
+        for (var i = 0; i < doc.pageCount(); i++) {
+            var page = doc.page(i);
+            for (var j = 0; j < page.itemCount(); j++) {
+                var spec = new NMRSpectrum(page.item(j));
+                if (!spec.isValid()) continue;
+                var df = spec.getParam("Data File Name");
+                if (!(df in dfs) || (df in snap.spectra)) continue;
+                snap.spectra[df] = {"key": dfs[df], "title": spec.title,
+                                    "dimCount": (spec.dimCount == 2 || String(spec.getParam("Nucleus")).indexOf(",") != -1) ? 2 : 1,
+                                    "peaks": peaksOf(spec)};
+                added++;
+            }
+        }
+        if (added > 0) {
+            if (writeJson(snapshotFilename, snap)) {
+                print("Saved the peaks of " + added + " spectra before refinement to " + snapshotFilename);
+            } else {
+                MessageBox.warning("Could not write " + snapshotFilename + "\nThe peaks can not be undone.");
+            }
+        } else {
+            print("Snapshot " + snapshotFilename + " already holds the unrefined peaks");
+        }
+    }
 
     // read in the revised peaks json file
     function readRevisedPeaksFile(jsonfilename){
@@ -73,7 +176,7 @@ function readRevisedPeaks() {
     var hmbc_data = revisedPeaks["HMBC_0"];
     var c13_data = revisedPeaks["C13_1D_0"];
     var h1_data = revisedPeaks["H1_1D_0"];
-    var pureshift_data = revisedPeaks["PureShift_0"];
+    var pureshift_data = revisedPeaks["PureShift_0"] || revisedPeaks["H1_pureshift_0"];
     var ddeptCH3_data = revisedPeaks["DDEPTCH3ONLY_0"];
     var hsqcclipcosy_data = revisedPeaks["HSQC_CLIPCOSY_0"];
     var cosy_data = revisedPeaks["COSY_0"];
@@ -84,6 +187,12 @@ function readRevisedPeaks() {
         print("No HSQC data found.");
         return;
     }
+
+    // keep the current (unrefined) peaks so that undoRefinedPeaks.qs can restore them
+    var snapDetails = doc.name ? splitPathAndFilename(doc.name)
+                               : splitPathAndFilename(revisedPeaksDialog.replace(/\.json$/i, "") + ".x");
+    var snapshotFilename = snapDetails.directoryPath + "/" + snapDetails.name + "_peaksBeforeRefine.json";
+    savePeaksBeforeRefine(doc, revisedPeaks, snapshotFilename);
 
     // print out the number of HSQC peaks
     print("Number of HSQC peaks: " + hsqc_data.peaks.count);

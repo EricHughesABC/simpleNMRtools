@@ -1,0 +1,362 @@
+diff --git a/MNOVAscripts/collectPeaks.qs b/MNOVAscripts/collectPeaks.qs
+index c4049fd..f03964a 100644
+--- a/MNOVAscripts/collectPeaks.qs
++++ b/MNOVAscripts/collectPeaks.qs
+@@ -540,9 +540,21 @@ function collectPeaks(){
+         }
+     }
+ 
+-    // read in saved dialog values from file
+-    var dialogParametersJsonFilename = result.directoryPath + "/dialogPrameters.json";
++    // Saved dialog choices for the peak-refinement export.  These are kept separate from
++    // the files used by the simpleNMR verify step (simplePREDICT_eeh.qs:
++    // dialogPrameters.json / exptIdentifiers.json) because the two steps usually use
++    // different combinations of spectra.  If the peak-refinement files do not exist yet,
++    // the verify step's files are read once as a starting point; only the
++    // peak-refinement files are ever written here.
++    var dialogParametersJsonFilename = result.directoryPath + "/peakRefine_dialogParameters.json";
+     var dialogParmetersJsonFilenamePath = new Dir(dialogParametersJsonFilename);
++    if (!dialogParmetersJsonFilenamePath.fileExists(dialogParametersJsonFilename)){
++        var legacyDialogParameters = result.directoryPath + "/dialogPrameters.json";
++        if (dialogParmetersJsonFilenamePath.fileExists(legacyDialogParameters)){
++            print("Using the verify step's dialog parameters as a starting point: " + legacyDialogParameters);
++            dialogParametersJsonFilename = legacyDialogParameters;
++        }
++    }
+     var dialogParameters = null;
+ 
+     if (dialogParmetersJsonFilenamePath.fileExists(dialogParametersJsonFilename)){
+@@ -566,9 +578,16 @@ function collectPeaks(){
+ 
+     print("dialogParameters\n", dialogParameters);
+ 
+-    // read in experiment identifiers from file expt_identifiers
+-    var exptIdentifiersJsonFilename = result.directoryPath + "/exptIdentifiers.json";
++    // read in experiment identifiers (the spectrum labels chosen last time)
++    var exptIdentifiersJsonFilename = result.directoryPath + "/peakRefine_exptIdentifiers.json";
+     var exptIdentifiersJsonFilenamePath = new Dir(exptIdentifiersJsonFilename);
++    if (!exptIdentifiersJsonFilenamePath.fileExists(exptIdentifiersJsonFilename)){
++        var legacyExptIdentifiers = result.directoryPath + "/exptIdentifiers.json";
++        if (exptIdentifiersJsonFilenamePath.fileExists(legacyExptIdentifiers)){
++            print("Using the verify step's spectrum choices as a starting point: " + legacyExptIdentifiers);
++            exptIdentifiersJsonFilename = legacyExptIdentifiers;
++        }
++    }
+     var expt_identifiers = [];
+ 
+     if (exptIdentifiersJsonFilenamePath.fileExists(exptIdentifiersJsonFilename)){
+@@ -755,7 +774,9 @@ function collectPeaks(){
+         spectra["exptIdentifiers"]["data"][i] = chosen_spectra["exptIdentifiers"][i];
+     }
+ 
+-    // save "exptIdentifiers" as a json file
++    // save "exptIdentifiers" as a json file - always to the peak-refinement file,
++    // never back to the verify step's file
++    exptIdentifiersJsonFilename = result.directoryPath + "/peakRefine_exptIdentifiers.json";
+     var fout = new File(exptIdentifiersJsonFilename);
+     if (fout.open(File.WriteOnly)) {
+         sout = new TextStream(fout, 'UTF-8');
+@@ -774,11 +795,13 @@ function collectPeaks(){
+     dialogParams["calcSimpleMNOVA"] = chosen_spectra["calcSimpleMNOVA"];
+     dialogParams["usePreviousPositions"] = chosen_spectra["usePreviousPositions"];
+ 
++    dialogParametersJsonFilename = result.directoryPath + "/peakRefine_dialogParameters.json";
+     var fout = new File(dialogParametersJsonFilename);
+     if (fout.open(File.WriteOnly)) {
+         sout = new TextStream(fout, 'UTF-8');
+         sout.writeln(JSON.stringify(dialogParams));
+     }
++    fout.close();
+ 
+     spectra["workingDirectory"] = {};
+     spectra["workingDirectory"]["datatype"] = "workingDirectory";
+diff --git a/MNOVAscripts/readRevisedPeaks.qs b/MNOVAscripts/readRevisedPeaks.qs
+index 8b407c7..40f05cf 100644
+--- a/MNOVAscripts/readRevisedPeaks.qs
++++ b/MNOVAscripts/readRevisedPeaks.qs
+@@ -1,5 +1,108 @@
++// Read the refined peaks (simpleNMRclaudePeakRefine output) back into Mnova.
++//
++// Before anything is changed, the current peaks of every spectrum that will be
++// replaced are saved to <document>_peaksBeforeRefine.json next to the Mnova document
++// (see savePeaksBeforeRefine below).  undoRefinedPeaks.qs restores them.  The snapshot
++// is only created when there is none, so reading refined peaks several times in a row
++// still keeps the original, unrefined peaks; spectra not yet in the snapshot are added.
++
+ function readRevisedPeaks() {
+ 
++    // keys of the refined JSON whose spectra this script replaces
++    var REPLACED_KEYS = ["HSQC_0", "HMBC_0", "C13_1D_0", "H1_1D_0", "PureShift_0", "H1_pureshift_0",
++                         "DDEPTCH3ONLY_0", "HSQC_CLIPCOSY_0", "COSY_0"];
++
++    function readJson(filename) {
++        var fin = new File(filename);
++        var txt = "";
++        if (fin.open(File.ReadOnly)) {
++            var sin = new TextStream(fin, 'UTF-8');
++            txt = sin.readAll();
++        }
++        fin.close();
++        try {
++            return JSON.parse(txt);
++        } catch (e) {
++            return null;
++        }
++    }
++
++    function writeJson(filename, obj) {
++        var fout = new File(filename);
++        if (fout.open(File.WriteOnly)) {
++            var sout = new TextStream(fout, 'UTF-8');
++            sout.writeln(JSON.stringify(obj, null, 2));
++            fout.close();
++            return true;
++        }
++        return false;
++    }
++
++    // all peaks of one Mnova spectrum, with every attribute needed to restore them
++    function peaksOf(spec) {
++        var out = [];
++        var pks = spec.peaks();
++        var twoD = spec.dimCount == 2 || String(spec.getParam("Nucleus")).indexOf(",") != -1;
++        for (var p = 0; p < pks.count; p++) {
++            var pk = pks.at(p);
++            out.push({
++                "delta1": pk.delta(1),
++                "delta2": twoD ? pk.delta(2) : 0,
++                "intensity": pk.intensity,
++                "type": pk.type,
++                "kind": pk.kind,
++                "flags": pk.flags,
++                "annotation": pk.annotation
++            });
++        }
++        return out;
++    }
++
++    // Save the current peaks of the spectra about to be replaced (matched by data file name).
++    function savePeaksBeforeRefine(doc, refined, snapshotFilename) {
++        var dfs = {};
++        for (var r = 0; r < REPLACED_KEYS.length; r++) {
++            var blk = refined[REPLACED_KEYS[r]];
++            if (blk && blk.datafilename) {
++                dfs[blk.datafilename] = REPLACED_KEYS[r];
++            }
++        }
++        var snap = null;
++        if (new Dir(snapshotFilename).fileExists(snapshotFilename)) {
++            snap = readJson(snapshotFilename);
++            if (snap && snap.restored) {
++                snap = null;            // already undone: start a fresh snapshot
++            }
++        }
++        if (!snap) {
++            snap = {"datatype": "peaksBeforeRefine", "version": 1, "document": doc.name,
++                    "created": new Date().toString(), "restored": false, "spectra": {}};
++        }
++        var added = 0;
++        for (var i = 0; i < doc.pageCount(); i++) {
++            var page = doc.page(i);
++            for (var j = 0; j < page.itemCount(); j++) {
++                var spec = new NMRSpectrum(page.item(j));
++                if (!spec.isValid()) continue;
++                var df = spec.getParam("Data File Name");
++                if (!(df in dfs) || (df in snap.spectra)) continue;
++                snap.spectra[df] = {"key": dfs[df], "title": spec.title,
++                                    "dimCount": (spec.dimCount == 2 || String(spec.getParam("Nucleus")).indexOf(",") != -1) ? 2 : 1,
++                                    "peaks": peaksOf(spec)};
++                added++;
++            }
++        }
++        if (added > 0) {
++            if (writeJson(snapshotFilename, snap)) {
++                print("Saved the peaks of " + added + " spectra before refinement to " + snapshotFilename);
++            } else {
++                MessageBox.warning("Could not write " + snapshotFilename + "\nThe peaks can not be undone.");
++            }
++        } else {
++            print("Snapshot " + snapshotFilename + " already holds the unrefined peaks");
++        }
++    }
++
+     // read in the revised peaks json file
+     function readRevisedPeaksFile(jsonfilename){
+         var peaksTxt = "";
+@@ -73,7 +176,7 @@ function readRevisedPeaks() {
+     var hmbc_data = revisedPeaks["HMBC_0"];
+     var c13_data = revisedPeaks["C13_1D_0"];
+     var h1_data = revisedPeaks["H1_1D_0"];
+-    var pureshift_data = revisedPeaks["PureShift_0"];
++    var pureshift_data = revisedPeaks["PureShift_0"] || revisedPeaks["H1_pureshift_0"];
+     var ddeptCH3_data = revisedPeaks["DDEPTCH3ONLY_0"];
+     var hsqcclipcosy_data = revisedPeaks["HSQC_CLIPCOSY_0"];
+     var cosy_data = revisedPeaks["COSY_0"];
+@@ -85,6 +188,12 @@ function readRevisedPeaks() {
+         return;
+     }
+ 
++    // keep the current (unrefined) peaks so that undoRefinedPeaks.qs can restore them
++    var snapDetails = doc.name ? splitPathAndFilename(doc.name)
++                               : splitPathAndFilename(revisedPeaksDialog.replace(/\.json$/i, "") + ".x");
++    var snapshotFilename = snapDetails.directoryPath + "/" + snapDetails.name + "_peaksBeforeRefine.json";
++    savePeaksBeforeRefine(doc, revisedPeaks, snapshotFilename);
++
+     // print out the number of HSQC peaks
+     print("Number of HSQC peaks: " + hsqc_data.peaks.count);
+ 
+diff --git a/MNOVAscripts/undoRefinedPeaks.qs b/MNOVAscripts/undoRefinedPeaks.qs
+new file mode 100644
+index 0000000..a6f07f4
+--- /dev/null
++++ b/MNOVAscripts/undoRefinedPeaks.qs
+@@ -0,0 +1,149 @@
++/*globals Application, NMRSpectrum, Peak, File, Dir, TextStream, MessageBox, FileDialog, print*/
++
++// Undo the refined peaks: restore the peaks that were in the spectra before
++// readRevisedPeaks.qs replaced them with the refined (simpleNMRclaudePeakRefine) peaks.
++//
++// readRevisedPeaks.qs saves the original peaks of every spectrum it changes to
++//     <document>_peaksBeforeRefine.json
++// in the folder of the Mnova document.  This script puts those peaks back - positions,
++// intensities and, where Mnova allows it, the peak type (compound, impurity, solvent ...),
++// kind, flags and annotation - into the spectra with the same data file name.  Spectra
++// that were not changed by the read-back are left alone.
++//
++// Afterwards the snapshot is marked as restored (it is kept on disk), so the next
++// read-back of refined peaks saves a fresh snapshot.  Running this script twice does no
++// harm: it asks before restoring an already-restored snapshot.
++
++function undoRefinedPeaks() {
++
++    function splitPathAndFilename(path) {
++        var separatorIndex = path.lastIndexOf('/');
++        var directoryPath = path.substring(0, separatorIndex);
++        var filename = path.substring(separatorIndex + 1);
++        var dotIndex = filename.lastIndexOf('.');
++        return {
++            directoryPath: directoryPath,
++            filename: filename,
++            name: dotIndex > 0 ? filename.substring(0, dotIndex) : filename,
++            extension: dotIndex > 0 ? filename.substring(dotIndex + 1) : ""
++        };
++    }
++
++    function readJson(filename) {
++        var fin = new File(filename);
++        var txt = "";
++        if (fin.open(File.ReadOnly)) {
++            var sin = new TextStream(fin, 'UTF-8');
++            txt = sin.readAll();
++        }
++        fin.close();
++        try {
++            return JSON.parse(txt);
++        } catch (e) {
++            return null;
++        }
++    }
++
++    function writeJson(filename, obj) {
++        var fout = new File(filename);
++        if (fout.open(File.WriteOnly)) {
++            var sout = new TextStream(fout, 'UTF-8');
++            sout.writeln(JSON.stringify(obj, null, 2));
++            fout.close();
++            return true;
++        }
++        return false;
++    }
++
++    // set a peak attribute if this Mnova version allows it
++    function trySet(pk, attr, value) {
++        if (value === undefined || value === null) return;
++        try {
++            pk[attr] = value;
++        } catch (e) {
++            print("could not set peak " + attr + ": " + e);
++        }
++    }
++
++    var doc = Application.mainWindow.activeDocument;
++
++    // find the snapshot next to the Mnova document; ask for it if it is not there
++    var snapshotFilename = "";
++    if (doc.name) {
++        var details = splitPathAndFilename(doc.name);
++        snapshotFilename = details.directoryPath + "/" + details.name + "_peaksBeforeRefine.json";
++    }
++    if (!snapshotFilename || !new Dir(snapshotFilename).fileExists(snapshotFilename)) {
++        var startDir = doc.name ? splitPathAndFilename(doc.name).directoryPath : "";
++        snapshotFilename = FileDialog.getOpenFileName("*_peaksBeforeRefine.json",
++                                                      "Choose the saved peaks to restore", startDir);
++        if (!snapshotFilename) {
++            print("No snapshot chosen - nothing undone.");
++            return;
++        }
++    }
++
++    var snap = readJson(snapshotFilename);
++    if (!snap || snap.datatype !== "peaksBeforeRefine" || !snap.spectra) {
++        MessageBox.warning("Not a saved-peaks file:\n" + snapshotFilename);
++        return;
++    }
++    if (snap.restored) {
++        var answer = MessageBox.question("These peaks were already restored on " + snap.restoredOn +
++                                         ".\nRestore them again?",
++                                         MessageBox.Yes, MessageBox.No);
++        if (answer != MessageBox.Yes) {
++            return;
++        }
++    }
++
++    var restored = [];
++    for (var i = 0; i < doc.pageCount(); i++) {
++        var page = doc.page(i);
++        for (var j = 0; j < page.itemCount(); j++) {
++            var spec = new NMRSpectrum(page.item(j));
++            if (!spec.isValid()) continue;
++            var df = spec.getParam("Data File Name");
++            var saved = snap.spectra[df];
++            if (!saved) continue;
++
++            var newPeaks = spec.peaks();
++            newPeaks.clear();
++            for (var k = 0; k < saved.peaks.length; k++) {
++                var p = saved.peaks[k];
++                var pk = saved.dimCount == 2 ? new Peak(p.delta1, p.delta2, p.intensity)
++                                             : new Peak(p.delta1, p.intensity);
++                trySet(pk, "type", p.type);
++                trySet(pk, "kind", p.kind);
++                trySet(pk, "flags", p.flags);
++                trySet(pk, "annotation", p.annotation);
++                newPeaks.append(pk);
++            }
++            spec.setPeaks(newPeaks);
++            spec.update();
++            restored.push((saved.key || saved.title) + " (" + saved.peaks.length + " peaks)");
++            print("Restored " + saved.peaks.length + " peaks in " + df);
++        }
++    }
++
++    if (restored.length === 0) {
++        MessageBox.warning("None of the saved spectra were found in this document.\n" +
++                           "Is the right Mnova document open?\n\n" + snapshotFilename);
++        return;
++    }
++
++    snap.restored = true;
++    snap.restoredOn = new Date().toString();
++    writeJson(snapshotFilename, snap);
++
++    var missing = [];
++    for (var key in snap.spectra) {
++        var found = false;
++        for (var r = 0; r < restored.length; r++) {
++            if (restored[r].indexOf(snap.spectra[key].key || snap.spectra[key].title) === 0) found = true;
++        }
++        if (!found) missing.push(snap.spectra[key].key || key);
++    }
++    MessageBox.information("Unrefined peaks restored:\n  " + restored.join("\n  ") +
++                           (missing.length ? "\n\nNot found in this document:\n  " + missing.join("\n  ") : ""));
++}
