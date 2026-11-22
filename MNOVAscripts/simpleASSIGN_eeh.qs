@@ -23,7 +23,7 @@ function simpleASSIGN_eeh() {
     // the assignments exported from the HTML page
     var jsonfilename = result.directoryPath + "/" + result.name + "_assignments_from_simplemnova.json";
     print(jsonfilename);
-    var jsondata = su.readJsonIfExists(jsonfilename, undefined);
+    var jsondata = su.readJson(jsonfilename, undefined);
     if (jsondata === undefined) {
         print("Could not open json file");
         print(jsonfilename);

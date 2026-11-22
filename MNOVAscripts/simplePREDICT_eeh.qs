@@ -29,32 +29,7 @@ function simplePREDICT_eeh() {
 
         var positions = [];
         var previousExportFilename = directoryPath + "/" + name + "_assignments_from_simplemnova.json";
-        var previousExportPath = new Dir(previousExportFilename);
-
-        if (!previousExportPath.fileExists(previousExportFilename)) {
-            print("No previous export file found at " + previousExportFilename);
-            return positions;
-        }
-
-        var fin = new File(previousExportFilename);
-        if (!fin.open(File.ReadOnly)) {
-            print("Could not open previous export file " + previousExportFilename);
-            return positions;
-        }
-
-        var sin = new TextStream(fin, 'UTF-8');
-        var jsonstr = sin.readAll();
-        fin.close();
-
-        var previousExport = {};
-        try {
-            previousExport = JSON.parse(jsonstr);
-        }
-        catch (e) {
-            print("Could not parse previous export file " + previousExportFilename);
-            print(e);
-            return positions;
-        }
+        var previousExport = new simpleUtils().readJson(previousExportFilename, {});
 
         var nodesNow = previousExport["nodes_now"];
         if (nodesNow === undefined) {
@@ -118,12 +93,12 @@ function simplePREDICT_eeh() {
 
     // dialog settings and spectrum labels chosen last time
     var dialogParametersJsonFilename = result.directoryPath + "/dialogPrameters.json";
-    var dialogParameters = su.readJsonIfExists(dialogParametersJsonFilename, {});
+    var dialogParameters = su.readJson(dialogParametersJsonFilename, {});
     dialogParameters["ml_consent"] = ml_consent;
     print("dialogParameters\n", dialogParameters);
 
     var exptIdentifiersJsonFilename = result.directoryPath + "/exptIdentifiers.json";
-    var expt_identifiers = su.readJsonIfExists(exptIdentifiersJsonFilename, []);
+    var expt_identifiers = su.readJson(exptIdentifiersJsonFilename, []);
 
     print("server", server);
     var chosen_spectra = xy3_dialog2(spectra_with_peaks,
@@ -142,7 +117,7 @@ function simplePREDICT_eeh() {
     if (chosen_spectra_ids === undefined) {
         return;
     }
-    if (!su.hasChosenLabel(chosen_spectra_ids, "HSQC")) {
+    if (!su.hasChosenLabel(chosen_spectra_ids, EXPT.HSQC)) {
         MessageBox.warning("No HSQC found in the chosen spectra. Please choose a HSQC spectrum.");
         return;
     }
@@ -150,7 +125,7 @@ function simplePREDICT_eeh() {
     // NOTE: the keys are "H1_1D_0", ... so this lookup never finds the 1H spectrum and the
     // HSQC-peaks-vs-1H-multiplets check further down never runs (unchanged behaviour,
     // under review).
-    var h1_1d = spectra["H1_1D_0"];
+    var h1_1d = spectra[exptKey(EXPT.H1_1D, 0)];
 
     // HSQC peak intensities from the HSQC integrals (when the counts match)
     var hsqc = su.hsqcIntensitiesFromIntegrals(spectra);

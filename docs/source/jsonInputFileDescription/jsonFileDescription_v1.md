@@ -335,7 +335,7 @@ Lists the spectra for which peaks or integrals have been picked. The format is t
 
 #### exptIdentifiers
 
-The experiment type label for each spectrum in `chosenSpectra`, in the same order. Valid labels are: `SKIP`, `H1_1D`, `C13_1D`, `H1_pureshift`, `DEPT135`, `COSY`, `HSQC`, `HMBC`, `HSQC_CLIPCOSY`, `DDEPT_CH3_ONLY`.
+The experiment type label for each spectrum in `chosenSpectra`, in the same order. Valid labels are: `SKIP`, `H1_1D`, `C13_1D`, `H1_pureshift`, `DEPT135`, `COSY`, `HSQC`, `HMBC`, `HSQC_CLIPCOSY`, `DDEPTCH3ONLY`.
 
 ```json
 "exptIdentifiers": {
@@ -394,7 +394,7 @@ Whether the user has consented to their data being used for machine learning. De
 Each NMR experiment contributes a separate top-level block. The key is constructed from the spectrum filename and an index suffix (e.g. `HMBC_0`, `HSQC_0`, `C13_1D_0`). Multiple acquisitions of the same experiment type are indexed `_0`, `_1`, etc.
 
 Required: at least one `HSQC` or `HSQC_CLIPCOSY` block.
-Optional: `C13_1D`, `H1_1D`, `H1_pureshift`, `HMBC`, `COSY`, `DDEPT_CH3_ONLY`.
+Optional: `C13_1D`, `H1_1D`, `H1_pureshift`, `HMBC`, `COSY`, `DDEPTCH3ONLY`.
 
 #### Spectrum attributes
 

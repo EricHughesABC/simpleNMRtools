@@ -199,7 +199,7 @@ function simplePeakPick_eeh() {
     var hsqcspec = undefined;
     for (var i = 0; i < spectra_lst.length; i++) {
         print(spectra_lst[i].experimentEEH);
-        if (spectra_lst[i].experimentEEH == "HSQC") {
+        if (spectra_lst[i].experimentEEH == EXPT.HSQC) {
             hsqc_idx = i;
             break;
         }

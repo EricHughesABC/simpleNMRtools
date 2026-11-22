@@ -61,7 +61,7 @@ The file is made up of two types of JSON data structures:
 
 - HSQC_CLIPCOSY_0,  HSQC_CLIPCOSY_1, ... (optional)
 
-- DDEPT_CH3_ONLY_0, DDEPT_CH3_ONLY_1, ... (optional)
+- DDEPTCH3ONLY_0, DDEPTCH3ONLY_1, ... (optional)
 
 
 
@@ -375,7 +375,7 @@ The file is made up of two types of JSON data structures:
           "datatype": "exptIdentifiers",
           "data": {
               "0": "SKIP",             # SKIP, H1_1D, C13_1D, H1_pureshift, DEPT135,  
-              "1": "C13_1D",           # COSY, HSQC, HMBC, HSQC_CLIPCOSY, DDEPT_CH3_ONLY
+              "1": "C13_1D",           # COSY, HSQC, HMBC, HSQC_CLIPCOSY, DDEPTCH3ONLY
               "2": "COSY",
               "3": "HSQC",
               "4": "HMBC"

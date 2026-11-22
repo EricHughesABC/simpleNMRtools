@@ -32,7 +32,7 @@ function peakPickHSQC_fromC131D(){
     var hsqc_idx = -1;
     var hsqcspec = undefined;
     for (var i = 0; i < spectra_lst.length; i++) {
-        if (spectra_lst[i].experimentEEH == "HSQC") {
+        if (spectra_lst[i].experimentEEH == EXPT.HSQC) {
             hsqc_idx = i;
             break;
         }

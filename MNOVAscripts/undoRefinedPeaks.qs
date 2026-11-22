@@ -16,44 +16,10 @@
 
 function undoRefinedPeaks() {
 
-    function splitPathAndFilename(path) {
-        var separatorIndex = path.lastIndexOf('/');
-        var directoryPath = path.substring(0, separatorIndex);
-        var filename = path.substring(separatorIndex + 1);
-        var dotIndex = filename.lastIndexOf('.');
-        return {
-            directoryPath: directoryPath,
-            filename: filename,
-            name: dotIndex > 0 ? filename.substring(0, dotIndex) : filename,
-            extension: dotIndex > 0 ? filename.substring(dotIndex + 1) : ""
-        };
-    }
+    var su = new simpleUtils();
 
-    function readJson(filename) {
-        var fin = new File(filename);
-        var txt = "";
-        if (fin.open(File.ReadOnly)) {
-            var sin = new TextStream(fin, 'UTF-8');
-            txt = sin.readAll();
-        }
-        fin.close();
-        try {
-            return JSON.parse(txt);
-        } catch (e) {
-            return null;
-        }
-    }
 
-    function writeJson(filename, obj) {
-        var fout = new File(filename);
-        if (fout.open(File.WriteOnly)) {
-            var sout = new TextStream(fout, 'UTF-8');
-            sout.writeln(JSON.stringify(obj, null, 2));
-            fout.close();
-            return true;
-        }
-        return false;
-    }
+
 
     // set a peak attribute if this Mnova version allows it
     function trySet(pk, attr, value) {
@@ -70,11 +36,11 @@ function undoRefinedPeaks() {
     // find the snapshot next to the Mnova document; ask for it if it is not there
     var snapshotFilename = "";
     if (doc.name) {
-        var details = splitPathAndFilename(doc.name);
+        var details = su.splitPathAndFilename(doc.name);
         snapshotFilename = details.directoryPath + "/" + details.name + "_peaksBeforeRefine.json";
     }
     if (!snapshotFilename || !new Dir(snapshotFilename).fileExists(snapshotFilename)) {
-        var startDir = doc.name ? splitPathAndFilename(doc.name).directoryPath : "";
+        var startDir = doc.name ? su.splitPathAndFilename(doc.name).directoryPath : "";
         snapshotFilename = FileDialog.getOpenFileName("*_peaksBeforeRefine.json",
                                                       "Choose the saved peaks to restore", startDir);
         if (!snapshotFilename) {
@@ -83,7 +49,7 @@ function undoRefinedPeaks() {
         }
     }
 
-    var snap = readJson(snapshotFilename);
+    var snap = su.readJson(snapshotFilename, null);
     if (!snap || snap.datatype !== "peaksBeforeRefine" || !snap.spectra) {
         MessageBox.warning("Not a saved-peaks file:\n" + snapshotFilename);
         return;
@@ -134,7 +100,7 @@ function undoRefinedPeaks() {
 
     snap.restored = true;
     snap.restoredOn = new Date().toString();
-    writeJson(snapshotFilename, snap);
+    su.writeJson(snapshotFilename, snap, 2);
 
     var missing = [];
     for (var key in snap.spectra) {

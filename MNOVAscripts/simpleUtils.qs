@@ -1,68 +1,125 @@
-// Read in simpleNMRglobals.json file
-// and parse the JSON content to get experiments_dict
-
-// read in the json file and return the json object
-function readJsonFile(jsonfilename){
-
-    var jsonobj = {};
-    var fin = new File(jsonfilename);
-    if (fin.open(File.ReadOnly)) {
-        var sin = new TextStream(fin, 'UTF-8');
-        var jsonstr = sin.readAll();
-        jsonobj = JSON.parse(jsonstr);
-    }
-    else{
-        MessageBox.warning("Could not open json file\n" + jsonfilename);
-    }
-    fin.close();
-    return jsonobj;
-}
-
-// var jsonFilePath = "simpleNMRglobals.json";
-// var globals = readJsonFile(jsonFilePath);
-// var experiments_dict = globals.experiments_dict;
-// var spectra_keys = Object.keys(experiments_dict);
 
 // Function to check if one string is a substring of another
 function isSubstring(sub, str) {
     return str.indexOf(sub) !== -1;
 }
 
-const spectra_keys = ["unidentified",
-                      "Predicted",    
-                      "SKIP", 
-                      "HSQC", 
-                      "HMBC", 
-                      "COSY", 
-                      "H1_1D", 
-                      "C13_1D", 
-                      "DEPT135", 
-                      "H1_pureshift", 
-                      "DDEPT_CH3_ONLY", 
-                      "HSQC_CLIPCOSY",
-                      "NOESY", 
-                ];
+///////////////////////////////////////////////////////////////////////////////
+// THE list of NMR experiment types - defined here once, used by every script.
+//
+// The names are the same as simpleNMR's NMREXPERIMENTS (simpleNMRtools
+// config/globals.py) and simpleNMRbuilder, so the JSON keys match the server.
+// Spectra in the JSON are keyed <name>_<n>: build them with exptKey(EXPT.HSQC, 0)
+// ("HSQC_0") and read them back with exptFromKey("HSQC_0") ("HSQC").  Refer to an
+// experiment as EXPT.HSQC, EXPT.H1_pureshift, ... - never type the name in a script.
+//
+// Each entry: dims (1 or 2), the Mnova subtype a 1D spectrum must have (null = any),
+// and the pulse-sequence names (substrings) used to identify the experiment.  The
+// order is the order in which the identification tries them (first match wins).
+///////////////////////////////////////////////////////////////////////////////
+var SIMPLENMR_EXPERIMENTS = [
+    {"name": "H1_1D", "dims": 1, "subtype": "1H",
+     "pulseSequences": ["zg30", "s2pul", "zg", "zgcppr"]},
+    {"name": "C13_1D", "dims": 1, "subtype": "13C",
+     "pulseSequences": ["zgdc30", "s2pul", "zgpg30", "zgzrse", "zg0dc.fr", "js_carbon.jxp"]},
+    {"name": "H1_pureshift", "dims": 1, "subtype": null,
+     "pulseSequences": ["ja_PSYCHE_pr_03b", "reset_psychetse.ptg"]},
+    {"name": "DEPT135", "dims": 1, "subtype": "13C",
+     "pulseSequences": ["dept135.wu", "DEPT", "deptsp135"]},
+    {"name": "HSQC", "dims": 2, "subtype": null,
+     "pulseSequences": ["hsqcedetgpsisp2.3.ptg", "hsqcedetgpsisp2.3", "gHSQCAD", "hsqcedetgpsp.3", "gHSQC", "inv4gp.wu", "hsqcetgp", "gns_noah3-BSScc.eeh", "hsqcedetgpsisp2.4", "hsqcedetgpsisp.2", "js_hsqc.jxp"]},
+    {"name": "HMBC", "dims": 2, "subtype": null,
+     "pulseSequences": ["ghmbc.wu", "gHMBC", "hmbcetgpl3nd", "hmbcetgpl3nd.ptg", "gHMBCAD", "hmbcgpndqf", "gns_noah3-BSScc.eeh", "shmbcctetgpl2nd", "js_hmbcet.jxp", "hmbcgplpndqf"]},
+    {"name": "COSY", "dims": 2, "subtype": null,
+     "pulseSequences": ["cosygpqf", "cosygp", "gcosy", "cosygpmfppqf", "cosygpmfqf", "gCOSY", "js_cosy.jxp", "cosygpppqf_ptype", "cosyqf45", "cosygpmfphpp"]},
+    {"name": "DDEPTCH3ONLY", "dims": 2, "subtype": null,
+     "pulseSequences": ["hcdeptedetgpzf"]},
+    {"name": "HSQC_CLIPCOSY", "dims": 2, "subtype": null,
+     "pulseSequences": ["hsqc_clip_cosy_mc_notation.eeh", "gns_noah3-BSScc.eeh"]},
+    {"name": "NOESY", "dims": 2, "subtype": null,
+     "pulseSequences": ["noesygpphppzs"]}
+];
 
+// EXPT.H1_1D == "H1_1D", ... plus the special labels used by the dialogs and the
+// spectrum identification (SKIP = do not use this spectrum)
+var EXPT = {"SKIP": "SKIP", "UNIDENTIFIED": "unidentified", "PREDICTED": "Predicted"};
+for (var iExpt = 0; iExpt < SIMPLENMR_EXPERIMENTS.length; iExpt++) {
+    EXPT[SIMPLENMR_EXPERIMENTS[iExpt].name] = SIMPLENMR_EXPERIMENTS[iExpt].name;
+}
 
+// names of all experiment types, in table order
+function exptNames() {
+    var names = [];
+    for (var i = 0; i < SIMPLENMR_EXPERIMENTS.length; i++) {
+        names.push(SIMPLENMR_EXPERIMENTS[i].name);
+    }
+    return names;
+}
 
+// the table entry for one experiment name (undefined if the name is not known)
+function exptInfo(name) {
+    for (var i = 0; i < SIMPLENMR_EXPERIMENTS.length; i++) {
+        if (SIMPLENMR_EXPERIMENTS[i].name === name) {
+            return SIMPLENMR_EXPERIMENTS[i];
+        }
+    }
+    return undefined;
+}
 
-// create a one to one spectra_dict
+// the choices offered in the spectrum dialogs: SKIP followed by every experiment
+function exptDialogList() {
+    return [EXPT.SKIP].concat(exptNames());
+}
 
-const experiments_dict = {
-                            "unidentified": "unidentified",
-                            "Predicted": "Predicted",
-                            "SKIP": "SKIP",
-                            "HSQC": "HSQC",
-                            "HMBC": "HMBC",
-                            "COSY": "COSY",
-                            "H1_1D": "H1_1D",
-                            "C13_1D": "C13_1D",
-                            "DEPT135": "DEPT135",
-                            "H1_pureshift": "H1_pureshift",
-                            "DDEPT_CH3_ONLY": "DDEPT_CH3_ONLY",
-                            "HSQC_CLIPCOSY": "HSQC_CLIPCOSY",
-                            "NOESY": "NOESY",
-                };
+// "HSQC", 0 -> "HSQC_0".  Throws on an unknown name, so a typo fails loudly.
+function exptKey(name, n) {
+    if (exptInfo(name) === undefined && name !== EXPT.SKIP) {
+        throw "exptKey: unknown experiment type '" + name + "'";
+    }
+    return name + "_" + (n === undefined ? 0 : n);
+}
+
+// "HSQC_0" -> "HSQC", "HSQC_CLIPCOSY_1" -> "HSQC_CLIPCOSY"; undefined if not a spectrum key
+function exptFromKey(key) {
+    var m = /^(.*)_([0-9]+)$/.exec(String(key));
+    if (m === null) {
+        return undefined;
+    }
+    return (exptInfo(m[1]) !== undefined || m[1] === EXPT.SKIP) ? m[1] : undefined;
+}
+
+// true for 2D experiment types
+function exptIsTwoD(name) {
+    var info = exptInfo(name);
+    return info !== undefined && info.dims === 2;
+}
+
+// true if the spectrum's pulse sequence contains one of validPulseSequences
+function comparePulseSequence(validPulseSequences, pulseSequence){
+    for (var i = 0; i < validPulseSequences.length; i++) {
+        if (isSubstring(validPulseSequences[i], pulseSequence)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// true for a 2D spectrum whose pulse sequence is one of the HSQC pulse sequences
+function isHSQC(spectrum) {
+    print("spectrum dimCount " + spectrum.dimCount);
+    if (spectrum.dimCount != 2) {
+        return false;
+    }
+    return comparePulseSequence(exptInfo(EXPT.HSQC).pulseSequences, spectrum.getParam("Pulse Sequence"));
+}
+
+// Lists kept for the older scripts (identify_spectrum.qs, idspectra_dialog.qs);
+// both are derived from SIMPLENMR_EXPERIMENTS.
+var spectra_keys = [EXPT.UNIDENTIFIED, EXPT.PREDICTED, EXPT.SKIP].concat(exptNames());
+var experiments_dict = {};
+for (var iKey = 0; iKey < spectra_keys.length; iKey++) {
+    experiments_dict[spectra_keys[iKey]] = spectra_keys[iKey];
+}
 
 function simpleUtils() {
 
@@ -104,36 +161,69 @@ simpleUtils.prototype.splitPathAndFilename = function (path) {
     };
 }
 
-simpleUtils.prototype.writeAsJsonToFile = function (data, filename) {
+// ----------------------------------------------------------------------------
+// Reading and writing files - use these in every script: readJson / writeJson for
+// JSON, writeText for plain text.
+// ----------------------------------------------------------------------------
 
-    print("writing to file ", filename);
-    var json_spectra_string = JSON.stringify(data, null, 4);
-    var fout1 = new File(filename);
-    if( fout1.open(File.WriteOnly)){
-        var sout1 = new TextStream(fout1, 'UTF-8');
-        sout1.writeln(json_spectra_string);
+// Read a JSON file.  Returns defaultValue if the file does not exist, cannot be
+// opened or is not valid JSON; the reason is printed, and also shown in a message
+// box when warn is true.
+simpleUtils.prototype.readJson = function (filename, defaultValue, warn) {
+    var problem = null;
+    var rtn = defaultValue;
+    if (!new Dir(filename).fileExists(filename)) {
+        problem = "File not found";
     }
-    else{
-        print("Error opening file for writing\n", filename);
-        MessageBox.warning("Error opening file for writing\n" +  filename);
+    else {
+        var fin = new File(filename);
+        if (fin.open(File.ReadOnly)) {
+            var text = new TextStream(fin, 'UTF-8').readAll();
+            fin.close();
+            try {
+                rtn = JSON.parse(text);
+            } catch (e) {
+                problem = "Not a valid JSON file (" + e + ")";
+            }
+        }
+        else {
+            problem = "Could not open the file";
+        }
     }
-    fout1.close();
-}
-
-simpleUtils.prototype.readJsonFromFile = function (filename) {
-    var fin = new File(filename);
-    var rtn = undefined;
-    if( fin.open(File.ReadOnly)){
-        var sin = new TextStream(fin, 'UTF-8');
-        var json_string = sin.readAll();
-        fin.close();
-        rtn = JSON.parse(json_string);
-    }
-    else{
-        print("Error opening file for reading\n", filename);
-        MessageBox.warning("Error opening file for reading\n" + filename);
+    if (problem !== null) {
+        print(problem + ": " + filename);
+        if (warn) {
+            MessageBox.warning(problem + ":\n" + filename);
+        }
     }
     return rtn;
+}
+
+// Write plain text to a file (UTF-8), exactly as given.  Returns true if written.
+simpleUtils.prototype.writeText = function (filename, text) {
+    var fout = new File(filename);
+    if (!fout.open(File.WriteOnly)) {
+        print("Error opening file for writing\n", filename);
+        return false;
+    }
+    var sout = new TextStream(fout, 'UTF-8');
+    sout.write(text);
+    fout.close();
+    return true;
+}
+
+// Write obj to a JSON file: indent undefined = one line, a number (2, 4) = indented.
+// Returns true if the file was written.
+simpleUtils.prototype.writeJson = function (filename, obj, indent) {
+    var fout = new File(filename);
+    if (!fout.open(File.WriteOnly)) {
+        print("Error opening file for writing\n", filename);
+        return false;
+    }
+    var sout = new TextStream(fout, 'UTF-8');
+    sout.writeln(indent === undefined ? JSON.stringify(obj) : JSON.stringify(obj, null, indent));
+    fout.close();
+    return true;
 }
 
 simpleUtils.prototype.identifySpectra = function(doc) {
@@ -274,23 +364,6 @@ simpleUtils.prototype.exptUniqueIdentifier = function(spectrum) {
 //        var spectra = su.collectSpectra(doc, {details: true});
 ///////////////////////////////////////////////////////////////////////////////
 
-// spectrum labels accepted by the export scripts (simplePREDICT_eeh, collectPeaks)
-simpleUtils.prototype.exportLabels = ["HSQC",
-                                      "HMBC",
-                                      "COSY",
-                                      "NOESY",
-                                      "H1_1D",
-                                      "C13_1D",
-                                      "DEPT135",
-                                      "PureShift",
-                                      "DDEPTCH3ONLY",
-                                      "SKIP",
-                                      "HSQC_CLIPCOSY"];
-
-// labels whose spectra are always 2D
-simpleUtils.prototype.twoDLabels = ["HSQC", "HMBC", "COSY", "NOESY", "HSQC_CLIPCOSY",
-                                    "DDEPT_CH3_ONLY", "DDEPTCH3ONLY"];
-
 // keys in the exported JSON that are not spectra
 simpleUtils.prototype.nonSpectrumKeys = ["smiles",
                                          "molfile",
@@ -320,34 +393,6 @@ simpleUtils.prototype.makeListBlock = function (datatype, list) {
         block["data"][i] = list[i];
     }
     return block;
-}
-
-// read a JSON file if it exists, otherwise return defaultValue (no warning)
-simpleUtils.prototype.readJsonIfExists = function (filename, defaultValue) {
-    if (!new Dir(filename).fileExists(filename)) {
-        return defaultValue;
-    }
-    var fin = new File(filename);
-    var rtn = defaultValue;
-    if (fin.open(File.ReadOnly)) {
-        var sin = new TextStream(fin, 'UTF-8');
-        rtn = JSON.parse(sin.readAll());
-    }
-    fin.close();
-    return rtn;
-}
-
-// write obj as JSON (indent = undefined for one line, 4 for the export files)
-simpleUtils.prototype.writeJson = function (filename, obj, indent) {
-    var fout = new File(filename);
-    if (fout.open(File.WriteOnly)) {
-        var sout = new TextStream(fout, 'UTF-8');
-        sout.writeln(indent === undefined ? JSON.stringify(obj) : JSON.stringify(obj, null, indent));
-    }
-    else {
-        print("Error opening file for writing\n", filename);
-    }
-    fout.close();
 }
 
 // smiles and molfile blocks (count 0 and empty data when there is no molecule)
@@ -571,14 +616,15 @@ simpleUtils.prototype.spectraWithPeaks = function (spectra) {
 // Rename the chosen spectra to "<label>_<n>" (HSQC_0, HMBC_0, ...), store the
 // original key in "filename", mark 2D spectra and add the chosenSpectra block.
 // Returns {"<label>_<n>": "<original key>"}, or undefined after a warning if a
-// label is not in this.exportLabels.
+// label is not SKIP or one of SIMPLENMR_EXPERIMENTS.
 simpleUtils.prototype.applyChosenSpectra = function (spectra, chosen_spectra) {
     spectra["chosenSpectra"] = this.makeListBlock("chosenSpectra", chosen_spectra["checked_spectra"]);
 
     var ids = {};
     var counts = {};
-    for (var i = 0; i < this.exportLabels.length; i++) {
-        counts[this.exportLabels[i]] = -1;
+    var labels = exptDialogList();
+    for (var i = 0; i < labels.length; i++) {
+        counts[labels[i]] = -1;
     }
     var checked = chosen_spectra["checked_spectra"];
     for (var c = 0; c < checked.length; c++) {
@@ -590,7 +636,7 @@ simpleUtils.prototype.applyChosenSpectra = function (spectra, chosen_spectra) {
             return undefined;
         }
         counts[label] += 1;
-        ids[label + "_" + counts[label]] = original;
+        ids[exptKey(label, counts[label])] = original;
     }
 
     for (var key in ids) {
@@ -598,7 +644,7 @@ simpleUtils.prototype.applyChosenSpectra = function (spectra, chosen_spectra) {
         spectra[key]["filename"] = ids[key];
     }
     for (var key2 in ids) {
-        if (this.twoDLabels.indexOf(key2.split("_")[0]) != -1) {
+        if (exptIsTwoD(exptFromKey(key2))) {
             spectra[key2]["type"] = "2D";
         }
     }
@@ -608,10 +654,10 @@ simpleUtils.prototype.applyChosenSpectra = function (spectra, chosen_spectra) {
     return ids;
 }
 
-// true if one of the chosen spectra has this label (e.g. "HSQC")
+// true if one of the chosen spectra is of this type (e.g. EXPT.HSQC)
 simpleUtils.prototype.hasChosenLabel = function (ids, label) {
     for (var key in ids) {
-        if (key.split("_")[0] == label) {
+        if (exptFromKey(key) === label) {
             return true;
         }
     }
@@ -623,8 +669,7 @@ simpleUtils.prototype.hasChosenLabel = function (ids, label) {
 simpleUtils.prototype.hsqcIntensitiesFromIntegrals = function (spectra) {
     var hsqc = undefined;
     for (var key in spectra) {
-        var split_key = key.split("_");
-        if (split_key[0] != "HSQC" || split_key.length != 2) {
+        if (exptFromKey(key) !== EXPT.HSQC) {
             continue;
         }
         hsqc = spectra[key];

@@ -23,9 +23,8 @@
 
 function peakRefineDialog(spectra_available, previousChoices, exptName) {
 
-    // the labels nmr_peak_refine understands (SKIP = leave this spectrum out)
-    var NMRexpts = ["SKIP", "H1_1D", "PureShift", "C13_1D", "HSQC", "HMBC", "COSY",
-                    "HSQC_CLIPCOSY", "DDEPTCH3ONLY", "DEPT135", "NOESY"];
+    // SKIP and every experiment type, from SIMPLENMR_EXPERIMENTS in simpleUtils.qs
+    var NMRexpts = exptDialogList();
 
     var dialog = new Dialog();
     dialog.title = "Export peaks for automatic refinement - " + exptName;
@@ -49,9 +48,6 @@ function peakRefineDialog(spectra_available, previousChoices, exptName) {
             previous = previousChoices[spectra_available[i]];
         } else if (previousChoices instanceof Array && previousChoices.length == spectra_available.length) {
             previous = previousChoices[i];
-        }
-        if (previous === "H1_pureshift") {
-            previous = "PureShift";
         }
         if (previous !== undefined && NMRexpts.indexOf(previous) != -1) {
             combo.currentText = previous;

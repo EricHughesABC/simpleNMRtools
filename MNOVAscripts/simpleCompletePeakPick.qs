@@ -353,7 +353,7 @@ function simpleCompletePeakPick() {
 
     // print out the active spectrum type
 
-    const expt_types = ["H1_1D", "C13_1D", "H1_pureshift", "DEPT135", "HSQC", "HMBC", "COSY", "NOESY", "DDEPT_CH3_ONLY", "HSQC_CLIPCOSY"];
+    const expt_types = exptNames();     // every experiment type, from simpleUtils.qs
 
     var spectra_dict = {};
 
@@ -652,7 +652,7 @@ function simpleCompletePeakPick() {
 
         "source": "MNOVA",
         "destination": "MNOVA",
-        "type": "HSQC",
+        "type": EXPT.HSQC,
         "matrix": zoomed_region.rrr,
         "axis_info": {
             "F2": {

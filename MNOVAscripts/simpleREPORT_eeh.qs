@@ -2,29 +2,15 @@
 
 function simpleREPORT_eeh() {
 
-    // Get the current document
-
-	function getActiveMolecule(aDocWin, aMolPlugin) {
-	    var molec = aMolPlugin.activeMolecule();
-		
-		if (molec.isValid()) {
-		    return molec;
-		}
-		if (aDocWin.itemCount("Molecule") == 1) {
-			molec = new Molecule(aDocWin.item(0, "Molecule"));
-			return molec;
-		}
-		return undefined;
-	}
-
     var simpleutils = new simpleUtils();
-    
+
+    // Get the current document
     var doc = Application.mainWindow.activeDocument;
 
     // get the assignments
 
     // return molecule from document
-    var mol = getActiveMolecule(doc, Application.molecule);
+    var mol = simpleutils.getActiveMolecule(doc, Application.molecule);
 
     var spectra = {};
     if( mol === undefined ){
@@ -224,18 +210,25 @@ function simpleREPORT_eeh() {
     }
     print("protonReportString\n", protonReportString);
 
-    Application.clipboard.text = carbonReportString + "\n\n" + protonReportString;
+    var reportText = carbonReportString + "\n\n" + protonReportString;
 
-    MessageBox.information(carbonReportString + "\n\n" + protonReportString, "NMR Report");
+    Application.clipboard.text = reportText;
 
-    // write the report to a file
-    // save "exptIdentifiers" as a json file
-    var fout = new File("NMR_Report.txt");
-    if (fout.open(File.WriteOnly)) {
-        sout = new TextStream(fout, 'UTF-8');
-        sout.writeln(JSON.stringify(carbonReportString + "\n\n" + protonReportString));
+    MessageBox.information(reportText, "NMR Report");
+
+    // save the report as plain text next to the Mnova document: <document>_NMR_Report.txt
+    if (!doc.name) {
+        MessageBox.warning("The document has not been saved yet, so the report was only copied to the clipboard.");
+        return;
     }
-    fout.close();
+    var result = simpleutils.splitPathAndFilename(doc.name);
+    var reportFilename = result.directoryPath + "/" + result.name + "_NMR_Report.txt";
+    if (simpleutils.writeText(reportFilename, reportText + "\n")) {
+        print("Report saved to " + reportFilename);
+    }
+    else {
+        MessageBox.warning("Could not save the report to\n" + reportFilename);
+    }
 }
 
 if (this.MnUi && MnUi.simpleNMRtools) {

@@ -27,9 +27,9 @@ function collectPeaks() {
 
     // the labels chosen last time for this folder (falls back once to the verify step's choices)
     var exptIdentifiersJsonFilename = result.directoryPath + "/peakRefine_exptIdentifiers.json";
-    var previousChoices = su.readJsonIfExists(exptIdentifiersJsonFilename, null);
+    var previousChoices = su.readJson(exptIdentifiersJsonFilename, null);
     if (previousChoices === null) {
-        previousChoices = su.readJsonIfExists(result.directoryPath + "/exptIdentifiers.json", null);
+        previousChoices = su.readJson(result.directoryPath + "/exptIdentifiers.json", null);
     }
 
     var chosen_spectra = peakRefineDialog(spectra_with_peaks, previousChoices, result["name"]);
