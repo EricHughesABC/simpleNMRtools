@@ -1457,6 +1457,7 @@ class NMRsolution:
                 g.F2_PPM,
                 self.problemdata_json.protonSeparation,
                 detect_ambiguity=True,
+            proton_dim=True,
             )
 
         # ambiguous rows first -- equally close to two+ HSQC protons, so
@@ -1829,6 +1830,7 @@ class NMRsolution:
         column_name: str,
         ppm_tolerance: float = 0.005,
         detect_ambiguity: bool = False,
+        ambiguity_margin: float = None,
     ) -> pd.DataFrame:
         """
         Adjusts chemical shift values in a DataFrame to their nearest true values within a specified tolerance.
@@ -1868,6 +1870,14 @@ class NMRsolution:
                 When detect_ambiguity is True, also ``{column}_ambiguous`` (bool) and
                 ``{column}_ambiguous_candidates`` (list, populated only when ambiguous).
         """
+
+        # The ambiguity margin defaults to the tolerance (the original behaviour).
+        # Exact mode passes ppm_tolerance=0.0 but keeps a real margin: two
+        # references closer than the margin cannot be told apart by the
+        # spectrum, so a pick sitting exactly on one of them is still ambiguous
+        # -- whoever placed it (Mnova snap or the refinement) had to choose.
+        if ambiguity_margin is None:
+            ambiguity_margin = ppm_tolerance
 
         # make a copy of the column_name adding a suffix orig
         df[f"{column_name}_orig"] = df[column_name]
@@ -1921,7 +1931,7 @@ class NMRsolution:
                     if self.within_tolerance(orig, nearest_val, ppm_tolerance) and len(distinct_vals) >= 2:
                         second_val = distinct_vals[1]
                         second_dist = abs(orig - second_val)
-                        if (second_dist - nearest_dist) <= ppm_tolerance:
+                        if (second_dist - nearest_dist) <= ambiguity_margin:
                             df.at[idx, f"{column_name}_ambiguous"] = True
                             df.at[idx, f"{column_name}_ambiguous_candidates"] = [
                                 nearest_val, second_val
@@ -2775,6 +2785,7 @@ class NMRsolution:
             g.F2_PPM,
             self.problemdata_json.protonSeparation,
             detect_ambiguity=True,
+            proton_dim=True,
         )
 
         self.hmbc = self.mark_excluded_rows(
@@ -2835,6 +2846,7 @@ class NMRsolution:
             g.F1_PPM,
             self.problemdata_json.protonSeparation,
             detect_ambiguity=True,
+            proton_dim=True,
         )
         self.cosy = self.snap(
             self.cosy,
@@ -2842,6 +2854,7 @@ class NMRsolution:
             g.F2_PPM,
             self.problemdata_json.protonSeparation,
             detect_ambiguity=True,
+            proton_dim=True,
         )
 
         # ambiguous rows first (own reason, naming the candidates), then
@@ -3000,6 +3013,7 @@ class NMRsolution:
             g.F2_PPM,
             self.problemdata_json.protonSeparation,
             detect_ambiguity=True,
+            proton_dim=True,
         )
 
         # mark (do not drop) rows that couldn't be matched -- ambiguous
@@ -3259,6 +3273,7 @@ class NMRsolution:
             g.F2_PPM,
             self.problemdata_json.protonSeparation,
             detect_ambiguity=True,
+            proton_dim=True,
         )
 
         return hsqc_clipcosy
@@ -3342,8 +3357,20 @@ class NMRsolution:
         col: str,
         tol: float,
         detect_ambiguity: bool = False,
+        proton_dim: bool = False,
     ) -> pd.DataFrame:
         """Snap a ppm column to the nearest canonical reference values.
+
+        proton_dim: set for the proton dimension of the correlating spectra
+        (HMBC, COSY, HSQC-CLIPCOSY, DDEPT-CH3-only). Their values are tested
+        against the reference list: if at least g.SNAPPED_FRACTION of them
+        sit exactly on a reference value, the spectrum was snapped (Mnova
+        snap tools or the peak refinement), so this column is matched
+        exactly -- a value that is not exactly on a reference (e.g. an OH/NH
+        HMBC peak) is excluded instead of being moved onto a nearby proton.
+        Otherwise (unsnapped picks: Bruker/JEOL/NMRium, database downloads,
+        picking without a 13C or pureshift) the normal window is used.
+        The ambiguity margin is kept in both cases.
 
         In *exact_ppm_values* mode this still runs through the same
         tidyup_ppm_values machinery, but with a tolerance of 0.0 -- i.e. a
@@ -3361,9 +3388,24 @@ class NMRsolution:
         see its docstring. Used for the correlating spectra (HMBC, COSY,
         HSQC-CLIPCOSY, DDEPT-CH3-only), never for HSQC's own snap.
         """
-        if self.exact_ppm_values:
+        exact = self.exact_ppm_values
+        if proton_dim and not exact and len(df):
+            ref_set = set(np.asarray(refs, dtype=float).tolist())
+            vals = df[col].astype(float)
+            frac = float(vals.isin(ref_set).mean())
+            exact = frac >= g.SNAPPED_FRACTION
+            if not hasattr(self, "snap_decisions"):
+                self.snap_decisions = []
+            self.snap_decisions.append(
+                {"column": col, "n": int(len(vals)), "on_reference": round(frac, 3),
+                 "mode": "exact" if exact else "window"}
+            )
+            logger.info(f"snap {col}: {frac:.0%} of {len(vals)} values on reference -> "
+                        f"{'exact' if exact else 'window'} matching")
+        if exact:
             return self.tidyup_ppm_values(
-                df, refs, col, ppm_tolerance=0.0, detect_ambiguity=detect_ambiguity
+                df, refs, col, ppm_tolerance=0.0, detect_ambiguity=detect_ambiguity,
+                ambiguity_margin=tol,
             )
         return self.tidyup_ppm_values(
             df, refs, col, ppm_tolerance=tol, detect_ambiguity=detect_ambiguity

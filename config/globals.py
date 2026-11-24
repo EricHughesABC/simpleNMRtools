@@ -114,6 +114,10 @@ COMPOUND = "Compound"  # Compound signal type
 # toward 1.0) at the same time.
 EFFECTIVE_TOLERANCE_MULTIPLIER = 38.5755
 
+# A correlating spectrum whose proton values sit exactly on the reference list at
+# least this often is treated as snapped: its proton dimension is matched exactly.
+SNAPPED_FRACTION = 0.8
+
 # Non-destructive exclusion tracking (snap/tidy stage): a correlation that
 # fails a tolerance/exact check is annotated and excluded from the solution
 # graph, never dropped from its table -- the original picked value and the
