@@ -7,6 +7,8 @@ import networkx as nx
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from typing import Tuple, Union, List, Dict, Any
 from loguru import logger
+
+from core import tolerance
 # from config.globals import CH1_CH3_PPM_BOUNDARY
 # from config.globals import CH1, CH2, CH3, CH0, QUATERNARY_CARBON
 
@@ -1458,6 +1460,7 @@ class NMRsolution:
                 self.problemdata_json.protonSeparation,
                 detect_ambiguity=True,
             proton_dim=True,
+            spectrum_label="HMBC",
             )
 
         # ambiguous rows first -- equally close to two+ HSQC protons, so
@@ -2786,6 +2789,7 @@ class NMRsolution:
             self.problemdata_json.protonSeparation,
             detect_ambiguity=True,
             proton_dim=True,
+            spectrum_label="HMBC",
         )
 
         self.hmbc = self.mark_excluded_rows(
@@ -2847,6 +2851,7 @@ class NMRsolution:
             self.problemdata_json.protonSeparation,
             detect_ambiguity=True,
             proton_dim=True,
+            spectrum_label="COSY",
         )
         self.cosy = self.snap(
             self.cosy,
@@ -2855,6 +2860,7 @@ class NMRsolution:
             self.problemdata_json.protonSeparation,
             detect_ambiguity=True,
             proton_dim=True,
+            spectrum_label="COSY",
         )
 
         # ambiguous rows first (own reason, naming the candidates), then
@@ -3014,6 +3020,7 @@ class NMRsolution:
             self.problemdata_json.protonSeparation,
             detect_ambiguity=True,
             proton_dim=True,
+            spectrum_label="DDEPTCH3ONLY",
         )
 
         # mark (do not drop) rows that couldn't be matched -- ambiguous
@@ -3274,6 +3281,7 @@ class NMRsolution:
             self.problemdata_json.protonSeparation,
             detect_ambiguity=True,
             proton_dim=True,
+            spectrum_label="HSQC_CLIPCOSY",
         )
 
         return hsqc_clipcosy
@@ -3358,6 +3366,7 @@ class NMRsolution:
         tol: float,
         detect_ambiguity: bool = False,
         proton_dim: bool = False,
+        spectrum_label: str = None,
     ) -> pd.DataFrame:
         """Snap a ppm column to the nearest canonical reference values.
 
@@ -3370,7 +3379,12 @@ class NMRsolution:
         HMBC peak) is excluded instead of being moved onto a nearby proton.
         Otherwise (unsnapped picks: Bruker/JEOL/NMRium, database downloads,
         picking without a 13C or pureshift) the normal window is used.
-        The ambiguity margin is kept in both cases.
+        In the unsnapped case, if the export carries the metadata (sw_Hz,
+        spectral_size, specfrequency) for spectrum_label and the HSQC, the
+        window is resolution-based (core/tolerance.py: a few digital points of
+        the coarser spectrum, with a floor in Hz) instead of the fixed
+        separation x EFFECTIVE_TOLERANCE_MULTIPLIER.
+        The ambiguity margin is kept in all cases.
 
         In *exact_ppm_values* mode this still runs through the same
         tidyup_ppm_values machinery, but with a tolerance of 0.0 -- i.e. a
@@ -3407,6 +3421,24 @@ class NMRsolution:
                 df, refs, col, ppm_tolerance=0.0, detect_ambiguity=detect_ambiguity,
                 ambiguity_margin=tol,
             )
+        if proton_dim and spectrum_label:
+            doc = getattr(self.problemdata_json, "json_data", None)
+            dim = 0 if col == g.F1_PPM else 1
+            tol_ppm = tolerance.match_tolerance_ppm(doc, spectrum_label, dim)
+            if tol_ppm is not None:
+                if getattr(self, "snap_decisions", None):
+                    self.snap_decisions[-1].update(
+                        {"spectrum": spectrum_label, "mode": "resolution",
+                         "tolerance_ppm": round(tol_ppm, 5)})
+                logger.info(f"snap {spectrum_label} {col}: resolution-based window "
+                            f"{tol_ppm:.4f} ppm")
+                # within_tolerance() multiplies by EFFECTIVE_TOLERANCE_MULTIPLIER,
+                # so divide here to get exactly tol_ppm as the acceptance window
+                return self.tidyup_ppm_values(
+                    df, refs, col,
+                    ppm_tolerance=tol_ppm / g.EFFECTIVE_TOLERANCE_MULTIPLIER,
+                    detect_ambiguity=detect_ambiguity, ambiguity_margin=tol,
+                )
         return self.tidyup_ppm_values(
             df, refs, col, ppm_tolerance=tol, detect_ambiguity=detect_ambiguity
         )
