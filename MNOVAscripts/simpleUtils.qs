@@ -510,9 +510,7 @@ simpleUtils.prototype.spectrumBlock = function (spec, details) {
     s["datafilename"] = spec.getParam("Data File Name");
     s["nucleus"] = spec.getParam("Nucleus");
     s["specfrequency"] = spec.getParam("Spectrometer Frequency");
-    if (details) {
-        s["sw_Hz"] = spec.getParam("Spectral Width");
-    }
+    s["sw_Hz"] = spec.getParam("Spectral Width");
     s["acquired_size"] = spec.getParam("Acquired Size");
     s["spectral_size"] = spec.getParam("Spectral Size");
     s["solvent"] = spec.getParam("Solvent");
@@ -522,6 +520,8 @@ simpleUtils.prototype.spectrumBlock = function (spec, details) {
     if (s["type"] == "1D" && s["nucleus"].indexOf(",") != -1) {
         s["type"] = "2D";
     }
+    // Digital Resolution
+    s["digital_resolution"] = spec.getParam("Digital Resolution");
 
     // multiplets (compound multiplets only)
     var multiplets = spec.multiplets();
