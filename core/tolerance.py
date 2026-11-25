@@ -24,7 +24,7 @@ strings such as "[f1, f2]"):
 
 TOLERANCE_VERSION = "1"
 
-N_POINTS = 2.0      # digital points of the coarser spectrum
+N_POINTS = 3.0      # digital points of the coarser spectrum
 FLOOR_HZ = 4.0      # never tighter than this
 
 
