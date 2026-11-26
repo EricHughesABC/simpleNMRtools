@@ -124,9 +124,12 @@ class NMRsolution:
         self.solution_error_code = self.expected_molecule.nmrshiftdb_failed_code
 
         # check if we need to use dept to assign CH2 in hsqc or has the user annotated the CH2 in the hsqc dataframe
+        # (negative peaks counted among compound rows only: an artifact-typed negative pick, e.g. an
+        # f1 wiggle in a non-edited HSQC, does not make the HSQC multiplicity-edited)
+        hsqc_c = self._hsqc_compound_rows()
         if (
             (self.expected_molecule.num_CH2_carbon_atoms > 0)
-            and (self.hsqc_df[self.hsqc_df.intensity < 0].shape[0] == 0)
+            and (hsqc_c[hsqc_c.intensity < 0].shape[0] == 0)
             and (self.hsqc_df[self.hsqc_df.Annotation == g.CH2].shape[0] == 0)
         ):
 
@@ -134,7 +137,7 @@ class NMRsolution:
 
         elif (
             (self.expected_molecule.num_CH2_carbon_atoms > 0)
-            and (self.hsqc_df[self.hsqc_df.intensity < 0].shape[0] == 0)
+            and (hsqc_c[hsqc_c.intensity < 0].shape[0] == 0)
             and (self.hsqc_df[self.hsqc_df.Annotation == g.CH2].shape[0] > 0)
         ):
 
@@ -878,6 +881,14 @@ class NMRsolution:
 
         return "ok", g.GOODREQUEST
 
+    def _hsqc_compound_rows(self):
+        """HSQC rows typed compound (or untyped), as used by check_hsqc_df_not_empty."""
+        df = self.hsqc_df
+        if g.SIGNALTYPE not in df.columns:
+            return df
+        st_ = df[g.SIGNALTYPE]
+        return df[(st_ == g.COMPOUND) | (st_ == 0) | (st_ == "")]
+
     def check_hsqc_assign_CH2_from_DEPT135(self):
         """
         Assigns CH2 group intensities in the HSQC dataframe using DEPT135 experiment data.
@@ -888,18 +899,25 @@ class NMRsolution:
         if the data is inconsistent or missing.
         """
         mol = self.expected_molecule
+        hsqc_c = self._hsqc_compound_rows()
 
         # check if mol has CH2 in dataframe then does hsqc have some negative intensities
         if (
             (mol.num_CH2_carbon_atoms > 0)
-            and (self.hsqc_df[self.hsqc_df.intensity < 0].shape[0] == 0)
+            and (hsqc_c[hsqc_c.intensity < 0].shape[0] == 0)
             and
             # the number of entries in the hsqc_df with intensity > 0 is greater than the number of CH3CH1 entries in the mol
             (
-                self.hsqc_df[self.hsqc_df.intensity > 0].shape[0]
+                hsqc_c[hsqc_c.intensity > 0].shape[0]
                 > (mol.num_CH1_carbon_atoms + mol.num_CH3_carbon_atoms)
             )
         ):
+
+            # compound DEPT peaks only (as for the 13C and HSQC): split lines, noise and
+            # impurities typed by Mnova or by the peak refinement must not count as carbons
+            if g.SIGNALTYPE in self.dept_df.columns:
+                st_ = self.dept_df[g.SIGNALTYPE]
+                self.dept_df = self.dept_df[(st_ == g.COMPOUND) | (st_ == 0) | (st_ == "")].copy()
 
             if len(self.dept_df) == 0:
                 self.fail("<p>HSQC needs a multiplicity-edited experiment: no DEPT data found</p>")
@@ -950,7 +968,7 @@ class NMRsolution:
             # check if the number of hsqc rows equals the number of dept rows
             # if yes no distasterotopic CH2 carbons, therefore each CH2 carbon has only one proton group
 
-            if self.hsqc_df.shape[0] == self.dept_df.shape[0]:
+            if hsqc_c.shape[0] == self.dept_df.shape[0]:
                 # loop through dept_CH2, find closest ppm value in hsqc and set the intensity to negative
                 tol = self.problemdata_json.carbonSeparation
                 for v1 in dept_CH2[g.PPM]:
@@ -962,7 +980,7 @@ class NMRsolution:
                     # set the intensity of the idx loc in self.hsqc_df to -1
                     self.hsqc_df.loc[idx, g.INTENSITY] = -1.0
 
-            elif self.hsqc_df.shape[0] > self.dept_df.shape[0]:
+            elif hsqc_c.shape[0] > self.dept_df.shape[0]:
                 # loop through dept_CH2, find closest ppm value in hsqc and set the intensity to negative
                 # tol = 0.0025  # CARBONSEPARATION
                 tol = self.problemdata_json.carbonSeparation
@@ -1451,6 +1469,17 @@ class NMRsolution:
 
         if "C13_1D" in self.available_experiments:
             return self.c13_df, False
+
+        # HMBC peaks typed non-compound in the input (artifact, impurity, solvent -- by Mnova
+        # or by the peak refinement) must not become quaternary carbons. Marked, not dropped;
+        # the f2 snap and the f1 clustering below only use active rows.
+        if g.SIGNALTYPE in self.hmbc_df.columns and len(self.hmbc_df):
+            st_ = self.hmbc_df[g.SIGNALTYPE]
+            non_compound = ~((st_ == g.COMPOUND) | (st_ == 0) | (st_ == ""))
+            if non_compound.any():
+                self.hmbc_df = self.mark_excluded_rows(
+                    self.hmbc_df, non_compound, "typed non-compound in the input"
+                )
 
         # replace values for f2_ppm in hmbc starting from f2_ppm hsqc
         self.hmbc_df = self.snap(
@@ -2620,6 +2649,14 @@ class NMRsolution:
             # later H1/ExpectedMolecule chain steps) as it should.
             CH3CH1_hsqc_df = hsqc[hsqc[g.CH3CH1]]
             CH1_hsqc_df = CH3CH1_hsqc_df[~CH3CH1_hsqc_df[g.CH3]]
+            # a carbon whose DDEPT peak was excluded is undecided, not CH1:
+            # leave it CH3CH1 for the later H1 / ExpectedMolecule steps
+            undecided = self._ddept_undecided_carbons()
+            if undecided:
+                keep = ~CH1_hsqc_df[g.F1_PPM].astype(float).apply(
+                    lambda v: any(np.isclose(v, u, rtol=0, atol=1e-6) for u in undecided)
+                )
+                CH1_hsqc_df = CH1_hsqc_df[keep]
             hsqc.loc[CH1_hsqc_df.index, g.CH1] = True
 
             # DoubleDEPT is a genuine-evidence tier (see the priority order
@@ -3022,6 +3059,9 @@ class NMRsolution:
             proton_dim=True,
             spectrum_label="DDEPTCH3ONLY",
         )
+        self.ddept_ch3_only = self._resolve_ddept_proton_ambiguity_by_carbon(
+            self.ddept_ch3_only
+        )
 
         # mark (do not drop) rows that couldn't be matched -- ambiguous
         # first (own reason, naming the candidates), then the plain
@@ -3192,6 +3232,66 @@ class NMRsolution:
         cosy_all = cosy_all.drop_duplicates(subset=[g.F1_PPM, g.F2_PPM], keep="first")
 
         return cosy_all
+
+    def _resolve_ddept_proton_ambiguity_by_carbon(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        A DDEPT-CH3-only peak is a (carbon, proton) pair, but its proton is
+        snapped against the whole proton list, on its own. When two
+        different carbons carry protons at almost the same shift (menthyl
+        anthranilate: CH3 C9 at 22.08/0.9545 and the axial H of CH2 C4 at
+        34.36/0.9539, 0.4 Hz apart) the proton test calls the peak ambiguous
+        and the CH3 is lost, although its carbon is unambiguous.
+
+        For each row whose proton is ambiguous but whose carbon matched one
+        value cleanly, keep only the HSQC protons on that carbon. If exactly
+        one of the two contending protons belongs to that carbon, the peak
+        is resolved onto it. Rows with an ambiguous or missing carbon, and
+        rows where both (or neither) candidates sit on the carbon, are left
+        as they were.
+        """
+        amb_col = g.F2_PPM + "_ambiguous"
+        if df.empty or amb_col not in df.columns:
+            return df
+        cand_col = g.F2_PPM + "_ambiguous_candidates"
+        f1_amb = g.F1_PPM + "_ambiguous"
+        for idx in df.index[df[amb_col].astype(bool)]:
+            if df.loc[idx, g.F1_PPM + "_prob"] == 0:
+                continue
+            if f1_amb in df.columns and bool(df.loc[idx, f1_amb]):
+                continue
+            c_ppm = df.loc[idx, g.F1_PPM]
+            own = self.hsqc.loc[
+                np.isclose(self.hsqc[g.F1_PPM].astype(float), c_ppm, rtol=0, atol=1e-6),
+                g.F2_PPM,
+            ].astype(float).tolist()
+            cands = list(df.at[idx, cand_col])
+            on_carbon = [c for c in cands if any(np.isclose(c, o, rtol=0, atol=1e-6) for o in own)]
+            if len(on_carbon) != 1:
+                continue
+            df.loc[idx, g.F2_PPM] = on_carbon[0]
+            df.at[idx, amb_col] = False
+            df.at[idx, cand_col] = []
+            df.loc[idx, g.F2_PPM + "_prob"] = 1.0
+            logger.info(
+                f"DDEPTCH3ONLY peak {c_ppm:.4f}/{df.loc[idx, g.F2_PPM + '_orig']:.4f}: "
+                f"proton ambiguity {cands} resolved by its carbon -> {on_carbon[0]:.4f}"
+            )
+        return df
+
+    def _ddept_undecided_carbons(self) -> list:
+        """Carbons that a DDEPT-CH3-only peak matched cleanly but whose peak
+        was then excluded (e.g. ambiguous proton). Such a carbon may well be
+        a CH3, so it must not be called CH1 from the DDEPT's silence."""
+        df = getattr(self, "ddept_ch3_only_all", None)
+        if df is None or df.empty or g.USED_IN_SOLUTION not in df.columns:
+            return []
+        if g.F1_PPM + "_prob" not in df.columns:
+            return []
+        excl = df[~df[g.USED_IN_SOLUTION].astype(bool) & (df[g.F1_PPM + "_prob"] == 1.0)]
+        f1_amb = g.F1_PPM + "_ambiguous"
+        if f1_amb in excl.columns:
+            excl = excl[~excl[f1_amb].astype(bool)]
+        return excl[g.F1_PPM].astype(float).tolist()
 
     def process_ddept_ch3_only(
         self, df: pd.DataFrame, hsqc: pd.DataFrame
